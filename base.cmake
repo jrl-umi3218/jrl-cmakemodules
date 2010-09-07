@@ -197,6 +197,77 @@ MACRO(_SETUP_PROJECT_UNINSTALL)
     )
 ENDMACRO(_SETUP_PROJECT_UNINSTALL)
 
+# _SETUP_PROJECT_DOCUMENTATION
+# ----------------------------
+#
+# Look for Doxygen, add a custom rule to generate the documentation
+# and install the documentation properly.
+#
+MACRO(_SETUP_PROJECT_DOCUMENTATION)
+  # Search for Perl and dot.
+  FIND_PROGRAM(PERL perl DOC "the Perl interpreter")
+  IF(NOT PERL)
+    MESSAGE(SEND_ERROR "Failed to find Perl.")
+    ENDIF(NOT PERL)
+  FIND_PROGRAM(DOT dot DOC "the dot tool from Graphviz")
+  IF(DOT)
+    SET(HAVE_DOT 1)
+  ELSE(DOT)
+    SET(HAVE_DOT 0)
+  ENDIF(DOT)
+
+  # Generate Doxyfile.extra.
+  CONFIGURE_FILE(
+    ${CMAKE_CURRENT_SOURCE_DIR}/doc/Doxyfile.extra.in
+    ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile.extra
+    @ONLY
+    )
+  # Generate Doxyfile.
+  CONFIGURE_FILE(
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/doxygen/Doxyfile.in
+    ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile
+    @ONLY
+    )
+  FILE(STRINGS ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile.extra doxyfile_extra)
+  FOREACH(x ${doxyfile_extra})
+    FILE(APPEND ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile ${x} "\n")
+  ENDFOREACH(x in doxyfile_extra)
+
+  # Teach CMake how to generate the documentation.
+  ADD_CUSTOM_TARGET(doc
+    COMMAND ${DOXYGEN_EXECUTABLE} Doxyfile
+    WORKING_DIRECTORY doc
+    COMMENT "Generating Doxygen documentation"
+    )
+
+  ADD_CUSTOM_COMMAND(
+    OUTPUT
+    ${CMAKE_CURRENT_BINARY_DIR}/doc/${PROJECT_NAME}.doxytag
+    ${CMAKE_CURRENT_BINARY_DIR}/doc/doxygen-html
+    COMMAND ${DOXYGEN_EXECUTABLE} Doxyfile
+    WORKING_DIRECTORY doc
+    COMMENT "Generating Doxygen documentation"
+    )
+
+  # Clean generated files.
+  SET_PROPERTY(
+    DIRECTORY APPEND PROPERTY
+    ADDITIONAL_MAKE_CLEAN_FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/doc/${PROJECT_NAME}.doxytag
+    ${CMAKE_CURRENT_BINARY_DIR}/doc/doxygen.log
+    ${CMAKE_CURRENT_BINARY_DIR}/doc/doxygen-html
+    )
+
+  # Install generated files.
+  INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/doc/${PROJECT_NAME}.doxytag
+    DESTINATION share/doc/${PROJECT_NAME}/doxygen-html)
+  INSTALL(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc/doxygen-html
+    DESTINATION share/doc/${PROJECT_NAME})
+  INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/doc/pictures
+    DESTINATION share/doc/${PROJECT_NAME}/doxygen-html)
+ENDMACRO(_SETUP_PROJECT_DOCUMENTATION)
+
+
 
 # SETUP_PROJECT
 # -------------
@@ -239,7 +310,11 @@ MACRO(SETUP_PROJECT)
     ${CMAKE_CURRENT_SOURCE_DIR}/cmake/config.hh.cmake
     ${CMAKE_CURRENT_BINARY_DIR}/include/${HEADER_DIR}/config.hh
     )
-  INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/${HEADER_DIR}/config.hh
+  CONFIGURE_FILE(
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/config.h.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/config.h
+    )
+  INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/include/${HEADER_DIR}/config.hh
     DESTINATION include/${HEADER_DIR}
     PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_WRITE
     )
@@ -247,6 +322,7 @@ MACRO(SETUP_PROJECT)
   _SETUP_PROJECT_CPACK()
   _SETUP_PROJECT_UNINSTALL()
   _SETUP_PROJECT_PKG_CONFIG()
+  _SETUP_PROJECT_DOCUMENTATION()
 ENDMACRO(SETUP_PROJECT)
 
 # SETUP_PROJECT_FINALIZE
@@ -261,6 +337,13 @@ MACRO(SETUP_PROJECT_FINALIZE)
     "${CMAKE_CURRENT_SOURCE_DIR}/cmake/pkg-config.pc.cmake"
     "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc"
     )
+
+  INSTALL(FILES ${${PROJECT_NAME}_HEADERS}
+    DESTINATION "include/${HEADER_DIR}"
+    PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_WRITE
+    )
+
+
 ENDMACRO(SETUP_PROJECT_FINALIZE)
 
 
