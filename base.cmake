@@ -26,6 +26,14 @@
 #			letter, number or hyphen ``-''.
 # - PROJECT_VERSION     Project version (X.Y.Z where X, Y, Z are unsigned
 #                       integers).
+# - PROJECT_DESCRIPTION One line summary of the package goal.
+# - PROJECT_URL		Project's website.
+# - PROJECT_EMAIL	Project's mailing-list.
+# - PROJECT_MAINTAINER	Project's current maintainer
+#			Please use the name of a person, not a group!
+#			I.e. who should handle problems with this package
+#			right now?
+#			Format is: FirstName LastName <email@domain>
 #
 # Please note that functions starting with an underscore are internal
 # functions and should not be used directly.
@@ -34,14 +42,9 @@
  # TODO #
  # ---- #
 
-# Add Debian support.
-# Add check target which compiles test (instead of relying
-#  on a configure-time option which is unpractical).
-
-
-
-
-INCLUDE(CPack)
+# - make install should trigger make doc
+# - unit tests should be tagged as
+#   EXCLUDE_FROM_ALL and make test should trigger their compilation.
 
 FIND_PACKAGE(Doxygen)
 FIND_PACKAGE(PkgConfig)
@@ -52,7 +55,9 @@ FIND_PACKAGE(PkgConfig)
  # --------- #
 
 # Variables requires by SETUP_PROJECT.
-SET(REQUIRED_VARIABLES PROJECT_NAME PROJECT_VERSION)
+SET(REQUIRED_VARIABLES
+  PROJECT_NAME PROJECT_VERSION PROJECT_DESCRIPTION
+  PROJECT_URL PROJECT_EMAIL PROJECT_MAINTAINER)
 
 # Additional pkg-config variables whose value will be imported
 # during the dependency check.
@@ -119,22 +124,61 @@ ENDMACRO(_CONCATENATE_ARGUMENTS OUTPUT)
 # Configure CPack as much as possible.
 #
 MACRO(_SETUP_PROJECT_CPACK)
-  # CPack related variables definition.
+  # Generators to be used.
+  SET(CPACK_GENERATOR "DEB")
+  SET(CPACK_SOURCE_GENERATOR "TGZ")
 
-  ## For tarball generation
-  SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY ${PROJECT_NAME})
-  SET(CPACK_PACKAGE_VENDOR "JRL, CNRS/AIST")
+  # Options.
+  SET(CPACK_INCLUDE_TOPLEVEL_DIRECTORY 1)
+
+  # Package generic meta-information.
+  SET(CPACK_PACKAGE_NAME ${PROJECT_NAME})
   SET(CPACK_PACKAGE_DESCRIPTION_FILE
-    ${CMAKE_CURRENT_SOURCE_DIR}/README)
-  SET(
-    CPACK_SOURCE_PACKAGE_FILE_NAME
-    "${PROJECT_NAME}-${PROJECT_VERSION}"
-    CACHE INTERNAL "tarball basename"
-    )
-  SET(CPACK_SOURCE_GENERATOR TGZ)
+    ${CMAKE_CURRENT_SOURCE_DIR}/package-description)
+  SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY ${PROJECT_DESCRIPTION})
+  SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/COPYING")
+  SET(CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
+  SET(CPACK_PACKAGE_VENDOR "JRL, CNRS/AIST")
 
-  ## For Debian
-  # FIXME: to be done.
+  # Filenames.
+  SET(CPACK_SOURCE_PACKAGE_FILE_NAME
+    "${PROJECT_NAME}-${PROJECT_VERSION}")
+  SET(CPACK_PACKAGE_FILE_NAME
+    "${PROJECT_NAME}-${PROJECT_VERSION}")
+
+  # Split version number to extract major/minor/patch versions.
+  SET(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
+  STRING(REGEX REPLACE "([^.]+)(.([^.]+)|)?(.([^.]+)|)?" "\\1"
+    _TMP ${PROJECT_VERSION})
+  SET(CPACK_PACKAGE_VERSION_MAJOR "${CMAKE_MATCH_1}")
+  SET(CPACK_PACKAGE_VERSION_MINOR "${CMAKE_MATCH_3}")
+  SET(CPACK_PACKAGE_VERSION_PATCH "${CMAKE_MATCH_5}")
+
+  # Do not distribute git and build directories.
+  SET(CPACK_SOURCE_IGNORE_FILES
+    "^${CMAKE_CURRENT_BINARY_DIR}"
+    "^${CMAKE_CURRENT_SOURCE_DIR}/.git"
+    "^${CMAKE_CURRENT_SOURCE_DIR}/cmake/.git"
+    )
+
+  # Debian specific information.
+  SET(CPACK_DEBIAN_PACKAGE_MAINTAINER
+    ${PROJECT_MAINTAINER})
+  SET(CPACK_DEBIAN_PACKAGE_SECTION "Science")
+
+  # NSIS specific information.
+  SET(CPACK_PACKAGE_INSTALL_DIRECTORY
+    "${PPROJECT_NAME} ${PROJECT_VERSION}")
+  SET(CPACK_PACKAGE_ICON "")
+  SET(CPACK_NSIS_INSTALLED_ICON_NAME "")
+  SET(CPACK_NSIS_DISPLAY_NAME
+    "${CPACK_PACKAGE_INSTALL_DIRECTORY} ${PROJECT_NAME}")
+  SET(CPACK_NSIS_HELP_LINK "${PROJECT_URL}")
+  SET(CPACK_NSIS_URL_INFO_ABOUT "${PROJECT_URL}")
+  SET(CPACK_NSIS_CONTACT "")
+  SET(CPACK_NSIS_MODIFY_PATH ON)
+
+  INCLUDE(CPack)
 ENDMACRO(_SETUP_PROJECT_CPACK)
 
 
