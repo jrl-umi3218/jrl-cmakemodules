@@ -117,71 +117,6 @@ MACRO(_CONCATENATE_ARGUMENTS OUTPUT SEPARATOR)
 ENDMACRO(_CONCATENATE_ARGUMENTS OUTPUT)
 
 
-
-# _SETUP_PROJECT_CPACK
-# --------------------
-#
-# Configure CPack as much as possible.
-#
-MACRO(_SETUP_PROJECT_CPACK)
-  # Generators to be used.
-  SET(CPACK_GENERATOR "DEB")
-  SET(CPACK_SOURCE_GENERATOR "TGZ")
-
-  # Options.
-  SET(CPACK_INCLUDE_TOPLEVEL_DIRECTORY 1)
-
-  # Package generic meta-information.
-  SET(CPACK_PACKAGE_NAME ${PROJECT_NAME})
-  SET(CPACK_PACKAGE_DESCRIPTION_FILE
-    ${CMAKE_CURRENT_SOURCE_DIR}/package-description)
-  SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY ${PROJECT_DESCRIPTION})
-  SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/COPYING")
-  SET(CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
-  SET(CPACK_PACKAGE_VENDOR "JRL, CNRS/AIST")
-
-  # Filenames.
-  SET(CPACK_SOURCE_PACKAGE_FILE_NAME
-    "${PROJECT_NAME}-${PROJECT_VERSION}")
-  SET(CPACK_PACKAGE_FILE_NAME
-    "${PROJECT_NAME}-${PROJECT_VERSION}")
-
-  # Split version number to extract major/minor/patch versions.
-  SET(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
-  STRING(REGEX REPLACE "([^.]+)(.([^.]+)|)?(.([^.]+)|)?" "\\1"
-    _TMP ${PROJECT_VERSION})
-  SET(CPACK_PACKAGE_VERSION_MAJOR "${CMAKE_MATCH_1}")
-  SET(CPACK_PACKAGE_VERSION_MINOR "${CMAKE_MATCH_3}")
-  SET(CPACK_PACKAGE_VERSION_PATCH "${CMAKE_MATCH_5}")
-
-  # Do not distribute git and build directories.
-  SET(CPACK_SOURCE_IGNORE_FILES
-    "^${CMAKE_CURRENT_BINARY_DIR}"
-    "^${CMAKE_CURRENT_SOURCE_DIR}/.git"
-    "^${CMAKE_CURRENT_SOURCE_DIR}/cmake/.git"
-    )
-
-  # Debian specific information.
-  SET(CPACK_DEBIAN_PACKAGE_MAINTAINER
-    ${PROJECT_MAINTAINER})
-  SET(CPACK_DEBIAN_PACKAGE_SECTION "Science")
-
-  # NSIS specific information.
-  SET(CPACK_PACKAGE_INSTALL_DIRECTORY
-    "${PPROJECT_NAME} ${PROJECT_VERSION}")
-  SET(CPACK_PACKAGE_ICON "")
-  SET(CPACK_NSIS_INSTALLED_ICON_NAME "")
-  SET(CPACK_NSIS_DISPLAY_NAME
-    "${CPACK_PACKAGE_INSTALL_DIRECTORY} ${PROJECT_NAME}")
-  SET(CPACK_NSIS_HELP_LINK "${PROJECT_URL}")
-  SET(CPACK_NSIS_URL_INFO_ABOUT "${PROJECT_URL}")
-  SET(CPACK_NSIS_CONTACT "")
-  SET(CPACK_NSIS_MODIFY_PATH ON)
-
-  INCLUDE(CPack)
-ENDMACRO(_SETUP_PROJECT_CPACK)
-
-
 # _SETUP_PROJECT_PKG_CONFIG
 # -------------------------
 #
@@ -303,13 +238,56 @@ MACRO(_SETUP_PROJECT_DOCUMENTATION)
     )
 
   # Install generated files.
-  INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/doc/${PROJECT_NAME}.doxytag
+  INSTALL(
+    CODE "EXECUTE_PROCESS(COMMAND make doc)"
+    FILES ${CMAKE_CURRENT_BINARY_DIR}/doc/${PROJECT_NAME}.doxytag
     DESTINATION share/doc/${PROJECT_NAME}/doxygen-html)
   INSTALL(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc/doxygen-html
     DESTINATION share/doc/${PROJECT_NAME})
   INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/doc/pictures
     DESTINATION share/doc/${PROJECT_NAME}/doxygen-html)
 ENDMACRO(_SETUP_PROJECT_DOCUMENTATION)
+
+# _SETUP_PROJECT_DIST
+# -------------------
+#
+# Add a dist target to generate a tarball using git-archive.
+#
+# Linux specific: use git-archive-all.sh to obtain a recursive
+# git-archive on the project's submodule.
+# Please note that git-archive-all.sh is not carefully written
+# and create a temporary file in the source directory
+# (which is then moved to the build directory).
+MACRO(_SETUP_PROJECT_DIST)
+  IF(UNIX)
+  ADD_CUSTOM_TARGET(dist
+    COMMAND
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/git-archive-all.sh
+    --prefix ${PROJECT_NAME}-${PROJECT_VERSION}/
+    && gzip -f ${PROJECT_NAME}.tar
+    && mv ${PROJECT_NAME}.tar.gz
+          ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-${PROJECT_VERSION}.tar.gz
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMENT "Generating tarball..."
+    )
+  ENDIF(NOT UNIX)
+ENDMACRO(_SETUP_PROJECT_DIST)
+
+# _SETUP_PROJECT_DEB
+# -------------------
+#
+# Add a deb target to generate a Debian package using
+# git-buildpackage (Linux specific).
+#
+MACRO(_SETUP_PROJECT_DEB)
+  IF(UNIX)
+  ADD_CUSTOM_TARGET(deb
+    COMMAND git-buildpackage
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMENT "Generating Debian package..."
+    )
+  ENDIF(NOT UNIX)
+ENDMACRO(_SETUP_PROJECT_DEB)
 
 
 
@@ -372,7 +350,8 @@ MACRO(SETUP_PROJECT)
 
   ENABLE_TESTING()
 
-  _SETUP_PROJECT_CPACK()
+  _SETUP_PROJECT_DIST()
+  _SETUP_PROJECT_DEB()
   _SETUP_PROJECT_UNINSTALL()
   _SETUP_PROJECT_PKG_CONFIG()
   _SETUP_PROJECT_DOCUMENTATION()
