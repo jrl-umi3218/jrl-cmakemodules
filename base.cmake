@@ -274,8 +274,17 @@ ENDMACRO(_SETUP_PROJECT_DIST)
 #
 MACRO(_SETUP_PROJECT_DEB)
   IF(UNIX)
+  ADD_CUSTOM_TARGET(deb-src
+    COMMAND
+    git-buildpackage
+    --git-debian-branch=debian
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMENT "Generating source Debian package..."
+    )
   ADD_CUSTOM_TARGET(deb
-    COMMAND git-buildpackage
+    COMMAND
+    git-buildpackage
+    --git-debian-branch=debian --git-builder="debuild -S -i.git -I.git"
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "Generating Debian package..."
     )
