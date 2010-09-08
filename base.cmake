@@ -28,12 +28,6 @@
 #                       integers).
 # - PROJECT_DESCRIPTION One line summary of the package goal.
 # - PROJECT_URL		Project's website.
-# - PROJECT_EMAIL	Project's mailing-list.
-# - PROJECT_MAINTAINER	Project's current maintainer
-#			Please use the name of a person, not a group!
-#			I.e. who should handle problems with this package
-#			right now?
-#			Format is: FirstName LastName <email@domain>
 #
 # Please note that functions starting with an underscore are internal
 # functions and should not be used directly.
@@ -56,8 +50,7 @@ FIND_PACKAGE(PkgConfig)
 
 # Variables requires by SETUP_PROJECT.
 SET(REQUIRED_VARIABLES
-  PROJECT_NAME PROJECT_VERSION PROJECT_DESCRIPTION
-  PROJECT_URL PROJECT_EMAIL PROJECT_MAINTAINER)
+  PROJECT_NAME PROJECT_VERSION PROJECT_DESCRIPTION PROJECT_URL)
 
 # Additional pkg-config variables whose value will be imported
 # during the dependency check.
@@ -133,8 +126,8 @@ MACRO(_SETUP_PROJECT_PKG_CONFIG)
   SET(PKG_CONFIG_DOXYGENDOCDIR "${PKG_CONFIG_DOCDIR}/doxygen-html")
 
   SET(PKG_CONFIG_PROJECT_NAME "${PROJECT_NAME}")
-  SET(PKG_CONFIG_DESCRIPTION "")
-  SET(PKG_CONFIG_URL "")
+  SET(PKG_CONFIG_DESCRIPTION "${PROJECT_DESCRIPTION}")
+  SET(PKG_CONFIG_URL "${PROJECT_URL}")
   SET(PKG_CONFIG_VERSION "${PROJECT_VERSION}")
   SET(PKG_CONFIG_REQUIRES "")
   SET(PKG_CONFIG_CONFLICTS "")
