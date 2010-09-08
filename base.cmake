@@ -43,6 +43,7 @@
 FIND_PACKAGE(Doxygen)
 FIND_PACKAGE(PkgConfig)
 
+INCLUDE(CheckCXXCompilerFlag)
 
  # --------- #
  # Constants #
@@ -349,6 +350,24 @@ MACRO(SETUP_PROJECT)
     ${CMAKE_CURRENT_BINARY_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     )
+
+  # Add warnings.
+  SET(FLAGS -Wall -Wcast-align -Wcast-qual
+            -Wformat -Wwrite-strings -Wconversion
+	    -Wmissing-declarations)
+  FOREACH(FLAG ${FLAGS})
+    CHECK_CXX_COMPILER_FLAG(${FLAG} R${FLAG})
+    IF(${R${FLAG}})
+      SET(WARNING_CXX_FLAGS "${WARNING_CXX_FLAGS} ${FLAG}")
+    ENDIF(${R${FLAG}})
+  ENDFOREACH(FLAG ${FLAGS})
+
+  IF(NOT DEFINED CXX_DISABLE_WERROR)
+    SET(WARNING_CXX_FLAGS "-Werror ${WARNING_CXX_FLAGS}")
+  ENDIF(NOT DEFINED CXX_DISABLE_WERROR)
+
+
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WARNING_CXX_FLAGS}")
 
   ENABLE_TESTING()
 
