@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-MACRO(_SETUP_HEADER)
+MACRO(_SETUP_PROJECT_HEADER)
   # Install project headers.
   STRING(REGEX REPLACE "[^a-zA-Z0-9]" "/" HEADER_DIR "${PROJECT_NAME}")
   STRING(TOLOWER "${HEADER_DIR}" "HEADER_DIR")
@@ -45,4 +45,4 @@ MACRO(_SETUP_HEADER)
     ${CMAKE_CURRENT_BINARY_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     )
-ENDMACRO(_SETUP_HEADER)
+ENDMACRO(_SETUP_PROJECT_HEADER)
