@@ -10,7 +10,6 @@
 
 #ifndef ${PACKAGE_CPPNAME}_CONFIG_HH
 # define ${PACKAGE_CPPNAME}_CONFIG_HH
-# include <hpp/util/portability.hh>
 
 // Package version (header).
 # define ${PACKAGE_CPPNAME}_VERSION "${PROJECT_VERSION}"
