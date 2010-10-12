@@ -1,6 +1,6 @@
 // Copyright (C) 2008, 2009 by Thomas Moulard, CNRS.
 //
-// This file is part of the hpp-util.
+// This file is part of the jrl-cmakemodules.
 //
 // This software is provided "as is" without warranty of any kind,
 // either expressed or implied, including but not limited to the
@@ -23,10 +23,10 @@
 // Depending on whether one is building or using the
 // library define DLLAPI to import or export.
 #  ifdef BUILDING_${PACKAGE_CPPNAME}
-#   define ${PACKAGE_CPPNAME}_DLLAPI HPP_DLLEXPORT
+#   define ${PACKAGE_CPPNAME}_DLLAPI ${PACKAGE_CPPNAME}_DLLEXPORT
 #  else
-#   define ${PACKAGE_CPPNAME}_DLLAPI HPP_DLLIMPORT
+#   define ${PACKAGE_CPPNAME}_DLLAPI ${PACKAGE_CPPNAME}_DLLIMPORT
 #  endif // BUILDING_${PACKAGE_CPPNAME}
-#  define ${PACKAGE_CPPNAME}_LOCAL HPP_DLLLOCAL
+#  define ${PACKAGE_CPPNAME}_LOCAL ${PACKAGE_CPPNAME}_DLLLOCAL
 # endif // ${PACKAGE_CPPNAME}_STATIC
 #endif //! ${PACKAGE_CPPNAME}_CONFIG_HH
