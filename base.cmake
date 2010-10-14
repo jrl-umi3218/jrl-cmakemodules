@@ -136,7 +136,7 @@ ENDMACRO(SETUP_PROJECT)
 # ----------------------
 #
 # To be called at the end of the CMakeLists.txt to
-# finazlie the project setup.
+# finalize the project setup.
 #
 MACRO(SETUP_PROJECT_FINALIZE)
   # Generate the pkg-config file.
@@ -152,6 +152,9 @@ MACRO(SETUP_PROJECT_FINALIZE)
       PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_WRITE
       )
   ENDIF(DEFINED ${PROJECT_NAME}_HEADERS)
+
+  # Install data if needed
+  _INSTALL_PROJECT_DATA()
 
 ENDMACRO(SETUP_PROJECT_FINALIZE)
 
