@@ -48,7 +48,7 @@ INCLUDE(cmake/doxygen.cmake)
 INCLUDE(cmake/header.cmake)
 INCLUDE(cmake/pkg-config.cmake)
 INCLUDE(cmake/uninstall.cmake)
-
+INCLUDE(cmake/installdata.cmake)
  # --------- #
  # Constants #
  # --------- #
