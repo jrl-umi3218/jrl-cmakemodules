@@ -142,8 +142,8 @@ Actions:
                               of a released version.
 
 
-Report bugs to <@PROJECT_EMAIL@>.
-For more information, see @PROJECT_URL@'
+Report bugs to http://github.com/jrl-umi3218/jrl-cmakemodules/issues
+For more information, see http://github.com/jrl-umi3218/jrl-cmakemodules
 }
 
   # ------------------- #
