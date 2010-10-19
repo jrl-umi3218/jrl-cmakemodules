@@ -184,6 +184,7 @@ case $1 in
 	exit 1
 	;;
 esac
+}
 
 # Main starts here...
 echo "* Checkout ${doc_version}..."
@@ -233,4 +234,3 @@ ${GIT} push origin gh-pages
 echo "${lgreen}Documentation updated with success!${std}"
 trap - EXIT
 
-}
