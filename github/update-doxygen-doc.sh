@@ -232,3 +232,5 @@ ${GIT} push origin gh-pages
 
 echo "${lgreen}Documentation updated with success!${std}"
 trap - EXIT
+
+}
