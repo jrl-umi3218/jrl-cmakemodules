@@ -143,7 +143,7 @@ Actions:
 
 
 Report bugs to http://github.com/jrl-umi3218/jrl-cmakemodules/issues
-For more information, see http://github.com/jrl-umi3218/jrl-cmakemodules
+For more information, see http://github.com/jrl-umi3218/jrl-cmakemodules'
 }
 
   # ------------------- #
@@ -184,7 +184,6 @@ case $1 in
 	exit 1
 	;;
 esac
-}
 
 # Main starts here...
 echo "* Checkout ${doc_version}..."
@@ -233,4 +232,3 @@ ${GIT} push origin gh-pages
 
 echo "${lgreen}Documentation updated with success!${std}"
 trap - EXIT
-
