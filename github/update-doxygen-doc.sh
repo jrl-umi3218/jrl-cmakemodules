@@ -144,6 +144,7 @@ Actions:
 
 Report bugs to http://github.com/jrl-umi3218/jrl-cmakemodules/issues
 For more information, see http://github.com/jrl-umi3218/jrl-cmakemodules'
+    exit 0
 }
 
   # ------------------- #
