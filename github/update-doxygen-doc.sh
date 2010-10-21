@@ -140,11 +140,10 @@ Actions:
                               VERSION by default is HEAD but can be
                               changed to vX.Y.Z to update the documentation
                               of a released version.
-
+'
 
 Report bugs to http://github.com/jrl-umi3218/jrl-cmakemodules/issues
-For more information, see http://github.com/jrl-umi3218/jrl-cmakemodules'
-    exit 0
+For more information, see http://github.com/jrl-umi3218/jrl-cmakemodules
 }
 
   # ------------------- #
@@ -163,6 +162,8 @@ test "x$1" = x--debug && shift && set -x
 
 doc_version=HEAD
 
+remote_url=`${GIT} config remote.origin.url`
+
 case $1 in
     version | v | --version | -version)
 	shift
@@ -176,6 +177,9 @@ case $1 in
 	doc_version=$2
 	shift; shift
 	;;
+    --remote-url)
+	remote_url=$2
+	;;
     '')
 	;;
     *)
@@ -185,6 +189,7 @@ case $1 in
 	exit 1
 	;;
 esac
+
 
 # Main starts here...
 echo "* Checkout ${doc_version}..."
@@ -198,9 +203,14 @@ echo "* Creating the temporary directory..."
 tmp=`mktemp -d` || abort "cannot create the temporary directory"
 trap "rm -rf -- '$tmp'" EXIT
 
+
 build_docdir=`pwd`
+
 head_commit=`${GIT} log --format=oneline HEAD^.. | cut -d' ' -f1`
-remote_url=`${GIT} config remote.origin.url`
+
+
+echo "Remote url:" $remote_url
+
 
 echo "* Clone the project..."
 cd $tmp
@@ -233,3 +243,4 @@ ${GIT} push origin gh-pages
 
 echo "${lgreen}Documentation updated with success!${std}"
 trap - EXIT
+
