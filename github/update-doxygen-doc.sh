@@ -233,14 +233,18 @@ ${GIT} add doxygen/$doc_version \
  || abort "failed to add the updated documentation to the git index"
 
 echo "Update $doc_version Doxygen documentation.
-
 Source commit id: $head_commit" >> $tmp/commit_msg
-${GIT} commit --quiet -F $tmp/commit_msg \
- || abort "failed to generate the git commit"
+commit_status=`${GIT} status -s`
 
-echo "* Push the generated commit..."
-${GIT} push origin gh-pages
+if [ ! -n $commit_status]
+then
+  ${GIT} commit --quiet -F $tmp/commit_msg \
+   || abort "failed to generate the git commit"
 
-echo "${lgreen}Documentation updated with success!${std}"
-trap - EXIT
+  echo "* Push the generated commit..."
+  ${GIT} push origin gh-pages
+
+  echo "${lgreen}Documentation updated with success!${std}"
+  trap - EXIT
+fi
 
