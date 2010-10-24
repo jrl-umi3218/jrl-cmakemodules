@@ -22,17 +22,19 @@ FIND_PACKAGE(Doxygen)
 # and install the documentation properly.
 #
 MACRO(_SETUP_PROJECT_DOCUMENTATION)
-  # Search for Perl and dot.
+  # Search for Perl.
   FIND_PROGRAM(PERL perl DOC "the Perl interpreter")
   IF(NOT PERL)
     MESSAGE(SEND_ERROR "Failed to find Perl.")
     ENDIF(NOT PERL)
-  FIND_PROGRAM(DOT dot DOC "the dot tool from Graphviz")
-  IF(DOT)
-    SET(HAVE_DOT 1)
-  ELSE(DOT)
-    SET(HAVE_DOT 0)
-  ENDIF(DOT)
+
+  # Generate variable to be substitued in Doxyfile.in
+  # for dot use.
+  IF(DOXYGEN_DOT_FOUND)
+    SET(HAVE_DOT YES)
+  ELSE(DOXYGEN_DOT_FOUND)
+    SET(HAVE_DOT NO)
+  ENDIF(DOXYGEN_DOT_FOUND)
 
   # Generate Doxyfile.extra.
   CONFIGURE_FILE(
