@@ -226,7 +226,7 @@ ${GIT} checkout --quiet -b gh-pages origin/gh-pages \
 echo "* Copy the documentation..."
 mkdir -p doxygen
 git rm --quiet -rf doxygen/$doc_version
-cp -r $build_docdir/doxygen-html doxygen/$doc_version \
+cp -r $build_docdir/doxygen-html/ doxygen/$doc_version \
  || abort "failed to copy the documentation"
 
 echo "* Generate the commit..."
