@@ -236,7 +236,9 @@ echo "Update $doc_version Doxygen documentation.
 Source commit id: $head_commit" >> $tmp/commit_msg
 commit_status=`${GIT} status -s`
 
-#FIXME: I don't really understand why this test is done.
+# Make sure that there is something to commit.
+# If this is not the case, the documentation is already
+# up-to-date and the commit should not be generated.
 if test -n "$commit_status"; then
   ${GIT} commit --quiet -F $tmp/commit_msg \
    || abort "failed to generate the git commit"
@@ -246,7 +248,7 @@ if test -n "$commit_status"; then
 
   echo "${lgreen}Documentation updated with success!${std}"
 else
-    abort "Failed to add the changes to the git index."
+    notice "Github pages documentation is already up-to-date."
 fi
 
 trap - EXIT
