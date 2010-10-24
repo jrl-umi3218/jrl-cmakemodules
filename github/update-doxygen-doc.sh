@@ -214,7 +214,7 @@ echo "Remote url:" $remote_url
 
 echo "* Clone the project..."
 cd $tmp
-${GIT} clone --quiet $remote_url project \
+${GIT} clone --quiet --depth 1 $remote_url project \
  || abort "failed to clone the package repository"
 cd project \
  || abort "failed to change directory"
@@ -236,8 +236,8 @@ echo "Update $doc_version Doxygen documentation.
 Source commit id: $head_commit" >> $tmp/commit_msg
 commit_status=`${GIT} status -s`
 
-if [ ! -n $commit_status]
-then
+#FIXME: I don't really understand why this test is done.
+if test -n "$commit_status"; then
   ${GIT} commit --quiet -F $tmp/commit_msg \
    || abort "failed to generate the git commit"
 
@@ -245,6 +245,8 @@ then
   ${GIT} push origin gh-pages
 
   echo "${lgreen}Documentation updated with success!${std}"
-  trap - EXIT
+else
+    abort "Failed to add the changes to the git index."
 fi
 
+trap - EXIT
