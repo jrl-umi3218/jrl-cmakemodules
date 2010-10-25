@@ -13,23 +13,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# _INSTALL_PROJECT_DATA_DOCUMENTATION
-# -----------------------------------
+# _INSTALL_PROJECT_DATA
+# ---------------------
 #
-# Build the installation rules for a set of data to install
-# 
+# Build the installation rules to install data-files.
+#
 MACRO(_INSTALL_PROJECT_DATA)
-  IF(DEFINED ${PROJECT_NAME}_DATA)
-    SET(${LPROJECT_NAME}_FULLPATHDATA )
-    FOREACH (ldata ${${PROJECT_NAME}_DATA})
-      SET(${PROJECT_NAME}_FULLPATHDATA
-        ${${PROJECT_NAME}_FULLPATHDATA} 
-        ${CMAKE_CURRENT_SOURCE_DIR}/${ldata})
-    ENDFOREACH(ldata)
-
-    INSTALL(FILES ${${PROJECT_NAME}_FULLPATHDATA}
+  IF(DEFINED PROJECT_DATA)
+    INSTALL(FILES ${PROJECT_DATA}
       DESTINATION share/${PROJECT_NAME}
       PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_WRITE
     )
-  ENDIF(DEFINED ${PROJECT_NAME}_DATA)
+  ENDIF(DEFINED PROJECT_DATA)
 ENDMACRO(_INSTALL_PROJECT_DATA)
