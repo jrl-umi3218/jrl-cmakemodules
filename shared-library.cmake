@@ -17,12 +17,10 @@
 # (used for pkg-config file generation).
 # FIXME: can't we get these information from CMake directly?
 IF(WIN32)
-  SET(INCDIR_KW "") # FIXME: put a value here.
   SET(LIBDIR_KW "/LIBPATH:")
   SET(LIBINCL_KW "")
   SET(LIB_EXT ".lib")
 ELSEIF(UNIX)
-  SET(INCDIR_KW "-I")
   SET(LIBDIR_KW "-L")
   SET(LIBINCL_KW "-l")
   SET(LIB_EXT "")
