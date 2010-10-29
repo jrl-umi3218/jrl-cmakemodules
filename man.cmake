@@ -21,7 +21,12 @@
 # This macro also adds the installation rules.
 #
 MACRO(MANPAGE NAME)
+  IF(WIN32)
+    MESSAGE(FATAL_ERROR "This macro is not supported on Microsoft Windows.")
+  ENDIF(WIN32)
+
   FIND_PROGRAM(POD2MAN pod2man)
+  FIND_PROGRAM(GZIP gzip)
   CONFIGURE_FILE(${NAME}.pod.in ${CMAKE_CURRENT_BINARY_DIR}/${NAME}.pod @ONLY)
 
   ADD_CUSTOM_COMMAND(
@@ -34,7 +39,7 @@ MACRO(MANPAGE NAME)
 
   ADD_CUSTOM_COMMAND(
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${NAME}.1.gz
-    COMMAND gzip -c ${NAME}.1 > ${NAME}.1.gz
+    COMMAND ${GZIP} -c ${NAME}.1 > ${NAME}.1.gz
     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${NAME}.1)
 
   INSTALL(

@@ -54,11 +54,21 @@ MACRO(_SETUP_PROJECT_DOCUMENTATION)
   ENDFOREACH(x in doxyfile_extra)
 
   # Teach CMake how to generate the documentation.
-  ADD_CUSTOM_TARGET(doc
-    COMMAND ${DOXYGEN_EXECUTABLE} Doxyfile
-    WORKING_DIRECTORY doc
-    COMMENT "Generating Doxygen documentation"
-    )
+  IF(MSVC)
+    # FIXME: it is impossible to trigger documentation installation
+    # at install, so put the target in ALL instead.
+    ADD_CUSTOM_TARGET(doc ALL
+      COMMAND ${DOXYGEN_EXECUTABLE} Doxyfile
+      WORKING_DIRECTORY doc
+      COMMENT "Generating Doxygen documentation"
+      )
+  ELSE(MSVC)
+    ADD_CUSTOM_TARGET(doc
+      COMMAND ${DOXYGEN_EXECUTABLE} Doxyfile
+      WORKING_DIRECTORY doc
+      COMMENT "Generating Doxygen documentation"
+      )
+  ENDIF(MSVC)
 
   ADD_CUSTOM_COMMAND(
     OUTPUT
@@ -78,11 +88,29 @@ MACRO(_SETUP_PROJECT_DOCUMENTATION)
     ${CMAKE_CURRENT_BINARY_DIR}/doc/doxygen-html
     )
 
+  IF(UNIX)
+    SET(MAKE make)
+  ELSEIF(WIN32)
+    SET(MAKE nmake)
+  ELSE(UNIX)
+    MESSAGE(FATAL_ERROR
+      "Doxygen documentation generation not supported on this platform.")
+  ENDIF(UNIX)
+
   # Install generated files.
-  INSTALL(
-    CODE "EXECUTE_PROCESS(COMMAND make doc)"
-    FILES ${CMAKE_CURRENT_BINARY_DIR}/doc/${PROJECT_NAME}.doxytag
-    DESTINATION share/doc/${PROJECT_NAME}/doxygen-html)
+  IF(MSVC)
+    # FIXME: it is impossible to trigger documentation installation
+    # at install, so put the target in ALL instead.
+    INSTALL(
+      FILES ${CMAKE_CURRENT_BINARY_DIR}/doc/${PROJECT_NAME}.doxytag
+      DESTINATION share/doc/${PROJECT_NAME}/doxygen-html)
+  ELSE(MSVC)
+    INSTALL(
+      CODE "EXECUTE_PROCESS(COMMAND ${MAKE} doc)"
+      FILES ${CMAKE_CURRENT_BINARY_DIR}/doc/${PROJECT_NAME}.doxytag
+      DESTINATION share/doc/${PROJECT_NAME}/doxygen-html)
+  ENDIF(MSVC)
+
   INSTALL(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc/doxygen-html
     DESTINATION share/doc/${PROJECT_NAME})
 
