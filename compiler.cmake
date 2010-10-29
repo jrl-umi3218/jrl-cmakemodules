@@ -21,6 +21,7 @@ MACRO(_SETUP_PROJECT_WARNINGS)
   # but CMake doest not check for the flag acceptance
   # correctly.
 
+ IF(UNIX)
   SET(FLAGS -Wall -Wcast-align -Wcast-qual
             -Wformat -Wwrite-strings -Wconversion)
   FOREACH(FLAG ${FLAGS})
@@ -33,6 +34,15 @@ MACRO(_SETUP_PROJECT_WARNINGS)
   IF(NOT DEFINED CXX_DISABLE_WERROR)
     SET(WARNING_CXX_FLAGS "-Werror ${WARNING_CXX_FLAGS}")
   ENDIF(NOT DEFINED CXX_DISABLE_WERROR)
+ ENDIF(UNIX)
 
+ # For win32 systems, it is impossible to use Wall, 
+ # especially with boost, which is way too verbose
+ # The default levels (W3/W4) are enough
+ # The next macro remove warnings on deprecations due to stl.
+ IF(WIN32)
+  SET(WARNING_CXX_FLAGS "-D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS")
+  SET(WARNING_CXX_FLAGS "${WARNING_CXX_FLAGS} -D_CRT_SECURE_NO_DEPRECATE")
+ ENDIF(WIN32)
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WARNING_CXX_FLAGS}")
 ENDMACRO(_SETUP_PROJECT_WARNINGS)
