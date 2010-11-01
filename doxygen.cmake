@@ -36,23 +36,6 @@ MACRO(_SETUP_PROJECT_DOCUMENTATION)
     SET(HAVE_DOT NO)
   ENDIF(DOXYGEN_DOT_FOUND)
 
-  # Generate Doxyfile.extra.
-  CONFIGURE_FILE(
-    ${CMAKE_CURRENT_SOURCE_DIR}/doc/Doxyfile.extra.in
-    ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile.extra
-    @ONLY
-    )
-  # Generate Doxyfile.
-  CONFIGURE_FILE(
-    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/doxygen/Doxyfile.in
-    ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile
-    @ONLY
-    )
-  FILE(STRINGS ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile.extra doxyfile_extra)
-  FOREACH(x ${doxyfile_extra})
-    FILE(APPEND ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile ${x} "\n")
-  ENDFOREACH(x in doxyfile_extra)
-
   IF(UNIX)
     SET(MAKE make)
   ELSEIF(WIN32)
@@ -112,3 +95,30 @@ MACRO(_SETUP_PROJECT_DOCUMENTATION)
   endif(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/doc/pictures)
 
 ENDMACRO(_SETUP_PROJECT_DOCUMENTATION)
+
+# _SETUP_PROJECT_DOCUMENTATION_FINALIZE
+# -------------------------------------
+#
+# Post-processing for the documentation generation macro.
+#
+# Doxyfile.extra and Doxyfile files are generated at the end to allow
+# the replacement of user-defined variables.
+#
+MACRO(_SETUP_PROJECT_DOCUMENTATION_FINALIZE)
+  # Generate Doxyfile.extra.
+  CONFIGURE_FILE(
+    ${CMAKE_CURRENT_SOURCE_DIR}/doc/Doxyfile.extra.in
+    ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile.extra
+    @ONLY
+    )
+  # Generate Doxyfile.
+  CONFIGURE_FILE(
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/doxygen/Doxyfile.in
+    ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile
+    @ONLY
+    )
+  FILE(STRINGS ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile.extra doxyfile_extra)
+  FOREACH(x ${doxyfile_extra})
+    FILE(APPEND ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile ${x} "\n")
+  ENDFOREACH(x in doxyfile_extra)
+ENDMACRO(_SETUP_PROJECT_DOCUMENTATION_FINALIZE)

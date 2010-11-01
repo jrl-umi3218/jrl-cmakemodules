@@ -90,3 +90,20 @@ MACRO(_SETUP_PROJECT_HEADER)
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     )
 ENDMACRO(_SETUP_PROJECT_HEADER)
+
+
+# _SETUP_PROJECT_HEADER_FINAlIZE
+# ------------------------------
+#
+# Post-processing of the header management step.
+# Install public headers if required.
+#
+MACRO(_SETUP_PROJECT_HEADER_FINAlIZE)
+  # If the header list is set, install it.
+  IF(DEFINED ${PROJECT_NAME}_HEADERS)
+    INSTALL(FILES ${${PROJECT_NAME}_HEADERS}
+      DESTINATION "include/${HEADER_DIR}"
+      PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_WRITE
+      )
+  ENDIF(DEFINED ${PROJECT_NAME}_HEADERS)
+ENDMACRO(_SETUP_PROJECT_HEADER_FINAlIZE)

@@ -58,6 +58,24 @@ MACRO(_SETUP_PROJECT_PKG_CONFIG)
     PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_WRITE)
 ENDMACRO(_SETUP_PROJECT_PKG_CONFIG)
 
+
+# _SETUP_PROJECT_PKG_CONFIG_FINALIZE
+# ----------------------------------
+#
+# Post-processing of the pkg-config step.
+#
+# The pkg-config file has to be generated at the end to allow end-user
+# defined variables replacement.
+#
+MACRO(_SETUP_PROJECT_PKG_CONFIG_FINALIZE)
+  # Generate the pkg-config file.
+  CONFIGURE_FILE(
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/pkg-config.pc.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc"
+    )
+ENDMACRO(_SETUP_PROJECT_PKG_CONFIG_FINALIZE)
+
+
 # ADD_REQUIRED_DEPENDENCY(PREFIX PKGCONFIG_STRING)
 # ------------------------------------------------
 #

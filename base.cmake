@@ -41,6 +41,7 @@
 #   EXCLUDE_FROM_ALL and make test should trigger their compilation.
 
 # Include base features.
+INCLUDE(cmake/portability.cmake)
 INCLUDE(cmake/compiler.cmake)
 INCLUDE(cmake/debian.cmake)
 INCLUDE(cmake/dist.cmake)
@@ -48,7 +49,8 @@ INCLUDE(cmake/doxygen.cmake)
 INCLUDE(cmake/header.cmake)
 INCLUDE(cmake/pkg-config.cmake)
 INCLUDE(cmake/uninstall.cmake)
-INCLUDE(cmake/installdata.cmake)
+INCLUDE(cmake/install-data.cmake)
+
  # --------- #
  # Constants #
  # --------- #
@@ -139,60 +141,10 @@ ENDMACRO(SETUP_PROJECT)
 # finalize the project setup.
 #
 MACRO(SETUP_PROJECT_FINALIZE)
-  # Generate the pkg-config file.
-  CONFIGURE_FILE(
-    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/pkg-config.pc.cmake"
-    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc"
-    )
-
-  # If the header list is set, install it.
-  IF(DEFINED ${PROJECT_NAME}_HEADERS)
-    INSTALL(FILES ${${PROJECT_NAME}_HEADERS}
-      DESTINATION "include/${HEADER_DIR}"
-      PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_WRITE
-      )
-  ENDIF(DEFINED ${PROJECT_NAME}_HEADERS)
+  _SETUP_PROJECT_PKG_CONFIG_FINALIZE()
+  _SETUP_PROJECT_DOCUMENTATION_FINALIZE()
+  _SETUP_PROJECT_HEADER_FINAlIZE()
 
   # Install data if needed
   _INSTALL_PROJECT_DATA()
-
 ENDMACRO(SETUP_PROJECT_FINALIZE)
-
-
-# CONFIG_FILES
-# ---------------
-#
-# This wraps CONFIGURE_FILES to provide a cleaner, shorter syntax.
-#
-FUNCTION(CONFIG_FILES)
-  FOREACH(I RANGE 0 ${ARGC})
-    SET(FILE ${ARGV${I}})
-    IF(FILE)
-      CONFIGURE_FILE(
-	${CMAKE_CURRENT_SOURCE_DIR}/${FILE}.in
-	${CMAKE_CURRENT_BINARY_DIR}/${FILE}
-	@ONLY
-	)
-    ENDIF(FILE)
-ENDFOREACH(I RANGE 0 ${ARGC})
-ENDFUNCTION(CONFIG_FILES)
-
-# CONFIG_FILES_CMAKE
-# ------------------
-#
-# Same as CONFIG_FILES but with CMake-style template files.
-#
-# Please, prefer the use of CONFIG_FILES to this function as
-# it is safer.
-#
-FUNCTION(CONFIG_FILES_CMAKE)
-  FOREACH(I RANGE 0 ${ARGC})
-    SET(FILE ${ARGV${I}})
-    IF(FILE)
-      CONFIGURE_FILE(
-	${CMAKE_CURRENT_SOURCE_DIR}/${FILE}.cmake
-	${CMAKE_CURRENT_BINARY_DIR}/${FILE}
-	)
-    ENDIF(FILE)
-ENDFOREACH(I RANGE 0 ${ARGC})
-ENDFUNCTION(CONFIG_FILES_CMAKE)
