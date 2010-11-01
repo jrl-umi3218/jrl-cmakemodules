@@ -9,4 +9,4 @@ all packages.
 
 
 Please see the documentation on the wiki for more information:
-http://github.com/jrl-umi3218/jrl-cmakemodules/wiki
+[[http://github.com/jrl-umi3218/jrl-cmakemodules/wiki]]
