@@ -83,7 +83,7 @@ MACRO(ADD_REQUIRED_DEPENDENCY PKG_CONFIG_STRING)
   # Get the values of additional variables.
   FOREACH(VARIABLE ${PKG_CONFIG_ADDITIONAL_VARIABLES})
     # Upper-case version of the variable for CMake variable generation.
-    STRING(TOUPPER "${VARIABLE}" "${VARIABLE}_UC")
+    STRING(TOUPPER "${VARIABLE}" "VARIABLE_UC")
     EXEC_PROGRAM(
       "${PKG_CONFIG_EXECUTABLE}" ARGS
       "--variable=${VARIABLE}" "${LIBRARY_NAME}"
