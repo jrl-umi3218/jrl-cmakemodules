@@ -8,5 +8,6 @@ It factorizes CMake mechanisms to provide a uniform look'n feel for
 all packages.
 
 
-Please see the documentation on the wiki for more information:
-[[http://github.com/jrl-umi3218/jrl-cmakemodules/wiki]]
+Please see the documentation on the [wiki] for more information.
+
+[wiki]: http://github.com/jrl-umi3218/jrl-cmakemodules/wiki
