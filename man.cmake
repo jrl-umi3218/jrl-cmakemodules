@@ -42,8 +42,11 @@ MACRO(MANPAGE NAME)
     COMMAND ${GZIP} -c ${NAME}.1 > ${NAME}.1.gz
     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${NAME}.1)
 
+  # Trigger man page generation at install.
+  INSTALL(CODE "EXECUTE_PROCESS(COMMAND make man)")
+
+  # Install man page.
   INSTALL(
-    CODE "EXECUTE_PROCESS(COMMAND make man)"
     FILES ${CMAKE_CURRENT_BINARY_DIR}/${NAME}.1.gz
     DESTINATION share/man/man1)
 ENDMACRO(MANPAGE)
