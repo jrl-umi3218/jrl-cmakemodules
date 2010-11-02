@@ -82,6 +82,17 @@ MACRO(_SETUP_PROJECT_HEADER)
     DESTINATION include/${HEADER_DIR}
     PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_WRITE
     )
+  # Generate warning.hh header.
+  CONFIGURE_FILE(
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/warning.hh.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/include/${HEADER_DIR}/warning.hh
+    @ONLY
+    )
+  INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/include/${HEADER_DIR}/warning.hh
+    DESTINATION include/${HEADER_DIR}
+    PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_WRITE
+    )
+
 
   # Generate config.h header.
   # This header, unlike the previous one is *not* installed and is generated
