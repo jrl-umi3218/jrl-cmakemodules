@@ -13,8 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-FIND_PACKAGE(Doxygen)
-
 # _SETUP_PROJECT_DOCUMENTATION
 # ----------------------------
 #
@@ -22,11 +20,18 @@ FIND_PACKAGE(Doxygen)
 # and install the documentation properly.
 #
 MACRO(_SETUP_PROJECT_DOCUMENTATION)
+  # Search for Doxygen.
+  FIND_PACKAGE(Doxygen)
+
+  IF(NOT DOXYGEN_FOUND)
+    MESSAGE(FATAL_ERROR "Failed to find Doxygen.")
+  ENDIF(NOT DOXYGEN_FOUND)
+
   # Search for Perl.
   FIND_PROGRAM(PERL perl DOC "the Perl interpreter")
   IF(NOT PERL)
     MESSAGE(SEND_ERROR "Failed to find Perl.")
-    ENDIF(NOT PERL)
+  ENDIF(NOT PERL)
 
   # Generate variable to be substitued in Doxyfile.in
   # for dot use.
