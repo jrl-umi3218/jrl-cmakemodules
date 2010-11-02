@@ -1,18 +1,23 @@
-// Copyright (C) 2008, 2009 by Thomas Moulard, CNRS.
+// Copyright (C) 2010 Florent Lamiraux, Thomas Moulard, JRL, CNRS/AIST.
 //
-// This file is part of the jrl-cmakemodules.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
-// This software is provided "as is" without warranty of any kind,
-// either expressed or implied, including but not limited to the
-// implied warranties of fitness for a particular purpose.
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
 //
-// See the COPYING file for more information.
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef @PACKAGE_CPPNAME@_CONFIG_HH
-# define @PACKAGE_CPPNAME@_CONFIG_HH
+#ifndef @LIBRARY_NAME@_CONFIG_HH
+# define @LIBRARY_NAME@_CONFIG_HH
 
 // Package version (header).
-# define @PACKAGE_CPPNAME@_VERSION "@PROJECT_VERSION@"
+# define @LIBRARY_NAME@_VERSION "@PROJECT_VERSION@"
 
 // Handle portable symbol export.
 // Defining manually which symbol should be exported is required
@@ -26,36 +31,36 @@
 // is handled by the compiler, see: http://gcc.gnu.org/wiki/Visibility
 # if defined _WIN32 || defined __CYGWIN__
 // On Microsoft Windows, use dllimport and dllexport to tag symbols.
-#  define @PACKAGE_CPPNAME@_DLLIMPORT __declspec(dllimport)
-#  define @PACKAGE_CPPNAME@_DLLEXPORT __declspec(dllexport)
-#  define @PACKAGE_CPPNAME@_DLLLOCAL
+#  define @LIBRARY_NAME@_DLLIMPORT __declspec(dllimport)
+#  define @LIBRARY_NAME@_DLLEXPORT __declspec(dllexport)
+#  define @LIBRARY_NAME@_DLLLOCAL
 # else
 // On Linux, for GCC >= 4, tag symbols using GCC extension.
 #  if __GNUC__ >= 4
-#   define @PACKAGE_CPPNAME@_DLLIMPORT __attribute__ ((visibility("default")))
-#   define @PACKAGE_CPPNAME@_DLLEXPORT __attribute__ ((visibility("default")))
-#   define @PACKAGE_CPPNAME@_DLLLOCAL  __attribute__ ((visibility("hidden")))
+#   define @LIBRARY_NAME@_DLLIMPORT __attribute__ ((visibility("default")))
+#   define @LIBRARY_NAME@_DLLEXPORT __attribute__ ((visibility("default")))
+#   define @LIBRARY_NAME@_DLLLOCAL  __attribute__ ((visibility("hidden")))
 #  else
 // Otherwise (GCC < 4 or another compiler is used), export everything.
-#   define @PACKAGE_CPPNAME@_DLLIMPORT
-#   define @PACKAGE_CPPNAME@_DLLEXPORT
-#   define @PACKAGE_CPPNAME@_DLLLOCAL
+#   define @LIBRARY_NAME@_DLLIMPORT
+#   define @LIBRARY_NAME@_DLLEXPORT
+#   define @LIBRARY_NAME@_DLLLOCAL
 #  endif // __GNUC__ >= 4
 # endif // defined _WIN32 || defined __CYGWIN__
 
-# ifdef @PACKAGE_CPPNAME@_STATIC
+# ifdef @LIBRARY_NAME@_STATIC
 // If one is using the library statically, get rid of
 // extra information.
-#  define @PACKAGE_CPPNAME@_DLLAPI
-#  define @PACKAGE_CPPNAME@_LOCAL
+#  define @LIBRARY_NAME@_DLLAPI
+#  define @LIBRARY_NAME@_LOCAL
 # else
 // Depending on whether one is building or using the
 // library define DLLAPI to import or export.
-#  ifdef BUILDING_@PACKAGE_CPPNAME@
-#   define @PACKAGE_CPPNAME@_DLLAPI @PACKAGE_CPPNAME@_DLLEXPORT
+#  ifdef @EXPORT_SYMBOL@
+#   define @LIBRARY_NAME@_DLLAPI @LIBRARY_NAME@_DLLEXPORT
 #  else
-#   define @PACKAGE_CPPNAME@_DLLAPI @PACKAGE_CPPNAME@_DLLIMPORT
-#  endif // BUILDING_@PACKAGE_CPPNAME@
-#  define @PACKAGE_CPPNAME@_LOCAL @PACKAGE_CPPNAME@_DLLLOCAL
-# endif // @PACKAGE_CPPNAME@_STATIC
-#endif //! @PACKAGE_CPPNAME@_CONFIG_HH
+#   define @LIBRARY_NAME@_DLLAPI @LIBRARY_NAME@_DLLIMPORT
+#  endif // @LIBRARY_NAME@_EXPORTS
+#  define @LIBRARY_NAME@_LOCAL @LIBRARY_NAME@_DLLLOCAL
+# endif // @LIBRARY_NAME@_STATIC
+#endif //! @LIBRARY_NAME@_CONFIG_HH

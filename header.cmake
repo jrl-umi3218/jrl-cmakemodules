@@ -69,11 +69,24 @@ MACRO(_SETUP_PROJECT_HEADER)
   # Generate config.hh header.
   STRING(REGEX REPLACE "[^a-zA-Z0-9]" "_" PACKAGE_CPPNAME "${PROJECT_NAME}")
   STRING(TOUPPER "${PACKAGE_CPPNAME}" "PACKAGE_CPPNAME")
+  GENERATE_CONFIGURATION_HEADER(
+    ${HEADER_DIR} config.hh ${PACKAGE_CPPNAME} BUILDING_${PACKAGE_CPPNAME})
 
+  # Generate deprecated.hh header.
   CONFIGURE_FILE(
-    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/config.hh.cmake
-    ${CMAKE_CURRENT_BINARY_DIR}/include/${HEADER_DIR}/config.hh
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/deprecated.hh.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/include/${HEADER_DIR}/deprecated.hh
+    @ONLY
     )
+  INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/include/${HEADER_DIR}/deprecated.hh
+    DESTINATION include/${HEADER_DIR}
+    PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_WRITE
+    )
+
+  # Generate config.h header.
+  # This header, unlike the previous one is *not* installed and is generated
+  # in the top-level directory of the build tree.
+  # Therefore it must not be inluded by any distributed header.
   CONFIGURE_FILE(
     ${CMAKE_CURRENT_SOURCE_DIR}/cmake/config.h.cmake
     ${CMAKE_CURRENT_BINARY_DIR}/config.h
@@ -83,13 +96,40 @@ MACRO(_SETUP_PROJECT_HEADER)
     PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_WRITE
     )
 
-  # Default include directories.
+  # Default include directories:
+  # - top-level build directory (for generated non-distributed headers).
+  # - include directory in the build tree (for generated, distributed headers).
+  # - include directory in the source tree (non-generated, distributed headers).
   INCLUDE_DIRECTORIES(
     ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     )
 ENDMACRO(_SETUP_PROJECT_HEADER)
+
+# GENERATE_CONFIGURATION_HEADER
+# -----------------------------
+#
+# This macro generates a configuration header. Macro parameters may be
+# used to customize it.
+#
+# HEADER_DIR    : where to generate the header
+# FILENAME      : how should the file named
+# LIBRARY_NAME  : CPP symbol prefix, should match the compiled library name
+# EXPORT_SYMBOl : what symbol controls the switch between symbol import/export
+FUNCTION(GENERATE_CONFIGURATION_HEADER HEADER_DIR FILENAME LIBRARY_NAME EXPORT_SYMBOL)
+  # Generate the header.
+  CONFIGURE_FILE(
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/${FILENAME}.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/include/${HEADER_DIR}/${FILENAME}
+    @ONLY
+    )
+  # Install it.
+  INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/include/${HEADER_DIR}/${FILENAME}
+    DESTINATION include/${HEADER_DIR}
+    PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_WRITE
+    )
+ENDFUNCTION(GENERATE_CONFIGURATION_HEADER)
 
 
 # _SETUP_PROJECT_HEADER_FINAlIZE
