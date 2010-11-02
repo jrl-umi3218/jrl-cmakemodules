@@ -151,17 +151,33 @@ FUNCTION(PKG_CONFIG_APPEND_CFLAGS)
 ENDFUNCTION(PKG_CONFIG_APPEND_CFLAGS)
 
 
+# PKG_CONFIG_APPEND_LIBS_RAW
+# ----------------------------
+#
+# This macro adds raw value in the "Libs:" into the pkg-config file.
+#
+FUNCTION(PKG_CONFIG_APPEND_LIBS_RAW)
+  FOREACH(I RANGE ${ARGC})
+    SET(LIB ${ARGV${I}})
+    IF(LIB)
+      SET(PKG_CONFIG_LIBS "${PKG_CONFIG_LIBS} ${LIB}")
+    ENDIF(LIB)
+  ENDFOREACH(I RANGE ${ARGC})
+ENDFUNCTION(PKG_CONFIG_APPEND_LIBS_RAW)
+
 # PKG_CONFIG_APPEND_LIBS
 # ----------------------
 #
 # This macro adds libraries in a portable way into the pkg-config
 # file.
 #
+# Library prefix and suffix is automatically added.
+#
 FUNCTION(PKG_CONFIG_APPEND_LIBS)
   FOREACH(I RANGE ${ARGC})
     SET(LIB ${ARGV${I}})
     IF(LIB)
-      SET(PKG_CONFIG_LIBS "${PKG_CONFIG_LIBS} ${LIB}")
+      SET(PKG_CONFIG_LIBS "${PKG_CONFIG_LIBS} ${LIBINCL_KW}${LIB}${LIB_EXT}")
     ENDIF(LIB)
   ENDFOREACH(I RANGE ${ARGC})
 ENDFUNCTION(PKG_CONFIG_APPEND_LIBS)
