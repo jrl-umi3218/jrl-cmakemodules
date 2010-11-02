@@ -119,3 +119,18 @@ MACRO(ADD_REQUIRED_DEPENDENCY PKG_CONFIG_STRING)
     "Pkg-config module ${LIBRARY_NAME} v${${PREFIX}_VERSION}"
     " has been detected with success.")
 ENDMACRO(ADD_REQUIRED_DEPENDENCY)
+
+
+# PKG_CONFIG_APPEND_LIBRARY_DIR
+# -----------------------------
+#
+# This macro adds library directories in a portable way
+# into the CMake file.
+FUNCTION(PKG_CONFIG_APPEND_LIBRARY_DIR)
+  FOREACH(I RANGE ${ARGC})
+    SET(DIR ${ARGV_${I}})
+    IF(DIR)
+      LIST(APPEND PKG_CONFIG_LIBS "${LIBDIR_KW}${DIR}")
+    ENDIF(DIR)
+  ENDFOREACH(I RANGE ${ARGC})
+ENDFUNCTION(PKG_CONFIG_APPEND_LIBRARY_DIR DIR)
