@@ -154,7 +154,7 @@ ENDMACRO(PKG_CONFIG_APPEND_CFLAGS)
 #
 # This macro adds raw value in the "Libs:" into the pkg-config file.
 #
-MACRO(PKG_CONFIG_APPEND_LIBS_RAW)
+MACRO(PKG_CONFIG_APPEND_LIBS_RAW LIBS)
   FOREACH(LIB ${LIBS})
     IF(LIB)
       SET(PKG_CONFIG_LIBS "${PKG_CONFIG_LIBS} ${LIB}")
