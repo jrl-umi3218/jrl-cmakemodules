@@ -41,6 +41,7 @@
 #   EXCLUDE_FROM_ALL and make test should trigger their compilation.
 
 # Include base features.
+INCLUDE(cmake/logging.cmake)
 INCLUDE(cmake/portability.cmake)
 INCLUDE(cmake/compiler.cmake)
 INCLUDE(cmake/debian.cmake)
@@ -125,6 +126,8 @@ MACRO(SETUP_PROJECT)
 
   ENABLE_TESTING()
 
+  LOGGING_INITIALIZE()
+
   _SETUP_PROJECT_WARNINGS()
   _SETUP_PROJECT_HEADER()
   _SETUP_PROJECT_DIST()
@@ -147,4 +150,6 @@ MACRO(SETUP_PROJECT_FINALIZE)
 
   # Install data if needed
   _INSTALL_PROJECT_DATA()
+
+  LOGGING_FINALIZE()
 ENDMACRO(SETUP_PROJECT_FINALIZE)

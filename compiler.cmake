@@ -36,7 +36,7 @@ MACRO(_SETUP_PROJECT_WARNINGS)
   ENDIF(NOT DEFINED CXX_DISABLE_WERROR)
  ENDIF(UNIX)
 
- # For win32 systems, it is impossible to use Wall, 
+ # For win32 systems, it is impossible to use Wall,
  # especially with boost, which is way too verbose
  # The default levels (W3/W4) are enough
  # The next macro remove warnings on deprecations due to stl.
@@ -44,5 +44,8 @@ MACRO(_SETUP_PROJECT_WARNINGS)
   SET(WARNING_CXX_FLAGS "-D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS")
   SET(WARNING_CXX_FLAGS "${WARNING_CXX_FLAGS} -D_CRT_SECURE_NO_DEPRECATE")
  ENDIF(WIN32)
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WARNING_CXX_FLAGS}")
+
+ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WARNING_CXX_FLAGS}")
+
+ LIST(APPEND LOGGING_WATCHED_VARIABLES WARNING_CXX_FLAGS)
 ENDMACRO(_SETUP_PROJECT_WARNINGS)
