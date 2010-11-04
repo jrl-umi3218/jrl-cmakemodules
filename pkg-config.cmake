@@ -118,6 +118,13 @@ MACRO(ADD_REQUIRED_DEPENDENCY PKG_CONFIG_STRING)
   # 2. make it uppercase.
   STRING(TOUPPER "${PREFIX}" "PREFIX")
 
+  # Force redetection each time CMake is launched.
+  # Rationale: these values are *NEVER* manually set, so information is never
+  # lost by overriding them. Moreover, changes in the pkg-config files are
+  # not seen as long as the cache is not destroyed, even if the .pc file
+  # is changed. This is a BAD behavior.
+  SET(${PREFIX}_FOUND 0)
+
   # Search for the package.
   PKG_CHECK_MODULES("${PREFIX}" REQUIRED "${PKG_CONFIG_STRING}")
 
