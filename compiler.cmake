@@ -22,7 +22,7 @@ MACRO(_SETUP_PROJECT_WARNINGS)
   # correctly.
 
  IF(UNIX)
-  SET(FLAGS -Wall -Wcast-align -Wcast-qual
+  SET(FLAGS -Wall -Wextra -Wcast-align -Wcast-qual
             -Wformat -Wwrite-strings -Wconversion)
   FOREACH(FLAG ${FLAGS})
     CHECK_CXX_COMPILER_FLAG(${FLAG} R${FLAG})
