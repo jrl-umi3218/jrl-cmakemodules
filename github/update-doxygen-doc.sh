@@ -267,10 +267,19 @@ if test -x "$tmp/project/doxygen/$doc_version/installdox"; then
     echo "* Run installdox to fix documentation cross-links..."
 
     cd $tmp/project/doxygen/$doc_version/ || abort "Failed to change directory."
+
+    # Patch installdox to never abort.
+    # installdox normally checks that _all_ links are substituted.
+    # This is not what we want, we call installdox one dependency at a time
+    # to avoid resolving documentation dependencies manually.
+    sed 's|&usage();||g' installdox > installdox.fixed
+    chmod 755 installdox.fixed
+
     i=1
     for doxytag in $installdox_args; do
 	url=`echo "$installdox_urls" | cut -d' ' -f$i`
-	./installdox -q -l ${doxytag}.doxytag@$url 2> /dev/null > /dev/null \
+	./installdox.fixed -q -l ${doxytag}.doxytag@$url \
+	    2> /dev/null > /dev/null \
 	    || true
 	i=$((i+1))
     done
