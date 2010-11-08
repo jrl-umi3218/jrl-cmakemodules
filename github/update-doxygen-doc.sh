@@ -45,6 +45,40 @@ me=$0
 bme=`basename "$0"`
 
 
+ # ----------------------- #
+ # Cross-links management. #
+ # ----------------------- #
+#
+# This stores the doxygen /online/ documentation
+# so that installdox can be called to fix links before upload.
+#
+# Please note that this script makes the assumption that the unstable
+# documentation should be used for cross-links which is not what we
+# want.
+
+# FIXME: find a way to link against the "real" corresponding version.
+
+ia="abstract-robot-dynamics"
+ia="$ia jrl-mathtools jrl-mal jrl-dynamics jrl-walkgen"
+ia="$ia dynamic-graph dg-middleware"
+ia="$ia sot-core sot-dynamic sot-pattern-generator"
+ia="$ia sot-openhrp sot-openhrp-scripts"
+installdox_args="$ia"
+
+iu="http://laas.github.com/abstract-robot-dynamics/doxygen/HEAD/"
+iu="$iu http://jrl-umi3218.github.com/jrl-mathtools/doxygen/HEAD/"
+iu="$iu http://jrl-umi3218.github.com/jrl-mal/doxygen/HEAD/"
+iu="$iu http://jrl-umi3218.github.com/jrl-dynamics/doxygen/HEAD/"
+iu="$iu http://jrl-umi3218.github.com/jrl-walkgen/doxygen/HEAD/"
+iu="$iu http://jrl-umi3218.github.com/dynamic-graph/doxygen/HEAD/"
+iu="$iu http://jrl-umi3218.github.com/dg-middleware/doxygen/HEAD/"
+iu="$iu http://jrl-umi3218.github.com/sot-core/doxygen/HEAD/"
+iu="$iu http://jrl-umi3218.github.com/sot-dynamic/doxygen/HEAD/"
+iu="$iu http://jrl-umi3218.github.com/sot-pattern-generator/doxygen/HEAD/"
+iu="$iu http://jrl-umi3218.github.com/sot-openhrp/doxygen/HEAD/"
+iu="$iu http://jrl-umi3218.github.com/sot-openhrp-scripts/doxygen/HEAD/"
+installdox_urls="$iu"
+
   # ----------------------- #
   # Customizable variables. #
   # ----------------------- #
@@ -228,6 +262,20 @@ git rm --quiet -rf doxygen/$doc_version
 mkdir -p doxygen/$doc_version
 cp -rf $build_docdir/doxygen-html/* doxygen/$doc_version/ \
  || abort "failed to copy the documentation"
+
+if test -x "$tmp/project/doxygen/$doc_version/installdox"; then
+    echo "* Run installdox to fix documentation cross-links..."
+
+    cd $tmp/project/doxygen/$doc_version/ || abort "Failed to change directory."
+    i=1
+    for doxytag in $installdox_args; do
+	url=`echo "$installdox_urls" | cut -d' ' -f$i`
+	./installdox -q -l ${doxytag}.doxytag@$url 2> /dev/null > /dev/null \
+	    || true
+	i=$((i+1))
+    done
+    cd $tmp/project || abort "Failed to change directory."
+fi
 
 echo "* Generate the commit..."
 ${GIT} add doxygen/$doc_version \
