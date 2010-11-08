@@ -99,17 +99,26 @@ MACRO(_SETUP_PROJECT_PKG_CONFIG_FINALIZE)
 ENDMACRO(_SETUP_PROJECT_PKG_CONFIG_FINALIZE)
 
 
-# ADD_REQUIRED_DEPENDENCY(PREFIX PKGCONFIG_STRING)
+# ADD_DEPENDENCY(PREFIX P_REQUIRED PKGCONFIG_STRING)
 # ------------------------------------------------
 #
 # Check for a dependency using pkg-config. Fail if the package cannot
 # be found.
 #
+# P_REQUIRED : if set to 1 the package is required, otherwise it consider
+#              as optional. 
+#              WARNING for optional package: 
+#              if the package is detected its compile
+#              and linking options are still put in the required fields
+#              of the generated pc file. Indeed from the binary viewpoint
+#              the package becomes required.
+#
 # PKG_CONFIG_STRING	: string passed to pkg-config to check the version.
 #			  Typically, this string looks like:
 #                         ``my-package >= 0.5''
 #
-MACRO(ADD_REQUIRED_DEPENDENCY PKG_CONFIG_STRING)
+
+MACRO(ADD_DEPENDENCY P_REQUIRED PKG_CONFIG_STRING)
   # Retrieve the left part of the equation to get package name.
   STRING(REGEX MATCH "[^<>= ]+" LIBRARY_NAME "${PKG_CONFIG_STRING}")
   # And transform it into a valid variable prefix.
@@ -126,7 +135,14 @@ MACRO(ADD_REQUIRED_DEPENDENCY PKG_CONFIG_STRING)
   SET(${PREFIX}_FOUND 0)
 
   # Search for the package.
-  PKG_CHECK_MODULES("${PREFIX}" REQUIRED "${PKG_CONFIG_STRING}")
+  MESSAGE(STATUS "Value of P_REQUIRED is :" ${P_REQUIRED})
+  IF(${P_REQUIRED})
+    MESSAGE(STATUS "${PKG_CONFIG_STRING} is required.")
+    PKG_CHECK_MODULES("${PREFIX}" REQUIRED "${PKG_CONFIG_STRING}")
+  ELSEIF(${P_REQUIRED})
+    MESSAGE(STATUS "${PKG_CONFIG_STRING} is optional.")
+    PKG_CHECK_MODULES("${PREFIX}" OPTIONAL "${PKG_CONFIG_STRING}")
+  ENDIF(${P_REQUIRED})
 
   # Watch variables.
   LIST(APPEND LOGGING_WATCHED_VARIABLES
@@ -169,8 +185,35 @@ MACRO(ADD_REQUIRED_DEPENDENCY PKG_CONFIG_STRING)
   MESSAGE(STATUS
     "Pkg-config module ${LIBRARY_NAME} v${${PREFIX}_VERSION}"
     " has been detected with success.")
+ENDMACRO(ADD_DEPENDENCY)
+
+# ADD_REQUIRED_DEPENDENCY(PREFIX PKGCONFIG_STRING)
+# ------------------------------------------------
+#
+# Check for a dependency using pkg-config. Fail if the package cannot
+# be found.
+#
+# PKG_CONFIG_STRING	: string passed to pkg-config to check the version.
+#			  Typically, this string looks like:
+#                         ``my-package >= 0.5''
+#
+MACRO(ADD_REQUIRED_DEPENDENCY PKG_CONFIG_STRING)
+  ADD_DEPENDENCY(1 ${PKG_CONFIG_STRING})
 ENDMACRO(ADD_REQUIRED_DEPENDENCY)
 
+# ADD_OPTIONAL_DEPENDENCY(PREFIX PKGCONFIG_STRING)
+# ------------------------------------------------
+#
+# Check for a dependency using pkg-config. Quiet if the package cannot
+# be found.
+#
+# PKG_CONFIG_STRING	: string passed to pkg-config to check the version.
+#			  Typically, this string looks like:
+#                         ``my-package >= 0.5''
+#
+MACRO(ADD_OPTIONAL_DEPENDENCY PKG_CONFIG_STRING)
+  ADD_DEPENDENCY(0 ${PKG_CONFIG_STRING})
+ENDMACRO(ADD_OPTIONAL_DEPENDENCY)
 
 # PKG_CONFIG_APPEND_LIBRARY_DIR
 # -----------------------------
