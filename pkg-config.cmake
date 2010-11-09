@@ -305,10 +305,10 @@ MACRO(PKG_CONFIG_USE_DEPENDENCY TARGET DEPENDENCY)
 
   # If there were no previous flags, get rid of the XYFLAGS-NOTFOUND
   # in the variables.
-  IF(${CFLAGS} MATCHES ".*NOTFOUND.*")
+  IF(NOT CFLAGS)
     SET(CFLAGS "")
   ENDIF()
-  IF(${LDFLAGS} MATCHES ".*NOTFOUND.*")
+  IF(NOT LDFLAGS)
     SET(LDFLAGS "")
   ENDIF()
 
