@@ -43,6 +43,17 @@ MACRO(_SETUP_PROJECT_WARNINGS)
  IF(WIN32)
   SET(WARNING_CXX_FLAGS "-D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS")
   SET(WARNING_CXX_FLAGS "${WARNING_CXX_FLAGS} -D_CRT_SECURE_NO_DEPRECATE")
+  ## -- The following warnings are removed to highlight the output
+  # C4101 The local variable is never used
+  # removed since happens frequently in headers.
+  SET(WARNING_CXX_FLAGS "${WARNING_CXX_FLAGS} /wd4101")
+  # C4251 class 'type' needs to have dll-interface to be used by clients of class 'type2'
+  # ~ in practice, raised by the classes that have non-dll attribute (such as std::vector)
+  SET(WARNING_CXX_FLAGS "${WARNING_CXX_FLAGS} /wd4251")
+  # C4275 non - DLL-interface used as base for DLL-interface
+  SET(WARNING_CXX_FLAGS "${WARNING_CXX_FLAGS} /wd4275")
+  # C4355 "this" used in base member initializer list
+  SET(WARNING_CXX_FLAGS "${WARNING_CXX_FLAGS} /wd4355")
  ENDIF(WIN32)
 
  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WARNING_CXX_FLAGS}")
