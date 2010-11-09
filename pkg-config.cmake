@@ -106,8 +106,8 @@ ENDMACRO(_SETUP_PROJECT_PKG_CONFIG_FINALIZE)
 # be found.
 #
 # P_REQUIRED : if set to 1 the package is required, otherwise it consider
-#              as optional. 
-#              WARNING for optional package: 
+#              as optional.
+#              WARNING for optional package:
 #              if the package is detected its compile
 #              and linking options are still put in the required fields
 #              of the generated pc file. Indeed from the binary viewpoint
@@ -117,7 +117,6 @@ ENDMACRO(_SETUP_PROJECT_PKG_CONFIG_FINALIZE)
 #			  Typically, this string looks like:
 #                         ``my-package >= 0.5''
 #
-
 MACRO(ADD_DEPENDENCY P_REQUIRED PKG_CONFIG_STRING)
   # Retrieve the left part of the equation to get package name.
   STRING(REGEX MATCH "[^<>= ]+" LIBRARY_NAME "${PKG_CONFIG_STRING}")
@@ -271,3 +270,58 @@ MACRO(PKG_CONFIG_APPEND_LIBS LIBS)
     ENDIF(LIB)
   ENDFOREACH(LIB ${LIBS})
 ENDMACRO(PKG_CONFIG_APPEND_LIBS)
+
+
+# PKG_CONFIG_USE_DEPENDENCY(TARGET DEPENDENCY)
+# --------------------------------------------
+#
+# This macro changes the target properties to properly search for
+# headers, libraries and link against the required shared libraries
+# when using a dependency detected through pkg-config.
+#
+# I.e. PKG_CONFIG_USE_DEPENDENCY(my-binary my-package)
+#
+MACRO(PKG_CONFIG_USE_DEPENDENCY TARGET DEPENDENCY)
+  # Transform the dependency into a valid variable prefix.
+  # 1. replace invalid characters into underscores.
+  STRING(REGEX REPLACE "[^a-zA-Z0-9]" "_" PREFIX "${DEPENDENCY}")
+  # 2. make it uppercase.
+  STRING(TOUPPER "${PREFIX}" "PREFIX")
+
+  # Make sure we search for a previously detected package.
+  IF(NOT DEFINED ${PREFIX}_FOUND)
+    MESSAGE(FATAL_ERROR
+      "The package ${DEPENDENCY} has not been detected correctly.\n"
+      "Have you called ADD_REQUIRED_DEPENDENCY/ADD_OPTIONAL_DEPENDENCY?")
+  ENDIF()
+  IF(NOT ${${PREFIX}_FOUND})
+    MESSAGE(FATAL_ERROR
+      "The package ${DEPENDENCY} has not been found.")
+  ENDIF()
+
+  # Make sure we do not override previous flags.
+  GET_TARGET_PROPERTY(CFLAGS ${TARGET} COMPILE_FLAGS)
+  GET_TARGET_PROPERTY(LDFLAGS ${TARGET} LINK_FLAGS)
+
+  # If there were no previous flags, get rid of the XYFLAGS-NOTFOUND
+  # in the variables.
+  IF(NOT ${CFLAGS})
+    SET(CFLAGS "")
+  ENDIF()
+  IF(NOT ${LDFLAGS})
+    SET(LDFLAGS "")
+  ENDIF()
+
+  # Transform semi-colon seperated list in to space separated list.
+  FOREACH(FLAG ${${PREFIX}_CFLAGS})
+    SET(CFLAGS "${CFLAGS} ${FLAG}")
+  ENDFOREACH()
+
+  FOREACH(FLAG ${${PREFIX}_LDFLAGS})
+    SET(LDFLAGS "${LDFLAGS} ${FLAG}")
+  ENDFOREACH()
+
+  # Update the flags.
+  SET_TARGET_PROPERTIES(${TARGET}
+    PROPERTIES COMPILE_FLAGS "${CFLAGS}" LINK_FLAGS "${LDFLAGS}")
+ENDMACRO(PKG_CONFIG_USE_DEPENDENCY TARGET DEPENDENCY)
