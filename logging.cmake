@@ -27,9 +27,23 @@
 SET(LOGGING_FILENAME "${CMAKE_BINARY_DIR}/config.log")
 
 # Watched variables list.
-# All watched variables final value will be displayed
-# in the logging file.
-SET(LOGGING_WATCHED_VARIABLES NOT_DEFINED)
+# All watched variables final value will be displayed in the logging file.
+SET(LOGGING_WATCHED_VARIABLES "")
+
+# Watched targets list.
+# All watched target properties will be displayed in the logging file.
+SET(LOGGING_WATCHED_TARGETS "")
+
+# Watched targets properties list.
+SET(LOGGING_WATCHED_TARGETS_PROPERTIES
+  COMPILE_DEFINITIONS
+  COMPILE_FLAGS
+  DEFINE_SYMBOL
+  ENABLE_EXPORTS
+  EXCLUDE_FROM_ALL
+  LINK_FLAGS
+  SOVERSION
+  VERSION)
 
 # LOGGING_INITIALIZE()
 # --------------
@@ -140,5 +154,20 @@ FUNCTION(LOGGING_FINALIZE)
     ENDIF()
     FILE(APPEND ${LOGGING_FILENAME}
       "${VAR} = ${${VAR}}\n")
+  ENDFOREACH()
+
+  FILE(APPEND ${LOGGING_FILENAME}
+    "## ---------------- ##\n"
+    "## Watched targets. ##\n"
+    "## ---------------- ##\n"
+    "\n")
+
+  LIST(REMOVE_DUPLICATES LOGGING_WATCHED_TARGETS)
+  FOREACH(TARGET ${LOGGING_WATCHED_TARGETS})
+    FOREACH(PROPERTY ${LOGGING_WATCHED_TARGETS_PROPERTIES})
+      GET_TARGET_PROPERTY(VALUE ${TARGET} ${PROPERTY})
+      FILE(APPEND ${LOGGING_FILENAME} "${TARGET}_${PROPERTY} = ${VALUE}\n")
+    ENDFOREACH()
+    FILE(APPEND ${LOGGING_FILENAME} "\n")
   ENDFOREACH()
 ENDFUNCTION(LOGGING_FINALIZE)
