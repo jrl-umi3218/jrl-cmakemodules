@@ -13,8 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-INCLUDE(CPack)
-
 # SETUP_PROJECT_CPACK
 # -------------------
 #
@@ -29,6 +27,8 @@ INCLUDE(CPack)
 MACRO(SETUP_PROJECT_CPACK)
   SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY ${PROJECT_DESCRIPTION})
   SET(CPACK_PACKAGE_VENDOR "JRL CNRS/AIST")
+  SET(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
+
   SET(CPACK_PACKAGE_DESCRIPTION_FILE ${CMAKE_CURRENT_SOURCE_DIR}/README.md)
   SET(CPACK_DEBIAN_PACKAGE_MAINTAINER
     "Olivier Stasse (olivier.stasse@aist.go.jp)")
@@ -53,4 +53,9 @@ MACRO(SETUP_PROJECT_CPACK)
   SET(CPACK_GENERATOR TGZ)
   SET(CPACK_GENERATOR DEB)
   SET(CPACK_PACKAGING_INSTALL_PREFIX "/usr/share/openrobots")
+
+  # CPack SHOULD be called after setting all the variables.
+  # SETUP_PROJECT_CPACK is supposed to be called only once for a project.
+  INCLUDE(CPack)
+
 ENDMACRO(SETUP_PROJECT_CPACK)
