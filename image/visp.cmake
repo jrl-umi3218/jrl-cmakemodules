@@ -29,6 +29,9 @@
 # it introduces complexity for nothing. Fix your path instead.
 MACRO(FIND_VISP)
   FIND_PROGRAM(VISP_CONFIG visp-config)
+  IF(NOT VISP_CONFIG)
+    MESSAGE(FATAL_ERROR "visp-config has not been found.")
+  ENDIF()
   EXECUTE_PROCESS(
     COMMAND ${VISP_CONFIG} --prefix
     OUTPUT_VARIABLE VISP_PREFIX
