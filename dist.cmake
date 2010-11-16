@@ -25,15 +25,31 @@
 # (which is then moved to the build directory).
 MACRO(_SETUP_PROJECT_DIST)
   IF(UNIX)
-  ADD_CUSTOM_TARGET(dist
-    COMMAND
-    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/git-archive-all.sh
-    --prefix ${PROJECT_NAME}-${PROJECT_VERSION}/
-    && gzip -f ${PROJECT_NAME}.tar
-    && mv ${PROJECT_NAME}.tar.gz
-          ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-${PROJECT_VERSION}.tar.gz
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    COMMENT "Generating tarball..."
-    )
-  ENDIF(UNIX)
+    FIND_PROGRAM(TAR tar)
+
+    ADD_CUSTOM_TARGET(distdir
+      COMMAND
+      ${CMAKE_SOURCE_DIR}/cmake/git-archive-all.sh
+      --prefix ${PROJECT_NAME}-${PROJECT_VERSION}/
+      && cd ${CMAKE_BINARY_DIR}/
+      && ${TAR} xf ${CMAKE_SOURCE_DIR}/${PROJECT_NAME}.tar
+      && echo "${PROJECT_VERSION}" >
+         ${CMAKE_BINARY_DIR}/${PROJECT_NAME}-${PROJECT_VERSION}/.version
+      && rm -f ${CMAKE_SOURCE_DIR}/${PROJECT_NAME}.tar
+      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+      COMMENT "Generating dist directory..."
+      )
+
+    ADD_CUSTOM_TARGET(dist
+      COMMAND
+      ${TAR} czf ${PROJECT_NAME}-${PROJECT_VERSION}.tar.gz
+                 ${PROJECT_NAME}-${PROJECT_VERSION}/
+      && rm -rf ${CMAKE_BINARY_DIR}/${PROJECT_NAME}-${PROJECT_VERSION}/
+      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+      COMMENT "Generating tarball..."
+      )
+    ADD_DEPENDENCIES(dist distdir)
+  ELSE()
+    #FIXME: what to do here?
+  ENDIF()
 ENDMACRO(_SETUP_PROJECT_DIST)
