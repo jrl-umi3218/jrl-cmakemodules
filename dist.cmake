@@ -32,6 +32,9 @@ MACRO(_SETUP_PROJECT_DIST)
       ${CMAKE_SOURCE_DIR}/cmake/git-archive-all.sh
       --prefix ${PROJECT_NAME}-${PROJECT_VERSION}/
       && cd ${CMAKE_BINARY_DIR}/
+      && find ${PROJECT_NAME}-${PROJECT_VERSION}/ -type d -print0
+         | xargs -0 chmod a+w || true
+      && rm -rf ${PROJECT_NAME}-${PROJECT_VERSION}/
       && ${TAR} xf ${CMAKE_SOURCE_DIR}/${PROJECT_NAME}.tar
       && echo "${PROJECT_VERSION}" >
          ${CMAKE_BINARY_DIR}/${PROJECT_NAME}-${PROJECT_VERSION}/.version
