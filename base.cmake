@@ -25,7 +25,9 @@
 #			I.e. a lower-case letter then one or more lower-case
 #			letter, number or hyphen ``-''.
 # - PROJECT_VERSION     Project version (X.Y.Z where X, Y, Z are unsigned
-#                       integers).
+#                       integers). If not defined, it will automatically
+#                       be computed through `git describe`.
+#                       See BASE_COMPUTE_VERSION for more information.
 # - PROJECT_DESCRIPTION One line summary of the package goal.
 # - PROJECT_URL		Project's website.
 #
@@ -51,14 +53,14 @@ INCLUDE(cmake/header.cmake)
 INCLUDE(cmake/pkg-config.cmake)
 INCLUDE(cmake/uninstall.cmake)
 INCLUDE(cmake/install-data.cmake)
+INCLUDE(cmake/version.cmake)
 
  # --------- #
  # Constants #
  # --------- #
 
 # Variables requires by SETUP_PROJECT.
-SET(REQUIRED_VARIABLES
-  PROJECT_NAME PROJECT_VERSION PROJECT_DESCRIPTION PROJECT_URL)
+SET(REQUIRED_VARIABLES PROJECT_NAME PROJECT_DESCRIPTION PROJECT_URL)
 
  # --------------------- #
  # Project configuration #
@@ -119,6 +121,11 @@ MACRO(SETUP_PROJECT)
 
   # Define project name.
   PROJECT(${PROJECT_NAME} CXX)
+
+  # If the project version number is not set, compute it automatically.
+  IF(NOT DEFINED PROJECT_VERSION)
+    VERSION_COMPUTE()
+  ENDIF()
 
   # Be verbose by default.
   SET(CMAKE_VERBOSE_MAKEFILE TRUE)
