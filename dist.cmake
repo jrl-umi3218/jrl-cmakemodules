@@ -30,10 +30,11 @@ MACRO(_SETUP_PROJECT_DIST)
     ADD_CUSTOM_TARGET(distdir
       COMMAND
       ${CMAKE_SOURCE_DIR}/cmake/git-archive-all.sh
-      --prefix ${PROJECT_NAME}-${PROJECT_VERSION}/
+      --prefix ${PROJECT_NAME}-${PROJECT_VERSION}/  ${PROJECT_NAME}.tar
       && cd ${CMAKE_BINARY_DIR}/
-      && find ${PROJECT_NAME}-${PROJECT_VERSION}/ -type d -print0
-         | xargs -0 chmod a+w || true
+      && (test -d ${PROJECT_NAME}-${PROJECT_VERSION} |
+	find ${PROJECT_NAME}-${PROJECT_VERSION}/ -type d -print0
+         | xargs -0 chmod a+w  || true)
       && rm -rf ${PROJECT_NAME}-${PROJECT_VERSION}/
       && ${TAR} xf ${CMAKE_SOURCE_DIR}/${PROJECT_NAME}.tar
       && echo "${PROJECT_VERSION}" >

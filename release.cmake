@@ -39,6 +39,7 @@ MACRO(RELEASE_SETUP)
       COMMAND
       ! test x$$VERSION = x
         || (echo "Please set a version for this release" && false)
+      && cd ${CMAKE_SOURCE_DIR}
       && ${GIT} tag -s v$$VERSION -m "Release of version $$VERSION."
       && cd ${CMAKE_BINARY_DIR}
       && cmake ${CMAKE_SOURCE_DIR}
