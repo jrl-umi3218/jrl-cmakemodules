@@ -3,6 +3,7 @@ exec_prefix=${PKG_CONFIG_EXEC_PREFIX}
 libdir=${PKG_CONFIG_LIBDIR}
 includedir=${PKG_CONFIG_INCLUDEDIR}
 datarootdir=${PKG_CONFIG_DATAROOTDIR}
+pkgdatarootdir=${PKG_CONFIG_PKGDATAROOTDIR}
 docdir=${PKG_CONFIG_DOCDIR}
 doxygendocdir=${PKG_CONFIG_DOXYGENDOCDIR}
 
