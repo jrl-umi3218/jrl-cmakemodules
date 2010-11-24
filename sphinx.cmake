@@ -38,21 +38,21 @@ MACRO(SPHINX_SETUP)
   IF(MSVC)
     # FIXME: it is impossible to trigger documentation installation
     # at install, so put the target in ALL instead.
-    ADD_CUSTOM_TARGET(doc ALL
+    ADD_CUSTOM_TARGET(sphinx-doc ALL
       COMMAND ${SPHINX_BUILD} -b html ${CMAKE_CURRENT_BINARY_DIR}/sphinx
       ${CMAKE_CURRENT_BINARY_DIR}/sphinx-html
       WORKING_DIRECTORY doc
       COMMENT "Generating sphinx documentation"
       )
   ELSE(MSVC)
-    ADD_CUSTOM_TARGET(doc
+    ADD_CUSTOM_TARGET(sphinx-doc
       COMMAND ${SPHINX_BUILD} -b html ${CMAKE_CURRENT_BINARY_DIR}/sphinx
       ${CMAKE_CURRENT_BINARY_DIR}/sphinx-html
       WORKING_DIRECTORY doc
       COMMENT "Generating sphinx documentation"
       )
 
-    INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${MAKE} doc)")
+    INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${MAKE} sphinx-doc)")
   ENDIF(MSVC)
 
   ADD_CUSTOM_COMMAND(
