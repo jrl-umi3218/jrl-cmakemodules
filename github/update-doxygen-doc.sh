@@ -309,4 +309,7 @@ else
     notice "Github pages documentation is already up-to-date."
 fi
 
+# Clean up the tmp directory
+rm -rf $tmp
+
 trap - EXIT
