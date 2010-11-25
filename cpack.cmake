@@ -52,7 +52,7 @@ MACRO(SETUP_PROJECT_CPACK)
   SET(CPACK_BINARY_DEB ON)
   SET(CPACK_GENERATOR TGZ)
   SET(CPACK_GENERATOR DEB)
-  SET(CPACK_PACKAGING_INSTALL_PREFIX "/usr/share/openrobots")
+  SET(CPACK_PACKAGING_INSTALL_PREFIX "/opt/openrobots")
 
   # CPack SHOULD be called after setting all the variables.
   # SETUP_PROJECT_CPACK is supposed to be called only once for a project.
