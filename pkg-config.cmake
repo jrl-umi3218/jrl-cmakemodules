@@ -182,6 +182,14 @@ MACRO(ADD_DEPENDENCY P_REQUIRED PKG_CONFIG_STRING)
   # Add the package to the dependency list.
   _ADD_TO_LIST(PKG_CONFIG_REQUIRES "${PKG_CONFIG_STRING}" ",")
 
+  # Add the package to the cmake dependency list
+  # if cpack has been included.
+  # This is likely to disappear when Ubuntu 8.04 will 
+  # disappear.
+  IF(COMMAND ADD_CMAKE_DEPENDENCY)
+    ADD_CMAKE_DEPENDENCY(${PKG_CONFIG_STRING})
+  ENDIF(COMMAND ADD_CMAKE_DEPENDENCY)
+
   MESSAGE(STATUS
     "Pkg-config module ${LIBRARY_NAME} v${${PREFIX}_VERSION}"
     " has been detected with success.")
