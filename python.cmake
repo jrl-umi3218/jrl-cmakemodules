@@ -14,9 +14,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 MACRO(FINDPYTHON)
-#
-# Python
-#
 INCLUDE(FindPythonLibs)
 IF (NOT ${PYTHONLIBS_FOUND} STREQUAL TRUE)
    MESSAGE(FATAL_ERROR "Python has not been found.")
@@ -28,6 +25,20 @@ IF (NOT ${PYTHONINTERP_FOUND} STREQUAL TRUE)
 ENDIF (NOT ${PYTHONINTERP_FOUND} STREQUAL TRUE)
 ENDMACRO(FINDPYTHON)
 
+
+#
+# DYNAMIC_GRAPH_PYTHON_MODULE
+# ---------------------------
+#
+# Add a python submodule to dynamic_graph
+#
+#  SUBMODULENAME : the name of the submodule (can be foo/bar)
+#
+#  NOTICE : Before calling this macro, set variable NEW_ENTITY_CLASS as
+#           the list of new Entity types that you want to be bound.
+#           Entity class name should match the name referencing the type
+#           in the factory.
+#
 MACRO(DYNAMIC_GRAPH_PYTHON_MODULE SUBMODULENAME)
   FINDPYTHON()
 
