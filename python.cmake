@@ -27,22 +27,27 @@ ENDMACRO(FINDPYTHON)
 
 
 #
-# DYNAMIC_GRAPH_PYTHON_MODULE
+# DYNAMIC_GRAPH_PYTHON_MODULE SUBMODULENAME LIBRARYNAME
 # ---------------------------
 #
 # Add a python submodule to dynamic_graph
 #
-#  SUBMODULENAME : the name of the submodule (can be foo/bar)
+#  SUBMODULENAME : the name of the submodule (can be foo/bar),
+#
+#  LIBRARYNAME   : library to link the submodule with.
+#
+#  TARGETNAME    : name of the target: should be different for several
+#                  calls to the macro.
 #
 #  NOTICE : Before calling this macro, set variable NEW_ENTITY_CLASS as
 #           the list of new Entity types that you want to be bound.
 #           Entity class name should match the name referencing the type
 #           in the factory.
 #
-MACRO(DYNAMIC_GRAPH_PYTHON_MODULE SUBMODULENAME)
+MACRO(DYNAMIC_GRAPH_PYTHON_MODULE SUBMODULENAME LIBRARYNAME TARGETNAME)
   FINDPYTHON()
 
-  SET(PYTHON_MODULE wrap)
+  SET(PYTHON_MODULE ${TARGETNAME})
 
   ADD_LIBRARY(${PYTHON_MODULE}
     MODULE
@@ -51,7 +56,7 @@ MACRO(DYNAMIC_GRAPH_PYTHON_MODULE SUBMODULENAME)
   SET_TARGET_PROPERTIES(${PYTHON_MODULE}
     PROPERTIES PREFIX "")
 
-  TARGET_LINK_LIBRARIES(${PYTHON_MODULE} ${LIBRARY_NAME})
+  TARGET_LINK_LIBRARIES(${PYTHON_MODULE} ${LIBRARYNAME})
 
   INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
 
@@ -61,9 +66,6 @@ MACRO(DYNAMIC_GRAPH_PYTHON_MODULE SUBMODULENAME)
 
   EXEC_PROGRAM(${PYTHON_EXECUTABLE} ARGS "-c \"from distutils import sysconfig; print sysconfig.get_python_lib(0,0,prefix='')\""
     OUTPUT_VARIABLE PYTHON_SITELIB)
-
-  MESSAGE(STATUS "PYTHON_SITELIB=${PYTHON_SITELIB}")
-
 
   SET(PYTHON_INSTALL_DIR ${PYTHON_SITELIB}/dynamic_graph/${SUBMODULENAME})
 
