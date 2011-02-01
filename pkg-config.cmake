@@ -256,16 +256,25 @@ ENDMACRO(PKG_CONFIG_APPEND_CFLAGS)
 #
 # This macro adds raw value in the "Libs:" into the pkg-config file.
 #
+# Exception for mac OS X: 
+# In addition to the classical static and dynamic libraries (handled like 
+# unix does), mac systems can link against frameworks.
+# Frameworks are directories gathering headers, libraries, shared resources...
+#
+# The syntax used to link with a framework is particular, hence a filter is 
+# added to convert the absolute path to a framework (e.g. /Path/to/Sample.framework)
+# into the correct flags (-F/Path/to/ -framework Sample).
+#
 MACRO(PKG_CONFIG_APPEND_LIBS_RAW LIBS)
   FOREACH(LIB ${LIBS})
     IF(LIB)
-      IF(${LIB} MATCHES .framework)
-	    get_filename_component(framework_PATH ${LIB} PATH)
-	    get_filename_component(framework_NAME ${LIB} NAME_WE)
+      IF( APPLE AND ${LIB} MATCHES .framework)
+	    GET_FILENAME_COMPONENT(framework_PATH ${LIB} PATH)
+	    GET_FILENAME_COMPONENT(framework_NAME ${LIB} NAME_WE)
         SET(PKG_CONFIG_LIBS "${PKG_CONFIG_LIBS} -F${framework_PATH} -framework ${framework_NAME}")
-      ELSE(${LIB} MATCHES .framework)
+      ELSE( APPLE AND ${LIB} MATCHES .framework)
         SET(PKG_CONFIG_LIBS "${PKG_CONFIG_LIBS} ${LIB}")
-      ENDIF(${LIB} MATCHES .framework)
+      ENDIF( APPLE AND ${LIB} MATCHES .framework)
     ENDIF(LIB)
   ENDFOREACH(LIB ${LIBS})
 ENDMACRO(PKG_CONFIG_APPEND_LIBS_RAW)
