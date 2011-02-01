@@ -304,7 +304,7 @@ MACRO(PKG_CONFIG_USE_DEPENDENCY TARGET DEPENDENCY)
       "The package ${DEPENDENCY} has not been detected correctly.\n"
       "Have you called ADD_REQUIRED_DEPENDENCY/ADD_OPTIONAL_DEPENDENCY?")
   ENDIF()
-  IF(NOT ${${PREFIX}_FOUND})
+  IF(NOT ${PREFIX}_FOUND)
     MESSAGE(FATAL_ERROR
       "The package ${DEPENDENCY} has not been found.")
   ENDIF()
