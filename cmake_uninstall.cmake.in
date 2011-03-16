@@ -34,5 +34,13 @@ FOREACH(file ${files})
     ENDIF(NOT "${rm_retval}" STREQUAL 0)
   ELSE(EXISTS "$ENV{DESTDIR}${file}")
     MESSAGE(STATUS "File \"$ENV{DESTDIR}${file}\" does not exist.")
+
+    # If file is a broken symbolic link, EXISTS returns false.
+    # Workaround this bug by attempting to remove the file anyway.
+    EXEC_PROGRAM(
+      "@CMAKE_COMMAND@" ARGS "-E remove \"$ENV{DESTDIR}${file}\""
+      OUTPUT_VARIABLE rm_out
+      RETURN_VALUE rm_retval
+      )
   ENDIF(EXISTS "$ENV{DESTDIR}${file}")
 ENDFOREACH(file)
