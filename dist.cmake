@@ -55,7 +55,7 @@ MACRO(_SETUP_PROJECT_DIST)
 
     ADD_CUSTOM_TARGET(distorig
       COMMAND
-      ${COPY} ${PROJECT_NAME}-${PROJECT_VERSION}.tar.gz
+      copy ${PROJECT_NAME}-${PROJECT_VERSION}.tar.gz
               ${PROJECT_NAME}-${PROJECT_VERSION}.orig.tar.gz
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
       COMMENT "Generating orig tarball..."
