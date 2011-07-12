@@ -63,8 +63,8 @@ MACRO(DYNAMIC_GRAPH_PYTHON_MODULE SUBMODULENAME LIBRARYNAME TARGETNAME)
   #
   # Installation
   #
-
-  EXEC_PROGRAM(${PYTHON_EXECUTABLE} ARGS "-c \"from distutils import sysconfig; print sysconfig.get_python_lib(0,0,prefix='')\""
+  EXEC_PROGRAM(${PYTHON_EXECUTABLE} ARGS
+    "-c \"import sys, os; print os.sep.join([sys.prefix, 'lib', 'python' + sys.version[:3], 'site-packages'])\""
     OUTPUT_VARIABLE PYTHON_SITELIB)
 
   SET(PYTHON_INSTALL_DIR ${PYTHON_SITELIB}/dynamic_graph/${SUBMODULENAME})
