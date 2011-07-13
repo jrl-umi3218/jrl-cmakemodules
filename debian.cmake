@@ -27,15 +27,34 @@ MACRO(_SETUP_DEBIAN)
     IF (IS_DIRECTORY ${CMAKE_SOURCE_DIR}/debian)
       IF(${PROJECT_NAME}_IS_SHARED_LIBRARY STREQUAL "SHARED_LIBRARY")
 	 # Create the install file to be inside ld.so.conf.d
-	 SET(install_file_name "debian/install")
-         FILE(WRITE ${install_file_name}
-	   "debian/lib${PROJECT_NAME}.conf /etc/ld.so.conf.d"
+	  EXECUTE_PROCESS(
+	       COMMAND ${GIT} describe --abbrev=0 --match=v* HEAD
+	       WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+	       RESULT_VARIABLE LGIT_DESCRIBE_RESULT
+	       OUTPUT_VARIABLE LGIT_DESCRIBE_OUTPUT
+	       ERROR_VARIABLE LGIT_DESCRIBE_ERROR
+	       OUTPUT_STRIP_TRAILING_WHITESPACE
+	       )
+         STRING(REGEX REPLACE "^v" "" LPROJECT_VERSION "${LGIT_DESCRIBE_OUTPUT}")   
+         SET(install_file_name_src "debian/lib${PROJECT_NAME}${LPROJECT_VERSION}.install.cmake")
+	 
+	 IF(EXISTS ${install_file_name_src})
+  	   SET(install_file_name_dest "debian/lib${PROJECT_NAME}${LPROJECT_VERSION}.install")
+	   EXECUTE_PROCESS(
+	       COMMAND cp ${install_file_name_src} ${install_file_name_dest}
+	       WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+	       )
+
+	   MESSAGE(STATUS "install_file_name :" ${install_file_name_dest})
+           FILE(APPEND ${install_file_name_dest}
+	     "debian/lib${PROJECT_NAME}.conf /etc/ld.so.conf.d\n"
 	   )
-	 # Create the file to be installed.
-	 SET(install_file_name "debian/lib${PROJECT_NAME}.conf")
-	 FILE(WRITE ${install_file_name}
-	   "${CMAKE_INSTALL_PREFIX}/lib"
+	   # Create the file to be installed.
+	   SET(install_file_name "debian/lib${PROJECT_NAME}.conf")
+	     FILE(WRITE ${install_file_name}
+	     "${CMAKE_INSTALL_PREFIX}/lib"
 	   )
+	 ENDIF(EXISTS ${install_file_name_src})
       ENDIF(${PROJECT_NAME}_IS_SHARED_LIBRARY STREQUAL "SHARED_LIBRARY")
     ENDIF(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/debian)
   ENDIF(UNIX)
