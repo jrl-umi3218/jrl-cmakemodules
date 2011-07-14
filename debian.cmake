@@ -1,4 +1,4 @@
-# Copyright (C) 2011 Olivier Stasse, JRL, CNRS/AIST.
+# Copyright (C) 2010-2011 Thomas Moulard, Olivier Stasse, JRL, CNRS/AIST.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -27,7 +27,8 @@ MACRO(_SETUP_DEBIAN)
     IF (IS_DIRECTORY ${CMAKE_SOURCE_DIR}/debian)
       IF(${PROJECT_NAME}_IS_SHARED_LIBRARY STREQUAL "SHARED_LIBRARY")
 	 # Create the install file to be inside ld.so.conf.d
-	  EXECUTE_PROCESS(
+         MESSAGE(STATUS "CMAKE_SOURCE_DIR:" ${CMAKE_SOURCE_DIR})
+ 	  EXECUTE_PROCESS(
 	       COMMAND ${GIT} describe --abbrev=0 --match=v* HEAD
 	       WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 	       RESULT_VARIABLE LGIT_DESCRIBE_RESULT
@@ -35,12 +36,38 @@ MACRO(_SETUP_DEBIAN)
 	       ERROR_VARIABLE LGIT_DESCRIBE_ERROR
 	       OUTPUT_STRIP_TRAILING_WHITESPACE
 	       )
-         STRING(REGEX REPLACE "^v" "" LPROJECT_VERSION "${LGIT_DESCRIBE_OUTPUT}")   
-         SET(install_file_name_src "debian/lib${PROJECT_NAME}${LPROJECT_VERSION}.install.cmake")
+	 MESSAGE(STATUS "LGIT_DESCRIBE_OUTPUT:" ${LGIT_DESCRIBE_OUTPUT})
+	 MESSAGE(STATUS "LGIT_DESCRIBE_ERROR:" ${LGIT_DESCRIBE_ERROR})
+
+         # From the v[0-9]+.[0-9]+.[0-9]+ version remove the v in prefix.
+         STRING(REGEX REPLACE "^v" "" LPROJECT_RELEASE_VERSION "${LGIT_DESCRIBE_OUTPUT}")   
+
+         # Considers the file *.release.version
+         SET(file_release_version "${CMAKE_SOURCE_DIR}/debian/${PROJECT_NAME}.release.version")
+
+         MESSAGE(STATUS "file_release_version:" ${file_release_version})
+         MESSAGE(STATUS "Everything sounds great: "${LPROJECT_RELEASE_VERSION})
+         # If this is not a git version.
+         IF(LPROJECT_RELEASE_VERSION STREQUAL "" )
+           # If the file exists
+           MESSAGE(STATUS "Read the release version file")
+           IF(EXISTS ${file_release_version})
+             # Use it. This is the release version.
+             FILE(STRINGS ${file_release_version} LPROJECT_RELEASE_VERSION)
+           ENDIF(EXISTS ${file_release_version})
+         # if this is
+         ELSE(LPROJECT_RELEASE_VERSION STREQUAL "")
+           # Then create the containing the release version.
+           MESSAGE(STATUS "Create the release version file")
+           FILE(WRITE ${file_release_version} "${LPROJECT_RELEASE_VERSION}")
+
+         ENDIF(LPROJECT_RELEASE_VERSION STREQUAL "" )
+
+         SET(install_file_name_src "debian/lib${PROJECT_NAME}${LPROJECT_RELEASE_VERSION}.install.cmake")
 	 
 	 MESSAGE(STATUS "install_file_name_src :" ${install_file_name_src})
 	 IF(EXISTS ${CMAKE_SOURCE_DIR}/${install_file_name_src})
-  	   SET(install_file_name_dest "debian/lib${PROJECT_NAME}${LPROJECT_VERSION}.install")
+  	   SET(install_file_name_dest "debian/lib${PROJECT_NAME}${LPROJECT_RELEASE_VERSION}.install")
 	   EXECUTE_PROCESS(
 	       COMMAND cp ${install_file_name_src} ${install_file_name_dest}
 	       WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
