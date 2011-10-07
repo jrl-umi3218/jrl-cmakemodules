@@ -73,10 +73,11 @@ MACRO(_SETUP_DEBIAN)
 	       WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 	       )
 
-	   MESSAGE(STATUS "install_file_name :" ${install_file_name_dest})
-           FILE(APPEND ${install_file_name_dest}
-	     "/etc/ld.so.conf.d/*\n"
-	   )
+#FIXME: this is wrong.
+#	   MESSAGE(STATUS "install_file_name :" ${install_file_name_dest})
+#           FILE(APPEND ${install_file_name_dest}
+#	     "/etc/ld.so.conf.d/*\n"
+#	   )
 	   # Create the file to be installed.
 	   SET(install_file_name "debian/lib${PROJECT_NAME}.conf")
 	     FILE(WRITE ${install_file_name}
