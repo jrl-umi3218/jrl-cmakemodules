@@ -16,7 +16,7 @@
 # Create and install KineoPathPlanner (Kitelab) add-on modules.
 
 # KINEO_ADDON
-# -------------
+# -----------
 #
 # Build a add-on module for KineoPathPlanner
 #
@@ -52,4 +52,36 @@ MACRO(KINEO_ADDON MODULE_NAME)
   ADD_DEPENDENCIES(license
     ${CMAKE_INSTALL_PREFIX}/${ADDON_INSTALLDIR}/lib${MODULE_NAME}.so)
   INSTALL(TARGETS ${MODULE_NAME} DESTINATION ${ADDON_INSTALLDIR})
+ENDMACRO()
+
+# KINEO_STANDALONE
+# ----------------
+#
+# Build a standalone executable for Kineo
+#
+# STANDALONE_NAME		: name of the executable
+#
+#   1. compile a kineo add-on builder file ${STANDALONE_NAME}.kab from
+#   the executable ${STANDALONE_NAME},
+#   2. install this .kab file in the the current build directory,
+#   i.e. at the same location as the executable,
+#   3. generate a target named "license" that creates the required
+#      .kab file.  Note that you must be in possession of a valid
+#      kineo license file.
+#
+MACRO(KINEO_STANDALONE STANDALONE_NAME)
+  ADD_CUSTOM_COMMAND(
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${STANDALONE_NAME}.kab
+    DEPEND ${CMAKE_CURRENT_BUILD_DIR}/${STANDALONE_NAME}
+    COMMAND KineoAddonBuilder
+    ARGS -a ${CMAKE_CURRENT_BINARY_DIR}/${STANDALONE_NAME}
+    )
+  ADD_CUSTOM_TARGET(
+    license ALL
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${STANDALONE_NAME}.kab
+    )
+  ADD_DEPENDENCIES(
+    license
+    ${CMAKE_CURRENT_BINARY_DIR}/${STANDALONE_NAME}
+    )
 ENDMACRO()
