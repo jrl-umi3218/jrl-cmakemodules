@@ -179,8 +179,10 @@ MACRO(ADD_DEPENDENCY P_REQUIRED PKG_CONFIG_STRING)
   #I cannot see why CMake is doing that...
   STRING(REPLACE ";" " " PKG_CONFIG_STRING "${PKG_CONFIG_STRING}")
 
-  # Add the package to the dependency list.
-  _ADD_TO_LIST(PKG_CONFIG_REQUIRES "${PKG_CONFIG_STRING}" ",")
+  # Add the package to the dependency list if found
+  IF(${PREFIX}_FOUND)
+    _ADD_TO_LIST(PKG_CONFIG_REQUIRES "${PKG_CONFIG_STRING}" ",")
+  ENDIF(${PREFIX}_FOUND)
 
   # Add the package to the cmake dependency list
   # if cpack has been included.
@@ -190,9 +192,12 @@ MACRO(ADD_DEPENDENCY P_REQUIRED PKG_CONFIG_STRING)
     ADD_CMAKE_DEPENDENCY(${PKG_CONFIG_STRING})
   ENDIF(COMMAND ADD_CMAKE_DEPENDENCY)
 
-  MESSAGE(STATUS
+  IF(${PREFIX}_FOUND)
+   MESSAGE(STATUS
     "Pkg-config module ${LIBRARY_NAME} v${${PREFIX}_VERSION}"
     " has been detected with success.")
+  ENDIF(${PREFIX}_FOUND)
+
 ENDMACRO(ADD_DEPENDENCY)
 
 # ADD_REQUIRED_DEPENDENCY(PREFIX PKGCONFIG_STRING)
