@@ -15,6 +15,9 @@
 
 # OpenRTM-aist
 macro(openrtm)
+
+  set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake/)
+
   find_package(OpenRTM REQUIRED)
   set(ADDITIONAL_SYMBOL "")
   include_directories(${OPENRTM_INCLUDE_DIRS})

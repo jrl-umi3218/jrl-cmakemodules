@@ -16,7 +16,7 @@
 # OpenRTM-aist
 
 macro(create_simple_controller CONTROLLER_NAME)
-
+  
   add_library(${CONTROLLER_NAME} SHARED ${CONTROLLER_NAME}.cpp)
   target_link_libraries(${CONTROLLER_NAME} ${OPENRTM_LIBRARIES})
   set_target_properties(${CONTROLLER_NAME} PROPERTIES PREFIX "")
