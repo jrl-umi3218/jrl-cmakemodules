@@ -1,0 +1,50 @@
+# Copyright (C) 2011 Thomas Moulard, Olivier Stasse, Gepetto, LAAS, CNRS.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# OpenRTM-aist
+
+macro(create_simple_controller CONTROLLER_NAME)
+
+  add_library(${CONTROLLER_NAME} SHARED ${CONTROLLER_NAME}.cpp)
+  target_link_libraries(${CONTROLLER_NAME} ${OPENRTM_LIBRARIES})
+  set_target_properties(${CONTROLLER_NAME} PROPERTIES PREFIX "")
+
+  add_executable(${CONTROLLER_NAME}Comp ${CONTROLLER_NAME}Comp.cpp ${CONTROLLER_NAME}.cpp)
+  target_link_libraries(${CONTROLLER_NAME}Comp ${OPENRTM_LIBRARIES})
+
+  if(WIN32)
+    add_definitions(${OPENRTM_DEFINITIONS})
+    set_target_properties(${CONTROLLER_NAME}Comp PROPERTIES DEBUG_POSTFIX d )
+  endif()
+
+  set(controller_install_path ${RELATIVE_SAMPLE_INSTALL_PATH}/controller/${CONTROLLER_NAME})
+
+  install(TARGETS ${CONTROLLER_NAME} ${CONTROLLER_NAME}Comp DESTINATION ${controller_install_path} CONFIGURATIONS Release)
+  
+  if(WIN32)
+    install(TARGETS ${CONTROLLER_NAME} ${CONTROLLER_NAME}Comp
+        DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}
+        CONFIGURATIONS Release )
+  endif()
+
+  install(PROGRAMS ${CONTROLLER_NAME}.${SH_SFX} DESTINATION ${controller_install_path})
+  
+  install(FILES rtc.conf bridge.conf DESTINATION ${controller_install_path})
+
+  if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/etc)
+    install(DIRECTORY etc DESTINATION ${controller_install_path} PATTERN ".svn" EXCLUDE)
+  endif()
+
+endmacro()
