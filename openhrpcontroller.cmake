@@ -14,9 +14,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # OpenRTM-aist
+INCLUDE(cmake/openrtm.cmake)
 
 macro(create_simple_controller CONTROLLER_NAME)
-  
+  openrtm()
   add_library(${CONTROLLER_NAME} SHARED ${CONTROLLER_NAME}.cpp)
   target_link_libraries(${CONTROLLER_NAME} ${OPENRTM_LIBRARIES})
   set_target_properties(${CONTROLLER_NAME} PROPERTIES PREFIX "")
