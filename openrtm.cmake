@@ -14,7 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # OpenRTM-aist
-macro openrtm()
+macro(openrtm)
   find_package(OpenRTM REQUIRED)
   set(ADDITIONAL_SYMBOL "")
   include_directories(${OPENRTM_INCLUDE_DIRS})
