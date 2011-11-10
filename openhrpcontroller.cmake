@@ -40,8 +40,6 @@ macro(create_simple_controller CONTROLLER_NAME)
         CONFIGURATIONS Release )
   endif()
 
-  install(PROGRAMS ${CONTROLLER_NAME}.${SH_SFX} DESTINATION ${controller_install_path})
-  
   install(FILES rtc.conf bridge.conf DESTINATION ${controller_install_path})
 
   if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/etc)
