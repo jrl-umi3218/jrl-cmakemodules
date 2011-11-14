@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
 MACRO(FINDPYTHON)
 INCLUDE(FindPythonLibs)
 IF (NOT ${PYTHONLIBS_FOUND} STREQUAL TRUE)
@@ -125,6 +126,21 @@ MACRO(PYTHON_INSTALL MODULE FILE DEST)
     "${CMAKE_CURRENT_SOURCE_DIR}/${MODULE}/${FILE}"
     "${CMAKE_CURRENT_BINARY_DIR}/${MODULE}/${FILE}c"
     DESTINATION "${DEST}/${MODULE}")
+ENDMACRO()
+
+# PYTHON_INSTALL_ON_SITE (MODULE FILE)
+# --------------------------------
+#
+# Install a Python file and its associated compiled version.
+#
+MACRO(PYTHON_INSTALL_ON_SITE MODULE FILE)
+
+  EXEC_PROGRAM(${PYTHON_EXECUTABLE} ARGS
+    "-c \"import sys, os; print os.sep.join(['lib', 'python' + sys.version[:3], 'site-packages'])\""
+    OUTPUT_VARIABLE PYTHON_SITELIB)
+
+  PYTHON_INSTALL(${MODULE} ${FILE} ${PYTHON_SITELIB})
+
 ENDMACRO()
 
 # PYTHON_INSTALL_BUILD(MODULE FILE DEST)
