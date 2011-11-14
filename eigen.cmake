@@ -20,7 +20,7 @@
 MACRO(SEARCH_FOR_EIGEN)
 
   SET(_Eigen_FOUND 0)
-  SET(_Eigen_REQUIRED "eigen >= 3.0.0")
+  SET(_Eigen_REQUIRED "eigen3 >= 3.0.0")
   PKG_CHECK_MODULES(_Eigen REQUIRED ${_Eigen_REQUIRED})
   
   IF(NOT ${_Eigen_FOUND})
