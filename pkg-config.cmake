@@ -181,9 +181,7 @@ MACRO(ADD_DEPENDENCY P_REQUIRED PKG_CONFIG_STRING)
 
   # Add the package to the dependency list if found
   IF(${PREFIX}_FOUND)
-    IF (P_REQUIRED)
-      _ADD_TO_LIST(PKG_CONFIG_REQUIRES "${PKG_CONFIG_STRING}" ",")
-    ENDIF(P_REQUIRED)
+    _ADD_TO_LIST(PKG_CONFIG_REQUIRES "${PKG_CONFIG_STRING}" ",")
   ENDIF(${PREFIX}_FOUND)
 
   # Add the package to the cmake dependency list
