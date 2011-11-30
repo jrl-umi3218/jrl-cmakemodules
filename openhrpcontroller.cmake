@@ -30,7 +30,7 @@ macro(create_simple_controller CONTROLLER_NAME)
     set_target_properties(${CONTROLLER_NAME}Comp PROPERTIES DEBUG_POSTFIX d )
   endif()
   
-  set(controller_install_path bin/controller/${CONTROLLER_NAME})	
+  set(controller_install_path lib/openhrp/controller/${CONTROLLER_NAME})	
  
   install(TARGETS ${CONTROLLER_NAME} ${CONTROLLER_NAME}Comp DESTINATION ${controller_install_path} CONFIGURATIONS Release)
   
@@ -47,3 +47,4 @@ macro(create_simple_controller CONTROLLER_NAME)
   endif()
 
 endmacro()
+
