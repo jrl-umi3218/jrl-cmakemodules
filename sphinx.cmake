@@ -41,14 +41,12 @@ MACRO(SPHINX_SETUP)
     ADD_CUSTOM_TARGET(sphinx-doc ALL
       COMMAND ${SPHINX_BUILD} -b html ${CMAKE_CURRENT_BINARY_DIR}/sphinx
       ${CMAKE_CURRENT_BINARY_DIR}/sphinx-html
-      WORKING_DIRECTORY doc
       COMMENT "Generating sphinx documentation"
       )
   ELSE(MSVC)
     ADD_CUSTOM_TARGET(sphinx-doc
       COMMAND ${SPHINX_BUILD} -b html ${CMAKE_CURRENT_BINARY_DIR}/sphinx
       ${CMAKE_CURRENT_BINARY_DIR}/sphinx-html
-      WORKING_DIRECTORY doc
       COMMENT "Generating sphinx documentation"
       )
 
@@ -60,7 +58,6 @@ MACRO(SPHINX_SETUP)
     ${CMAKE_BINARY_DIR}/doc/sphinx-html
     COMMAND ${SPHINX_BUILD} -b html  ${CMAKE_CURRENT_BINARY_DIR}/sphinx
       ${CMAKE_CURRENT_BINARY_DIR}/sphinx-html
-    WORKING_DIRECTORY doc
     COMMENT "Generating sphinx documentation"
     )
 
