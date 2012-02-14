@@ -354,6 +354,7 @@ MACRO(PKG_CONFIG_USE_DEPENDENCY TARGET DEPENDENCY)
   # Update the flags.
   SET_TARGET_PROPERTIES(${TARGET}
     PROPERTIES COMPILE_FLAGS "${CFLAGS}" LINK_FLAGS "${LDFLAGS}")
+  TARGET_LINK_LIBRARIES(${TARGET} ${${PREFIX}_LDFLAGS_OTHER})
 
   # Include/libraries paths seems to be filtered on Linux, add paths
   # again.
