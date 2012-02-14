@@ -186,7 +186,7 @@ MACRO(ADD_DEPENDENCY P_REQUIRED PKG_CONFIG_STRING)
 
   # Add the package to the cmake dependency list
   # if cpack has been included.
-  # This is likely to disappear when Ubuntu 8.04 will 
+  # This is likely to disappear when Ubuntu 8.04 will
   # disappear.
   IF(COMMAND ADD_CMAKE_DEPENDENCY)
     ADD_CMAKE_DEPENDENCY(${PKG_CONFIG_STRING})
@@ -261,12 +261,12 @@ ENDMACRO(PKG_CONFIG_APPEND_CFLAGS)
 #
 # This macro adds raw value in the "Libs:" into the pkg-config file.
 #
-# Exception for mac OS X: 
-# In addition to the classical static and dynamic libraries (handled like 
+# Exception for mac OS X:
+# In addition to the classical static and dynamic libraries (handled like
 # unix does), mac systems can link against frameworks.
 # Frameworks are directories gathering headers, libraries, shared resources...
 #
-# The syntax used to link with a framework is particular, hence a filter is 
+# The syntax used to link with a framework is particular, hence a filter is
 # added to convert the absolute path to a framework (e.g. /Path/to/Sample.framework)
 # into the correct flags (-F/Path/to/ -framework Sample).
 #
@@ -354,6 +354,7 @@ MACRO(PKG_CONFIG_USE_DEPENDENCY TARGET DEPENDENCY)
   # Update the flags.
   SET_TARGET_PROPERTIES(${TARGET}
     PROPERTIES COMPILE_FLAGS "${CFLAGS}" LINK_FLAGS "${LDFLAGS}")
+  TARGET_LINK_LIBRARIES(${TARGET} ${${PREFIX}_LDFLAGS})
   TARGET_LINK_LIBRARIES(${TARGET} ${${PREFIX}_LDFLAGS_OTHER})
 
   # Include/libraries paths seems to be filtered on Linux, add paths
