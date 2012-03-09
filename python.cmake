@@ -141,10 +141,7 @@ ENDMACRO()
 #
 MACRO(PYTHON_INSTALL_ON_SITE MODULE FILE)
 
-  EXEC_PROGRAM(${PYTHON_EXECUTABLE} ARGS
-    "-c \"import sys, os; print os.sep.join(['lib', 'python' + sys.version[:3], 'site-packages'])\""
-    OUTPUT_VARIABLE PYTHON_SITELIB)
-
+  FINDPYTHON()
   PYTHON_INSTALL(${MODULE} ${FILE} ${PYTHON_SITELIB})
 
 ENDMACRO()
