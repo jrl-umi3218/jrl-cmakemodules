@@ -62,6 +62,10 @@ MACRO(ROSPACK_USE_DEPENDENCY TARGET PKG)
     SET(LDFLAGS "${LDFLAGS} ${FLAG}")
   ENDFOREACH()
 
+  # Filter out end of line in new flags.
+  STRING(REPLACE "\n" "" ${PREFIX}_CFLAGS "${${PREFIX}_CFLAGS}")
+  STRING(REPLACE "\n" "" ${PREFIX}_LIBS "${${PREFIX}_LIBS}")
+
   # Append new flags.
   SET(CFLAGS "${CFLAGS} ${${PREFIX}_CFLAGS}")
   SET(LDFLAGS "${LDFLAGS} ${${PREFIX}_LIBS}")
