@@ -126,7 +126,7 @@ MACRO(_SETUP_PROJECT_DOCUMENTATION_FINALIZE)
     )
   # Generate Doxyfile.
   CONFIGURE_FILE(
-    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/doxygen/Doxyfile.in
+    ${jrl-cmake_DIR}/doxygen/Doxyfile.in
     ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile
     @ONLY
     )

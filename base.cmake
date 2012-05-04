@@ -42,20 +42,32 @@
 # - unit tests should be tagged as
 #   EXCLUDE_FROM_ALL and make test should trigger their compilation.
 
+# ensure jrl-cmake_DIR is set
+IF(NOT DEFINED jrl-cmake_DIR)
+    # user has probably not done
+    #   FIND_PACKAGE(jrl-cmake HINTS cmake)
+    #   INCLUDE(${jrl-cmake_DIR}/base.cmake)
+    # which sets the variable, but directly
+    #   INCLUDE(cmake/base.cmake)
+    # So let set it
+    GET_FILENAME_COMPONENT(_path ${CMAKE_CURRENT_LIST_FILE} PATH)
+    SET(jrl-cmake_DIR "${_path}" CACHE PATH "jrl-cmake install path")
+ENDIF(NOT DEFINED jrl-cmake_DIR)
+
 # Include base features.
-INCLUDE(cmake/logging.cmake)
-INCLUDE(cmake/portability.cmake)
-INCLUDE(cmake/compiler.cmake)
-INCLUDE(cmake/debian.cmake)
-INCLUDE(cmake/dist.cmake)
-INCLUDE(cmake/distcheck.cmake)
-INCLUDE(cmake/doxygen.cmake)
-INCLUDE(cmake/header.cmake)
-INCLUDE(cmake/pkg-config.cmake)
-INCLUDE(cmake/uninstall.cmake)
-INCLUDE(cmake/install-data.cmake)
-INCLUDE(cmake/release.cmake)
-INCLUDE(cmake/version.cmake)
+INCLUDE(${jrl-cmake_DIR}/logging.cmake)
+INCLUDE(${jrl-cmake_DIR}/portability.cmake)
+INCLUDE(${jrl-cmake_DIR}/compiler.cmake)
+INCLUDE(${jrl-cmake_DIR}/debian.cmake)
+INCLUDE(${jrl-cmake_DIR}/dist.cmake)
+INCLUDE(${jrl-cmake_DIR}/distcheck.cmake)
+INCLUDE(${jrl-cmake_DIR}/doxygen.cmake)
+INCLUDE(${jrl-cmake_DIR}/header.cmake)
+INCLUDE(${jrl-cmake_DIR}/pkg-config.cmake)
+INCLUDE(${jrl-cmake_DIR}/uninstall.cmake)
+INCLUDE(${jrl-cmake_DIR}/install-data.cmake)
+INCLUDE(${jrl-cmake_DIR}/release.cmake)
+INCLUDE(${jrl-cmake_DIR}/version.cmake)
 
  # --------- #
  # Constants #

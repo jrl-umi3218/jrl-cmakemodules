@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-INCLUDE(cmake/shared-library.cmake)
+INCLUDE(${jrl-cmake_DIR}/shared-library.cmake)
 
 FIND_PACKAGE(PkgConfig)
 
@@ -95,7 +95,7 @@ ENDMACRO(_SETUP_PROJECT_PKG_CONFIG)
 MACRO(_SETUP_PROJECT_PKG_CONFIG_FINALIZE)
   # Generate the pkg-config file.
   CONFIGURE_FILE(
-    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/pkg-config.pc.cmake"
+    "${jrl-cmake_DIR}/pkg-config.pc.cmake"
     "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc"
     )
 ENDMACRO(_SETUP_PROJECT_PKG_CONFIG_FINALIZE)
