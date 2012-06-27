@@ -13,6 +13,22 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# OMNIIDL_INCLUDE_DIRECTORIES
+# ---------------------------
+#
+# Set include directories for omniidl
+#
+# DIRECTORIES: a list of directories to search for idl files.
+#
+MACRO (OMNIIDL_INCLUDE_DIRECTORIES DIRECTORIES)
+  SET (_OMNIIDL_INCLUDE_FLAG "")
+  FOREACH (DIR ${DIRECTORIES})
+    SET (_OMNIIDL_INCLUDE_FLAG ${_OMNIIDL_INCLUDE_FLAG}
+      -I${DIR}
+      )
+  ENDFOREACH ()
+ENDMACRO ()
+
 # GENERATE_IDL_FILE FILENAME DIRECTORY
 # ------------------------------------
 #
@@ -27,16 +43,10 @@ MACRO(GENERATE_IDL_FILE FILENAME DIRECTORY)
   IF(${OMNIIDL} STREQUAL OMNIIDL-NOTFOUND)
     MESSAGE(FATAL_ERROR "cannot find omniidl.")
   ENDIF(${OMNIIDL} STREQUAL OMNIIDL-NOTFOUND)
-  SET (OMNIIDL_INCLUDE_FLAG "")
-  FOREACH (DIR ${OMNIIDL_INCLUDE_DIRECTORIES})
-    SET (OMNIIDL_INCLUDE_FLAG ${OMNIIDL_INCLUDE_FLAG}
-      -I${DIR}
-      )
-  ENDFOREACH ()
   ADD_CUSTOM_COMMAND(
     OUTPUT ${FILENAME}SK.cc ${FILENAME}.hh
     COMMAND ${OMNIIDL}
-    ARGS -bcxx ${OMNIIDL_INCLUDE_FLAG} ${DIRECTORY}/${FILENAME}.idl
+    ARGS -bcxx ${_OMNIIDL_INCLUDE_FLAG} ${DIRECTORY}/${FILENAME}.idl
     MAIN_DEPENDENCY ${DIRECTORY}/${FILENAME}.idl
     )
   SET(ALL_IDL_STUBS ${FILENAME}SK.cc ${FILENAME}.hh ${ALL_IDL_STUBS})
