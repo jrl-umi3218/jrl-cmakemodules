@@ -303,14 +303,17 @@ MACRO(PKG_CONFIG_APPEND_LIBS LIBS)
 ENDMACRO(PKG_CONFIG_APPEND_LIBS)
 
 
-# PKG_CONFIG_USE_COMPILE_DEPENDENCY(TARGET DEPENDENCY)
+# For internal use only.
+# PKG_CONFIG_USE_LCOMPILE_DEPENDENCY(TARGET DEPENDENCY)
 # --------------------------------------------
+#
+# For user look at PKG_CONFIG_USE_COMPILE_DEPENDENCY
 #
 # This macro changes the target properties to properly search for
 # headers  against the required shared libraries
 # when using a dependency detected through pkg-config.
 #
-# I.e. PKG_CONFIG_USE_COMPILE_DEPENDENCY(my-binary my-package)
+# I.e. PKG_CONFIG_USE_LCOMPILE_DEPENDENCY(my-binary my-package)
 #
 MACRO(PKG_CONFIG_USE_LCOMPILE_DEPENDENCY TARGET PREFIX)
 
@@ -338,14 +341,18 @@ MACRO(PKG_CONFIG_USE_LCOMPILE_DEPENDENCY TARGET PREFIX)
 
 ENDMACRO(PKG_CONFIG_USE_LCOMPILE_DEPENDENCY)
 
-# PKG_CONFIG_USE_LINK_DEPENDENCY(TARGET DEPENDENCY)
+
+# Internal use only.
+# PKG_CONFIG_USE_LLINK_DEPENDENCY(TARGET DEPENDENCY)
 # --------------------------------------------
+#
+# For user look at PKG_CONFIG_USE_LINK_DEPENDENCY
 #
 # This macro changes the target properties to properly search for
 # the required shared libraries
 # when using a dependency detected through pkg-config.
 #
-# I.e. PKG_CONFIG_USE_LINK_DEPENDENCY(my-binary my-package)
+# I.e. PKG_CONFIG_USE_LLINK_DEPENDENCY(my-binary my-package)
 #
 MACRO(PKG_CONFIG_USE_LLINK_DEPENDENCY TARGET PREFIX)
 
@@ -416,11 +423,28 @@ MACRO(PKG_CONFIG_USE_DEPENDENCY TARGET DEPENDENCY)
   PKG_CONFIG_USE_LLINK_DEPENDENCY(${TARGET} ${PREFIX})
 ENDMACRO(PKG_CONFIG_USE_DEPENDENCY TARGET DEPENDENCY)
 
+
+# PKG_CONFIG_USE_COMPILE_DEPENDENCY(TARGET DEPENDENCY)
+# --------------------------------------------
+#
+# This macro changes the target properties to properly search for
+# headers  against the required shared libraries
+# when using a dependency detected through pkg-config.
+#
+# I.e. PKG_CONFIG_USE_COMPILE_DEPENDENCY(my-binary my-package)
 MACRO(PKG_CONFIG_USE_COMPILE_DEPENDENCY TARGET DEPENDENCY)
   BUILD_PREFIX_FOR_PKG(${DEPENDENCY} PREFIX)
   PKG_CONFIG_USE_LCOMPILE_DEPENDENCY(${TARGET} ${PREFIX})
 ENDMACRO(PKG_CONFIG_USE_COMPILE_DEPENDENCY TARGET DEPENDENCY)
 
+# PKG_CONFIG_USE_LINK_DEPENDENCY(TARGET DEPENDENCY)
+# --------------------------------------------
+#
+# This macro changes the target properties to properly search for
+# the required shared libraries
+# when using a dependency detected through pkg-config.
+#
+# I.e. PKG_CONFIG_USE_LINK_DEPENDENCY(my-binary my-package)
 MACRO(PKG_CONFIG_USE_LINK_DEPENDENCY TARGET DEPENDENCY)
   BUILD_PREFIX_FOR_PKG(${DEPENDENCY} PREFIX)
   PKG_CONFIG_USE_LLINK_DEPENDENCY(${TARGET} ${PREFIX})
