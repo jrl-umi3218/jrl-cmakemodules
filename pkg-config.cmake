@@ -303,6 +303,104 @@ MACRO(PKG_CONFIG_APPEND_LIBS LIBS)
 ENDMACRO(PKG_CONFIG_APPEND_LIBS)
 
 
+# PKG_CONFIG_USE_COMPILE_DEPENDENCY(TARGET DEPENDENCY)
+# --------------------------------------------
+#
+# This macro changes the target properties to properly search for
+# headers  against the required shared libraries
+# when using a dependency detected through pkg-config.
+#
+# I.e. PKG_CONFIG_USE_COMPILE_DEPENDENCY(my-binary my-package)
+#
+MACRO(PKG_CONFIG_USE_COMPILE_DEPENDENCY TARGET PREFIX)
+
+  # Make sure we do not override previous flags.
+  GET_TARGET_PROPERTY(CFLAGS ${TARGET} COMPILE_FLAGS)
+
+  # If there were no previous flags, get rid of the XYFLAGS-NOTFOUND
+  # in the variables.
+  IF(NOT CFLAGS)
+    SET(CFLAGS "")
+  ENDIF()
+
+  # Transform semi-colon seperated list in to space separated list.
+  FOREACH(FLAG ${${PREFIX}_CFLAGS})
+    SET(CFLAGS "${CFLAGS} ${FLAG}")
+  ENDFOREACH()
+
+  # Update the flags.
+  SET_TARGET_PROPERTIES(${TARGET}
+    PROPERTIES COMPILE_FLAGS "${CFLAGS}")
+
+  # Include/libraries paths seems to be filtered on Linux, add paths
+  # again.
+  INCLUDE_DIRECTORIES(${${PREFIX}_INCLUDE_DIRS})
+
+ENDMACRO(PKG_CONFIG_USE_COMPILE_DEPENDENCY)
+
+# PKG_CONFIG_USE_LINK_DEPENDENCY(TARGET DEPENDENCY)
+# --------------------------------------------
+#
+# This macro changes the target properties to properly search for
+# the required shared libraries
+# when using a dependency detected through pkg-config.
+#
+# I.e. PKG_CONFIG_USE_LINK_DEPENDENCY(my-binary my-package)
+#
+MACRO(PKG_CONFIG_USE_LINK_DEPENDENCY TARGET PREFIX)
+
+  # Make sure we do not override previous flags.
+  GET_TARGET_PROPERTY(LDFLAGS ${TARGET} LINK_FLAGS)
+
+  # If there were no previous flags, get rid of the XYFLAGS-NOTFOUND
+  # in the variables.
+  IF(NOT LDFLAGS)
+    SET(LDFLAGS "")
+  ENDIF()
+
+  # Transform semi-colon seperated list in to space separated list.
+  FOREACH(FLAG ${${PREFIX}_LDLAGS})
+    SET(LDFLAGS "${LDFLAGS} ${FLAG}")
+  ENDFOREACH()
+
+  # Update the flags.
+  SET_TARGET_PROPERTIES(${TARGET}
+    PROPERTIES LINK_FLAGS "${LDFLAGS}")
+
+  IF(UNIX AND NOT APPLE)
+    TARGET_LINK_LIBRARIES(${TARGET} ${${PREFIX}_LDFLAGS})
+    TARGET_LINK_LIBRARIES(${TARGET} ${${PREFIX}_LDFLAGS_OTHER})
+  ENDIF(UNIX AND NOT APPLE)
+
+  # Include/libraries paths seems to be filtered on Linux, add paths
+  # again.
+  LINK_DIRECTORIES(${${PREFIX}_LIBRARY_DIRS})
+
+ENDMACRO(PKG_CONFIG_USE_LINK_DEPENDENCY)
+
+MACRO(BUILD_PREFIX_FOR_PKG DEPENDENCY PREFIX)
+
+  # Transform the dependency into a valid variable prefix.
+  # 1. replace invalid characters into underscores.
+  STRING(REGEX REPLACE "[^a-zA-Z0-9]" "_" LPREFIX "${DEPENDENCY}")
+  # 2. make it uppercase.
+  STRING(TOUPPER "${LPREFIX}" "LPREFIX")
+
+  # Make sure we search for a previously detected package.
+  IF(NOT DEFINED ${LPREFIX}_FOUND)
+    MESSAGE(FATAL_ERROR
+      "The package ${DEPENDENCY} has not been detected correctly.\n"
+      "Have you called ADD_REQUIRED_DEPENDENCY/ADD_OPTIONAL_DEPENDENCY?")
+  ENDIF()
+  IF(NOT ${LPREFIX}_FOUND)
+    MESSAGE(FATAL_ERROR
+      "The package ${DEPENDENCY} has not been found.")
+  ENDIF()
+
+  SET(${PREFIX} LPREFIX)
+
+ENDMACRO(BUILD_PREFIX_FOR_PKG)
+
 # PKG_CONFIG_USE_DEPENDENCY(TARGET DEPENDENCY)
 # --------------------------------------------
 #
@@ -313,56 +411,7 @@ ENDMACRO(PKG_CONFIG_APPEND_LIBS)
 # I.e. PKG_CONFIG_USE_DEPENDENCY(my-binary my-package)
 #
 MACRO(PKG_CONFIG_USE_DEPENDENCY TARGET DEPENDENCY)
-  # Transform the dependency into a valid variable prefix.
-  # 1. replace invalid characters into underscores.
-  STRING(REGEX REPLACE "[^a-zA-Z0-9]" "_" PREFIX "${DEPENDENCY}")
-  # 2. make it uppercase.
-  STRING(TOUPPER "${PREFIX}" "PREFIX")
-
-  # Make sure we search for a previously detected package.
-  IF(NOT DEFINED ${PREFIX}_FOUND)
-    MESSAGE(FATAL_ERROR
-      "The package ${DEPENDENCY} has not been detected correctly.\n"
-      "Have you called ADD_REQUIRED_DEPENDENCY/ADD_OPTIONAL_DEPENDENCY?")
-  ENDIF()
-  IF(NOT ${PREFIX}_FOUND)
-    MESSAGE(FATAL_ERROR
-      "The package ${DEPENDENCY} has not been found.")
-  ENDIF()
-
-  # Make sure we do not override previous flags.
-  GET_TARGET_PROPERTY(CFLAGS ${TARGET} COMPILE_FLAGS)
-  GET_TARGET_PROPERTY(LDFLAGS ${TARGET} LINK_FLAGS)
-
-  # If there were no previous flags, get rid of the XYFLAGS-NOTFOUND
-  # in the variables.
-  IF(NOT CFLAGS)
-    SET(CFLAGS "")
-  ENDIF()
-  IF(NOT LDFLAGS)
-    SET(LDFLAGS "")
-  ENDIF()
-
-  # Transform semi-colon seperated list in to space separated list.
-  FOREACH(FLAG ${${PREFIX}_CFLAGS})
-    SET(CFLAGS "${CFLAGS} ${FLAG}")
-  ENDFOREACH()
-
-  FOREACH(FLAG ${${PREFIX}_LDFLAGS})
-    SET(LDFLAGS "${LDFLAGS} ${FLAG}")
-  ENDFOREACH()
-
-  # Update the flags.
-  SET_TARGET_PROPERTIES(${TARGET}
-    PROPERTIES COMPILE_FLAGS "${CFLAGS}" LINK_FLAGS "${LDFLAGS}")
-  
-  IF(UNIX AND NOT APPLE)
-    TARGET_LINK_LIBRARIES(${TARGET} ${${PREFIX}_LDFLAGS})
-    TARGET_LINK_LIBRARIES(${TARGET} ${${PREFIX}_LDFLAGS_OTHER})
-  ENDIF(UNIX AND NOT APPLE)
-
-  # Include/libraries paths seems to be filtered on Linux, add paths
-  # again.
-  INCLUDE_DIRECTORIES(${${PREFIX}_INCLUDE_DIRS})
-  LINK_DIRECTORIES(${${PREFIX}_LIBRARY_DIRS})
+  BUILD_PREFIX_FOR_PKG(DEPENDENCY PREFIX)
+  PKG_CONFIG_USE_COMPILE_DEPENDENCY(TARGET PREFIX)
+  PKG_CONFIG_USE_LINK_DEPENDENCY(TARGET PREFIX)
 ENDMACRO(PKG_CONFIG_USE_DEPENDENCY TARGET DEPENDENCY)
