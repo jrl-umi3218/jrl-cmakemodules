@@ -29,7 +29,7 @@ MACRO(_SETUP_PROJECT_DIST)
 
     ADD_CUSTOM_TARGET(distdir
       COMMAND
-      ${CMAKE_SOURCE_DIR}/cmake/git-archive-all.sh
+      ${jrl-cmake_DIR}/git-archive-all.sh
       --prefix ${PROJECT_NAME}-${PROJECT_VERSION}/  ${PROJECT_NAME}.tar
       && cd ${CMAKE_BINARY_DIR}/
       && (test -d ${PROJECT_NAME}-${PROJECT_VERSION}
