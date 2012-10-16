@@ -29,8 +29,8 @@ ENDIF (NOT ${PYTHONINTERP_FOUND} STREQUAL TRUE)
 GET_FILENAME_COMPONENT(PYTHON_LIBRARY_DIRS ${PYTHON_LIBRARIES} PATH)
 
 EXECUTE_PROCESS(
-  COMMAND "${PYTHON_EXECUTABLE}"
-  "-c \"import sys, os; print os.sep.join(['lib', 'python' + sys.version[:3], 'site-packages'])\""
+  COMMAND "${PYTHON_EXECUTABLE}" "-c"
+  "import sys, os; print os.sep.join(['lib', 'python' + sys.version[:3], 'site-packages'])"
   OUTPUT_VARIABLE PYTHON_SITELIB
   ERROR_QUIET)
 ENDMACRO(FINDPYTHON)
@@ -144,7 +144,7 @@ ENDMACRO()
 MACRO(PYTHON_INSTALL_ON_SITE MODULE FILE)
 
   FINDPYTHON()
-  PYTHON_INSTALL(${MODULE} ${FILE} ${PYTHON_SITELIB})
+  PYTHON_INSTALL("${MODULE}" "${FILE}" "${PYTHON_SITELIB}")
 
 ENDMACRO()
 
