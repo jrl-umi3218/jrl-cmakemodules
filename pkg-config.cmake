@@ -367,7 +367,7 @@ MACRO(PKG_CONFIG_USE_LLINK_DEPENDENCY TARGET PREFIX)
   ENDIF()
 
   # Transform semi-colon seperated list in to space separated list.
-  FOREACH(FLAG ${${PREFIX}_LDLAGS})
+  FOREACH(FLAG ${${PREFIX}_LDFLAGS})
     SET(LDFLAGS "${LDFLAGS} ${FLAG}")
   ENDFOREACH()
 
