@@ -17,16 +17,23 @@ MACRO(ADD_ROSPACK_DEPENDENCY PKG)
   ENDIF()
 
   MESSAGE(STATUS "Looking for ${PKG} using rospack...")
-  EXEC_PROGRAM("${ROSPACK} find ${PKG}" OUTPUT_VARIABLE ${PKG}_ROS_PREFIX)
+  EXECUTE_PROCESS(
+    COMMAND "${ROSPACK}" find "${PKG}"
+    OUTPUT_VARIABLE "${PKG}_ROS_PREFIX"
+    ERROR_QUIET)
   IF(NOT ${PKG}_ROS_PREFIX)
     MESSAGE(FATAL_ERROR "Failed to detect ${PKG}.")
   ENDIF()
 
   SET(${PREFIX}_FOUND 1)
-  EXEC_PROGRAM("${ROSPACK} export --lang=cpp --attrib=cflags ${PKG}"
-    OUTPUT_VARIABLE "${PREFIX}_CFLAGS")
-  EXEC_PROGRAM("${ROSPACK} export --lang=cpp --attrib=lflags ${PKG}"
-    OUTPUT_VARIABLE "${PREFIX}_LIBS")
+  EXECUTE_PROCESS(
+    COMMAND "${ROSPACK}" export "--lang=cpp" "--attrib=cflags" "${PKG}"
+    OUTPUT_VARIABLE "${PREFIX}_CFLAGS"
+    ERROR_QUIET)
+  EXECUTE_PROCESS(
+    COMMAND "${ROSPACK}" export "--lang=cpp" "--attrib=lflags" "${PKG}"
+    OUTPUT_VARIABLE "${PREFIX}_LIBS"
+    ERROR_QUIET)
 
   # Add flags to package pkg-config file.
   PKG_CONFIG_APPEND_CFLAGS (${${PREFIX}_CFLAGS})

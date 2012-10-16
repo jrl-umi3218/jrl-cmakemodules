@@ -24,10 +24,11 @@ STRING(REGEX REPLACE "\n" ";" files "${files}")
 FOREACH(file ${files})
   MESSAGE(STATUS "Uninstalling \"$ENV{DESTDIR}${file}\"")
   IF(EXISTS "$ENV{DESTDIR}${file}")
-    EXEC_PROGRAM(
-      "@CMAKE_COMMAND@" ARGS "-E remove \"$ENV{DESTDIR}${file}\""
+    EXECUTE_PROCESS(
+      COMMAND "@CMAKE_COMMAND@" "-E remove \"$ENV{DESTDIR}${file}\""
       OUTPUT_VARIABLE rm_out
       RETURN_VALUE rm_retval
+      ERROR_QUIET
       )
     IF(NOT "${rm_retval}" STREQUAL 0)
       MESSAGE(FATAL_ERROR "Problem when removing \"$ENV{DESTDIR}${file}\"")
@@ -37,10 +38,11 @@ FOREACH(file ${files})
 
     # If file is a broken symbolic link, EXISTS returns false.
     # Workaround this bug by attempting to remove the file anyway.
-    EXEC_PROGRAM(
-      "@CMAKE_COMMAND@" ARGS "-E remove \"$ENV{DESTDIR}${file}\""
+    EXECUTE_PROCESS(
+      COMMAND "@CMAKE_COMMAND@" "-E remove \"$ENV{DESTDIR}${file}\""
       OUTPUT_VARIABLE rm_out
       RETURN_VALUE rm_retval
+      ERROR_QUIET
       )
   ENDIF(EXISTS "$ENV{DESTDIR}${file}")
 ENDFOREACH(file)
