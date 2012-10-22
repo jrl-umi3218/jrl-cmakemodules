@@ -35,5 +35,10 @@ comp = builddir + name + (__debug__ and 'c' or 'o')
 
 try:
     py_compile.compile(src, comp, doraise=True)
+except Exception, e:
+    print ("Failed to compile python script: {0}".format (repr (src)))
+    print ("Exception raised: {0}".format (str(e)))
+    sys.exit(1)
 except:
+    print ("Failed to compile python script: {0}".format (repr (src)))
     sys.exit(1)
