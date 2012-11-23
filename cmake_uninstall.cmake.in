@@ -26,13 +26,13 @@ FOREACH(file ${files})
   IF(EXISTS "$ENV{DESTDIR}${file}")
     EXECUTE_PROCESS(
       COMMAND "@CMAKE_COMMAND@" "-E remove \"$ENV{DESTDIR}${file}\""
+      RESULT_VARIABLE rm_resval
       OUTPUT_VARIABLE rm_out
-      RETURN_VALUE rm_retval
       ERROR_QUIET
       )
-    IF(NOT "${rm_retval}" STREQUAL 0)
+    IF(NOT "${rm_resval}" STREQUAL 0)
       MESSAGE(FATAL_ERROR "Problem when removing \"$ENV{DESTDIR}${file}\"")
-    ENDIF(NOT "${rm_retval}" STREQUAL 0)
+    ENDIF(NOT "${rm_resval}" STREQUAL 0)
   ELSE(EXISTS "$ENV{DESTDIR}${file}")
     MESSAGE(STATUS "File \"$ENV{DESTDIR}${file}\" does not exist.")
 
@@ -40,8 +40,8 @@ FOREACH(file ${files})
     # Workaround this bug by attempting to remove the file anyway.
     EXECUTE_PROCESS(
       COMMAND "@CMAKE_COMMAND@" "-E remove \"$ENV{DESTDIR}${file}\""
+      RESULT_VARIABLE rm_resval
       OUTPUT_VARIABLE rm_out
-      RETURN_VALUE rm_retval
       ERROR_QUIET
       )
   ENDIF(EXISTS "$ENV{DESTDIR}${file}")
