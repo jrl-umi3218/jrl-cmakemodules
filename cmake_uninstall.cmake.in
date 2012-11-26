@@ -21,14 +21,14 @@ ENDIF(NOT EXISTS "@CMAKE_CURRENT_BINARY_DIR@/install_manifest.txt")
 
 FILE(READ "@CMAKE_CURRENT_BINARY_DIR@/install_manifest.txt" files)
 STRING(REGEX REPLACE "\n" ";" files "${files}")
+LIST(REVERSE files)
 FOREACH(file ${files})
   MESSAGE(STATUS "Uninstalling \"$ENV{DESTDIR}${file}\"")
   IF(EXISTS "$ENV{DESTDIR}${file}")
     EXECUTE_PROCESS(
-      COMMAND "@CMAKE_COMMAND@" "-E remove \"$ENV{DESTDIR}${file}\""
+      COMMAND @CMAKE_COMMAND@ -E remove \"$ENV{DESTDIR}${file}\"
       RESULT_VARIABLE rm_resval
       OUTPUT_VARIABLE rm_out
-      ERROR_QUIET
       )
     IF(NOT "${rm_resval}" STREQUAL 0)
       MESSAGE(FATAL_ERROR "Problem when removing \"$ENV{DESTDIR}${file}\"")
