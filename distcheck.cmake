@@ -58,10 +58,10 @@ MACRO(DISTCHECK_SETUP)
       && make uninstall
          || (echo "ERROR: the uninstall target failed." && false)
       && test x`find ${INSTDIR} -type f | wc -l` = x0
+         || (echo "ERROR: the uninstall target does not work." && false)
       && make clean
          || (echo "ERROR: the clean target failed." && false)
       && cd ${CMAKE_BINARY_DIR}/${PROJECT_NAME}-${PROJECT_VERSION}
-         || (echo "ERROR: the uninstall target does not work." && false)
       && chmod u+w . _build _inst && rm -rf _build _inst
       && find . -type d -print0 | xargs -0 chmod u+w
       && echo "=============================================================="
