@@ -33,6 +33,10 @@ EXECUTE_PROCESS(
   "import sys, os; print os.sep.join(['lib', 'python' + sys.version[:3], 'site-packages'])"
   OUTPUT_VARIABLE PYTHON_SITELIB
   ERROR_QUIET)
+
+# Remove final \n of the variable PYTHON_SITELIB
+STRING(REPLACE "\n" "" PYTHON_SITELIB "${PYTHON_SITELIB}")
+
 ENDMACRO(FINDPYTHON)
 
 
