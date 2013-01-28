@@ -43,11 +43,8 @@ MACRO(ADD_ROSPACK_DEPENDENCY PKG)
 ENDMACRO()
 
 MACRO(ROSPACK_USE_DEPENDENCY TARGET PKG)
-  SET(CFLAGS "")
-  SET(LDFLAGS "")
-
   IF(PKG STREQUAL "")
-    MESSAGE(FATAL_ERROR "ADD_ROS_DEPENDENCY invalid call.")
+    MESSAGE(FATAL_ERROR "ROSPACK_USE_DEPENDENCY invalid call.")
   ENDIF()
 
   # Transform package name into a valid variable prefix.
@@ -68,15 +65,6 @@ MACRO(ROSPACK_USE_DEPENDENCY TARGET PKG)
   IF(NOT LDFLAGS)
     SET(LDFLAGS "")
   ENDIF()
-
-  # Transform semi-colon seperated list in to space separated list.
-  FOREACH(FLAG ${${PREFIX}_CFLAGS})
-    SET(CFLAGS "${CFLAGS} ${FLAG}")
-  ENDFOREACH()
-
-  FOREACH(FLAG ${${PREFIX}_LDFLAGS})
-    SET(LDFLAGS "${LDFLAGS} ${FLAG}")
-  ENDFOREACH()
 
   # Filter out end of line in new flags.
   STRING(REPLACE "\n" "" ${PREFIX}_CFLAGS "${${PREFIX}_CFLAGS}")
