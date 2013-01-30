@@ -77,4 +77,16 @@ MACRO(ROSPACK_USE_DEPENDENCY TARGET PKG)
   # Update the flags.
   SET_TARGET_PROPERTIES("${TARGET}"
     PROPERTIES COMPILE_FLAGS "${CFLAGS}" LINK_FLAGS "${LDFLAGS}")
+
+  # Correct the potential link issue due to the order of link flags.
+  #  (appears e.g. on ubuntu 12.04).
+  # Note that this issue is the same as the one in pkg-config.cmake,
+  #  method PKG_CONFIG_USE_LLINK_DEPENDENCY
+  IF(UNIX AND NOT APPLE)
+    # convert the string in a list
+    STRING(REPLACE " " ";" LDFLAGS_LIST "${LDFLAGS}")
+    FOREACH(dep ${LDFLAGS_LIST})
+      TARGET_LINK_LIBRARIES(${TARGET} ${dep})
+    ENDFOREACH(dep)
+  ENDIF(UNIX AND NOT APPLE)
 ENDMACRO()
