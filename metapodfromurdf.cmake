@@ -32,7 +32,6 @@ MACRO(ADD_METAPOD_FROM_URDF_MODEL model_name)
   SET(license_file_robot ${data_robot_dir}/${model_name}_license_file.txt)
   SET(urdf_file_robot ${data_robot_dir}/${model_name}.urdf)
   
-  MESSAGE(STATUS "urdf_file_robot: ${urdf_file_robot}")
   ADD_CUSTOM_COMMAND(
     OUTPUT ${robot_name_sources}
     COMMAND metapodfromurdf
