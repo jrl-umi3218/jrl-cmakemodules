@@ -43,4 +43,4 @@ MACRO(ADD_METAPOD_FROM_URDF_MODEL model_name)
     --license-file ${license_file_robot}
     ${urdf_file_robot}
   )
-ENDMACRO(ADD_MODEL_TESTCASE)
+ENDMACRO(ADD_METAPOD_FROM_URDF_MODEL)
