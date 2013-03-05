@@ -47,9 +47,9 @@ MACRO(MANPAGE NAME)
 
   # Detects if PKGMAN has been specified
   SET(DESTINATION_MAN_PAGE share/man/man1)
-  IF(PKGMANDIR)
-    SET(DESTINATION_MAN_PAGE ${PKGMANDIR}/man1)
-  ENDIF(PKGMANDIR)
+  IF(MANDIR)
+    SET(DESTINATION_MAN_PAGE ${MANDIR}/man1)
+  ENDIF(MANDIR)
 
   # Install man page.
   INSTALL(
