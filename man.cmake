@@ -45,10 +45,16 @@ MACRO(MANPAGE NAME)
   # Trigger man page generation at install.
   INSTALL(CODE "EXECUTE_PROCESS(COMMAND make man)")
 
+  # Detects if PKGMAN has been specified
+  SET(DESTINATION_MAN_PAGE share/man/man1)
+  IF(PKGMANDIR)
+    SET(DESTINATION_MAN_PAGE ${PKGMANDIR}/man1)
+  ENDIF(PKGMANDIR)
+
   # Install man page.
   INSTALL(
     FILES ${CMAKE_CURRENT_BINARY_DIR}/${NAME}.1.gz
-    DESTINATION share/man/man1)
+    DESTINATION ${DESTINATION_MAN_PAGE})
 
   LIST(APPEND LOGGING_WATCHED_VARIABLES
     POD2MAN
