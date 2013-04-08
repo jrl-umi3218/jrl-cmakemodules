@@ -62,12 +62,12 @@ function usage () {
     echo "$PROGRAM <--usage|--help|-?>"
     echo "    Prints this usage output and exits."
     echo
-    echo "$PROGRAM [--format <fmt>] [--prefix <path>] [--separate|-s] [output_file]"
+    echo "$PROGRAM [--format <fmt>] [--prefix <path>] [--verbose|-v] [--separate|-s] [output_file]"
     echo "    Creates an archive for the entire git superproject, and its submodules"
     echo "    using the passed parameters, described below."
     echo
     echo "    If '--format' is specified, the archive is created with the named"
-    echo "    git archiver backend. Obviously, this must be a backend that git-archive"
+    echo "    git archiver backend. Obviously, this must be a backend that git archive"
     echo "    understands. The format defaults to 'tar' if not specified."
     echo
     echo "    If '--prefix' is specified, the archive's superproject and all submodules"
@@ -83,6 +83,8 @@ function usage () {
     echo "    Without this parameter or when combined with '--separate' the resulting"
     echo "    archive(s) are named with a dot-separated path of the archived directory and"
     echo "    a file extension equal to their format (e.g., 'superdir.submodule1dir.tar')."
+    echo
+    echo "    If '--verbose' or '-v' is specified, progress will be printed."
 }
 
 function version () {
@@ -99,6 +101,7 @@ TMPFILE=`mktemp "$TMPDIR/$PROGRAM.XXXXXX"` # Create a place to store our work's 
 TOARCHIVE=`mktemp "$TMPDIR/$PROGRAM.toarchive.XXXXXX"`
 OUT_FILE=$OLD_PWD # assume "this directory" without a name change by default
 SEPARATE=0
+VERBOSE=0
 
 FORMAT=tar
 PREFIX=
@@ -131,6 +134,11 @@ while test $# -gt 0; do
         --version )
             version
             exit
+            ;;
+
+        --verbose | -v )
+            shift
+            VERBOSE=1
             ;;
 
         -? | --usage | --help )
@@ -166,15 +174,39 @@ elif [ `git config -l | grep -q '^core\.bare=false'; echo $?` -ne 0 ]; then
 fi
 
 # Create the superproject's git-archive
+if [ $VERBOSE -eq 1 ]; then
+    echo -n "creating superproject archive..."
+fi
 git archive --format=$FORMAT --prefix="$PREFIX" $TREEISH > $TMPDIR/$(basename $(pwd)).$FORMAT
+if [ $VERBOSE -eq 1 ]; then
+    echo "done"
+fi
 echo $TMPDIR/$(basename $(pwd)).$FORMAT >| $TMPFILE # clobber on purpose
 superfile=`head -n 1 $TMPFILE`
 
+if [ $VERBOSE -eq 1 ]; then
+    echo -n "looking for subprojects..."
+fi
 # find all '.git' dirs, these show us the remaining to-be-archived dirs
-find . -name '.git' -type d -print | sed -e 's/^\.\///' -e 's/\.git$//' | grep -v '^$' >> $TOARCHIVE
+# we only want directories that are below the current directory
+find . -mindepth 2 -name '.git' -type d -print | sed -e 's/^\.\///' -e 's/\.git$//' >> $TOARCHIVE
+# as of version 1.7.8, git places the submodule .git directories under the superprojects .git dir
+# the submodules get a .git file that points to their .git dir. we need to find all of these too
+find . -mindepth 2 -name '.git' -type f -print | xargs grep -l "gitdir" | sed -e 's/^\.\///' -e 's/\.git$//' >> $TOARCHIVE
+if [ $VERBOSE -eq 1 ]; then
+    echo "done"
+    echo "  found:"
+    cat $TOARCHIVE | while read arch
+    do
+      echo "    $arch"
+    done
+fi
 
+if [ $VERBOSE -eq 1 ]; then
+    echo -n "archiving submodules..."
+fi
 while read path; do
-    TREEISH=$(git submodule | grep "^ .*${path%/} " | cut -d ' ' -f 2) # git-submodule does not list trailing slashes in $path
+    TREEISH=$(git submodule | grep "^ .*${path%/} " | cut -d ' ' -f 2) # git submodule does not list trailing slashes in $path
     cd "$path"
     git archive --format=$FORMAT --prefix="${PREFIX}$path" ${TREEISH:-HEAD} > "$TMPDIR"/"$(echo "$path" | sed -e 's/\//./g')"$FORMAT
     if [ $FORMAT == 'zip' ]; then
@@ -184,7 +216,13 @@ while read path; do
     echo "$TMPDIR"/"$(echo "$path" | sed -e 's/\//./g')"$FORMAT >> $TMPFILE
     cd "$OLD_PWD"
 done < $TOARCHIVE
+if [ $VERBOSE -eq 1 ]; then
+    echo "done"
+fi
 
+if [ $VERBOSE -eq 1 ]; then
+    echo -n "concatenating archives into single archive..."
+fi
 # Concatenate archives into a super-archive.
 if [ $SEPARATE -eq 0 ]; then
     if [ $FORMAT == 'tar' ]; then
@@ -202,7 +240,16 @@ if [ $SEPARATE -eq 0 ]; then
 
     echo "$superfile" >| $TMPFILE # clobber on purpose
 fi
+if [ $VERBOSE -eq 1 ]; then
+    echo "done"
+fi
 
+if [ $VERBOSE -eq 1 ]; then
+    echo -n "moving archive to $OUT_FILE..."
+fi
 while read file; do
     mv "$file" "$OUT_FILE"
 done < $TMPFILE
+if [ $VERBOSE -eq 1 ]; then
+    echo "done"
+fi
