@@ -189,3 +189,24 @@ MACRO(PYTHON_INSTALL_BUILD MODULE FILE DEST)
     "${CMAKE_CURRENT_BINARY_DIR}/${MODULE}/${FILE}c"
     DESTINATION "${DEST}/${MODULE}")
 ENDMACRO()
+
+# FIND_NUMPY
+# ----------
+#
+# Detect numpy module
+#
+
+MACRO(FIND_NUMPY)
+  # Detect numpy.
+  MESSAGE (STATUS "checking for numpy")
+  EXECUTE_PROCESS(
+    COMMAND "${PYTHON_EXECUTABLE}" "-c"
+    "import numpy; print (numpy.get_include())"
+    OUTPUT_VARIABLE NUMPY_INCLUDE_DIRS
+    ERROR_QUIET)
+  IF (NOT NUMPY_INCLUDE_DIRS)
+    MESSAGE (FATAL_ERROR "Failed to detect numpy")
+  ELSE ()
+    MESSAGE (STATUS " NUMPY_INCLUDE_DIRS=${NUMPY_INCLUDE_DIRS}")
+  ENDIF()
+ENDMACRO()
