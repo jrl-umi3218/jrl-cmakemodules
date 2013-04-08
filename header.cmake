@@ -48,9 +48,9 @@
 #
 #    In that case, CUSTOM_HEADER_DIR can be set to override this policy.
 #
-#    Reminder: breaking the JRL/LAAS policies shoud be done after discussing
-#              the issue. You should at least open a ticket or send an e-mail
-#              to notify this behavior.
+#    Reminder: breaking the JRL/LAAS policies shoud be done after
+#              discussing the issue. You should at least open a ticket
+#              or send an e-mail to notify this behavior.
 #
 MACRO(_SETUP_PROJECT_HEADER)
   # Install project headers.
@@ -63,11 +63,13 @@ MACRO(_SETUP_PROJECT_HEADER)
   STRING(TOLOWER "${HEADER_DIR}" "HEADER_DIR")
 
   # Generate config.hh header.
-  STRING(REGEX REPLACE "[^a-zA-Z0-9]" "_" PACKAGE_CPPNAME "${PROJECT_NAME}")
+  STRING(REGEX REPLACE "[^a-zA-Z0-9]" "_"
+    PACKAGE_CPPNAME "${PROJECT_NAME}")
   STRING(TOLOWER "${PACKAGE_CPPNAME}" "PACKAGE_CPPNAME_LOWER")
   STRING(TOUPPER "${PACKAGE_CPPNAME}" "PACKAGE_CPPNAME")
   GENERATE_CONFIGURATION_HEADER(
-    ${HEADER_DIR} config.hh ${PACKAGE_CPPNAME} ${PACKAGE_CPPNAME_LOWER}_EXPORTS)
+    ${HEADER_DIR} config.hh ${PACKAGE_CPPNAME}
+    ${PACKAGE_CPPNAME_LOWER}_EXPORTS)
 
   # Generate deprecated.hh header.
   CONFIGURE_FILE(
@@ -75,8 +77,9 @@ MACRO(_SETUP_PROJECT_HEADER)
     ${CMAKE_CURRENT_BINARY_DIR}/include/${HEADER_DIR}/deprecated.hh
     @ONLY
     )
-  INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/include/${HEADER_DIR}/deprecated.hh
-    DESTINATION include/${HEADER_DIR}
+  INSTALL(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/include/${HEADER_DIR}/deprecated.hh
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${HEADER_DIR}
     PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_WRITE
     )
   # Generate warning.hh header.
@@ -86,8 +89,9 @@ MACRO(_SETUP_PROJECT_HEADER)
     @ONLY
     )
 
-  INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/include/${HEADER_DIR}/warning.hh
-    DESTINATION include/${HEADER_DIR}
+  INSTALL(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/include/${HEADER_DIR}/warning.hh
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${HEADER_DIR}
     PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_WRITE
     )
 
@@ -101,7 +105,7 @@ MACRO(_SETUP_PROJECT_HEADER)
     ${CMAKE_CURRENT_BINARY_DIR}/config.h
     )
   INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/config.h
-    DESTINATION include/${HEADER_DIR}
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${HEADER_DIR}
     PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_WRITE
     )
 
@@ -126,7 +130,8 @@ ENDMACRO(_SETUP_PROJECT_HEADER)
 # FILENAME      : how should the file named
 # LIBRARY_NAME  : CPP symbol prefix, should match the compiled library name
 # EXPORT_SYMBOl : what symbol controls the switch between symbol import/export
-FUNCTION(GENERATE_CONFIGURATION_HEADER HEADER_DIR FILENAME LIBRARY_NAME EXPORT_SYMBOL)
+FUNCTION(GENERATE_CONFIGURATION_HEADER
+    HEADER_DIR FILENAME LIBRARY_NAME EXPORT_SYMBOL)
   # Generate the header.
   CONFIGURE_FILE(
     ${CMAKE_CURRENT_SOURCE_DIR}/cmake/config.hh.cmake
@@ -134,8 +139,9 @@ FUNCTION(GENERATE_CONFIGURATION_HEADER HEADER_DIR FILENAME LIBRARY_NAME EXPORT_S
     @ONLY
     )
   # Install it.
-  INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/include/${HEADER_DIR}/${FILENAME}
-    DESTINATION include/${HEADER_DIR}
+  INSTALL(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/include/${HEADER_DIR}/${FILENAME}
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${HEADER_DIR}
     PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_WRITE
     )
 ENDFUNCTION(GENERATE_CONFIGURATION_HEADER)
@@ -169,7 +175,7 @@ MACRO(HEADER_INSTALL FILES)
     STRING(REGEX REPLACE "${CMAKE_SOURCE_DIR}" "" DIR "${DIR}")
     STRING(REGEX REPLACE "include/" "" DIR "${DIR}")
     INSTALL(FILES ${FILE}
-      DESTINATION "include/${DIR}"
+      DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${DIR}"
       PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_WRITE
       )
   ENDFOREACH()
