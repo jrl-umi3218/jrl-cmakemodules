@@ -56,7 +56,6 @@ INCLUDE(cmake/uninstall.cmake)
 INCLUDE(cmake/install-data.cmake)
 INCLUDE(cmake/release.cmake)
 INCLUDE(cmake/version.cmake)
-INCLUDE(cmake/GNUInstallDirs.cmake)
 
  # --------- #
  # Constants #
@@ -114,6 +113,8 @@ ENDMACRO(_CONCATENATE_ARGUMENTS OUTPUT)
 # file).
 #
 MACRO(SETUP_PROJECT)
+  INCLUDE(cmake/GNUInstallDirs.cmake)
+
   # Check that required variables are defined.
   FOREACH(VARIABLE ${REQUIRED_VARIABLES})
     IF (NOT DEFINED ${VARIABLE})
