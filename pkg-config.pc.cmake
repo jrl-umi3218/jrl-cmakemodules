@@ -1,6 +1,7 @@
 prefix=${PKG_CONFIG_PREFIX}
 exec_prefix=${PKG_CONFIG_EXEC_PREFIX}
 libdir=${PKG_CONFIG_LIBDIR}
+bindir=${PKG_CONFIG_BINDIR}
 includedir=${PKG_CONFIG_INCLUDEDIR}
 datarootdir=${PKG_CONFIG_DATAROOTDIR}
 pkgdatarootdir=${PKG_CONFIG_PKGDATAROOTDIR}
