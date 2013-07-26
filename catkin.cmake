@@ -15,5 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# Override binary installation directory
+# Be aware that including this file implies that binary installation directory
+# cannot be chosen by user.
 SET(CATKIN_PACKAGE_BIN_DESTINATION ${CMAKE_INSTALL_LIBDIR}/${PROJECT_NAME})
+SET(CMAKE_INSTALL_BINDIR ${CATKIN_PACKAGE_BIN_DESTINATION})
 
