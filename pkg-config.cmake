@@ -19,7 +19,7 @@ FIND_PACKAGE(PkgConfig)
 
 # Additional pkg-config variables whose value will be imported
 # during the dependency check.
-SET(PKG_CONFIG_ADDITIONAL_VARIABLES datarootdir pkgdatarootdir docdir doxygendocdir)
+SET(PKG_CONFIG_ADDITIONAL_VARIABLES pkglibdir datarootdir pkgdatarootdir docdir doxygendocdir)
 
 # _SETUP_PROJECT_PKG_CONFIG
 # -------------------------
