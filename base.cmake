@@ -113,6 +113,9 @@ ENDMACRO(_CONCATENATE_ARGUMENTS OUTPUT)
 # file).
 #
 MACRO(SETUP_PROJECT)
+  IF(NOT DEFINED CMAKE_INSTALL_LIBDIR)
+    SET(CMAKE_INSTALL_LIBDIR ${CMAKE_INSTALL_PREFIX}/lib)
+  ENDIF()
   INCLUDE(cmake/GNUInstallDirs.cmake)
 
   # Check that required variables are defined.
