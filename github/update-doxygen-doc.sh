@@ -243,19 +243,12 @@ build_docdir=`pwd`
 head_commit=`${GIT} log --format=oneline HEAD^.. | cut -d' ' -f1`
 
 
-echo "Remote url:" $remote_url
-
-
 echo "* Clone the project..."
 cd $tmp
-${GIT} clone --quiet --depth 1 $remote_url project \
+${GIT} clone --quiet --depth 1 --branch gh-pages $remote_url project \
  || abort "failed to clone the package repository"
 cd project \
  || abort "failed to change directory"
-
-echo "* Checkout the github web pages..."
-${GIT} checkout --quiet -b gh-pages origin/gh-pages \
- || abort "failed to checkout gh-pages (does the branch exist?)"
 
 echo "* Copy the documentation..."
 git rm --quiet -rf doxygen/$doc_version
