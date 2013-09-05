@@ -17,11 +17,16 @@
 # -----------------
 #
 # This macro gets eigen include path from pkg-config file, and adds it include directories.
+
+# If the variable Eigen_REQUIRED is not defined before calling
+#  the method SEARCH_FOR_EIGEN, the version chosen is the default one.
 MACRO(SEARCH_FOR_EIGEN)
 
   SET(_Eigen_FOUND 0)
-  SET(_Eigen_REQUIRED "eigen3 >= 3.0.0")
-  PKG_CHECK_MODULES(_Eigen REQUIRED ${_Eigen_REQUIRED})
+  IF(NOT Eigen_REQUIRED)
+    SET(Eigen_REQUIRED "eigen3 >= 3.0.0")
+  ENDIF(NOT Eigen_REQUIRED)
+  PKG_CHECK_MODULES(_Eigen REQUIRED ${Eigen_REQUIRED})
   
   IF(NOT ${_Eigen_FOUND})
     MESSAGE(FATAL_ERROR "Check that package Eigen is installed in a directory pointed out by PKG_CONFIG_PATH.")
