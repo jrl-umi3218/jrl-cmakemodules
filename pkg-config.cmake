@@ -123,7 +123,7 @@ ENDMACRO(_SETUP_PROJECT_PKG_CONFIG_FINALIZE)
 #			  Typically, this string looks like:
 #                         ``my-package >= 0.5''
 #
-MACRO(ADD_DEPENDENCY P_REQUIRED PKG_CONFIG_STRING)
+MACRO(ADD_DEPENDENCY P_REQUIRED DOC_ONLY PKG_CONFIG_STRING)
   # Retrieve the left part of the equation to get package name.
   STRING(REGEX MATCH "[^<>= ]+" LIBRARY_NAME "${PKG_CONFIG_STRING}")
   # And transform it into a valid variable prefix.
@@ -191,8 +191,9 @@ MACRO(ADD_DEPENDENCY P_REQUIRED PKG_CONFIG_STRING)
   #I cannot see why CMake is doing that...
   STRING(REPLACE ";" " " PKG_CONFIG_STRING "${PKG_CONFIG_STRING}")
 
-  # Add the package to the dependency list if found
-  IF(${${PREFIX}_FOUND})
+  # Add the package to the dependency list if found and if dependency
+  # is triggered not only for documentation
+  IF((${${PREFIX}_FOUND}) AND (NOT ${DOC_ONLY}))
     _ADD_TO_LIST(PKG_CONFIG_REQUIRES "${PKG_CONFIG_STRING}" ",")
   ENDIF()
 
@@ -223,7 +224,7 @@ ENDMACRO(ADD_DEPENDENCY)
 #                         ``my-package >= 0.5''
 #
 MACRO(ADD_REQUIRED_DEPENDENCY PKG_CONFIG_STRING)
-  ADD_DEPENDENCY(1 ${PKG_CONFIG_STRING})
+  ADD_DEPENDENCY(1 0 ${PKG_CONFIG_STRING})
 ENDMACRO(ADD_REQUIRED_DEPENDENCY)
 
 # ADD_OPTIONAL_DEPENDENCY(PREFIX PKGCONFIG_STRING)
@@ -237,8 +238,22 @@ ENDMACRO(ADD_REQUIRED_DEPENDENCY)
 #                         ``my-package >= 0.5''
 #
 MACRO(ADD_OPTIONAL_DEPENDENCY PKG_CONFIG_STRING)
-  ADD_DEPENDENCY(0 ${PKG_CONFIG_STRING})
+  ADD_DEPENDENCY(0 0 ${PKG_CONFIG_STRING})
 ENDMACRO(ADD_OPTIONAL_DEPENDENCY)
+
+# ADD_DOC_DEPENDENCY(PREFIX PKGCONFIG_STRING)
+# ------------------------------------------------
+#
+# Check for a dependency using pkg-config. Do not express dependency in
+# "requires" field.
+#
+# PKG_CONFIG_STRING	: string passed to pkg-config to check the version.
+#			  Typically, this string looks like:
+#                         ``my-package >= 0.5''
+#
+MACRO(ADD_DOC_DEPENDENCY PKG_CONFIG_STRING)
+  ADD_DEPENDENCY(1 1 ${PKG_CONFIG_STRING})
+ENDMACRO(ADD_DOC_DEPENDENCY)
 
 # PKG_CONFIG_APPEND_LIBRARY_DIR
 # -----------------------------
