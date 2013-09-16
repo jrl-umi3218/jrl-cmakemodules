@@ -1,4 +1,4 @@
-# Copyright (C) 2013
+# Copyright (C) 2008-2013 LAAS-CNRS, JRL AIST-CNRS.
 # Olivier STASSE (LAAS,CNRS)
 # macro inspired from Sébastien Barthélémy in laas/metapod
 #

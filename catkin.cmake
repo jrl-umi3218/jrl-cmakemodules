@@ -1,4 +1,4 @@
-# Copyright (C) 2011 CNRS
+# Copyright (C) 2008-2013 LAAS-CNRS, JRL AIST-CNRS.
 #
 # Author: Florent Lamiraux
 #
