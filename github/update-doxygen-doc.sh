@@ -25,17 +25,21 @@
 # - it creates a commit and push the modification.
 #
 # This scripts makes several assumptions on the project structure:
-# 1. It should be launched from the documentation build directory
-#    I.e. _build/doc
 #
-# 2. The documentation is generated in the doxygen-html directory
+# 1. The documentation is generated in the doxygen-html directory
 #    of the doc build directory.
 #
-# 3. The documentation is updated through `make doc` in the top build
+# 2. The documentation is updated through `make doc` in the top build
 #    directory.
 #
-# If doxygen.cmake is used, 2 and 3 will be respected.
+# If doxygen.cmake is used, these assumptions will be respected.
 #
+#
+# Launch the script by running:
+#
+# $ /path/to/update-doxygen-doc.sh -r /path/to/repo/root/dir \
+#                                  -b /path/to/build/root/dir
+set -e
 
 # Override the locale.
 LC_ALL='C'
@@ -156,8 +160,8 @@ yesno()
 
 version()
 {
-    echo 'update-doxygen-doc.sh - provided by @PROJECT_NAME@ @PROJECT_VERSION@
-Copyright (C) 2010 JRL, CNRS/AIST.
+    echo 'update-doxygen-doc.sh
+Copyright (C) 2010-2013 LAAS-CNRS, JRL CNRS/AIST.
 This is free software; see the source for copying conditions.
 There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE.'
@@ -165,8 +169,12 @@ PARTICULAR PURPOSE.'
 
 help()
 {
-    echo 'Usage: update-doxygen-doc.sh [action]
-Actions:
+    echo 'Usage: update-doxygen-doc.sh -r ROOT_DIR -b BUILD_DIR [options]
+
+-r and -b are mandatory. They must be set respectively to the project
+root directory and to the build directory.
+
+Options:
   --help, -h		      Print this message and exit.
   --version, -v		      Print the script version and exit.
   --doc-version VERSION       Update the documentation of a stable
@@ -174,12 +182,12 @@ Actions:
                               VERSION by default is HEAD but can be
                               changed to vX.Y.Z to update the documentation
                               of a released version.
-'
 
 Report bugs to http://github.com/jrl-umi3218/jrl-cmakemodules/issues
 For more information, see http://github.com/jrl-umi3218/jrl-cmakemodules
-}
+'
 
+}
   # ------------------- #
   # `main' starts here. #
   # ------------------- #
@@ -194,52 +202,87 @@ fi
 # For dev's:
 test "x$1" = x--debug && shift && set -x
 
+# Default documentation version
 doc_version=HEAD
+# Remote URL used to push
+remote_url=
+# Package root directory
+root_dir=
+# Build root directory
+build_dir=
 
-remote_url=`${GIT} config remote.origin.url`
+while `test $# -gt 0`; do
+    case $1 in
+	version | -v | --version | -version)
+	    shift
+	    version
+	    exit 0
+	    ;;
+	help | -h | --help | -help)
+	    shift
+	    help
+	    exit 0
+	    ;;
+	--doc-version)
+	    doc_version=$2
+	    shift; shift
+	    ;;
+	--remote-url)
+	    remote_url=$2
+	    shift; shift
+	    ;;
+	--root-dir | -r)
+	    root_dir=$2
+	    shift; shift
+	    ;;
+	--build-dir | -b)
+	    build_dir=$2
+	    shift; shift
+	    ;;
+	*)
+	    echo "update-doxygen-doc.sh: ${lred}invalid option${std}: $1"
+	    shift
+	    help
+	    exit 1
+	    ;;
+    esac
+done
 
-case $1 in
-    version | v | --version | -version)
-	shift
-	version
-	;;
-    help | h | --help | -help)
-	shift
-	help
-	;;
-    --doc-version)
-	doc_version=$2
-	shift; shift
-	;;
-    --remote-url)
-	remote_url=$2
-	;;
-    '')
-	;;
-    *)
-	echo "update-doxygen-doc.sh: ${lred}invalid option${std}: $1"
-	shift
-	help
-	exit 1
-	;;
-esac
+# If root dir is not set, fail.
+if `test x${root_dir} = x`; then
+    abort "root directory is not set, please set it using \`-r'"
+    usage
+    exit 1
+fi
+# If build dir is not set, fail.
+if `test x${build_dir} = x`; then
+    abort "build directory is not set, please set it using \`-b'"
+    usage
+    exit 1
+fi
+
+# If no remote URL is set, try to retrieve it automatically.
+if `test x${remote_url} = x`; then
+    cd $root_dir
+    remote_url=`${GIT} config remote.origin.url`
+fi
 
 
 # Main starts here...
 echo "* Checkout ${doc_version}..."
+cd $root_dir
 ${GIT} checkout --quiet $doc_version
 
 echo "* Generating the documentation..."
-(cd .. && make doc) 2> /dev/null > /dev/null || \
+cd $build_dir
+make doc 2> /dev/null > /dev/null || \
  abort "failed to generate the documentation"
 
 echo "* Creating the temporary directory..."
 tmp=`mktemp -d` || abort "cannot create the temporary directory"
 trap "rm -rf -- '$tmp'" EXIT
 
-
-build_docdir=`pwd`
-
+cd $root_dir
 head_commit=`${GIT} log --format=oneline HEAD^.. | cut -d' ' -f1`
 
 
@@ -247,13 +290,13 @@ echo "* Clone the project..."
 cd $tmp
 ${GIT} clone --quiet --depth 1 --branch gh-pages $remote_url project \
  || abort "failed to clone the package repository"
-cd project \
+cd ${tmp}/project \
  || abort "failed to change directory"
 
 echo "* Copy the documentation..."
-git rm --quiet -rf doxygen/$doc_version
-mkdir -p doxygen/$doc_version
-cp -rf $build_docdir/doxygen-html/* doxygen/$doc_version/ \
+git rm --quiet -rf doxygen/${doc_version}
+mkdir -p doxygen/${doc_version}
+cp -rf ${build_dir}/doc/doxygen-html/* doxygen/${doc_version}/ \
  || abort "failed to copy the documentation"
 
 if test -x "$tmp/project/doxygen/$doc_version/installdox"; then
