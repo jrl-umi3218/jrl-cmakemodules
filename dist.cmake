@@ -41,6 +41,8 @@ MACRO(_SETUP_PROJECT_DIST)
       && ${TAR} xf ${CMAKE_SOURCE_DIR}/${PROJECT_NAME}.tar
       && echo "${PROJECT_VERSION}" >
          ${CMAKE_BINARY_DIR}/${PROJECT_NAME}-${PROJECT_VERSION}/.version
+      && ${CMAKE_SOURCE_DIR}/cmake/gitlog-to-changelog > 
+      ${CMAKE_BINARY_DIR}/${PROJECT_NAME}-${PROJECT_VERSION}/ChangeLog
       && rm -f ${CMAKE_SOURCE_DIR}/${PROJECT_NAME}.tar
       WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
       COMMENT "Generating dist directory..."
