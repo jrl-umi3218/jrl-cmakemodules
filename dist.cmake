@@ -26,6 +26,7 @@
 MACRO(_SETUP_PROJECT_DIST)
   IF(UNIX)
     FIND_PROGRAM(TAR tar)
+    FIND_PROGRAM(GPG gpg)   
 
     ADD_CUSTOM_TARGET(distdir
       COMMAND
@@ -49,6 +50,9 @@ MACRO(_SETUP_PROJECT_DIST)
       COMMAND
       ${TAR} czf ${PROJECT_NAME}-${PROJECT_VERSION}.tar.gz
                  ${PROJECT_NAME}-${PROJECT_VERSION}/
+      && ${GPG} --detach-sign --armor -o
+      ${CMAKE_BINARY_DIR}/${PROJECT_NAME}-${PROJECT_VERSION}.tar.gz.sig
+      ${CMAKE_BINARY_DIR}/${PROJECT_NAME}-${PROJECT_VERSION}.tar.gz 
       && rm -rf ${CMAKE_BINARY_DIR}/${PROJECT_NAME}-${PROJECT_VERSION}/
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
       COMMENT "Generating tarball..."
