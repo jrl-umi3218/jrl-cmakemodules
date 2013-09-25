@@ -48,3 +48,4 @@
 ~ RULE_A_3_avoid_too_deep_blocks
 - _build/
 - build/
+- _travis/
