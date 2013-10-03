@@ -43,9 +43,27 @@ MACRO(SPHINX_SETUP)
       ${CMAKE_CURRENT_BINARY_DIR}/sphinx-html
       COMMENT "Generating sphinx documentation"
       )
-  ELSE(MSVC)
+  ELIF(APPLE)
+    # THE DYLD_LIBRARY_PATH should be completed to run the sphinx command.
+    #  otherwise some symbols won't be found.
+    SET(EXTRA_LD_PATH "\"${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}\":")
+    SET(EXTRA_LD_PATH "${EXTRA_LD_PATH}\"${DYNAMIC_GRAPH_PLUGINDIR}\":")
     ADD_CUSTOM_TARGET(sphinx-doc
-      COMMAND ${SPHINX_BUILD} -b html ${CMAKE_CURRENT_BINARY_DIR}/sphinx
+      COMMAND  export DYLD_LIBRARY_PATH=${EXTRA_LD_PATH}:\$DYLD_LIBRARY_PATH \;
+      ${SPHINX_BUILD} -b html ${CMAKE_CURRENT_BINARY_DIR}/sphinx
+      ${CMAKE_CURRENT_BINARY_DIR}/sphinx-html
+      COMMENT "Generating sphinx documentation"
+      )
+
+    INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${MAKE} sphinx-doc)")
+  ELSE() #UNIX
+    # THE LD_LIBRARY_PATH should be completed to run the sphinx command.
+    #  otherwise some symbols won't be found.
+    SET(EXTRA_LD_PATH "\"${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}\":")
+    SET(EXTRA_LD_PATH "${EXTRA_LD_PATH}\"${DYNAMIC_GRAPH_PLUGINDIR}\":")
+    ADD_CUSTOM_TARGET(sphinx-doc
+      COMMAND  export LD_LIBRARY_PATH=${EXTRA_LD_PATH}:\$LD_LIBRARY_PATH \;
+      ${SPHINX_BUILD} -b html ${CMAKE_CURRENT_BINARY_DIR}/sphinx
       ${CMAKE_CURRENT_BINARY_DIR}/sphinx-html
       COMMENT "Generating sphinx documentation"
       )
