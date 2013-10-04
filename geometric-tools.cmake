@@ -21,9 +21,11 @@
 # point to the geometric-tools install prefix.
 #
 MACRO(SEARCH_FOR_GEOMETRIC_TOOLS)
+  MESSAGE(STATUS "geometric-tools is required.")
   SET(GEOMETRIC_TOOLS_INSTALL_PREFIX "" CACHE PATH "geometric-tools installation prefix")
   SET(LIB_GEOMETRIC_TOOLS_CORE LIB_GEOMETRIC_TOOLS_CORE-NOTFOUND)
   SET(LIB_GEOMETRIC_TOOLS_MATH LIB_GEOMETRIC_TOOLS_MATH-NOTFOUND)
+  MESSAGE(STATUS "checking for module geometric-tools")
   FIND_LIBRARY(LIB_GEOMETRIC_TOOLS_CORE
     libWm5Core.so
     PATH
@@ -50,4 +52,7 @@ MACRO(SEARCH_FOR_GEOMETRIC_TOOLS)
   ENDIF()
   INCLUDE_DIRECTORIES("${GEOMETRIC_TOOLS_INSTALL_PREFIX}/include")
   LINK_DIRECTORIES("${GEOMETRIC_TOOLS_INSTALL_PREFIX}/lib")
+
+  MESSAGE(STATUS "  found geometric-tools")
+  MESSAGE(STATUS "Module geometric-tools has been detected with success.")
 ENDMACRO(SEARCH_FOR_GEOMETRIC_TOOLS)
