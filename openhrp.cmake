@@ -51,7 +51,6 @@ MACRO(SEARCH_GRX_ROBOTS  HANDLED_ROBOTS)
       MESSAGE(ERROR "Dit not find GRX_PREFIX")
     ELSE(!GRX_PREFIX)
       #List of know robots.
-      MESSAGE("IS_DIRECTORY ${GRX_PREFIX}/${robot}")
       IF(IS_DIRECTORY ${GRX_PREFIX}/${robot})
         LIST(APPEND GRX_ROBOTS ${robot})
       ENDIF()
