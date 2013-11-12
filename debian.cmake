@@ -46,8 +46,8 @@ MACRO(_SETUP_DEBIAN)
           # Considers the file *.release.version
           SET(file_release_version "${CMAKE_SOURCE_DIR}/debian/${PROJECT_NAME}.release.version")
 
-          MESSAGE(STATUS "file_release_version:" ${file_release_version})
-          MESSAGE(STATUS "Everything sounds great: "${LPROJECT_RELEASE_VERSION})
+          MESSAGE(STATUS "file_release_version: ${file_release_version}")
+          MESSAGE(STATUS "Everything sounds great: ${LPROJECT_RELEASE_VERSION}")
           # If this is not a git version.
           IF(LPROJECT_RELEASE_VERSION STREQUAL "" )
             # If the file exists

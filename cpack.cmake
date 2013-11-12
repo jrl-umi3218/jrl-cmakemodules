@@ -25,7 +25,7 @@
 # and debhelper for Debian package generation.
 #
 MACRO(ADD_CMAKE_DEPENDENCY PKG_CONFIG_STRING)
-  MESSAGE(STATUS "PKG_CONFIG_STRING:"${PKG_CONFIG_STRING} )
+  MESSAGE(STATUS "PKG_CONFIG_STRING: ${PKG_CONFIG_STRING}")
   STRING(REGEX MATCH "[^<>= ]+" LIBRARY_NAME "${PKG_CONFIG_STRING}")
   # Carefull the space in front of the matching string is important to avoid
   # confusion with package name.
