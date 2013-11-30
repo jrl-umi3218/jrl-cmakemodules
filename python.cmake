@@ -65,9 +65,9 @@ MACRO(DYNAMIC_GRAPH_PYTHON_MODULE SUBMODULENAME LIBRARYNAME TARGETNAME)
 
   ADD_LIBRARY(${PYTHON_MODULE}
     MODULE
-    ${CMAKE_SOURCE_DIR}/cmake/dynamic_graph/python-module-py.cc)
+    ${PROJECT_SOURCE_DIR}/cmake/dynamic_graph/python-module-py.cc)
 
-  FILE(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/src/dynamic_graph/${SUBMODULENAME})
+  FILE(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/src/dynamic_graph/${SUBMODULENAME})
   SET_TARGET_PROPERTIES(${PYTHON_MODULE}
     PROPERTIES PREFIX ""
     OUTPUT_NAME dynamic_graph/${SUBMODULENAME}/wrap
@@ -93,12 +93,12 @@ MACRO(DYNAMIC_GRAPH_PYTHON_MODULE SUBMODULENAME LIBRARYNAME TARGETNAME)
   ENDFOREACH(ENTITY ${NEW_ENTITY_CLASS})
 
   CONFIGURE_FILE(
-    ${CMAKE_SOURCE_DIR}/cmake/dynamic_graph/submodule/__init__.py.cmake
-    ${CMAKE_BINARY_DIR}/src/dynamic_graph/${SUBMODULENAME}/__init__.py
+    ${PROJECT_SOURCE_DIR}/cmake/dynamic_graph/submodule/__init__.py.cmake
+    ${PROJECT_BINARY_DIR}/src/dynamic_graph/${SUBMODULENAME}/__init__.py
     )
 
   INSTALL(
-    FILES ${CMAKE_BINARY_DIR}/src/dynamic_graph/${SUBMODULENAME}/__init__.py
+    FILES ${PROJECT_BINARY_DIR}/src/dynamic_graph/${SUBMODULENAME}/__init__.py
     DESTINATION ${PYTHON_INSTALL_DIR}
     )
 
@@ -117,7 +117,7 @@ MACRO(PYTHON_INSTALL MODULE FILE DEST)
   INSTALL(CODE
     "EXECUTE_PROCESS(COMMAND
     \"${PYTHON_EXECUTABLE}\"
-    \"${CMAKE_SOURCE_DIR}/cmake/compile.py\"
+    \"${PROJECT_SOURCE_DIR}/cmake/compile.py\"
     \"${CMAKE_CURRENT_SOURCE_DIR}\"
     \"${CMAKE_CURRENT_BINARY_DIR}\"
     \"${MODULE}/${FILE}\")
@@ -166,7 +166,7 @@ MACRO(PYTHON_INSTALL_BUILD MODULE FILE DEST)
   INSTALL(CODE
     "EXECUTE_PROCESS(COMMAND
     \"${PYTHON_EXECUTABLE}\"
-    \"${CMAKE_SOURCE_DIR}/cmake/compile.py\"
+    \"${PROJECT_SOURCE_DIR}/cmake/compile.py\"
     \"${CMAKE_CURRENT_BINARY_DIR}\"
     \"${CMAKE_CURRENT_BINARY_DIR}\"
     \"${MODULE}/${FILE}\")
