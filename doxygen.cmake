@@ -41,15 +41,6 @@ MACRO(_SETUP_PROJECT_DOCUMENTATION)
     SET(HAVE_DOT NO)
   ENDIF(DOXYGEN_DOT_FOUND)
 
-  IF(UNIX)
-    SET(MAKE make)
-  ELSEIF(WIN32)
-    SET(MAKE nmake)
-  ELSE(UNIX)
-    MESSAGE(FATAL_ERROR
-      "Doxygen documentation generation not supported on this platform.")
-  ENDIF(UNIX)
-
   # Teach CMake how to generate the documentation.
   IF(MSVC)
     # FIXME: it is impossible to trigger documentation installation
@@ -66,7 +57,7 @@ MACRO(_SETUP_PROJECT_DOCUMENTATION)
       COMMENT "Generating Doxygen documentation"
       )
 
-    INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${MAKE} doc)")
+    INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${CMAKE_MAKE_PROGRAM} doc)")
   ENDIF(MSVC)
 
   ADD_CUSTOM_COMMAND(

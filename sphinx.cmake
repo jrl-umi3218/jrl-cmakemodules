@@ -26,15 +26,6 @@ MACRO(SPHINX_SETUP)
     MESSAGE(FATAL_ERROR "Failed to find sphinx")
   ENDIF(NOT SPHINX_BUILD)
 
-  IF(UNIX)
-    SET(MAKE make)
-  ELSEIF(WIN32)
-    SET(MAKE nmake)
-  ELSE(UNIX)
-    MESSAGE(FATAL_ERROR
-      "sphinx documentation generation not supported on this platform.")
-  ENDIF(UNIX)
-
   IF(MSVC)
     # FIXME: it is impossible to trigger documentation installation
     # at install, so put the target in ALL instead.
@@ -55,7 +46,7 @@ MACRO(SPHINX_SETUP)
       COMMENT "Generating sphinx documentation"
       )
 
-    INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${MAKE} sphinx-doc)")
+    INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${CMAKE_MAKE_PROGRAM} sphinx-doc)")
   ELSE() #UNIX
     # THE LD_LIBRARY_PATH should be completed to run the sphinx command.
     #  otherwise some symbols won't be found.
