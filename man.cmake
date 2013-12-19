@@ -43,7 +43,7 @@ MACRO(MANPAGE NAME)
     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${NAME}.1)
 
   # Trigger man page generation at install.
-  INSTALL(CODE "EXECUTE_PROCESS(COMMAND make man)")
+  INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${CMAKE_MAKE_PROGRAM} man)")
 
   # Detects if PKGMAN has been specified
   SET(DESTINATION_MAN_PAGE share/man/man1)
