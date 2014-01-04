@@ -59,7 +59,7 @@ MACRO(SPHINX_SETUP)
       COMMENT "Generating sphinx documentation"
       )
 
-    INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${MAKE} sphinx-doc)")
+    INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${CMAKE_MAKE_PROGRAM} sphinx-doc)")
   ENDIF(MSVC)
 
   ADD_CUSTOM_COMMAND(
