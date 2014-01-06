@@ -28,9 +28,19 @@ ENDIF (NOT ${PYTHONINTERP_FOUND} STREQUAL TRUE)
 # Find PYTHON_LIBRARY_DIRS
 GET_FILENAME_COMPONENT(PYTHON_LIBRARY_DIRS ${PYTHON_LIBRARIES} PATH)
 
+# Default Python packages directory
+SET(PYTHON_PACKAGES_DIR site-packages)
+
+# Use either site-packages (default) or dist-packages (Debian packages) directory
+OPTION(PYTHON_DEB_LAYOUT "Enable Debian-style Python package layout" OFF)
+
+IF (PYTHON_DEB_LAYOUT)
+  SET(PYTHON_PACKAGES_DIR dist-packages)
+ENDIF (PYTHON_DEB_LAYOUT)
+
 EXECUTE_PROCESS(
   COMMAND "${PYTHON_EXECUTABLE}" "-c"
-  "import sys, os; print os.sep.join(['lib', 'python' + sys.version[:3], 'site-packages'])"
+  "import sys, os; print os.sep.join(['lib', 'python' + sys.version[:3], '${PYTHON_PACKAGES_DIR}'])"
   OUTPUT_VARIABLE PYTHON_SITELIB
   ERROR_QUIET)
 
