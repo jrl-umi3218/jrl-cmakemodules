@@ -80,7 +80,12 @@ MACRO(SEARCH_FOR_QHULL)
   endif(NOT QHULL_LIBRARY_DEBUG)
 
   set(QHULL_INCLUDE_DIRS ${QHULL_INCLUDE_DIR})
-  set(QHULL_LIBRARIES ${QHULL_LIBRARY} ${QHULL_LIBRARY_DEBUG} ${QHULL_CPP_LIBRARY})
+  set(QHULL_LIBRARIES ${QHULL_LIBRARY} ${QHULL_LIBRARY_DEBUG})
+
+  # C++ library may not be available on old Linux distributions
+  if(QHULL_CPP_LIBRARY)
+      set(QHULL_LIBRARIES ${QHULL_LIBRARIES} ${QHULL_CPP_LIBRARY})
+  endif(QHULL_CPP_LIBRARY)
 
   include(FindPackageHandleStandardArgs)
   find_package_handle_standard_args(Qhull DEFAULT_MSG QHULL_LIBRARY
