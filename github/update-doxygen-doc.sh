@@ -294,7 +294,7 @@ cd ${tmp}/project \
  || abort "failed to change directory"
 
 echo "* Copy the documentation..."
-git rm --quiet -rf doxygen/${doc_version}
+git rm --quiet -rf doxygen/${doc_version} || true
 mkdir -p doxygen/${doc_version}
 cp -rf ${build_dir}/doc/doxygen-html/* doxygen/${doc_version}/ \
  || abort "failed to copy the documentation"
