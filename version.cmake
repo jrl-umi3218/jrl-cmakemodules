@@ -55,11 +55,11 @@ MACRO(VERSION_COMPUTE)
   SET(PROJECT_STABLE False)
 
   # Check if a version is embedded in the project.
-  IF(EXISTS ${CMAKE_SOURCE_DIR}/.version)
+  IF(EXISTS ${PROJECT_SOURCE_DIR}/.version)
     # Yes, use it. This is a stable version.
     FILE(STRINGS .version PROJECT_VERSION)
     SET(PROJECT_STABLE True)
-  ELSE(EXISTS ${CMAKE_SOURCE_DIR}/.version)
+  ELSE(EXISTS ${PROJECT_SOURCE_DIR}/.version)
     # No, there is no '.version' file. Deduce the version from git.
 
     # Search for git.
@@ -73,7 +73,7 @@ MACRO(VERSION_COMPUTE)
     # display only the first four characters of the commit id.
     EXECUTE_PROCESS(
       COMMAND ${GIT} describe --abbrev=4 --match=v* HEAD
-      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
       RESULT_VARIABLE GIT_DESCRIBE_RESULT
       OUTPUT_VARIABLE GIT_DESCRIBE_OUTPUT
       ERROR_VARIABLE GIT_DESCRIBE_ERROR
@@ -83,7 +83,7 @@ MACRO(VERSION_COMPUTE)
     # Run diff-index to check whether the tree is clean or not.
     EXECUTE_PROCESS(
       COMMAND ${GIT} diff-index --name-only HEAD
-      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
       RESULT_VARIABLE GIT_DIFF_INDEX_RESULT
       OUTPUT_VARIABLE GIT_DIFF_INDEX_OUTPUT
       ERROR_VARIABLE GIT_DIFF_INDEX_ERROR
@@ -129,5 +129,5 @@ MACRO(VERSION_COMPUTE)
     IF(PROJECT_DIRTY)
       SET(PROJECT_VERSION "${PROJECT_VERSION}-dirty")
     ENDIF()
-  ENDIF(EXISTS ${CMAKE_SOURCE_DIR}/.version)
+  ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/.version)
 ENDMACRO()

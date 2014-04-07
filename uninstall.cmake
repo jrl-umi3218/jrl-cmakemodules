@@ -22,7 +22,7 @@ MACRO(_SETUP_PROJECT_UNINSTALL)
   # FIXME: it is utterly stupid to rely on the install manifest.
   # Can't we just remember what we install ?!
   CONFIGURE_FILE(
-    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/cmake_uninstall.cmake.in"
+    "${PROJECT_SOURCE_DIR}/cmake/cmake_uninstall.cmake.in"
     "${CMAKE_CURRENT_BINARY_DIR}/cmake/cmake_uninstall.cmake"
     IMMEDIATE
     @ONLY
