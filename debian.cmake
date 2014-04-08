@@ -25,13 +25,13 @@ MACRO(_SETUP_DEBIAN)
     MESSAGE(STATUS "${PROJECT_NAME}_IS_SHARED_LIBRARY:" ${${PROJECT_NAME}_IS_SHARED_LIBRARY})
 
     IF(UNIX)
-      IF (IS_DIRECTORY ${CMAKE_SOURCE_DIR}/debian)
+      IF (IS_DIRECTORY ${PROJECT_SOURCE_DIR}/debian)
 	IF(${PROJECT_NAME}_IS_SHARED_LIBRARY STREQUAL "SHARED_LIBRARY")
 	  # Create the install file to be inside ld.so.conf.d
-          MESSAGE(STATUS "CMAKE_SOURCE_DIR:" ${CMAKE_SOURCE_DIR})
+          MESSAGE(STATUS "PROJECT_SOURCE_DIR:" ${PROJECT_SOURCE_DIR})
  	  EXECUTE_PROCESS(
 	    COMMAND ${GIT} describe --abbrev=0 --match=v* HEAD
-	    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+	    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
 	    RESULT_VARIABLE LGIT_DESCRIBE_RESULT
 	    OUTPUT_VARIABLE LGIT_DESCRIBE_OUTPUT
 	    ERROR_VARIABLE LGIT_DESCRIBE_ERROR
@@ -44,7 +44,7 @@ MACRO(_SETUP_DEBIAN)
           STRING(REGEX REPLACE "^v" "" LPROJECT_RELEASE_VERSION "${LGIT_DESCRIBE_OUTPUT}")   
 
           # Considers the file *.release.version
-          SET(file_release_version "${CMAKE_SOURCE_DIR}/debian/${PROJECT_NAME}.release.version")
+          SET(file_release_version "${PROJECT_SOURCE_DIR}/debian/${PROJECT_NAME}.release.version")
 
           MESSAGE(STATUS "file_release_version: ${file_release_version}")
           MESSAGE(STATUS "Everything sounds great: ${LPROJECT_RELEASE_VERSION}")
@@ -67,11 +67,11 @@ MACRO(_SETUP_DEBIAN)
           SET(install_file_name_src "debian/lib${PROJECT_NAME}${LPROJECT_RELEASE_VERSION}.install.cmake")
 	 
 	  MESSAGE(STATUS "install_file_name_src :" ${install_file_name_src})
-	  IF(EXISTS ${CMAKE_SOURCE_DIR}/${install_file_name_src})
+	  IF(EXISTS ${PROJECT_SOURCE_DIR}/${install_file_name_src})
   	    SET(install_file_name_dest "debian/lib${PROJECT_NAME}${LPROJECT_RELEASE_VERSION}.install")
 	    EXECUTE_PROCESS(
 	        COMMAND cp ${install_file_name_src} ${install_file_name_dest}
-	        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+	        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
 	        )
 
 	    MESSAGE(STATUS "install_file_name :" ${install_file_name_dest})
@@ -86,9 +86,9 @@ MACRO(_SETUP_DEBIAN)
 	    MESSAGE(STATUS "install_file_name :" ${install_file_name})
 	    INSTALL(FILES ${install_file_name} DESTINATION /etc/ld.so.conf.d )
 
-	  ENDIF(EXISTS ${CMAKE_SOURCE_DIR}/${install_file_name_src})
+	  ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/${install_file_name_src})
        ENDIF(${PROJECT_NAME}_IS_SHARED_LIBRARY STREQUAL "SHARED_LIBRARY")
-     ENDIF(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/debian)
+     ENDIF(IS_DIRECTORY ${PROJECT_SOURCE_DIR}/debian)
    ENDIF(UNIX)
  ENDIF(BUILDING_DEBIAN_PACKAGE)
 ENDMACRO(_SETUP_DEBIAN)
@@ -106,14 +106,14 @@ MACRO(_SETUP_PROJECT_DEB)
     COMMAND
     git-buildpackage
     --git-debian-branch=debian
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
     COMMENT "Generating source Debian package..."
     )
   ADD_CUSTOM_TARGET(deb
     COMMAND
     git-buildpackage
     --git-debian-branch=debian --git-builder="debuild -S -i.git -I.git"
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
     COMMENT "Generating Debian package..."
     )
   ENDIF(UNIX AND NOT APPLE)

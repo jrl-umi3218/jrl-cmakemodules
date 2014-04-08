@@ -31,20 +31,20 @@ MACRO(_SETUP_PROJECT_DIST)
     ADD_CUSTOM_TARGET(distdir
       COMMAND
       rm -f /tmp/${PROJECT_NAME}.tar
-      && ${CMAKE_SOURCE_DIR}/cmake/git-archive-all.sh
+      && ${PROJECT_SOURCE_DIR}/cmake/git-archive-all.sh
       --prefix ${PROJECT_NAME}-${PROJECT_VERSION}/  ${PROJECT_NAME}.tar
       && cd ${CMAKE_BINARY_DIR}/
       && (test -d ${PROJECT_NAME}-${PROJECT_VERSION}
 	&& find ${PROJECT_NAME}-${PROJECT_VERSION}/ -type d -print0
          | xargs -0 chmod a+w  || true)
       && rm -rf ${PROJECT_NAME}-${PROJECT_VERSION}/
-      && ${TAR} xf ${CMAKE_SOURCE_DIR}/${PROJECT_NAME}.tar
+      && ${TAR} xf ${PROJECT_SOURCE_DIR}/${PROJECT_NAME}.tar
       && echo "${PROJECT_VERSION}" >
          ${CMAKE_BINARY_DIR}/${PROJECT_NAME}-${PROJECT_VERSION}/.version
-      && ${CMAKE_SOURCE_DIR}/cmake/gitlog-to-changelog > 
+      && ${PROJECT_SOURCE_DIR}/cmake/gitlog-to-changelog >
       ${CMAKE_BINARY_DIR}/${PROJECT_NAME}-${PROJECT_VERSION}/ChangeLog
-      && rm -f ${CMAKE_SOURCE_DIR}/${PROJECT_NAME}.tar
-      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+      && rm -f ${PROJECT_SOURCE_DIR}/${PROJECT_NAME}.tar
+      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
       COMMENT "Generating dist directory..."
       )
 

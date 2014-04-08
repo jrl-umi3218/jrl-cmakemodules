@@ -36,13 +36,13 @@ macro(create_simple_controller CONTROLLER_NAME)
   
   if(WIN32)
     install(TARGETS ${CONTROLLER_NAME} ${CONTROLLER_NAME}Comp
-        DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}
+        DESTINATION ${PROJECT_SOURCE_DIR}
         CONFIGURATIONS Release )
   endif()
 
   install(FILES rtc.conf bridge.conf DESTINATION ${controller_install_path})
 
-  if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/etc)
+  if(EXISTS ${PROJECT_SOURCE_DIR}/etc)
     install(DIRECTORY etc DESTINATION ${controller_install_path} PATTERN ".svn" EXCLUDE)
   endif()
 
