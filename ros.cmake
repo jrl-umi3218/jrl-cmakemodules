@@ -13,9 +13,26 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-MACRO(ADD_ROSPACK_DEPENDENCY PKG)
+# Check the existence of the ros package using rospack.
+#  PKG_ROS is a string containing the name of the package and eventually the
+#  desired version of the package using pkg-config syntax.
+#  The following operators are handled: {>, >=, =, <, <=}
+# example: ADD_ROSPACK_DEPENDENCY("pkg_name")
+#          ADD_ROSPACK_DEPENDENCY("pkg_name >= 0.1")
+MACRO(ADD_ROSPACK_DEPENDENCY PKG_ROS)
   IF(PKG STREQUAL "")
     MESSAGE(FATAL_ERROR "ADD_ROS_DEPENDENCY invalid call.")
+  ENDIF()
+
+  # check if a version is defined
+  STRING(REGEX MATCH "[<>=]+" SIGN "${PKG_ROS}")
+  IF(NOT "${SIGN}" STREQUAL "")
+    STRING(REGEX MATCH "[0-9.]+ *$" PKG_VERSION "${PKG_ROS}")
+    # get the name of the package
+    STRING(REGEX MATCH "[^<>= ]+" PKG ${PKG_ROS})
+  ELSE()
+    # the name of the package is the full input
+    SET(PKG ${PKG_ROS})
   ENDIF()
 
   # Transform package name into a valid variable prefix.
@@ -39,6 +56,45 @@ MACRO(ADD_ROSPACK_DEPENDENCY PKG)
   IF(NOT ${PKG}_ROS_PREFIX)
     MESSAGE(FATAL_ERROR "Failed to detect ${PKG}.")
   ENDIF()
+
+  # Get the version of the package
+  FIND_PROGRAM(ROSVERSION rosversion)
+  IF(NOT ROSVERSION)
+    MESSAGE(FATAL_ERROR "failed to find the rosversion binary. Is ROS installed?")
+  ENDIF()
+
+  EXECUTE_PROCESS(
+    COMMAND "${ROSVERSION}" "${PKG}"
+    OUTPUT_VARIABLE ${PKG}_ROSVERSION_TMP
+    ERROR_QUIET)
+  STRING(REGEX REPLACE "\n" "" ${PKG}_ROSVERSION ${${PKG}_ROSVERSION_TMP})
+
+  #check whether the version satisfies the constraint
+  IF (NOT "${SIGN}" STREQUAL "")
+    SET(RESULT FALSE)
+    IF(("${${PKG}_ROSVERSION}" VERSION_LESS "${PKG_VERSION}")
+       AND((${SIGN} STREQUAL "<=") OR (${SIGN} STREQUAL "<")))
+        SET(RESULT TRUE)
+    ENDIF()
+
+    IF(("${${PKG}_ROSVERSION}" VERSION_EQUAL "${PKG_VERSION}")
+      AND((${SIGN} STREQUAL ">=") OR (${SIGN} STREQUAL "=") OR (${SIGN} STREQUAL "<=")))
+        SET(RESULT TRUE)
+    ENDIF()
+
+    IF(("${${PKG}_ROSVERSION}" VERSION_GREATER "${PKG_VERSION}")
+       AND(("${SIGN}" STREQUAL ">=") OR ("${SIGN}" STREQUAL ">")))
+        SET(RESULT TRUE)
+    ENDIF()
+
+    IF (NOT RESULT)
+      MESSAGE(FATAL_ERROR "The package ${PKG} does not have the correct version."
+              " Found: ${${PKG}_ROSVERSION}, desired: ${SIGN} ${PKG_VERSION}")
+    ENDIF()
+  ENDIF (NOT "${SIGN}" STREQUAL "")
+
+  # Declare that the package has been found
+  MESSAGE("${PKG} found, version ${${PKG}_ROSVERSION}")
 
   SET(${PREFIX}_FOUND 1)
   EXECUTE_PROCESS(
