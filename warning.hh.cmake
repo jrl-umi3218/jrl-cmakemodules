@@ -1,4 +1,4 @@
-// Copyright (C) 2008-2013 LAAS-CNRS, JRL AIST-CNRS.
+// Copyright (C) 2008-2014 LAAS-CNRS, JRL AIST-CNRS.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by

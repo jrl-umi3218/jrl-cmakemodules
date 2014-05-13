@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright (C) 2008-2013 LAAS-CNRS, JRL AIST-CNRS.
+# Copyright (C) 2008-2014 LAAS-CNRS, JRL AIST-CNRS.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -161,7 +161,7 @@ yesno()
 version()
 {
     echo 'update-doxygen-doc.sh
-Copyright (C) 2010-2013 LAAS-CNRS, JRL CNRS/AIST.
+Copyright (C) 2010-2014 LAAS-CNRS, JRL CNRS/AIST.
 This is free software; see the source for copying conditions.
 There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE.'

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Copyright (C) 2008-2013 LAAS-CNRS, JRL AIST-CNRS.
+# Copyright (C) 2008-2014 LAAS-CNRS, JRL AIST-CNRS.
 #
 # This file is part of jrl-cmakemodules.
 # jrl-cmakemodules is free software: you can redistribute it and/or
