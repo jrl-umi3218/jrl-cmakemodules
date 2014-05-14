@@ -113,6 +113,9 @@ ENDMACRO(_CONCATENATE_ARGUMENTS OUTPUT)
 # file).
 #
 MACRO(SETUP_PROJECT)
+  # If DEVEL_DIR environment variable is defined and CMAKE_INSTALL_PREFIX has not
+  # been explicitly set in the command line, set CMAKE_INSTALL_PREFIX to
+  # DEVEL_DIR/install
   IF (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT AND NOT "$ENV{DEVEL_DIR}" STREQUAL "")
     SET(CMAKE_INSTALL_PREFIX
       "$ENV{DEVEL_DIR}/install" CACHE PATH "Install path prefix" FORCE
