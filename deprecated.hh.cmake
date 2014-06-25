@@ -35,7 +35,7 @@
 # ifdef __GNUC__
 #  define @PACKAGE_CPPNAME@_DEPRECATED __attribute__ ((deprecated))
 # else
-#  ifdef _MSC_VER
+#  if defined(_MSC_VER) && !defined(__INTEL_COMPILER)
 #   define @PACKAGE_CPPNAME@_DEPRECATED __declspec (deprecated)
 #  else
 // If the compiler is not recognized, drop the feature.
