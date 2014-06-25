@@ -1,4 +1,4 @@
-// Copyright (C) 2008-2014 LAAS-CNRS, JRL AIST-CNRS.
+// Copyright (C) 2008-2013 LAAS-CNRS, JRL AIST-CNRS.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@
 # ifdef __GNUC__
 #  define @PACKAGE_CPPNAME@_DEPRECATED __attribute__ ((deprecated))
 # else
-#  ifdef _MSC_VER
+#  if defined(_MSC_VER) && !defined(__INTEL_COMPILER)
 #   define @PACKAGE_CPPNAME@_DEPRECATED __declspec (deprecated)
 #  else
 // If the compiler is not recognized, drop the feature.
