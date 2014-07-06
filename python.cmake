@@ -40,7 +40,7 @@ ENDIF (PYTHON_DEB_LAYOUT)
 
 EXECUTE_PROCESS(
   COMMAND "${PYTHON_EXECUTABLE}" "-c"
-  "import sys, os; print os.sep.join(['lib', 'python' + sys.version[:3], '${PYTHON_PACKAGES_DIR}'])"
+  "import sys, os; print(os.sep.join(['lib', 'python' + sys.version[:3], '${PYTHON_PACKAGES_DIR}']))"
   OUTPUT_VARIABLE PYTHON_SITELIB
   ERROR_QUIET)
 
