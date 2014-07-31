@@ -1,4 +1,4 @@
-# Copyright (C) 2008-2013 LAAS-CNRS, JRL AIST-CNRS.
+# Copyright (C) 2008-2014 LAAS-CNRS, JRL AIST-CNRS.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,8 +20,19 @@
 # install the documentation properly.
 #
 MACRO(SPHINX_SETUP)
+  SET(SPHINX_BUILD_PATH "")
+
+  #  With MSVC, it is likely thant sphinx has been installed using easy-install
+  # directly in the python folder.
+  IF (MSVC)
+    GET_FILENAME_COMPONENT(PYTHON_ROOT ${PYTHON_EXECUTABLE} DIRECTORY)
+    SET(SPHINX_BUILD_PATH ${PYTHON_ROOT}/Scripts)
+  ENDIF(MSVC)
+
   FIND_PROGRAM(SPHINX_BUILD sphinx-build DOC
-    "Sphinx documentation generator tool")
+    "Sphinx documentation generator tool"
+    PATHS "${SPHINX_BUILD_PATH}")
+
   IF (NOT SPHINX_BUILD)
     MESSAGE(FATAL_ERROR "Failed to find sphinx")
   ENDIF(NOT SPHINX_BUILD)
@@ -34,7 +45,7 @@ MACRO(SPHINX_SETUP)
       ${CMAKE_CURRENT_BINARY_DIR}/sphinx-html
       COMMENT "Generating sphinx documentation"
       )
-  ELIF(APPLE)
+  ELSEIF(APPLE)
     # THE DYLD_LIBRARY_PATH should be completed to run the sphinx command.
     #  otherwise some symbols won't be found.
     SET(EXTRA_LD_PATH "\"${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}\":")
