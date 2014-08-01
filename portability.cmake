@@ -64,3 +64,20 @@ FUNCTION(CONFIG_FILES_CMAKE)
     ENDIF(FILE)
 ENDFOREACH(I RANGE 0 ${ARGC})
 ENDFUNCTION(CONFIG_FILES_CMAKE)
+
+
+# NORMALIZE_PATH
+# ------------------
+#
+# Convert the windows style path into unix style path.
+#
+# On windows, the folder separator is \, wihch can lead to some issues 
+# because of the appearance of special characters like \p, \n ...
+#
+FUNCTION(NORMALIZE_PATH mypath)
+  IF(WIN32)
+    STRING(REPLACE "\\" "/" ${mypath} "${${mypath}}")
+	SET(${mypath} ${${mypath}} PARENT_SCOPE)
+  ENDIF(WIN32)
+ENDFUNCTION(NORMALIZE_PATH)
+
