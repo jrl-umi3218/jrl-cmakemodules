@@ -476,3 +476,27 @@ MACRO(PKG_CONFIG_USE_LINK_DEPENDENCY TARGET DEPENDENCY)
   BUILD_PREFIX_FOR_PKG(${DEPENDENCY} PREFIX)
   PKG_CONFIG_USE_LLINK_DEPENDENCY(${TARGET} ${PREFIX})
 ENDMACRO(PKG_CONFIG_USE_LINK_DEPENDENCY TARGET DEPENDENCY)
+
+
+# PKG_CONFIG_ADD_COMPILE_OPTIONS(COMPILE_OPTIONS DEPENDENCY)
+# ----------------------------------------------------------
+#
+# This macro adds the compile-time options for a given pkg-config
+# dependency to a given semi-colon-separated list. This can be
+# used to provide options to CUDA_ADD_LIBRARY for instance, since
+# it does not support SET_TARGET_PROPERTIES...
+#
+# I.e. PKG_CONFIG_ADD_COMPILE_OPTIONS(${MY_OPTIONS} my-package)
+MACRO(PKG_CONFIG_ADD_COMPILE_OPTIONS COMPILE_OPTIONS DEPENDENCY)
+  BUILD_PREFIX_FOR_PKG(${DEPENDENCY} PREFIX)
+
+  # If there were no previous options
+  IF(NOT ${COMPILE_OPTIONS})
+    SET(${COMPILE_OPTIONS} "")
+  ENDIF()
+
+  # Append flags
+  FOREACH(FLAG ${${PREFIX}_CFLAGS})
+    SET(${COMPILE_OPTIONS} "${${COMPILE_OPTIONS}};${FLAG}")
+  ENDFOREACH()
+ENDMACRO(PKG_CONFIG_ADD_COMPILE_OPTIONS COMPILE_OPTIONS DEPENDENCY)
