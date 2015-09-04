@@ -30,10 +30,10 @@ MACRO (OMNIIDL_INCLUDE_DIRECTORIES)
   STRING (REGEX REPLACE " " ";" _OMNIIDL_INCLUDE_FLAG ${_OMNIIDL_INCLUDE_FLAG})
 ENDMACRO ()
 
-# GENERATE_IDL_FILE FILENAME DIRECTORY
+# GENERATE_IDL_CPP FILENAME DIRECTORY
 # ------------------------------------
 #
-# Generate stubs from an idl file.
+# Generate C++ stubs from an idl file.
 # An include directory can also be specified.
 #
 # FILENAME : IDL filename without the extension
@@ -41,7 +41,51 @@ ENDMACRO ()
 # DIRECTORY : IDL directory
 #             The idl file being search for is: ${DIRECTORY}/${_filename}.idl
 #
-MACRO(GENERATE_IDL_FILE FILENAME DIRECTORY)
+MACRO(GENERATE_IDL_CPP FILENAME DIRECTORY)
+  GET_FILENAME_COMPONENT (_PATH ${FILENAME} PATH)
+  GET_FILENAME_COMPONENT (_NAME ${FILENAME} NAME)
+  IF (_PATH STREQUAL "")
+    SET(_PATH "./")
+  ENDIF (_PATH STREQUAL "")
+  FIND_PROGRAM(OMNIIDL omniidl)
+  IF(${OMNIIDL} STREQUAL OMNIIDL-NOTFOUND)
+    MESSAGE(FATAL_ERROR "cannot find omniidl.")
+  ENDIF(${OMNIIDL} STREQUAL OMNIIDL-NOTFOUND)
+
+  LIST(APPEND IDL_COMPILED_FILES ${FILENAME}SK.cc ${FILENAME}.hh)
+  ADD_CUSTOM_COMMAND(
+    OUTPUT ${IDL_COMPILED_FILES}
+    COMMAND ${OMNIIDL}
+    ARGS -bcxx -Wbkeep_inc_path ${_OMNIIDL_INCLUDE_FLAG}
+    -C${_PATH} ${DIRECTORY}/${_NAME}.idl
+    MAIN_DEPENDENCY ${DIRECTORY}/${_NAME}.idl
+    COMMENT "Compiling C++ stubs for ${_NAME}"
+    )
+
+  SET(ALL_IDL_CPP_STUBS ${IDL_COMPILED_FILES} ${ALL_IDL_CPP_STUBS})
+
+  # Clean generated files.
+  SET_PROPERTY(
+    DIRECTORY APPEND PROPERTY
+    ADDITIONAL_MAKE_CLEAN_FILES
+    ${IDL_COMPILED_FILES}
+    )
+
+  LIST(APPEND LOGGING_WATCHED_VARIABLES OMNIIDL ALL_IDL_CPP_STUBS)
+ENDMACRO(GENERATE_IDL_CPP FILENAME DIRECTORY)
+
+# GENERATE_IDL_PYTHON FILENAME DIRECTORY
+# ------------------------------------
+#
+# Generate Python stubs from an idl file.
+# An include directory can also be specified.
+#
+# FILENAME : IDL filename without the extension
+#            Can be prefixed by a path: _path/_filename
+# DIRECTORY : IDL directory
+#             The idl file being search for is: ${DIRECTORY}/${_filename}.idl
+#
+MACRO(GENERATE_IDL_PYTHON FILENAME DIRECTORY)
   GET_FILENAME_COMPONENT (_PATH ${FILENAME} PATH)
   GET_FILENAME_COMPONENT (_NAME ${FILENAME} NAME)
   IF (_PATH STREQUAL "")
@@ -52,20 +96,36 @@ MACRO(GENERATE_IDL_FILE FILENAME DIRECTORY)
     MESSAGE(FATAL_ERROR "cannot find omniidl.")
   ENDIF(${OMNIIDL} STREQUAL OMNIIDL-NOTFOUND)
   ADD_CUSTOM_COMMAND(
-    OUTPUT ${FILENAME}SK.cc ${FILENAME}.hh
+    OUTPUT ${FILENAME}_idl.py
     COMMAND ${OMNIIDL}
-    ARGS -bcxx -Wbkeep_inc_path ${_OMNIIDL_INCLUDE_FLAG}
+    ARGS -bpython ${_OMNIIDL_INCLUDE_FLAG}
     -C${_PATH} ${DIRECTORY}/${_NAME}.idl
     MAIN_DEPENDENCY ${DIRECTORY}/${_NAME}.idl
+    COMMENT "Compiling Python stubs for ${_NAME}"
     )
-  SET(ALL_IDL_STUBS ${FILENAME}SK.cc ${FILENAME}.hh ${ALL_IDL_STUBS})
+  SET(ALL_IDL_PYTHON_STUBS ${FILENAME}_idl.py ${ALL_IDL_PYTHON_STUBS})
 
   # Clean generated files.
   SET_PROPERTY(
     DIRECTORY APPEND PROPERTY
     ADDITIONAL_MAKE_CLEAN_FILES
-    ${FILENAME}SK.cc ${FILENAME}.hh
+    ${FILENAME}_idl.py
     )
 
-  LIST(APPEND LOGGING_WATCHED_VARIABLES OMNIIDL ALL_IDL_STUBS)
+  LIST(APPEND LOGGING_WATCHED_VARIABLES OMNIIDL ALL_IDL_PYTHON_STUBS)
+ENDMACRO(GENERATE_IDL_PYTHON FILENAME DIRECTORY)
+
+# GENERATE_IDL_FILE FILENAME DIRECTORY
+# ------------------------------------
+#
+# Generate C++ stubs from an idl file (legacy macro).
+# An include directory can also be specified.
+#
+# FILENAME : IDL filename without the extension
+#            Can be prefixed by a path: _path/_filename
+# DIRECTORY : IDL directory
+#             The idl file being search for is: ${DIRECTORY}/${_filename}.idl
+#
+MACRO(GENERATE_IDL_FILE FILENAME DIRECTORY)
+  GENERATE_IDL_CPP(${FILENAME} ${DIRECTORY})
 ENDMACRO(GENERATE_IDL_FILE FILENAME DIRECTORY)
