@@ -36,6 +36,14 @@ ENDMACRO ()
 # Generate C++ stubs from an idl file.
 # An include directory can also be specified.
 #
+# In CMake, "source file properties are visible only to targets added in the
+# same directory (CMakeLists.txt)". As a result, we cannot provide a single
+# macro that takes care of generating the files and ensures a proper build
+# dependency graph.
+#
+# For more information:
+# http://www.cmake.org/Wiki/CMake_FAQ#How_can_I_add_a_dependency_to_a_source_file_which_is_generated_in_a_subdirectory.3F
+#
 # FILENAME : IDL filename without the extension
 #            Can be prefixed by a path: _path/_filename
 # DIRECTORY : IDL directory
@@ -80,6 +88,14 @@ ENDMACRO(GENERATE_IDL_CPP FILENAME DIRECTORY)
 # Generate Python stubs from an idl file.
 # An include directory can also be specified.
 #
+# In CMake, "source file properties are visible only to targets added in the
+# same directory (CMakeLists.txt)". As a result, we cannot provide a single
+# macro that takes care of generating the files and ensures a proper build
+# dependency graph.
+#
+# For more information:
+# http://www.cmake.org/Wiki/CMake_FAQ#How_can_I_add_a_dependency_to_a_source_file_which_is_generated_in_a_subdirectory.3F
+#
 # FILENAME : IDL filename without the extension
 #            Can be prefixed by a path: _path/_filename
 # DIRECTORY : IDL directory
@@ -114,18 +130,3 @@ MACRO(GENERATE_IDL_PYTHON FILENAME DIRECTORY)
 
   LIST(APPEND LOGGING_WATCHED_VARIABLES OMNIIDL ALL_IDL_PYTHON_STUBS)
 ENDMACRO(GENERATE_IDL_PYTHON FILENAME DIRECTORY)
-
-# GENERATE_IDL_FILE FILENAME DIRECTORY
-# ------------------------------------
-#
-# Generate C++ stubs from an idl file (legacy macro).
-# An include directory can also be specified.
-#
-# FILENAME : IDL filename without the extension
-#            Can be prefixed by a path: _path/_filename
-# DIRECTORY : IDL directory
-#             The idl file being search for is: ${DIRECTORY}/${_filename}.idl
-#
-MACRO(GENERATE_IDL_FILE FILENAME DIRECTORY)
-  GENERATE_IDL_CPP(${FILENAME} ${DIRECTORY})
-ENDMACRO(GENERATE_IDL_FILE FILENAME DIRECTORY)
