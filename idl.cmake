@@ -67,7 +67,7 @@ MACRO(GENERATE_IDL_CPP FILENAME DIRECTORY)
     ARGS -bcxx -Wbkeep_inc_path ${_OMNIIDL_INCLUDE_FLAG}
     -C${_PATH} ${DIRECTORY}/${_NAME}.idl
     MAIN_DEPENDENCY ${DIRECTORY}/${_NAME}.idl
-    COMMENT "Compiling C++ stubs for ${_NAME}"
+    COMMENT "Generating C++ stubs for ${_NAME}"
     )
 
   SET(ALL_IDL_CPP_STUBS ${IDL_COMPILED_FILES} ${ALL_IDL_CPP_STUBS})
@@ -117,7 +117,7 @@ MACRO(GENERATE_IDL_PYTHON FILENAME DIRECTORY)
     ARGS -bpython ${_OMNIIDL_INCLUDE_FLAG}
     -C${_PATH} ${DIRECTORY}/${_NAME}.idl
     MAIN_DEPENDENCY ${DIRECTORY}/${_NAME}.idl
-    COMMENT "Compiling Python stubs for ${_NAME}"
+    COMMENT "Generating Python stubs for ${_NAME}"
     )
   SET(ALL_IDL_PYTHON_STUBS ${FILENAME}_idl.py ${ALL_IDL_PYTHON_STUBS})
 
