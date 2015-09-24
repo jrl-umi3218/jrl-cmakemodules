@@ -249,22 +249,43 @@ MACRO(ADD_DEPENDENCY P_REQUIRED DOC_ONLY PKG_CONFIG_STRING PKG_CONFIG_DEBUG_STRI
     SET(${PREFIX}_DEBUG_FOUND 0)
   ENDIF()
 
+  # This makes the debug dependency optional when building in release and
+  # vice-versa, this only applies to single build type generators
+  SET(PP_REQUIRED ${P_REQUIRED}) # Work-around macro limitation
+  IF(DEFINED ${PREFIX}_DEBUG)
+    SET(P_DEBUG_REQUIRED ${P_REQUIRED})
+    IF(${P_REQUIRED})
+      # Single build type generators
+      IF(DEFINED CMAKE_BUILD_TYPE)
+        STRING(TOLOWER "${CMAKE_BUILD_TYPE}" cmake_build_type)
+        IF("${cmake_build_type}" MATCHES "debug")
+          SET(PP_REQUIRED 0)
+        ELSE()
+          SET(P_DEBUG_REQUIRED 0)
+        ENDIF()
+      ENDIF()
+    ENDIF()
+  ENDIF()
+
   # Search for the package.
-  IF(${P_REQUIRED})
+  IF(${PP_REQUIRED})
     MESSAGE(STATUS "${PKG_CONFIG_STRING} is required.")
     PKG_CHECK_MODULES("${PREFIX}" REQUIRED "${PKG_CONFIG_STRING}")
-    IF(DEFINED ${PREFIX}_DEBUG)
-      MESSAGE(STATUS "${PKG_CONFIG_DEBUG_STRING} is required")
-      PKG_CHECK_MODULES("${PREFIX}_DEBUG" REQUIRED "${PKG_CONFIG_DEBUG_STRING}")
-    ENDIF()
-  ELSE(${P_REQUIRED})
+  ELSE(${PP_REQUIRED})
     MESSAGE(STATUS "${PKG_CONFIG_STRING} is optional.")
     PKG_CHECK_MODULES("${PREFIX}" "${PKG_CONFIG_STRING}")
-    IF(DEFINED ${PREFIX}_DEBUG)
+  ENDIF(${PP_REQUIRED})
+
+  # Search for the debug package
+  IF(DEFINED ${PREFIX}_DEBUG)
+    IF(${P_DEBUG_REQUIRED})
+      MESSAGE(STATUS "${PKG_CONFIG_DEBUG_STRING} is required")
+      PKG_CHECK_MODULES("${PREFIX}_DEBUG" REQUIRED "${PKG_CONFIG_DEBUG_STRING}")
+    ELSE(${P_DEBUG_REQUIRED})
       MESSAGE(STATUS "${PKG_CONFIG_DEBUG_STRING} is optional")
       PKG_CHECK_MODULES("${PREFIX}_DEBUG" "${PKG_CONFIG_DEBUG_STRING}")
-    ENDIF()
-  ENDIF(${P_REQUIRED})
+    ENDIF(${P_DEBUG_REQUIRED})
+  ENDIF()
 
   # Watch variables.
   LIST(APPEND LOGGING_WATCHED_VARIABLES
@@ -703,7 +724,7 @@ MACRO(BUILD_PREFIX_FOR_PKG DEPENDENCY PREFIX)
       "The package ${DEPENDENCY} has not been detected correctly.\n"
       "Have you called ADD_REQUIRED_DEPENDENCY/ADD_OPTIONAL_DEPENDENCY?")
   ENDIF()
-  IF(NOT ${LPREFIX}_FOUND)
+  IF(NOT (${LPREFIX}_FOUND OR ${LPREFIX}_DEBUG_FOUND))
     MESSAGE(FATAL_ERROR
       "The package ${DEPENDENCY} has not been found.")
   ENDIF()
