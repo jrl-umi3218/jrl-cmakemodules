@@ -156,11 +156,19 @@ MACRO(_SETUP_PROJECT_DOCUMENTATION_FINALIZE)
   ENDIF()
 
   # Generate Doxyfile.extra.
-  CONFIGURE_FILE(
-    ${PROJECT_SOURCE_DIR}/doc/Doxyfile.extra.in
-    ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile.extra
-    @ONLY
-    )
+  IF(EXISTS ${PROJECT_SOURCE_DIR}/doc/Doxyfile.extra.in)
+    CONFIGURE_FILE(
+      ${PROJECT_SOURCE_DIR}/doc/Doxyfile.extra.in
+      ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile.extra
+      @ONLY
+      )
+  ELSE()
+    CONFIGURE_FILE(
+      ${PROJECT_SOURCE_DIR}/cmake/doxygen/Doxyfile.extra.in
+      ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile.extra
+      @ONLY
+      )
+  ENDIF()
   # Generate Doxyfile.
   CONFIGURE_FILE(
     ${PROJECT_SOURCE_DIR}/cmake/doxygen/Doxyfile.in
