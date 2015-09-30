@@ -125,28 +125,23 @@ ENDMACRO(_SETUP_PROJECT_DOCUMENTATION)
 #
 MACRO(_SETUP_PROJECT_DOCUMENTATION_FINALIZE)
   IF(DOXYGEN_FOUND)
+    IF(NOT ${DOXYGEN_USE_MATHJAX} STREQUAL "YES")
+      # Make sure latex, dvips and gs are available
+      FIND_PROGRAM(LATEX latex DOC "LaTeX compiler")
+      FIND_PROGRAM(DVIPS dvips DOC "DVI to PostScript converter")
+      FIND_PROGRAM(GS gs DOC "GhostScript interpreter")
+
+      IF(NOT (LATEX AND GS AND DVIPS))
+        MESSAGE("Failed to find latex/dvips/gs, will use MathJax backend.")
+        SET(DOXYGEN_USE_MATHJAX "YES")
+      ENDIF()
+    ENDIF()
+
     IF(${DOXYGEN_USE_MATHJAX} STREQUAL "YES")
       MESSAGE("-- Doxygen rendering: using MathJax backend")
       SET(DOXYGEN_HEADER_NAME "header-mathjax.html")
     ELSE()
       MESSAGE("-- Doxygen rendering: using LaTeX backend")
-      # Make sure latex, dvips and gs are available
-      FIND_PROGRAM(LATEX latex DOC "LaTeX compiler")
-      IF(NOT LATEX)
-        MESSAGE(SEND_ERROR "Failed to find latex.")
-      ENDIF()
-
-      FIND_PROGRAM(DVIPS dvips DOC "DVI to PostScript converter")
-      IF(NOT DVIPS)
-        MESSAGE(SEND_ERROR "Failed to find dvips.")
-      ENDIF()
-
-      FIND_PROGRAM(GS gs DOC
-                   "GhostScript interpreter")
-      IF(NOT GS)
-        MESSAGE(SEND_ERROR "Failed to find gs.")
-      ENDIF()
-
       SET(DOXYGEN_HEADER_NAME "header.html")
     ENDIF()
 
