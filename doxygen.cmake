@@ -49,9 +49,8 @@ MACRO(_SETUP_PROJECT_DOCUMENTATION)
 
     # HTML style sheet configuration
     IF(NOT DEFINED DOXYGEN_USE_TEMPLATE_CSS)
-      SET(DOXYGEN_USE_TEMPLATE_CSS "NO")
+      SET(DOXYGEN_USE_TEMPLATE_CSS "YES")
     ENDIF()
-
 
     # Teach CMake how to generate the documentation.
     IF(MSVC)
