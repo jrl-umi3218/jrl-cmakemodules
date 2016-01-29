@@ -1,4 +1,4 @@
-# Copyright (C) 2008-2014 LAAS-CNRS, JRL AIST-CNRS.
+# Copyright (C) 2008-2016 LAAS-CNRS, JRL AIST-CNRS.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -558,13 +558,13 @@ ENDMACRO(PKG_CONFIG_APPEND_CFLAGS)
 MACRO(PKG_CONFIG_APPEND_LIBS_RAW LIBS)
   FOREACH(LIB ${LIBS})
     IF(LIB)
-      IF( APPLE AND ${LIB} MATCHES .framework)
+      IF( APPLE AND ${LIB} MATCHES "\\.framework")
 	    GET_FILENAME_COMPONENT(framework_PATH ${LIB} PATH)
 	    GET_FILENAME_COMPONENT(framework_NAME ${LIB} NAME_WE)
         SET(_PKG_CONFIG_LIBS "${_PKG_CONFIG_LIBS} -F${framework_PATH} -framework ${framework_NAME}" CACHE INTERNAL "")
-      ELSE( APPLE AND ${LIB} MATCHES .framework)
+      ELSE( APPLE AND ${LIB} MATCHES "\\.framework")
         SET(_PKG_CONFIG_LIBS "${_PKG_CONFIG_LIBS} ${LIB}" CACHE INTERNAL "")
-      ENDIF( APPLE AND ${LIB} MATCHES .framework)
+      ENDIF( APPLE AND ${LIB} MATCHES "\\.framework")
     ENDIF(LIB)
   ENDFOREACH(LIB ${LIBS})
   STRING(REPLACE "\n" "" _PKG_CONFIG_LIBS "${_PKG_CONFIG_LIBS}")
