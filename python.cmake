@@ -14,13 +14,24 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+# FINDPYTHON
+# ------------------------------------
+#
+# Find python interpreter and python libs.
+# Arguments are passed to the find_package command so
+# refer to find_package documentation to learn about valid arguments.
+#
+# For instance, the command
+# FINDPYTHON(2.7 EXACT REQUIRED)
+# will force CMake to find Python2.7
+#
 MACRO(FINDPYTHON)
-INCLUDE(FindPythonLibs)
+FIND_PACKAGE(PythonLibs ${ARGN})
 IF (NOT ${PYTHONLIBS_FOUND} STREQUAL TRUE)
    MESSAGE(FATAL_ERROR "Python has not been found.")
 ENDIF (NOT ${PYTHONLIBS_FOUND} STREQUAL TRUE)
 
-INCLUDE(FindPythonInterp)
+FIND_PACKAGE(PythonInterp ${ARGN})
 IF (NOT ${PYTHONINTERP_FOUND} STREQUAL TRUE)
    MESSAGE(FATAL_ERROR "Python executable has not been found.")
 ENDIF (NOT ${PYTHONINTERP_FOUND} STREQUAL TRUE)
