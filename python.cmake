@@ -25,16 +25,21 @@
 # FINDPYTHON(2.7 EXACT REQUIRED)
 # will force CMake to find Python2.7
 #
+# WARNING: According to the FindPythonLibs and FindPythonInterp
+# documentation, you could also set Python_ADDITIONAL_VERSIONS.
+# If you do this, you will not have an error if you found two different versions
+# or another version that the requested one.
+#
 MACRO(FINDPYTHON)
-FIND_PACKAGE(PythonLibs ${ARGN})
-IF (NOT ${PYTHONLIBS_FOUND} STREQUAL TRUE)
-   MESSAGE(FATAL_ERROR "Python has not been found.")
-ENDIF (NOT ${PYTHONLIBS_FOUND} STREQUAL TRUE)
-
 FIND_PACKAGE(PythonInterp ${ARGN})
 IF (NOT ${PYTHONINTERP_FOUND} STREQUAL TRUE)
    MESSAGE(FATAL_ERROR "Python executable has not been found.")
 ENDIF (NOT ${PYTHONINTERP_FOUND} STREQUAL TRUE)
+
+FIND_PACKAGE(PythonLibs ${ARGN})
+IF (NOT ${PYTHONLIBS_FOUND} STREQUAL TRUE)
+   MESSAGE(FATAL_ERROR "Python has not been found.")
+ENDIF (NOT ${PYTHONLIBS_FOUND} STREQUAL TRUE)
 
 # Find PYTHON_LIBRARY_DIRS
 GET_FILENAME_COMPONENT(PYTHON_LIBRARY_DIRS ${PYTHON_LIBRARIES} PATH)
