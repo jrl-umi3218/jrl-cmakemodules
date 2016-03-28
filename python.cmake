@@ -30,6 +30,11 @@
 # If you do this, you will not have an error if you found two different versions
 # or another version that the requested one.
 #
+
+IF(CMAKE_VERSION VERSION_LESS "3.2")
+  SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_DIR}/python ${CMAKE_MODULE_PATH})
+ENDIF(CMAKE_VERSION VERSION_LESS "3.2")
+
 MACRO(FINDPYTHON)
 FIND_PACKAGE(PythonInterp ${ARGN})
 IF (NOT ${PYTHONINTERP_FOUND} STREQUAL TRUE)
