@@ -49,7 +49,7 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-include(${CMAKE_CURRENT_LIST_DIR}/CMakeFindFrameworks.cmake)
+include(CMakeFindFrameworks)
 # Search for the python framework on Apple.
 CMAKE_FIND_FRAMEWORKS(Python)
 
@@ -194,17 +194,33 @@ set(PYTHON_DEBUG_LIBRARIES "${PYTHON_DEBUG_LIBRARY}")
 # what SELECT_LIBRARY_CONFIGURATIONS() expects.
 set(PYTHON_LIBRARY_DEBUG "${PYTHON_DEBUG_LIBRARY}")
 set(PYTHON_LIBRARY_RELEASE "${PYTHON_LIBRARY}")
-include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
+include(SelectLibraryConfigurations)
 SELECT_LIBRARY_CONFIGURATIONS(PYTHON)
 # SELECT_LIBRARY_CONFIGURATIONS() sets ${PREFIX}_FOUND if it has a library.
 # Unset this, this prefix doesn't match the module prefix, they are different
 # for historical reasons.
 unset(PYTHON_FOUND)
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+# This is a hack to make FindPackageHandleStandardArgs not failing
+# when EXACT version of the form "3" or "3.2" is required and
+# PYTHONLIBS_VERSION_STRING is "3.2.4".
+# This hack is in CMake 3.2 and above.
+set(_PYTHONLIBS_VERSION_STRING "${PYTHONLIBS_VERSION_STRING}")
+if(PythonLibs_FIND_VERSION)
+    set(PYTHONLIBS_VERSION_STRING "${PythonLibs_FIND_VERSION_MAJOR}")
+    if(PythonLibs_FIND_VERSION_COUNT GREATER 1)
+        set(PYTHONLIBS_VERSION_STRING "${PYTHONLIBS_VERSION_STRING}.${PythonLibs_FIND_VERSION_MINOR}")
+    endif(PythonLibs_FIND_VERSION_COUNT GREATER 1)
+    if(PythonLibs_FIND_VERSION_COUNT GREATER 2)
+        set(PYTHONLIBS_VERSION_STRING "${PYTHONLIBS_VERSION_STRING}.${PythonLibs_FIND_VERSION_TWEAK}")
+    endif(PythonLibs_FIND_VERSION_COUNT GREATER 2)
+endif()
+
+include(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(PythonLibs
                                   REQUIRED_VARS PYTHON_LIBRARIES PYTHON_INCLUDE_DIRS
                                   VERSION_VAR PYTHONLIBS_VERSION_STRING)
+set(PYTHONLIBS_VERSION_STRING "${_PYTHONLIBS_VERSION_STRING}")
 
 # PYTHON_ADD_MODULE(<name> src1 src2 ... srcN) is used to build modules for python.
 # PYTHON_WRITE_MODULES_HEADER(<filename>) writes a header file you can include

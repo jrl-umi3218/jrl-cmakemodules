@@ -156,9 +156,25 @@ if(PYTHON_EXECUTABLE)
     unset(_VERSION)
 endif()
 
+# This is a hack to make FindPackageHandleStandardArgs not failing
+# when EXACT version of the form "3" or "3.2" is required and
+# PYTHONLIBS_VERSION_STRING is "3.2.4".
+# This hack is in CMake 3.2 and above.
+set(_PYTHON_VERSION_STRING "${PYTHON_VERSION_STRING}")
+if(PythonInterp_FIND_VERSION)
+    set(PYTHON_VERSION_STRING "${PythonInterp_FIND_VERSION_MAJOR}")
+    if(PythonInterp_FIND_VERSION_COUNT GREATER 1)
+        set(PYTHON_VERSION_STRING "${PYTHON_VERSION_STRING}.${PythonInterp_FIND_VERSION_MINOR}")
+    endif(PythonInterp_FIND_VERSION_COUNT GREATER 1)
+    if(PythonInterp_FIND_VERSION_COUNT GREATER 2)
+        set(PYTHON_VERSION_STRING "${PYTHON_VERSION_STRING}.${PythonInterp_FIND_VERSION_TWEAK}")
+    endif(PythonInterp_FIND_VERSION_COUNT GREATER 2)
+endif()
+
 # handle the QUIETLY and REQUIRED arguments and set PYTHONINTERP_FOUND to TRUE if
 # all listed variables are TRUE
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(PythonInterp REQUIRED_VARS PYTHON_EXECUTABLE VERSION_VAR PYTHON_VERSION_STRING)
+set(PYTHON_VERSION_STRING "${_PYTHON_VERSION_STRING}")
 
 mark_as_advanced(PYTHON_EXECUTABLE)
