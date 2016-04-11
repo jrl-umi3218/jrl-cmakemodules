@@ -17,24 +17,36 @@
 # -----------------
 #
 # This macro gets eigen include path from pkg-config file, and adds it include directories.
+# On Windows, there is no pkg-config for Eigen, thus we fall back on a manual search.
 
-# If the variable Eigen_REQUIRED is not defined before calling
-#  the method SEARCH_FOR_EIGEN, the version chosen is the default one.
+# If no version requirement argument is passed to the macro, it looks for the 
+# variable Eigen_REQUIRED. If this variable is not defined before calling
+# the method SEARCH_FOR_EIGEN, the version chosen is the default one.
 MACRO(SEARCH_FOR_EIGEN)
-
   SET(_Eigen_FOUND 0)
-  IF(NOT Eigen_REQUIRED)
+  IF(${ARGC} GREATER 0)
+    SET(Eigen_REQUIRED ${ARGV0})
+  ELSEIF(NOT Eigen_REQUIRED)
     SET(Eigen_REQUIRED "eigen3 >= 3.0.0")
-  ENDIF(NOT Eigen_REQUIRED)
-  PKG_CHECK_MODULES(_Eigen REQUIRED ${Eigen_REQUIRED})
-  
-  IF(NOT ${_Eigen_FOUND})
-    MESSAGE(FATAL_ERROR "Check that package Eigen is installed in a directory pointed out by PKG_CONFIG_PATH.")
-  ENDIF(NOT ${_Eigen_FOUND})
-  
-  SET(${PROJECT_NAME}_CXX_FLAGS "${${PROJECT_NAME}_CXX_FLAGS} ${_Eigen_CFLAGS}")
-  SET(${PROJECT_NAME}_LINK_FLAGS "${${PROJECT_NAME}_LINK_FLAGS} ${_Eigen_LDFLAGS}")
-
-  STRING(REGEX REPLACE "-I" "" Eigen_INCLUDE_DIR ${_Eigen_CFLAGS})
-  INCLUDE_DIRECTORIES(SYSTEM ${Eigen_INCLUDE_DIR} )
+  ENDIF()
+  IF(WIN32)
+    find_path(Eigen_INCLUDE_DIR NAMES signature_of_eigen3_matrix_library
+      PATHS
+      ${CMAKE_INSTALL_PREFIX}/include
+      PATH_SUFFIXES eigen3 eigen
+    )
+    INCLUDE_DIRECTORIES(SYSTEM ${Eigen_INCLUDE_DIR})
+  ELSE()
+    PKG_CHECK_MODULES(_Eigen REQUIRED ${Eigen_REQUIRED})
+    
+    IF(NOT ${_Eigen_FOUND})
+      MESSAGE(FATAL_ERROR "Check that package Eigen is installed in a directory pointed out by PKG_CONFIG_PATH.")
+    ENDIF(NOT ${_Eigen_FOUND})
+    
+    SET(${PROJECT_NAME}_CXX_FLAGS "${${PROJECT_NAME}_CXX_FLAGS} ${_Eigen_CFLAGS}")
+    SET(${PROJECT_NAME}_LINK_FLAGS "${${PROJECT_NAME}_LINK_FLAGS} ${_Eigen_LDFLAGS}")
+    
+    STRING(REGEX REPLACE "-I" "" Eigen_INCLUDE_DIR ${_Eigen_CFLAGS})
+    INCLUDE_DIRECTORIES(SYSTEM ${Eigen_INCLUDE_DIR} )
+  ENDIF(WIN32)
 ENDMACRO(SEARCH_FOR_EIGEN)
