@@ -102,7 +102,8 @@ ENDMACRO(SEARCH_FOR_BOOST)
 # \input target is either a library or an executable
 # On darwin systems, boost_python is not linked against any python library.
 # This linkage is resolved at execution time via the python interpreter.
-# We then need to stipulate that boost_python has unresolved symbols at compile time.
+# We then need to stipulate that boost_python has unresolved symbols at compile time for a library target.
+# Otherwise, for executables we need to link to a specific version of python.
 #
 MACRO(TARGET_LINK_BOOST_PYTHON target)
   IF(APPLE)
@@ -135,10 +136,15 @@ MACRO(PKG_CONFIG_APPEND_BOOST_LIBS)
   FOREACH(COMPONENT ${ARGN})
     IF(APPLE)
       STRING(TOUPPER ${COMPONENT} UPPERCOMPONENT)
-      PKG_CONFIG_APPEND_LIBS_RAW(${Boost_${UPPERCOMPONENT}_LIBRARY})
-    ELSE()
+      STRING(TOLOWER ${COMPONENT} LOWERCOMPONENT)
+      IF("${LOWERCOMPONENT}" MATCHES "python")
+        PKG_CONFIG_APPEND_LIBS_RAW(-Wl,-undefined,dynamic_lookup,${Boost_${UPPERCOMPONENT}_LIBRARY})
+      ELSE("${LOWERCOMPONENT}" MATCHES "python")
+        PKG_CONFIG_APPEND_LIBS_RAW(${Boost_${UPPERCOMPONENT}_LIBRARY})
+      ENDIF("${LOWERCOMPONENT}" MATCHES "python")
+    ELSE(APPLE)
       STRING(TOLOWER ${COMPONENT} LOWERCOMPONENT)
       PKG_CONFIG_APPEND_LIBS(boost_${LOWERCOMPONENT})
-    ENDIF()
+    ENDIF(APPLE)
   ENDFOREACH()
 ENDMACRO(PKG_CONFIG_APPEND_BOOST_LIBS)
