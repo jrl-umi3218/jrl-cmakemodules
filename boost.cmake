@@ -87,6 +87,10 @@ MACRO(SEARCH_FOR_BOOST)
   # We then remove boost_python from the global Boost_LIBRARIES list to handle it with specific care.
   IF(${Boost_PYTHON_LIBRARY})
     LIST(REMOVE_ITEM Boost_LIBRARIES ${Boost_PYTHON_LIBRARY})
+    MESSAGE(WARNING 
+            "The boost_python library have been removed from the Boost_LIBRARIES variable.
+            \n To link againt boost_python, please use the macro TARGET_LINK_BOOST_PYTHON."
+           )
   ENDIF(${Boost_PYTHON_LIBRARY})
 
 ENDMACRO(SEARCH_FOR_BOOST)
