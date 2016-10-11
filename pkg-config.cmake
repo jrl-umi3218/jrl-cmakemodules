@@ -648,6 +648,8 @@ MACRO(PKG_CONFIG_USE_LCOMPILE_DEPENDENCY TARGET PREFIX)
       LIST(APPEND CFLAGS "${FLAG}")
     ENDFOREACH()
   ENDIF()
+  # This cast from LIST to STRING is mandatory for old CMake versions
+  STRING(REPLACE ";" " " CFLAGS "${CFLAGS}")
   SET_TARGET_PROPERTIES(${TARGET} PROPERTIES ${COMPILE_OPTIONS_NAME} "${CFLAGS}")
 
   # Include/libraries paths seems to be filtered on Linux, add paths
