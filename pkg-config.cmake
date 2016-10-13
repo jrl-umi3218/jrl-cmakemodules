@@ -209,7 +209,7 @@ MACRO(_SETUP_PROJECT_PKG_CONFIG_FINALIZE)
 ENDMACRO(_SETUP_PROJECT_PKG_CONFIG_FINALIZE)
 
 
-# ADD_DEPENDENCY(PREFIX P_REQUIRED PKGCONFIG_STRING)
+# ADD_DEPENDENCY(PREFIX P_REQUIRED COMPILE_TIME_ONLY PKGCONFIG_STRING)
 # ------------------------------------------------
 #
 # Check for a dependency using pkg-config. Fail if the package cannot
@@ -223,11 +223,14 @@ ENDMACRO(_SETUP_PROJECT_PKG_CONFIG_FINALIZE)
 #              of the generated pc file. Indeed from the binary viewpoint
 #              the package becomes required.
 #
+# COMPILE_TIME_ONLY : if set to 1, the package is only requiered at compile time and won't
+#                     appear as a dependency inside the *.pc file. 
+#
 # PKG_CONFIG_STRING	: string passed to pkg-config to check the version.
 #			  Typically, this string looks like:
 #                         ``my-package >= 0.5''
 #
-MACRO(ADD_DEPENDENCY P_REQUIRED DOC_ONLY PKG_CONFIG_STRING PKG_CONFIG_DEBUG_STRING)
+MACRO(ADD_DEPENDENCY P_REQUIRED COMPILE_TIME_ONLY PKG_CONFIG_STRING PKG_CONFIG_DEBUG_STRING)
   # Retrieve the left part of the equation to get package name.
   STRING(REGEX MATCH "[^<>= ]+" LIBRARY_NAME "${PKG_CONFIG_STRING}")
   # And transform it into a valid variable prefix.
@@ -385,7 +388,7 @@ MACRO(ADD_DEPENDENCY P_REQUIRED DOC_ONLY PKG_CONFIG_STRING PKG_CONFIG_DEBUG_STRI
 
   # Add the package to the dependency list if found and if dependency
   # is triggered not only for documentation
-  IF((${${PREFIX}_FOUND}) AND (NOT ${DOC_ONLY}))
+  IF((${${PREFIX}_FOUND}) AND (NOT ${COMPILE_TIME_ONLY}))
     IF(DEFINED PROJECT_DEBUG_POSTFIX AND DEFINED ${PREFIX}_DEBUG)
       _ADD_TO_LIST(_PKG_CONFIG_REQUIRES_DEBUG "${PKG_CONFIG_DEBUG_STRING}" ",")
       _ADD_TO_LIST(_PKG_CONFIG_REQUIRES_OPTIMIZED "${PKG_CONFIG_STRING}" ",")
@@ -465,6 +468,29 @@ MACRO(ADD_OPTIONAL_DEPENDENCY PKG_CONFIG_STRING)
   ADD_DEPENDENCY(0 0 ${PKG_CONFIG_STRING} "${PKG_CONFIG_DEBUG_STRING}")
 ENDMACRO(ADD_OPTIONAL_DEPENDENCY)
 
+# ADD_COMPILE_DEPENDENCY(PREFIX PKGCONFIG_STRING)
+# ------------------------------------------------
+#
+# Check for a dependency using pkg-config. Fail if the package cannot be found.
+# The package won't appear as depency inside the *.pc file of the PROJECT.
+#
+#
+# PKG_CONFIG_STRING : string passed to pkg-config to check the version.
+#       Typically, this string looks like:
+#                         ``my-package >= 0.5''
+#
+# An optional argument can be passed to define an alternate PKG_CONFIG_STRING
+# for debug builds. It should follow the same rule as PKG_CONFIG_STRING.
+#
+MACRO(ADD_COMPILE_DEPENDENCY PKG_CONFIG_STRING)
+  SET(PKG_CONFIG_DEBUG_STRING "")
+  FOREACH(ARG ${ARGN})
+    SET(PKG_CONFIG_DEBUG_STRING ${ARG})
+  ENDFOREACH()
+  ADD_DEPENDENCY(1 1 ${PKG_CONFIG_STRING} "${PKG_CONFIG_DEBUG_STRING}")
+ENDMACRO(ADD_COMPILE_DEPENDENCY)
+
+
 # ADD_DOC_DEPENDENCY(PREFIX PKGCONFIG_STRING)
 # ------------------------------------------------
 #
@@ -479,11 +505,7 @@ ENDMACRO(ADD_OPTIONAL_DEPENDENCY)
 # for debug builds. It should follow the same rule as PKG_CONFIG_STRING.
 #
 MACRO(ADD_DOC_DEPENDENCY PKG_CONFIG_STRING)
-  SET(PKG_CONFIG_DEBUG_STRING "")
-  FOREACH(ARG ${ARGN})
-    SET(PKG_CONFIG_DEBUG_STRING ${ARG})
-  ENDFOREACH()
-  ADD_DEPENDENCY(1 1 ${PKG_CONFIG_STRING} "${PKG_CONFIG_DEBUG_STRING}")
+  ADD_COMPILE_DEPENDENCY(PKG_CONFIG_STRING)
 ENDMACRO(ADD_DOC_DEPENDENCY)
 
 # PKG_CONFIG_APPEND_LIBRARY_DIR
