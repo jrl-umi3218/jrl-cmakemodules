@@ -211,8 +211,10 @@ MACRO(SETUP_PROJECT)
   _SETUP_PROJECT_PACKAGE_INIT()
 ENDMACRO(SETUP_PROJECT)
 
-# _SETUP_PROJECT_PACKAGE_FINALIZE
+# SETUP_PROJECT_PACKAGE_FINALIZE
 # -------------
+#
+# Generates PackageConfig.cmake files so users can call find_package(MyPackage)
 #
 # Initialize the PackageConfig installation configuration.
 # https://github.com/forexample/package-example
@@ -223,7 +225,7 @@ ENDMACRO(SETUP_PROJECT)
 #
 # assumes SETUP_PROJECT() was called
 # internally the real requirement is that _SETUP_PROJECT_PACKAGE_INIT() was called
-MACRO(_SETUP_PROJECT_PACKAGE_FINALIZE)
+MACRO(SETUP_PROJECT_PACKAGE_FINALIZE)
 
 ####
 # Installation (https://github.com/forexample/package-example)
@@ -278,7 +280,7 @@ install(
     NAMESPACE "${namespace}"
     DESTINATION "${CONFIG_INSTALL_DIR}"
 )
-ENDMACRO(_SETUP_PROJECT_PACKAGE_FINALIZE)
+ENDMACRO(SETUP_PROJECT_PACKAGE_FINALIZE)
 
 
 # SETUP_PROJECT_FINALIZE
@@ -291,7 +293,6 @@ MACRO(SETUP_PROJECT_FINALIZE)
   _SETUP_PROJECT_PKG_CONFIG_FINALIZE()
   _SETUP_PROJECT_DOCUMENTATION_FINALIZE()
   _SETUP_PROJECT_HEADER_FINAlIZE()
-  _SETUP_PROJECT_PACKAGE_FINALIZE()
   _SETUP_DEBIAN()
   # Install data if needed
   _INSTALL_PROJECT_DATA()
