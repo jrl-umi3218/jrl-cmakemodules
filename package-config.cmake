@@ -15,6 +15,39 @@
 
 
 
+
+# _SETUP_PROJECT_PACKAGE_INIT
+# -------------
+#
+# Initialize the PackageConfig installation configuration.
+# https://github.com/forexample/package-example
+#
+# This function does not take any argument but check that some
+# variables are defined (see documentation at the beginning of this
+# file).
+#
+MACRO(_SETUP_PROJECT_PACKAGE_INIT)
+####
+# Installation (https://github.com/forexample/package-example)
+
+# Layout. This works for all platforms:
+#   * <prefix>/lib/cmake/<PROJECT-NAME>
+#   * <prefix>/lib/
+#   * <prefix>/include/
+set(CONFIG_INSTALL_DIR "lib/cmake/${PROJECT_NAME}")
+set(INCLUDE_INSTALL_DIR "include")
+set(INCLUDE_INSTALL_DESTINATION "${INCLUDE_INSTALL_DIR}/${PROJECT_NAME}")
+
+set(GENERATED_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated")
+
+# Configuration
+set(VERSION_CONFIG "${GENERATED_DIR}/${PROJECT_NAME}ConfigVersion.cmake")
+set(PROJECT_CONFIG "${GENERATED_DIR}/${PROJECT_NAME}Config.cmake")
+set(TARGETS_EXPORT_NAME "${PROJECT_NAME}Targets")
+set(namespace "${PROJECT_NAME}::")
+ENDMACRO(_SETUP_PROJECT_PACKAGE_INIT)
+
+
 # SETUP_PROJECT_PACKAGE_FINALIZE
 # -------------
 #
