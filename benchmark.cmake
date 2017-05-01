@@ -9,7 +9,6 @@
 #  benchmark_INCLUDE_DIRS - The benchmark include directories
 #  benchmark_LIBRARIES - The libraries needed to use benchmark
 
-MESSAGE( STATUS "CMAKE_BINARY_DIR:     BENCHMARK    " )
 
 set(benchmark_ROOT_DIR "" CACHE PATH "Folder containing benchmark")
 
