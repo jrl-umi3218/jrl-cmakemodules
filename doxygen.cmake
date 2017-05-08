@@ -87,6 +87,13 @@ MACRO(_SETUP_PROJECT_DOCUMENTATION)
         WORKING_DIRECTORY doc
         COMMENT "Generating Doxygen template files"
         )
+      ADD_CUSTOM_TARGET(generate-template-css
+        DEPENDS
+        ${CMAKE_CURRENT_BINARY_DIR}/doc/header.html
+        ${CMAKE_CURRENT_BINARY_DIR}/doc/footer.html
+        ${CMAKE_CURRENT_BINARY_DIR}/doc/doxygen.css
+        )
+      ADD_DEPENDENCIES(doc generate-template-css)
     ELSE (DOXYGEN_USE_TEMPLATE_CSS)
       FILE (COPY
         ${PROJECT_SOURCE_DIR}/cmake/doxygen/doxygen.css
