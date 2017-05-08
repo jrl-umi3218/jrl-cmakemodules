@@ -55,6 +55,9 @@ SET(PYTHON_PACKAGES_DIR site-packages)
 
 # Use either site-packages (default) or dist-packages (Debian packages) directory
 OPTION(PYTHON_DEB_LAYOUT "Enable Debian-style Python package layout" OFF)
+IF(EXISTS "/etc/debian_version")
+  SET(PYTHON_DEB_LAYOUT ON)
+ENDIF()
 
 IF (PYTHON_DEB_LAYOUT)
   SET(PYTHON_PACKAGES_DIR dist-packages)
