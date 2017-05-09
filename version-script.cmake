@@ -13,6 +13,19 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+INCLUDE(CheckCCompilerFlag)
+
+# _CHECK_VERSION_SCRIPT_SUPPORT
+# -----------------------------
+#
+# Internal macro to check if version scripts are supported by the current
+# linker.
+MACRO(_CHECK_VERSION_SCRIPT_SUPPORT)
+  SET(CMAKE_REQUIRED_FLAGS "-Wl,--version-script=${PROJECT_SOURCE_DIR}/cmake/version-script-test.lds")
+  CHECK_C_COMPILER_FLAG("" HAS_VERSION_SCRIPT_SUPPORT)
+  SET(_HAS_VERSION_SCRIPT_SUPPORT ${HAS_VERSION_SCRIPT_SUPPORT} CACHE INTERNAL "Linker supports version scripts")
+ENDMACRO(_CHECK_VERSION_SCRIPT_SUPPORT)
+
 # ADD_VERSION_SCRIPT(TARGET VERSION_SCRIPT)
 # ------------------
 #
@@ -27,7 +40,10 @@
 # VERSION_SCRIPT: Version script to add to the library.
 #
 MACRO(ADD_VERSION_SCRIPT TARGET VERSION_SCRIPT)
-  IF(NOT WIN32)
+  IF(NOT DEFINED _HAS_VERSION_SCRIPT_SUPPORT)
+    _CHECK_VERSION_SCRIPT_SUPPORT()
+  ENDIF()
+  IF(_HAS_VERSION_SCRIPT_SUPPORT)
     IF(TARGET ${TARGET})
       SET_PROPERTY(TARGET ${TARGET} APPEND_STRING PROPERTY
                    LINK_FLAGS " -Wl,--version-script,${VERSION_SCRIPT}")
