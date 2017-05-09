@@ -92,6 +92,7 @@ INCLUDE(cmake/install-data.cmake)
 INCLUDE(cmake/release.cmake)
 INCLUDE(cmake/version.cmake)
 INCLUDE(cmake/package-config.cmake)
+INCLUDE(cmake/version-script.cmake)
 
  # --------- #
  # Constants #
