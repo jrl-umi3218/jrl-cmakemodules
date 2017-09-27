@@ -13,8 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# SEARCH_FOR_BOOST
-# -----------------
+#.rst:
+# .. function:: SEARCH_FOR_BOOST
 #
 # This macro deals with Visual Studio Fortran incompatibilities
 # and add detected flags to the pkg-config file automatically.

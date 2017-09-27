@@ -13,8 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# SEARCH_FOR_EIGEN
-# -----------------
+#.rst:
+# .. function:: SEARCH_FOR_EIGEN
 #
 # This macro gets eigen include path from pkg-config file, and adds it include directories.
 # If there is no pkg-config for Eigen, we fall back to a manual search.

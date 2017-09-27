@@ -14,8 +14,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-# FINDPYTHON
-# ------------------------------------
+#.rst:
+# .. function:: FINDPYTHON
 #
 # Find python interpreter and python libs.
 # Arguments are passed to the find_package command so
