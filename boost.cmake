@@ -14,19 +14,24 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #.rst:
-# .. function:: SEARCH_FOR_BOOST
+# .. variable:: BOOST_COMPONENTS
 #
-# This macro deals with Visual Studio Fortran incompatibilities
-# and add detected flags to the pkg-config file automatically.
+#  Controls the components to be detected.  If
+#  this variable is not defined, it defaults to the following component
+#  list:
 #
-# The components to be detected is controlled by BOOST_COMPONENTS.  If
-# this variable is not defined, it defaults to the following component
-# list:
-# - Filesystem
-# - Program_options
-# - System
-# - Thread
-# - Unit_test_framework
+#  - Filesystem
+#  - Program_options
+#  - System
+#  - Thread
+#  - Unit_test_framework
+#
+# .. command:: SEARCH_FOR_BOOST
+#
+#  This macro deals with Visual Studio Fortran incompatibilities
+#  and add detected flags to the pkg-config file automatically.
+#
+#  The components to be detected is controlled by :variable:`BOOST_COMPONENTS`.
 #
 MACRO(SEARCH_FOR_BOOST)
   SET(Boost_USE_STATIC_LIBS OFF)

@@ -17,20 +17,34 @@
  # README #
  # ------ #
 
+
+#.rst:
 # This file factorizes all rules to define a project for JRL or LAAS.
 # It supposes that some variables have already been defined:
-# - PROJECT_NAME	Project name.
-#			Please keep respect our coding style and choose a name
-#			which respects the following regexp: [a-z][a-z0-9-]*
-#			I.e. a lower-case letter then one or more lower-case
-#			letter, number or hyphen ``-''.
-# - PROJECT_VERSION     Project version (X.Y.Z where X, Y, Z are unsigned
-#                       integers). If not defined, it will automatically
-#                       be computed through `git describe`.
-#                       See BASE_COMPUTE_VERSION for more information.
-# - PROJECT_DESCRIPTION One line summary of the package goal.
-# - PROJECT_URL		Project's website.
 #
+# .. variable:: PROJECT_NAME
+#
+#   Please keep respect our coding style and choose a name
+#   which respects the following regexp: ``[a-z][a-z0-9-]*``
+#   I.e. a lower-case letter then one or more lower-case
+#   letter, number or hyphen ``-``.
+#
+# .. variable:: PROJECT_VERSION
+#
+#   Project version (X.Y.Z where X, Y, Z are unsigned
+#   integers). If not defined, it will automatically
+#   be computed through `git describe`.
+#   See :cmake:command:`VERSION_COMPUTE` for more information.
+#
+# .. variable:: PROJECT_URL
+#
+#   Project's website.
+#
+# .. variable:: PROJECT_DESCRIPTION
+#
+#   One line summary of the package goal.
+#
+
 # Please note that functions starting with an underscore are internal
 # functions and should not be used directly.
 

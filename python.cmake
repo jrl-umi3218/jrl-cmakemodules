@@ -15,20 +15,21 @@
 
 
 #.rst:
-# .. function:: FINDPYTHON
+# .. command:: FINDPYTHON
 #
-# Find python interpreter and python libs.
-# Arguments are passed to the find_package command so
-# refer to find_package documentation to learn about valid arguments.
+#  Find python interpreter and python libs.
+#  Arguments are passed to the find_package command so
+#  refer to find_package documentation to learn about valid arguments.
 #
-# For instance, the command
-# FINDPYTHON(2.7 EXACT REQUIRED)
-# will force CMake to find Python2.7
+#  For instance, the command
+#  ``FINDPYTHON(2.7 EXACT REQUIRED)``
+#  will force CMake to find Python2.7
 #
-# WARNING: According to the FindPythonLibs and FindPythonInterp
-# documentation, you could also set Python_ADDITIONAL_VERSIONS.
-# If you do this, you will not have an error if you found two different versions
-# or another version that the requested one.
+#  .. warning::
+#    According to the ``FindPythonLibs`` and ``FindPythonInterp``
+#    documentation, you could also set ``Python_ADDITIONAL_VERSIONS``.
+#    If you do this, you will not have an error if you found two different versions
+#    or another version that the requested one.
 #
 
 IF(CMAKE_VERSION VERSION_LESS "3.2")

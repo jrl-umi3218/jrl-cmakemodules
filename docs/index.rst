@@ -3,22 +3,31 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Shared CMake submodule's documentation!
-==================================================
+Shared CMake submodule
+======================
 
-Contents:
+This repository is meant to be used as a submodule for any project
+from CNRS LAAS/HPP or JRL.
+
+It factorizes CMake mechanisms to provide a uniform look'n feel for
+all packages.
+
+Contents
+=========
 
 .. toctree::
    :maxdepth: 2
 
+   /pages/base.rst
    /pages/external_deps.rst
-
+   /pages/internal.rst
+   /pages/developers.rst
 
 
 Indices and tables
 ==================
 
 * :ref:`genindex`
-* :ref:`modindex`
 * :ref:`search`
 
+.. * :ref:`modindex`
