@@ -56,7 +56,6 @@ INCLUDE(cmake/uninstall.cmake)
 INCLUDE(cmake/install-data.cmake)
 INCLUDE(cmake/release.cmake)
 INCLUDE(cmake/version.cmake)
-INCLUDE(cmake/test.cmake)
 INCLUDE(cmake/package-config.cmake)
 
  # --------- #
