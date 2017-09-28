@@ -18,7 +18,7 @@ The documentation can be generated using the follwing command, from the ``docs``
 To have the same look as on readthedocs:
 
 .. code-block:: bash
-  
+
   sudo pip install sphinx-theme
 
 
