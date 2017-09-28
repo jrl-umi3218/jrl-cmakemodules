@@ -15,6 +15,10 @@
 import sys
 import os
 
+from sphinx.util.compat import Directive
+from docutils import nodes
+from sphinx.util.nodes import set_source_info
+
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
@@ -29,7 +33,8 @@ sys.path.insert(0, os.path.abspath('.'))
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx.ext.todo', 'cmake'
+    'sphinx.ext.todo',
+    'cmake'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -42,6 +47,37 @@ primary_domain = 'cmake'
 highlight_language = 'cmake'
 
 todo_include_todos = True
+
+currentmode = "user"
+
+class IfMode(Directive):
+
+    has_content = True
+    required_arguments = 1
+    optional_arguments = 0
+    final_argument_whitespace = True
+    option_spec = {}
+
+    def run(self):
+        cm = self.state.document.settings.env.config.currentmode
+        if cm == self.arguments[0]:
+            node = nodes.Element()
+            node.document = self.state.document
+            set_source_info(self, node)
+            self.state.nested_parse(self.content, self.content_offset,
+                                    node, match_titles=1)
+            return node.children
+        return []
+
+class SetMode (Directive):
+    has_content = False
+    required_arguments = 1
+    optional_arguments = 0
+    final_argument_whitespace = False
+
+    def run(self):
+        self.state.document.settings.env.config.currentmode = self.arguments[0]
+        return []
 
 # The encoding of source files.
 #source_encoding = 'utf-8-sig'
@@ -263,3 +299,8 @@ texinfo_documents = [
 
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 #texinfo_no_detailmenu = False
+
+def setup(app):
+    app.add_config_value('currentmode', 'user', 'env')
+    app.add_directive("setmode", SetMode)
+    app.add_directive("ifmode", IfMode)
