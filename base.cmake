@@ -162,12 +162,6 @@ MACRO(SETUP_PROJECT)
   ELSE(DEFINED INSTALL_DOCUMENTATION)
     SET(_INSTALL_DOC TRUE CACHE INTERNAL "")
   ENDIF(DEFINED INSTALL_DOCUMENTATION)
-  
-  # If variable COMPILE_UNIT_TESTS is TRUE,
-  # then directories added with the ADD_UNIT_TESTS_SUBDIRECTORY
-  # will be compiled with target all.
-  # COMPILE_UNIT_TESTS defaults to TRUE.
-  OPTION(COMPILE_UNIT_TESTS "Add unit tests directory to target all" ON)
 
   ENABLE_TESTING()
 
