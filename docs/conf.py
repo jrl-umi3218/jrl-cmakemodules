@@ -304,3 +304,4 @@ def setup(app):
     app.add_config_value('currentmode', 'user', 'env')
     app.add_directive("setmode", SetMode)
     app.add_directive("ifmode", IfMode)
+    app.add_stylesheet('css/cmake.css')
