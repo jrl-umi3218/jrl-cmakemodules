@@ -21,10 +21,12 @@ FIND_PACKAGE(PkgConfig)
 # during the dependency check.
 SET(PKG_CONFIG_ADDITIONAL_VARIABLES bindir pkglibdir datarootdir pkgdatarootdir docdir doxygendocdir)
 
-# _SETUP_PROJECT_PKG_CONFIG
-# -------------------------
+#.rst:
+# .. ifmode:: internal
 #
-# Prepare pkg-config pc file generation step.
+#   .. command:: _SETUP_PROJECT_PKG_CONFIG
+#
+#     Prepare pkg-config pc file generation step.
 #
 MACRO(_SETUP_PROJECT_PKG_CONFIG)
   # Pkg-config related commands.
@@ -802,14 +804,17 @@ MACRO(BUILD_PREFIX_FOR_PKG DEPENDENCY PREFIX)
 
 ENDMACRO(BUILD_PREFIX_FOR_PKG)
 
-# PKG_CONFIG_USE_DEPENDENCY(TARGET DEPENDENCY)
-# --------------------------------------------
+#.rst:
+# .. ifmode:: user
 #
-# This macro changes the target properties to properly search for
-# headers, libraries and link against the required shared libraries
-# when using a dependency detected through pkg-config.
+#   .. command:: PKG_CONFIG_USE_DEPENDENCY(TARGET DEPENDENCY)
 #
-# I.e. PKG_CONFIG_USE_DEPENDENCY(my-binary my-package)
+#     This macro changes the target properties to properly search for
+#     headers, libraries and link against the required shared libraries
+#     when using a dependency detected through pkg-config.
+#     I.e.::
+#
+#       PKG_CONFIG_USE_DEPENDENCY(my-binary my-package)
 #
 MACRO(PKG_CONFIG_USE_DEPENDENCY TARGET DEPENDENCY)
   BUILD_PREFIX_FOR_PKG(${DEPENDENCY} PREFIX)

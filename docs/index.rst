@@ -12,6 +12,8 @@ from CNRS LAAS/HPP or JRL.
 It factorizes CMake mechanisms to provide a uniform look'n feel for
 all packages.
 
+.. setmode:: user
+
 Contents
 =========
 
