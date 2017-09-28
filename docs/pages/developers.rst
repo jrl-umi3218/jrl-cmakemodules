@@ -15,6 +15,13 @@ The documentation can be generated using the follwing command, from the ``docs``
   # Open build/html/index.html to see the doc
   firefox build/html/index.html
 
+To have the same look as on readthedocs:
+
+.. code-block:: bash
+  
+  sudo pip install sphinx-theme
+
+
 Comment the CMake files
 +++++++++++++++++++++++
 
