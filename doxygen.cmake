@@ -184,6 +184,28 @@ MACRO(_SETUP_PROJECT_DOCUMENTATION_FINALIZE)
       SET(DOXYGEN_HEADER_NAME "header.html")
     ENDIF()
 
+    # Find doxytag files
+    # To ignore this list of tag files, add to doc/Doxyfile.extra.in
+    # TAGFILES =
+    STRING(REPLACE "," ";" PKG_REQUIRES "${_PKG_CONFIG_REQUIRES}")
+    FOREACH(PKG_CONFIG_STRING ${PKG_REQUIRES})
+      # Get the name of the package in the same format as in pkg-config.cmake.
+      STRING(REGEX MATCH "[^<>= ]+" LIBRARY_NAME "${PKG_CONFIG_STRING}")
+      STRING(REGEX REPLACE "[^a-zA-Z0-9]" "_" PREFIX "${LIBRARY_NAME}")
+      STRING(TOUPPER "${PREFIX}" "PREFIX")
+      # If DOXYGENDOCDIR is specified, add a doc path.
+      IF( DEFINED ${PREFIX}_DOXYGENDOCDIR
+          AND EXISTS ${${PREFIX}_DOXYGENDOCDIR}/${LIBRARY_NAME}.doxytag)
+        IF(DEFINED _PKG_CONFIG_DOXYGENDOCDIR)
+          FILE(RELATIVE_PATH DOXYTAG_FILE ${_PKG_CONFIG_DOXYGENDOCDIR} ${${PREFIX}_DOXYGENDOCDIR})
+        ELSE(DEFINED _PKG_CONFIG_DOXYGENDOCDIR)
+          SET(DOXYTAG_FILE ${${PREFIX}_DOXYGENDOCDIR})
+        ENDIF(DEFINED _PKG_CONFIG_DOXYGENDOCDIR)
+
+        SET(DOXYTAG_FILES "${DOXYTAG_FILES} ${${PREFIX}_DOXYGENDOCDIR}/${LIBRARY_NAME}.doxytag=${DOXYTAG_FILE}")
+      ENDIF()
+    ENDFOREACH(PKG_CONFIG_STRING ${_PKG_CONFIG_REQUIRES})
+
     # Generate Doxyfile.extra.
     IF(EXISTS ${PROJECT_SOURCE_DIR}/doc/Doxyfile.extra.in)
       CONFIGURE_FILE(
