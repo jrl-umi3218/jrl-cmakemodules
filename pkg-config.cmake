@@ -208,6 +208,22 @@ MACRO(_SETUP_PROJECT_PKG_CONFIG_FINALIZE)
   ENDIF()
 ENDMACRO(_SETUP_PROJECT_PKG_CONFIG_FINALIZE)
 
+# _PARSE_PKG_CONFIG_STRING (PKG_CONFIG_STRING PREFIX)
+# ----------------------------------------------------------
+# 
+# Retrieve the library name and the prefix used for CMake variable names
+# from the pkg-config string. For instance, `my-package > 0.4` results in
+# - _PKG_LIB_NAME_VAR <- my-package
+# - _PKG_PREFIX_VAR <- MY_PACKAGE
+MACRO(_PARSE_PKG_CONFIG_STRING PKG_CONFIG_STRING _PKG_LIB_NAME_VAR _PKG_PREFIX_VAR)
+  # Retrieve the left part of the equation to get package name.
+  STRING(REGEX MATCH "[^<>= ]+" ${_PKG_LIB_NAME_VAR} "${PKG_CONFIG_STRING}")
+  # And transform it into a valid variable prefix.
+  # 1. replace invalid characters into underscores.
+  STRING(REGEX REPLACE "[^a-zA-Z0-9]" "_" ${_PKG_PREFIX_VAR} "${${_PKG_LIB_NAME_VAR}}")
+  # 2. make it uppercase.
+  STRING(TOUPPER "${${_PKG_PREFIX_VAR}}" ${_PKG_PREFIX_VAR})
+ENDMACRO(_PARSE_PKG_CONFIG_STRING PKG_CONFIG_STRING LIBRABRY_NAME VARIABLE_PREFIX)
 
 # ADD_DEPENDENCY(PREFIX P_REQUIRED COMPILE_TIME_ONLY PKGCONFIG_STRING)
 # ------------------------------------------------
@@ -231,21 +247,9 @@ ENDMACRO(_SETUP_PROJECT_PKG_CONFIG_FINALIZE)
 #                         ``my-package >= 0.5''
 #
 MACRO(ADD_DEPENDENCY P_REQUIRED COMPILE_TIME_ONLY PKG_CONFIG_STRING PKG_CONFIG_DEBUG_STRING)
-  # Retrieve the left part of the equation to get package name.
-  STRING(REGEX MATCH "[^<>= ]+" LIBRARY_NAME "${PKG_CONFIG_STRING}")
-  # And transform it into a valid variable prefix.
-  # 1. replace invalid characters into underscores.
-  STRING(REGEX REPLACE "[^a-zA-Z0-9]" "_" PREFIX "${LIBRARY_NAME}")
-  # 2. make it uppercase.
-  STRING(TOUPPER "${PREFIX}" "PREFIX")
+  _PARSE_PKG_CONFIG_STRING ("${PKG_CONFIG_STRING}" LIBRARY_NAME PREFIX)
   IF(NOT ${PKG_CONFIG_DEBUG_STRING} STREQUAL "")
-    # Retrieve the left part of the equation to get package name.
-    STRING(REGEX MATCH "[^<>= ]+" LIBRARY_DEBUG_NAME "${PKG_CONFIG_DEBUG_STRING}")
-    # And transform it into a valid variable prefix.
-    # 1. replace invalid characters into underscores.
-    STRING(REGEX REPLACE "[^a-zA-Z0-9]" "_" ${PREFIX}_DEBUG "${LIBRARY_DEBUG_NAME}")
-    # 2. make it uppercase.
-    STRING(TOUPPER "${PREFIX}_DEBUG" "${PREFIX}_DEBUG")
+    _PARSE_PKG_CONFIG_STRING ("${PKG_CONFIG_DEBUG_STRING}" LIBRARY_DEBUG_NAME PREFIX_DEBUG)
   ENDIF()
 
   # Force redetection each time CMake is launched.
