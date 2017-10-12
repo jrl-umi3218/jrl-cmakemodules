@@ -428,18 +428,19 @@ MACRO(ADD_DEPENDENCY P_REQUIRED COMPILE_TIME_ONLY PKG_CONFIG_STRING PKG_CONFIG_D
 
 ENDMACRO(ADD_DEPENDENCY)
 
-# ADD_REQUIRED_DEPENDENCY(PREFIX PKGCONFIG_STRING)
-# ------------------------------------------------
+#.rst:
+# .. ifmode:: user
 #
-# Check for a dependency using pkg-config. Fail if the package cannot
-# be found.
+#   .. command:: ADD_REQUIRED_DEPENDENCY (PKG_CONFIG_STRING)
 #
-# PKG_CONFIG_STRING	: string passed to pkg-config to check the version.
-#			  Typically, this string looks like:
-#                         ``my-package >= 0.5''
+#     Check for a dependency using pkg-config. Fail if the package cannot
+#     be found.
 #
-# An optional argument can be passed to define an alternate PKG_CONFIG_STRING
-# for debug builds. It should follow the same rule as PKG_CONFIG_STRING.
+#     :PKG_CONFIG_STRING: string passed to pkg-config to check the version.
+#       Typically, this string looks like: ``my-package >= 0.5``
+#
+#     An optional argument can be passed to define an alternate PKG_CONFIG_STRING
+#     for debug builds. It should follow the same rule as PKG_CONFIG_STRING.
 #
 MACRO(ADD_REQUIRED_DEPENDENCY PKG_CONFIG_STRING)
   SET(PKG_CONFIG_DEBUG_STRING "")
@@ -449,18 +450,19 @@ MACRO(ADD_REQUIRED_DEPENDENCY PKG_CONFIG_STRING)
   ADD_DEPENDENCY(1 0 ${PKG_CONFIG_STRING} "${PKG_CONFIG_DEBUG_STRING}")
 ENDMACRO(ADD_REQUIRED_DEPENDENCY)
 
-# ADD_OPTIONAL_DEPENDENCY(PREFIX PKGCONFIG_STRING)
-# ------------------------------------------------
+#.rst:
+# .. ifmode:: user
 #
-# Check for a dependency using pkg-config. Quiet if the package cannot
-# be found.
+#   .. command:: ADD_OPTIONAL_DEPENDENCY (PKG_CONFIG_STRING)
 #
-# PKG_CONFIG_STRING	: string passed to pkg-config to check the version.
-#			  Typically, this string looks like:
-#                         ``my-package >= 0.5''
+#     Check for a dependency using pkg-config. Quiet if the package cannot
+#     be found.
 #
-# An optional argument can be passed to define an alternate PKG_CONFIG_STRING
-# for debug builds. It should follow the same rule as PKG_CONFIG_STRING.
+#     :PKG_CONFIG_STRING: string passed to pkg-config to check the version.
+#       Typically, this string looks like: ``my-package >= 0.5``
+#
+#     An optional argument can be passed to define an alternate PKG_CONFIG_STRING
+#     for debug builds. It should follow the same rule as PKG_CONFIG_STRING.
 #
 MACRO(ADD_OPTIONAL_DEPENDENCY PKG_CONFIG_STRING)
   SET(PKG_CONFIG_DEBUG_STRING "")
@@ -807,7 +809,7 @@ ENDMACRO(BUILD_PREFIX_FOR_PKG)
 #.rst:
 # .. ifmode:: user
 #
-#   .. command:: PKG_CONFIG_USE_DEPENDENCY(TARGET DEPENDENCY)
+#   .. command:: PKG_CONFIG_USE_DEPENDENCY (TARGET DEPENDENCY)
 #
 #     This macro changes the target properties to properly search for
 #     headers, libraries and link against the required shared libraries
