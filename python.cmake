@@ -73,23 +73,23 @@ NORMALIZE_PATH(PYTHON_SITELIB)
 ENDMACRO(FINDPYTHON)
 
 
+#.rst:
+# .. command:: DYNAMIC_GRAPH_PYTHON_MODULE ( SUBMODULENAME LIBRARYNAME TARGETNAME )
 #
-# DYNAMIC_GRAPH_PYTHON_MODULE SUBMODULENAME LIBRARYNAME TARGETNAME
-# ---------------------------
+#   Add a python submodule to dynamic_graph
+#  
+#   :param SUBMODULENAME: the name of the submodule (can be foo/bar),
+#  
+#   :param LIBRARYNAME:   library to link the submodule with.
+#  
+#   :param TARGETNAME:     name of the target: should be different for several
+#                   calls to the macro.
 #
-# Add a python submodule to dynamic_graph
-#
-#  SUBMODULENAME : the name of the submodule (can be foo/bar),
-#
-#  LIBRARYNAME   : library to link the submodule with.
-#
-#  TARGETNAME    : name of the target: should be different for several
-#                  calls to the macro.
-#
-#  NOTICE : Before calling this macro, set variable NEW_ENTITY_CLASS as
-#           the list of new Entity types that you want to be bound.
-#           Entity class name should match the name referencing the type
-#           in the factory.
+#  .. note::
+#    Before calling this macro, set variable NEW_ENTITY_CLASS as
+#    the list of new Entity types that you want to be bound.
+#    Entity class name should match the name referencing the type
+#    in the factory.
 #
 MACRO(DYNAMIC_GRAPH_PYTHON_MODULE SUBMODULENAME LIBRARYNAME TARGETNAME)
 
@@ -255,10 +255,10 @@ MACRO(PYTHON_INSTALL_BUILD MODULE FILE DEST)
     DESTINATION "${DEST}/${MODULE}")
 ENDMACRO()
 
-# FIND_NUMPY
-# ----------
+#.rst:
+# .. command:: FIND_NUMPY
 #
-# Detect numpy module
+#   Detect numpy module
 #
 
 MACRO(FIND_NUMPY)
