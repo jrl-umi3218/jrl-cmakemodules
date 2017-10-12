@@ -2,10 +2,10 @@ Contributing
 ************
 
 Update the doc
---------------
+==============
 
 Generate the documentation locally
-++++++++++++++++++++++++++++++++++++
+------------------------------------
 
 The documentation can be generated using the follwing command, from the ``docs`` directory:
 
@@ -23,7 +23,7 @@ To have the same look as on readthedocs:
 
 
 Comment the CMake files
-+++++++++++++++++++++++
+-----------------------
 
 Comment paragraph with ``#.rst:`` as first line will be interpreted as documentation.
 To document a macro or a variable in a ``.cmake`` file, use
@@ -62,6 +62,6 @@ gives
 
 
 To do's list
-------------
+============
 
 .. todolist::

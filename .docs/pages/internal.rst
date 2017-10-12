@@ -1,5 +1,5 @@
 Internal commands
------------------
+*****************
 
 .. setmode:: internal
 

@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 
 Shared CMake submodule
-======================
+######################
 
 This repository is meant to be used as a submodule for any project
 from CNRS LAAS/HPP or JRL.
@@ -15,7 +15,7 @@ all packages.
 .. setmode:: user
 
 Contents
-=========
+#########
 
 .. toctree::
    :maxdepth: 2
@@ -28,7 +28,7 @@ Contents
 
 
 Indices and tables
-==================
+##################
 
 * :ref:`genindex`
 * :ref:`search`
