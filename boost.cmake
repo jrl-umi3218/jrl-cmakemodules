@@ -99,15 +99,17 @@ MACRO(SEARCH_FOR_BOOST)
 
 ENDMACRO(SEARCH_FOR_BOOST)
 
-# TARGET_LINK_BOOST_PYTHON
-# ------------------------
+#.rst:
+# .. command:: TARGET_LINK_BOOST_PYTHON (TARGET)
 #
-# Link target againt boost_python library.
-# \input target is either a library or an executable
-# On darwin systems, boost_python is not linked against any python library.
-# This linkage is resolved at execution time via the python interpreter.
-# We then need to stipulate that boost_python has unresolved symbols at compile time for a library target.
-# Otherwise, for executables we need to link to a specific version of python.
+#   Link target againt boost_python library.
+#
+#   :TARGET: is either a library or an executable
+#
+#   On darwin systems, boost_python is not linked against any python library.
+#   This linkage is resolved at execution time via the python interpreter.
+#   We then need to stipulate that boost_python has unresolved symbols at compile time for a library target.
+#   Otherwise, for executables we need to link to a specific version of python.
 #
 MACRO(TARGET_LINK_BOOST_PYTHON target)
   IF(APPLE)
@@ -124,13 +126,13 @@ MACRO(TARGET_LINK_BOOST_PYTHON target)
   ENDIF(APPLE)
 ENDMACRO(TARGET_LINK_BOOST_PYTHON)
 
-# PKG_CONFIG_APPEND_BOOST_LIBS
-# ----------------------------
+#.rst:
+# .. command:: PKG_CONFIG_APPEND_BOOST_LIBS
 #
-# This macro appends Boost libraries to the pkg-config file. A list of Boost
-# components is expected, for instance:
+#   This macro appends Boost libraries to the pkg-config file. A list of Boost
+#   components is expected, for instance::
 #
-# PKG_CONFIG_APPEND_BOOST_LIBS(system filesystem)
+#     PKG_CONFIG_APPEND_BOOST_LIBS(system filesystem)
 #
 MACRO(PKG_CONFIG_APPEND_BOOST_LIBS)
   IF(NOT APPLE)
