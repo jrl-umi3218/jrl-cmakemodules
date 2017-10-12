@@ -33,25 +33,25 @@
 #  - the softwares comes from git (possibly unstable version).
 #    ``git describe`` is used to retrieve the version number
 #    (see 'man git-describe'). This tool generates a version number from the git
-#    history. The version number follows this pattern::
+#    history. The version number follows this pattern:
 #
-#      TAG[-N-SHA1][-dirty]
+#      ``TAG[-N-SHA1][-dirty]``
 #
-#    - TAG: last matching tag (i.e. last signed tag starting with v, i.e. v0.1)
-#    - N: number of commits since the last maching tag
-#    - SHA1: sha1 of the current commit
-#    - -dirty: added if the workig directory is dirty (there is some uncommitted
+#    - ``TAG``: last matching tag (i.e. last signed tag starting with v, i.e. v0.1)
+#    - ``N``: number of commits since the last maching tag
+#    - ``SHA1``: sha1 of the current commit
+#    - ``-dirty``: added if the workig directory is dirty (there is some uncommitted
 #      changes).
 #
-#    For stable releases, i.e. the current commit is a matching tag, -N-SHA1 is
+#    For stable releases, i.e. the current commit is a matching tag, ``-N-SHA1`` is
 #    omitted. If the HEAD is on the signed tag v0.1, the version number will be
 #    0.1.
 #
 #    If the HEAD is two commits after v0.5 and the last commit is 034f6d...
 #    The version number will be:
 #
-#    - 0.5-2-034f if there is no uncommitted changes,
-#    - 0.5-2-034f-dirty if there is some uncommitted changes.
+#    - ``0.5-2-034f`` if there is no uncommitted changes,
+#    - ``0.5-2-034f-dirty`` if there is some uncommitted changes.
 #
 MACRO(VERSION_COMPUTE)
   SET(PROJECT_STABLE False)
