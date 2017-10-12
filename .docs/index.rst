@@ -22,6 +22,7 @@ Contents
 
    /pages/base.rst
    /pages/external_deps.rst
+   /pages/other.rst
    /pages/internal.rst
    /pages/developers.rst
 
