@@ -226,6 +226,7 @@ class CMakeTransform(Transform):
             _cmake_object_inventory(env, self.document, 1, objtype, targetid)
 
 class CMakeObject(ObjectDescription):
+    _re_sub = re.compile(r'^([^()\s]+)\s*\(([^()]*)\)$', re.DOTALL)
 
     def handle_signature(self, sig, signode):
         # called from sphinx.directives.ObjectDescription.run()
@@ -234,9 +235,14 @@ class CMakeObject(ObjectDescription):
 
     def add_target_and_index(self, name, sig, signode):
         if self.objtype == 'command':
-           targetname = name.lower()
+            # Reference of CMake commands does not include arguments
+            m = CMakeXRefRole._re_sub.match (name)
+            if m: 
+                targetname = m.group(1).lower()
+            else:
+                targetname = name.lower()
         else:
-           targetname = name
+            targetname = name
         targetid = '%s:%s' % (self.objtype, targetname)
         if targetid not in self.state.document.ids:
             signode['names'].append(targetid)
