@@ -153,6 +153,11 @@ try:
     import sphinx_theme
     html_theme = 'neo_rtd_theme'
     html_theme_path = [ sphinx_theme.get_html_theme_path() ]
+    html_theme_options = {
+            'collapse_navigation': False,
+            'display_version': False,
+            'navigation_depth': 3,
+            }
 except:
     html_theme_path = []
 
