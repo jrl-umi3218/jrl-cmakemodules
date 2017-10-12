@@ -13,20 +13,21 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# GENERATE_URDF_FILE FILENAME EXTENSION
-# ------------------------------------
+#.rst:
+# .. command:: GENERATE_URDF_FILE (FILENAME EXTENSION)
 #
-# Generate urdf ${CMAKE_CURRENT_BINARY_DIR}/${FILENAME}.${EXTENSION}
-# from xacro ${CMAKE_CURRENT_SOURCE_DIR}/${FILENAME}.xacro file.
+#   Generate urdf ``${CMAKE_CURRENT_BINARY_DIR}/${FILENAME}.${EXTENSION}``
+#   from xacro ``${CMAKE_CURRENT_SOURCE_DIR}/${FILENAME}.xacro`` file.
 #
-# To trigger generation, use:
-# ADD_CUSTOM_TARGET (generate_urdf_files DEPENDS ${ALL_GENERATED_URDF})
+#   To trigger generation, use::
 #
-# FILENAME : XACRO filename without the extension
-# EXTENSION : desired extension of the output file, e.g. "urdf" or "srdf"
+#     ADD_CUSTOM_TARGET (generate_urdf_files DEPENDS ${ALL_GENERATED_URDF})
 #
-# Note : If ${CMAKE_CURRENT_SOURCE_DIR}/${FILENAME}.xacro does not exists,
-#        the macros tries to configure file ${CMAKE_CURRENT_SOURCE_DIR}/${FILENAME}.xacro.in
+#   :FILENAME:  XACRO filename without the extension
+#   :EXTENSION: desired extension of the output file, e.g. "urdf" or "srdf"
+#
+#   .. note:: If ``${CMAKE_CURRENT_SOURCE_DIR}/${FILENAME}.xacro`` does not exists,
+#          the macros tries to configure file ``${CMAKE_CURRENT_SOURCE_DIR}/${FILENAME}.xacro.in``
 #
 MACRO(GENERATE_URDF_FILE FILENAME EXTENSION)
   FIND_PACKAGE(catkin REQUIRED COMPONENTS xacro)
