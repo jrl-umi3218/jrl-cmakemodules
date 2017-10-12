@@ -118,15 +118,15 @@ MACRO(_CONCATENATE_ARGUMENTS OUTPUT SEPARATOR)
   MESSAGE(${${OUTPUT}})
 ENDMACRO(_CONCATENATE_ARGUMENTS OUTPUT)
 
-# SETUP_PROJECT
-# -------------
+#.rst:
+# .. command:: SETUP_PROJECT
 #
-# Initialize the project. Should be called first in the root
-# CMakeList.txt.
+#   Initialize the project. Should be called first in the root
+#   CMakeList.txt.
 #
-# This function does not take any argument but check that some
-# variables are defined (see documentation at the beginning of this
-# file).
+#   This function does not take any argument but check that some
+#   variables are defined (see documentation at the beginning of this
+#   file).
 #
 MACRO(SETUP_PROJECT)
   INCLUDE(cmake/GNUInstallDirs.cmake)
@@ -194,12 +194,11 @@ MACRO(SETUP_PROJECT)
   _SETUP_PROJECT_PACKAGE_INIT()
 ENDMACRO(SETUP_PROJECT)
 
-
-# SETUP_PROJECT_FINALIZE
-# ----------------------
+#.rst:
+# .. command:: SETUP_PROJECT_FINALIZE
 #
-# To be called at the end of the CMakeLists.txt to
-# finalize the project setup.
+#   To be called at the end of the CMakeLists.txt to
+#   finalize the project setup.
 #
 MACRO(SETUP_PROJECT_FINALIZE)
   _SETUP_PROJECT_PKG_CONFIG_FINALIZE()
