@@ -14,11 +14,51 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+FUNCTION(LARGEST_COMMON_PREFIX a b prefix)
+  STRING(LENGTH ${a} len_a)
+  STRING(LENGTH ${b} len_b)
+
+  IF(${len_a} LESS ${len_b})
+      SET(len ${len_a})
+  ELSE()
+      SET(len ${len_b} )
+  ENDIF()
+
+  FOREACH(size RANGE 1 ${len})
+      STRING(SUBSTRING ${a} 0 ${size} sub_a)
+      STRING(SUBSTRING ${b} 0 ${size} sub_b)
+
+      IF(${sub_a} STREQUAL ${sub_b} )
+          SET(${prefix} ${sub_a} PARENT_SCOPE)
+      ELSE()
+          BREAK()
+      ENDIF()
+  ENDFOREACH()
+ENDFUNCTION()
+
 MACRO(ADD_GROUP GROUP_NAME FILENAMES)
+  # Find the largest common prefix
+  LIST(LENGTH ${FILENAMES} num_files)
+  IF(${num_files} GREATER 2)
+    LIST(GET ${FILENAMES} 0 str_a)
+    FOREACH(id RANGE 2 ${num_files})
+      MATH(EXPR id "${id}-1")
+      LIST(GET ${FILENAMES} ${id} str_b)
+      LARGEST_COMMON_PREFIX(${str_a} ${str_b} prefix)
+      SET(str_a ${prefix})
+    ENDFOREACH()
+    STRING(REGEX REPLACE "/" "" prefix ${prefix})
+  ELSE()
+    SET(prefix "")
+  ENDIF()
+
   FOREACH(filename ${${FILENAMES}})
     GET_FILENAME_COMPONENT(filenamePath ${filename} PATH)
     IF(NOT (filenamePath STREQUAL ""))
-      STRING(REGEX REPLACE "/" "\\\\" filenamePath ${filenamePath}) 
+      STRING(REGEX REPLACE "${prefix}" "" filenamePath ${filenamePath})
+      IF(NOT (filenamePath STREQUAL ""))
+        STRING(REGEX REPLACE "/" "\\\\" filenamePath ${filenamePath})
+      ENDIF()
       SOURCE_GROUP("${GROUP_NAME}\\${filenamePath}" FILES ${filename})
     ELSE()
       SOURCE_GROUP("${GROUP_NAME}" FILES ${filename})
