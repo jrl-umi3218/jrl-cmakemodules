@@ -18,10 +18,10 @@ Contents
 #########
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
    /pages/base.rst
-   /pages/external_deps.rst
+   /pages/dependencies.rst
    /pages/other.rst
    /pages/internal.rst
    /pages/developers.rst

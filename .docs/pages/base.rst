@@ -9,9 +9,7 @@ C++ Headers
 ===========
 .. cmake-module:: ../../header.cmake
 
-Add dependencies
-================
-.. cmake-module:: ../../pkg-config.cmake
+.. _minimal-working-example:
 
 Minimal working example
 =======================

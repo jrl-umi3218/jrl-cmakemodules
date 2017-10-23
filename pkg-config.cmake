@@ -429,15 +429,20 @@ MACRO(ADD_DEPENDENCY P_REQUIRED COMPILE_TIME_ONLY PKG_CONFIG_STRING PKG_CONFIG_D
 ENDMACRO(ADD_DEPENDENCY)
 
 #.rst:
-# .. ifmode:: user
+# .. ifmode:: import
 #
-#   .. command:: ADD_REQUIRED_DEPENDENCY (PKG_CONFIG_STRING)
+#   .. command:: ADD_REQUIRED_DEPENDENCY (PKG_CONFIG_STRING PKG_CONFIG_DEBUG_STRING)
 #
 #     Check for a dependency using pkg-config. Fail if the package cannot
 #     be found.
 #
 #     :PKG_CONFIG_STRING: string passed to pkg-config to check the version.
 #       Typically, this string looks like: ``my-package >= 0.5``
+#
+#     :PKG_CONFIG_DEBUG_STRING: (optional) string passed to pkg-config to
+#       check the version. The package found this way will be used in place
+#       of the first provided if the build is happening in DEBUG mode.
+#       This string might look like: ``my-package_d >= 0.5``
 #
 #     An optional argument can be passed to define an alternate PKG_CONFIG_STRING
 #     for debug builds. It should follow the same rule as PKG_CONFIG_STRING.
@@ -451,15 +456,20 @@ MACRO(ADD_REQUIRED_DEPENDENCY PKG_CONFIG_STRING)
 ENDMACRO(ADD_REQUIRED_DEPENDENCY)
 
 #.rst:
-# .. ifmode:: user
+# .. ifmode:: import
 #
-#   .. command:: ADD_OPTIONAL_DEPENDENCY (PKG_CONFIG_STRING)
+#   .. command:: ADD_OPTIONAL_DEPENDENCY (PKG_CONFIG_STRING PKG_CONFIG_DEBUG_STRING)
 #
 #     Check for a dependency using pkg-config. Quiet if the package cannot
 #     be found.
 #
 #     :PKG_CONFIG_STRING: string passed to pkg-config to check the version.
 #       Typically, this string looks like: ``my-package >= 0.5``
+#
+#     :PKG_CONFIG_DEBUG_STRING: (optional) string passed to pkg-config to
+#       check the version. The package found this way will be used in place
+#       of the first provided if the build is happening in DEBUG mode.
+#       This string might look like: ``my-package_d >= 0.5``
 #
 #     An optional argument can be passed to define an alternate PKG_CONFIG_STRING
 #     for debug builds. It should follow the same rule as PKG_CONFIG_STRING.
@@ -472,19 +482,23 @@ MACRO(ADD_OPTIONAL_DEPENDENCY PKG_CONFIG_STRING)
   ADD_DEPENDENCY(0 0 ${PKG_CONFIG_STRING} "${PKG_CONFIG_DEBUG_STRING}")
 ENDMACRO(ADD_OPTIONAL_DEPENDENCY)
 
-# ADD_COMPILE_DEPENDENCY(PREFIX PKGCONFIG_STRING)
-# ------------------------------------------------
+#.rst:
+# .. ifmode:: import-advanced
 #
-# Check for a dependency using pkg-config. Fail if the package cannot be found.
-# The package won't appear as depency inside the *.pc file of the PROJECT.
+#   .. command:: ADD_COMPILE_DEPENDENCY (PKGCONFIG_STRING)
 #
+#     Check for a dependency using pkg-config. Fail if the package cannot
+#     be found.  The package won't appear as depency inside the \*.pc file
+#     of the PROJECT.
 #
-# PKG_CONFIG_STRING : string passed to pkg-config to check the version.
-#       Typically, this string looks like:
-#                         ``my-package >= 0.5''
+#     :PKG_CONFIG_STRING: string passed to pkg-config to check the version.
+#       Typically, this string looks like: ``my-package >= 0.5``
 #
-# An optional argument can be passed to define an alternate PKG_CONFIG_STRING
-# for debug builds. It should follow the same rule as PKG_CONFIG_STRING.
+#     :PKG_CONFIG_DEBUG_STRING: (optional) string passed to pkg-config to
+#       check the version. The package found this way will be used in place
+#       of the first provided if the build is happening in DEBUG mode.  This
+#       string might look like: ``my-package_d >= 0.5``
+#
 #
 MACRO(ADD_COMPILE_DEPENDENCY PKG_CONFIG_STRING)
   SET(PKG_CONFIG_DEBUG_STRING "")
@@ -495,28 +509,25 @@ MACRO(ADD_COMPILE_DEPENDENCY PKG_CONFIG_STRING)
 ENDMACRO(ADD_COMPILE_DEPENDENCY)
 
 
-# ADD_DOC_DEPENDENCY(PREFIX PKGCONFIG_STRING)
-# ------------------------------------------------
+#.rst:
+# .. ifmode:: import-advanced
 #
-# Check for a dependency using pkg-config. Do not express dependency in
-# "requires" field.
+#   .. command:: ADD_DOC_DEPENDENCY (PKGCONFIG_STRING)
 #
-# PKG_CONFIG_STRING	: string passed to pkg-config to check the version.
-#			  Typically, this string looks like:
-#                         ``my-package >= 0.5''
-#
-# An optional argument can be passed to define an alternate PKG_CONFIG_STRING
-# for debug builds. It should follow the same rule as PKG_CONFIG_STRING.
+#     Alias for :command:`ADD_COMPILE_DEPENDENCY`
 #
 MACRO(ADD_DOC_DEPENDENCY PKG_CONFIG_STRING)
   ADD_COMPILE_DEPENDENCY(${PKG_CONFIG_STRING})
 ENDMACRO(ADD_DOC_DEPENDENCY)
 
-# PKG_CONFIG_APPEND_LIBRARY_DIR
-# -----------------------------
+#.rst:
+# .. ifmode:: export
 #
-# This macro adds library directories in a portable way
-# into the CMake file.
+#   .. command:: PKG_CONFIG_APPEND_LIBRARY_DIR (DIRS)
+#
+#     This macro adds library directories ``DIRS`` in a portable way into
+#     the CMake file.
+#
 MACRO(PKG_CONFIG_APPEND_LIBRARY_DIR DIRS)
   FOREACH(DIR ${DIRS})
     IF(DIR)
@@ -525,11 +536,16 @@ MACRO(PKG_CONFIG_APPEND_LIBRARY_DIR DIRS)
   ENDFOREACH(DIR ${DIRS})
 ENDMACRO(PKG_CONFIG_APPEND_LIBRARY_DIR DIR)
 
-# PKG_CONFIG_APPEND_CFLAGS_DEBUG
-# ------------------------
+#.rst:
+# .. ifmode:: export-advanced
 #
-# This macro adds CFLAGS in a portable way into the pkg-config file of the debug library
-# As such the macro fails if PROJECT_DEBUG_POSTFIX is not set
+#   .. command:: PKG_CONFIG_APPEND_CFLAGS_DEBUG (FLAGS)
+#
+#
+#     This macro adds ``FLAGS`` in a portable way into the pkg-config file
+#     of the debug library.
+#
+#     As such the macro fails if ``PROJECT_DEBUG_POSTFIX`` is not set
 #
 MACRO(PKG_CONFIG_APPEND_CFLAGS_DEBUG FLAGS)
   IF(NOT DEFINED PROJECT_DEBUG_POSTFIX)
@@ -542,11 +558,16 @@ MACRO(PKG_CONFIG_APPEND_CFLAGS_DEBUG FLAGS)
   ENDFOREACH(FLAG ${FLAGS})
 ENDMACRO(PKG_CONFIG_APPEND_CFLAGS_DEBUG FLAGS)
 
-# PKG_CONFIG_APPEND_CFLAGS_OPTIMIZED
-# ------------------------
+#.rst:
+# .. ifmode:: export-advanced
 #
-# This macro adds CFLAGS in a portable way into the pkg-config file of the OPTIMIZED library
-# As such the macro fails if PROJECT_OPTIMIZED_POSTFIX is not set
+#   .. command:: PKG_CONFIG_APPEND_CFLAGS_OPTIMIZED (FLAGS)
+#
+#
+#     This macro adds ``FLAGS`` in a portable way into the pkg-config file
+#     of the optimized library.
+#
+#     As such the macro fails if ``PROJECT_DEBUG_POSTFIX`` is not set
 #
 MACRO(PKG_CONFIG_APPEND_CFLAGS_OPTIMIZED FLAGS)
   IF(NOT DEFINED PROJECT_DEBUG_POSTFIX)
@@ -559,10 +580,12 @@ MACRO(PKG_CONFIG_APPEND_CFLAGS_OPTIMIZED FLAGS)
   ENDFOREACH(FLAG ${FLAGS})
 ENDMACRO(PKG_CONFIG_APPEND_CFLAGS_OPTIMIZED FLAGS)
 
-# PKG_CONFIG_APPEND_CFLAGS
-# ------------------------
+#.rst:
+# .. ifmode:: export
 #
-# This macro adds CFLAGS in a portable way into the pkg-config file.
+#   .. command:: PKG_CONFIG_APPEND_CFLAGS (FLAGS)
+#
+#     This macro adds ``FLAGS`` in a portable way into the pkg-config file.
 #
 MACRO(PKG_CONFIG_APPEND_CFLAGS FLAGS)
   FOREACH(FLAG ${FLAGS})
@@ -573,19 +596,25 @@ MACRO(PKG_CONFIG_APPEND_CFLAGS FLAGS)
 ENDMACRO(PKG_CONFIG_APPEND_CFLAGS)
 
 
-# PKG_CONFIG_APPEND_LIBS_RAW
-# ----------------------------
+#.rst:
+# .. ifmode:: export-advanced
 #
-# This macro adds raw value in the "Libs:" into the pkg-config file.
+#   .. command:: PKG_CONFIG_APPEND_LIBS_RAW (LIBS)
 #
-# Exception for mac OS X:
-# In addition to the classical static and dynamic libraries (handled like
-# unix does), mac systems can link against frameworks.
-# Frameworks are directories gathering headers, libraries, shared resources...
+#     This macro adds raw value ``LIBS`` in the "Libs:" section of the
+#     pkg-config file.
 #
-# The syntax used to link with a framework is particular, hence a filter is
-# added to convert the absolute path to a framework (e.g. /Path/to/Sample.framework)
-# into the correct flags (-F/Path/to/ -framework Sample).
+#     **Exception for mac OS X**
+#
+#       In addition to the classical static and dynamic libraries (handled
+#       like unix does), mac systems can link against frameworks.
+#       Frameworks are directories gathering headers, libraries, shared
+#       resources...
+#
+#       The syntax used to link with a framework is particular, hence a
+#       filter is added to convert the absolute path to a framework (e.g.
+#       /Path/to/Sample.framework) into the correct flags (-F/Path/to/
+#       -framework Sample).
 #
 MACRO(PKG_CONFIG_APPEND_LIBS_RAW LIBS)
   FOREACH(LIB ${LIBS})
@@ -602,14 +631,20 @@ MACRO(PKG_CONFIG_APPEND_LIBS_RAW LIBS)
   STRING(REPLACE "\n" "" _PKG_CONFIG_LIBS "${_PKG_CONFIG_LIBS}")
 ENDMACRO(PKG_CONFIG_APPEND_LIBS_RAW)
 
-
-# PKG_CONFIG_APPEND_LIBS
-# ----------------------
+#.rst:
+# .. ifmode:: export
 #
-# This macro adds libraries in a portable way into the pkg-config
-# file.
+#   .. command:: PKG_CONFIG_APPEND_LIBS (LIBS)
 #
-# Library prefix and suffix is automatically added.
+#     This macro adds libraries in a portable way into the pkg-config file.
+#
+#     Library prefix and suffix is automatically added.
+#
+#   .. note::
+#
+#     If you use :variable:`PROJECT_DEBUG_POSTFIX`, this covers both debug
+#     and optimized configurations with the correct name for targets
+#     affected by the postfix.
 #
 MACRO(PKG_CONFIG_APPEND_LIBS LIBS)
   FOREACH(LIB ${LIBS})
@@ -807,7 +842,7 @@ MACRO(BUILD_PREFIX_FOR_PKG DEPENDENCY PREFIX)
 ENDMACRO(BUILD_PREFIX_FOR_PKG)
 
 #.rst:
-# .. ifmode:: user
+# .. ifmode:: import
 #
 #   .. command:: PKG_CONFIG_USE_DEPENDENCY (TARGET DEPENDENCY)
 #
@@ -825,42 +860,46 @@ MACRO(PKG_CONFIG_USE_DEPENDENCY TARGET DEPENDENCY)
 ENDMACRO(PKG_CONFIG_USE_DEPENDENCY TARGET DEPENDENCY)
 
 
-# PKG_CONFIG_USE_COMPILE_DEPENDENCY(TARGET DEPENDENCY)
-# --------------------------------------------
+#.rst:
+# .. ifmode:: import-advanced
 #
-# This macro changes the target properties to properly search for
-# headers  against the required shared libraries
-# when using a dependency detected through pkg-config.
+#   .. command:: PKG_CONFIG_USE_COMPILE_DEPENDENCY (TARGET DEPENDENCY)
 #
-# I.e. PKG_CONFIG_USE_COMPILE_DEPENDENCY(my-binary my-package)
+#     This macro changes the target properties to properly search for
+#     headers  against the required shared libraries
+#     when using a dependency detected through pkg-config.
+#
 MACRO(PKG_CONFIG_USE_COMPILE_DEPENDENCY TARGET DEPENDENCY)
   BUILD_PREFIX_FOR_PKG(${DEPENDENCY} PREFIX)
   PKG_CONFIG_USE_LCOMPILE_DEPENDENCY(${TARGET} ${PREFIX})
 ENDMACRO(PKG_CONFIG_USE_COMPILE_DEPENDENCY TARGET DEPENDENCY)
 
-# PKG_CONFIG_USE_LINK_DEPENDENCY(TARGET DEPENDENCY)
-# --------------------------------------------
+#.rst:
+# .. ifmode:: import-advanced
 #
-# This macro changes the target properties to properly search for
-# the required shared libraries
-# when using a dependency detected through pkg-config.
+#   .. command:: PKG_CONFIG_USE_LINK_DEPENDENCY (TARGET DEPENDENCY)
 #
-# I.e. PKG_CONFIG_USE_LINK_DEPENDENCY(my-binary my-package)
+#     This macro changes the target properties to properly search for
+#     the required shared libraries
+#     when using a dependency detected through pkg-config.
+#
 MACRO(PKG_CONFIG_USE_LINK_DEPENDENCY TARGET DEPENDENCY)
   BUILD_PREFIX_FOR_PKG(${DEPENDENCY} PREFIX)
   PKG_CONFIG_USE_LLINK_DEPENDENCY(${TARGET} ${PREFIX})
 ENDMACRO(PKG_CONFIG_USE_LINK_DEPENDENCY TARGET DEPENDENCY)
 
 
-# PKG_CONFIG_ADD_COMPILE_OPTIONS(COMPILE_OPTIONS DEPENDENCY)
-# ----------------------------------------------------------
+#.rst:
+# .. ifmode:: import-advanced
 #
-# This macro adds the compile-time options for a given pkg-config
-# dependency to a given semi-colon-separated list. This can be
-# used to provide options to CUDA_ADD_LIBRARY for instance, since
-# it does not support SET_TARGET_PROPERTIES...
+#   .. command:: PKG_CONFIG_ADD_COMPILE_OPTIONS (COMPILE_OPTIONS DEPENDENCY)
 #
-# I.e. PKG_CONFIG_ADD_COMPILE_OPTIONS(${MY_OPTIONS} my-package)
+#     This macro adds the compile-time options for a given pkg-config
+#     ``DEPENDENCY`` to a given semi-colon-separated list:
+#     ``COMPILE_OPTIONS``. This can be used to provide options to
+#     CUDA_ADD_LIBRARY for instance, since it does not support
+#     SET_TARGET_PROPERTIES...
+#
 MACRO(PKG_CONFIG_ADD_COMPILE_OPTIONS COMPILE_OPTIONS DEPENDENCY)
   BUILD_PREFIX_FOR_PKG(${DEPENDENCY} PREFIX)
 
