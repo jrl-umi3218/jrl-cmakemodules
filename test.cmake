@@ -13,7 +13,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# Configure the unit test compilation
+#.rst:
+# .. variable:: DISABLE_TESTS
+#
+#   Boolean variable to configure unit test compilation declared with
+#   :command:`ADD_UNIT_TEST`.
+#
+#   * if ``OFF`` (default), nothing special is done.
+#   * if ``ON``, the unit-test is not compiled with target *all*.
+#     A target *build_tests* is added to compile the tests and
+#     a test that run target build_tests is run before all other tests.
+#     So command ``make test`` compiles and runs the unit-tests.
 IF(NOT DEFINED DISABLE_TESTS)
   SET(DISABLE_TESTS OFF)
 ENDIF(NOT DEFINED DISABLE_TESTS)
@@ -22,14 +32,10 @@ IF(DISABLE_TESTS)
   ADD_CUSTOM_TARGET(build_tests)
 ENDIF(DISABLE_TESTS)
 
-# ADD_UNIT_TEST(NAME)
-# ----------------------
+#.rst:
+# .. command:: ADD_UNIT_TEST (NAME)
 #
-# The behaviour of this function depends on DISABLE_TESTS option:
-# - if OFF (default), nothing special is done.
-# - if ON, the unit-test is not compiled with target all.
-#          A target build_tests is added to compile the tests and
-#          a test that run target build_tests is run before all other tests.
+#   The behaviour of this function depends on :variable:`DISABLE_TESTS` option.
 #
 MACRO(ADD_UNIT_TEST NAME SOURCE)
   IF(DISABLE_TESTS)
