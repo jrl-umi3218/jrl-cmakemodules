@@ -13,25 +13,28 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# DISTCHECK_SETUP
-# ---------------
+#.rst:
+# .. command:: DISTCHECK_SETUP
 #
-# Add a distcheck target to check the generated tarball.
+#   .. _target-distcheck:
 #
-# This step calls `make distdir' to generate a copy of the project without
-# the git history and with the `.version' file (as it will be when an user
-# will retrieve a stable version).
-# Then:
-# - create _build and _inst to respectively create a build and an installation
-#   directory.
-# - copy the CMakeCache.txt file.
-# - run cmake with _inst as the installation prefix
-# - run make, make check, make install and make uninstall
-# - remove _build and _inst.
+#   Add a *distcheck* target to check the generated tarball.
 #
-# During the compilation phase, all files in the source tree are modified
-# to *not* be writeable to detect bad compilation steps which tries to modify
-# the source tree. Permissions are reverted at the end of the check.
+#   This step calls ``make distdir`` to generate a copy of the project without
+#   the git history and with the ``.version`` file (as it will be when an user
+#   will retrieve a stable version).
+#   Then:
+#
+#   - create ``_build`` and ``_inst`` to respectively create a build and an installation
+#     directory.
+#   - copy the ``CMakeCache.txt`` file.
+#   - run ``cmake`` with ``_inst`` as the installation prefix
+#   - run ``make``, ``make check``, ``make install`` and ``make uninstall``
+#   - remove ``_build`` and ``_inst``.
+#
+#   During the compilation phase, all files in the source tree are modified
+#   to *not* be writeable to detect bad compilation steps which tries to modify
+#   the source tree. Permissions are reverted at the end of the check.
 #
 MACRO(DISTCHECK_SETUP)
   IF(UNIX)
