@@ -13,23 +13,36 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# RELEASE_SETUP
-# -------------
+#.rst:
+# .. command:: RELEASE_SETUP
 #
-# This adds a release target which release a stable version of the
-# current package.
+#   .. _target-release:
 #
-# To release a package, please run: make release VERSION=X.Y.Z
-# where X.Y.Z is the version number of your new package.
+#   This adds a *release* target which release a stable version of the
+#   current package.
 #
-# A release consists in:
-# - adding a signed tag following the vVERSION pattern.
-# - running make distcheck to make sure everything is ok.
-# - uploading the stable documentation (TODO)
-# - uploading the resulting tarball to GitHub (TODO).
-# - announce the release by e-mail (TODO).
-# - pushing the tag on the GitHub repository (to be done manually as
-#   it is simple but cannot be reverted).
+#   To release a package, please run:
+#
+#   .. code-block:: bash
+#
+#     make release VERSION=X.Y.Z
+#
+#   where ``X.Y.Z`` is the version number of your new package.
+#
+#   A release consists in:
+#
+#   - adding a signed tag following the ``vVERSION`` pattern.
+#   - running ``make distcheck`` (:ref:`distcheck <target-distcheck>`) to make sure everything is ok.
+#   - pushing the tag on the GitHub repository (to be done manually as
+#     it is simple but cannot be reverted).
+#
+#   .. todo::
+#
+#     The following steps are missing to the current release procedure:
+#
+#     - uploading the stable documentation.
+#     - uploading the resulting tarball to GitHub.
+#     - announce the release by e-mail.
 #
 MACRO(RELEASE_SETUP)
   IF(UNIX)
