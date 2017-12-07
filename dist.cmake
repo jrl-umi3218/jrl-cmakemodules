@@ -13,16 +13,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# _SETUP_PROJECT_DIST
-# -------------------
+#.rst:
+# .. command:: _SETUP_PROJECT_DIST
 #
-# Add a dist target to generate a tarball using git-archive.
+#   .. _target-dist:
 #
-# Linux specific: use git-archive-all.sh to obtain a recursive
-# git-archive on the project's submodule.
-# Please note that git-archive-all.sh is not carefully written
-# and create a temporary file in the source directory
-# (which is then moved to the build directory).
+#   Add a *dist* target to generate a tarball using ``git-archive``.
+#
+#   Linux specific: use ``git-archive-all.sh`` to obtain a recursive
+#   ``git-archive`` on the project's submodule.
+#   Please note that ``git-archive-all.sh`` is not carefully written
+#   and create a temporary file in the source directory
+#   (which is then moved to the build directory).
 MACRO(_SETUP_PROJECT_DIST)
   IF(UNIX)
     FIND_PROGRAM(TAR tar)
