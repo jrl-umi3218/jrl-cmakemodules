@@ -1,40 +1,23 @@
-#.rst:
-# FindPythonLibs
-# --------------
-#
-# Find python libraries
-#
+# - Find python libraries
 # This module finds if Python is installed and determines where the
-# include files and libraries are.  It also determines what the name of
-# the library is.  This code sets the following variables:
+# include files and libraries are. It also determines what the name of
+# the library is. This code sets the following variables:
 #
-# ::
+#  PYTHONLIBS_FOUND           - have the Python libs been found
+#  PYTHON_LIBRARIES           - path to the python library
+#  PYTHON_INCLUDE_PATH        - path to where Python.h is found (deprecated)
+#  PYTHON_INCLUDE_DIRS        - path to where Python.h is found
+#  PYTHON_DEBUG_LIBRARIES     - path to the debug library (deprecated)
+#  PYTHONLIBS_VERSION_STRING  - version of the Python libs found (since CMake 2.8.8)
 #
-#   PYTHONLIBS_FOUND           - have the Python libs been found
-#   PYTHON_LIBRARIES           - path to the python library
-#   PYTHON_INCLUDE_PATH        - path to where Python.h is found (deprecated)
-#   PYTHON_INCLUDE_DIRS        - path to where Python.h is found
-#   PYTHON_DEBUG_LIBRARIES     - path to the debug library (deprecated)
-#   PYTHONLIBS_VERSION_STRING  - version of the Python libs found (since CMake 2.8.8)
+# The Python_ADDITIONAL_VERSIONS variable can be used to specify a list of
+# version numbers that should be taken into account when searching for Python.
+# You need to set this variable before calling find_package(PythonLibs).
 #
-#
-#
-# The Python_ADDITIONAL_VERSIONS variable can be used to specify a list
-# of version numbers that should be taken into account when searching
-# for Python.  You need to set this variable before calling
-# find_package(PythonLibs).
-#
-# If you'd like to specify the installation of Python to use, you should
-# modify the following cache variables:
-#
-# ::
-#
-#   PYTHON_LIBRARY             - path to the python library
-#   PYTHON_INCLUDE_DIR         - path to where Python.h is found
-#
-# If also calling find_package(PythonInterp), call find_package(PythonInterp)
-# first to get the currently active Python version by default with a consistent
-# version of PYTHON_LIBRARIES.
+# If you'd like to specify the installation of Python to use, you should modify
+# the following cache variables:
+#  PYTHON_LIBRARY             - path to the python library
+#  PYTHON_INCLUDE_DIR         - path to where Python.h is found
 
 #=============================================================================
 # Copyright 2001-2009 Kitware, Inc.
@@ -49,133 +32,209 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-include(CMakeFindFrameworks)
-# Search for the python framework on Apple.
-CMAKE_FIND_FRAMEWORKS(Python)
+# Note by Nikolaus Demmel 28.03.2014: My contributions are licensend under the
+# same as CMake (BSD). My adaptations are in part based
+# https://github.com/qgis/QGIS/tree/master/cmake which has the following
+# copyright note:
 
-set(_PYTHON1_VERSIONS 1.6 1.5)
-set(_PYTHON2_VERSIONS 2.7 2.6 2.5 2.4 2.3 2.2 2.1 2.0)
-set(_PYTHON3_VERSIONS 3.4 3.3 3.2 3.1 3.0)
+# Copyright (c) 2007, Simon Edwards <simon@simonzone.com>
+# Redistribution and use is allowed according to the terms of the BSD license.
+# For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 
-if(PythonLibs_FIND_VERSION)
-    if(PythonLibs_FIND_VERSION_COUNT GREATER 1)
-        set(_PYTHON_FIND_MAJ_MIN "${PythonLibs_FIND_VERSION_MAJOR}.${PythonLibs_FIND_VERSION_MINOR}")
-        unset(_PYTHON_FIND_OTHER_VERSIONS)
-        if(PythonLibs_FIND_VERSION_EXACT)
-            if(_PYTHON_FIND_MAJ_MIN STREQUAL PythonLibs_FIND_VERSION)
-                set(_PYTHON_FIND_OTHER_VERSIONS "${PythonLibs_FIND_VERSION}")
-            else()
-                set(_PYTHON_FIND_OTHER_VERSIONS "${PythonLibs_FIND_VERSION}" "${_PYTHON_FIND_MAJ_MIN}")
-            endif()
-        else()
-            foreach(_PYTHON_V ${_PYTHON${PythonLibs_FIND_VERSION_MAJOR}_VERSIONS})
-                if(NOT _PYTHON_V VERSION_LESS _PYTHON_FIND_MAJ_MIN)
-                    list(APPEND _PYTHON_FIND_OTHER_VERSIONS ${_PYTHON_V})
-                endif()
-             endforeach()
-        endif()
-        unset(_PYTHON_FIND_MAJ_MIN)
-    else()
-        set(_PYTHON_FIND_OTHER_VERSIONS ${_PYTHON${PythonLibs_FIND_VERSION_MAJOR}_VERSIONS})
-    endif()
-else()
-    set(_PYTHON_FIND_OTHER_VERSIONS ${_PYTHON3_VERSIONS} ${_PYTHON2_VERSIONS} ${_PYTHON1_VERSIONS})
-endif()
 
-# Set up the versions we know about, in the order we will search. Always add
-# the user supplied additional versions to the front.
-# If FindPythonInterp has already found the major and minor version,
-# insert that version between the user supplied versions and the stock
-# version list.
-set(_Python_VERSIONS ${Python_ADDITIONAL_VERSIONS})
-if(DEFINED PYTHON_VERSION_MAJOR AND DEFINED PYTHON_VERSION_MINOR)
-  list(APPEND _Python_VERSIONS ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR})
-endif()
-list(APPEND _Python_VERSIONS ${_PYTHON_FIND_OTHER_VERSIONS})
-
-unset(_PYTHON_FIND_OTHER_VERSIONS)
-unset(_PYTHON1_VERSIONS)
-unset(_PYTHON2_VERSIONS)
-unset(_PYTHON3_VERSIONS)
-
-foreach(_CURRENT_VERSION ${_Python_VERSIONS})
-  string(REPLACE "." "" _CURRENT_VERSION_NO_DOTS ${_CURRENT_VERSION})
-  if(WIN32)
-    find_library(PYTHON_DEBUG_LIBRARY
-      NAMES python${_CURRENT_VERSION_NO_DOTS}_d python
-      PATHS
-      [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/libs/Debug
-      [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/libs/Debug
-      [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/libs
-      [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/libs
-      )
-  endif()
-
-  find_library(PYTHON_LIBRARY
-    NAMES
-    python${_CURRENT_VERSION_NO_DOTS}
-    python${_CURRENT_VERSION}mu
-    python${_CURRENT_VERSION}m
-    python${_CURRENT_VERSION}u
-    python${_CURRENT_VERSION}
-    PATHS
-      [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/libs
-      [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/libs
-    # Avoid finding the .dll in the PATH.  We want the .lib.
-    NO_SYSTEM_ENVIRONMENT_PATH
-  )
-  # Look for the static library in the Python config directory
-  find_library(PYTHON_LIBRARY
-    NAMES python${_CURRENT_VERSION_NO_DOTS} python${_CURRENT_VERSION}
-    # Avoid finding the .dll in the PATH.  We want the .lib.
-    NO_SYSTEM_ENVIRONMENT_PATH
-    # This is where the static library is usually located
-    PATH_SUFFIXES python${_CURRENT_VERSION}/config
-  )
-
-  # For backward compatibility, honour value of PYTHON_INCLUDE_PATH, if
-  # PYTHON_INCLUDE_DIR is not set.
-  if(DEFINED PYTHON_INCLUDE_PATH AND NOT DEFINED PYTHON_INCLUDE_DIR)
+if(NOT DEFINED PYTHON_INCLUDE_DIR)
+  if(DEFINED PYTHON_INCLUDE_PATH)
+    # For backward compatibility, repect PYTHON_INCLUDE_PATH.
     set(PYTHON_INCLUDE_DIR "${PYTHON_INCLUDE_PATH}" CACHE PATH
       "Path to where Python.h is found" FORCE)
+  else()
+    set(PYTHON_INCLUDE_DIR "" CACHE PATH
+      "Path to where Python.h is found" FORCE)
   endif()
+endif()
 
-  set(PYTHON_FRAMEWORK_INCLUDES)
-  if(Python_FRAMEWORKS AND NOT PYTHON_INCLUDE_DIR)
-    foreach(dir ${Python_FRAMEWORKS})
-      set(PYTHON_FRAMEWORK_INCLUDES ${PYTHON_FRAMEWORK_INCLUDES}
-        ${dir}/Versions/${_CURRENT_VERSION}/include/python${_CURRENT_VERSION})
-    endforeach()
-  endif()
-
-  find_path(PYTHON_INCLUDE_DIR
-    NAMES Python.h
-    PATHS
-      ${PYTHON_FRAMEWORK_INCLUDES}
-      [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/include
-      [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/include
-    PATH_SUFFIXES
-      python${_CURRENT_VERSION}mu
-      python${_CURRENT_VERSION}m
-      python${_CURRENT_VERSION}u
-      python${_CURRENT_VERSION}
-  )
-
-  # For backward compatibility, set PYTHON_INCLUDE_PATH.
-  set(PYTHON_INCLUDE_PATH "${PYTHON_INCLUDE_DIR}")
-
-  if(PYTHON_INCLUDE_DIR AND EXISTS "${PYTHON_INCLUDE_DIR}/patchlevel.h")
-    file(STRINGS "${PYTHON_INCLUDE_DIR}/patchlevel.h" python_version_str
-         REGEX "^#define[ \t]+PY_VERSION[ \t]+\"[^\"]+\"")
+if(EXISTS "${PYTHON_INCLUDE_DIR}" AND EXISTS "${PYTHON_LIBRARY}")
+  if(EXISTS "${PYTHON_INCLUDE_DIR}/patchlevel.h")
+    file(STRINGS "${PYTHON_INCLUDE_DIR}/patchlevel.h" _PYTHON_VERSION_STR
+      REGEX "^#define[ \t]+PY_VERSION[ \t]+\"[^\"]+\"")
     string(REGEX REPLACE "^#define[ \t]+PY_VERSION[ \t]+\"([^\"]+)\".*" "\\1"
-                         PYTHONLIBS_VERSION_STRING "${python_version_str}")
-    unset(python_version_str)
+      PYTHONLIBS_VERSION_STRING "${_PYTHON_VERSION_STR}")
+    unset(_PYTHON_VERSION_STR)
+  endif()
+else()
+  set(_PYTHON1_VERSIONS 1.6 1.5)
+  set(_PYTHON2_VERSIONS 2.7 2.6 2.5 2.4 2.3 2.2 2.1 2.0)
+  set(_PYTHON3_VERSIONS 3.6 3.5 3.4 3.3 3.2 3.1 3.0)
+
+  unset(_PYTHON_FIND_OTHER_VERSIONS)
+  if(PythonLibs_FIND_VERSION)
+    if(PythonLibs_FIND_VERSION_COUNT GREATER 1)
+      set(_PYTHON_FIND_MAJ_MIN "${PythonLibs_FIND_VERSION_MAJOR}.${PythonLibs_FIND_VERSION_MINOR}")
+      if(NOT PythonLibs_FIND_VERSION_EXACT)
+        foreach(_PYTHON_V ${_PYTHON${PythonLibs_FIND_VERSION_MAJOR}_VERSIONS})
+          if(NOT _PYTHON_V VERSION_LESS _PYTHON_FIND_MAJ_MIN)
+            if(NOT _PYTHON_V STREQUAL PythonLibs_FIND_VERSION)
+              list(APPEND _PYTHON_FIND_OTHER_VERSIONS ${_PYTHON_V})
+            endif()
+          endif()
+        endforeach()
+      endif()
+      unset(_PYTHON_FIND_MAJ_MIN)
+    else()
+      set(_PYTHON_FIND_OTHER_VERSIONS ${_PYTHON${PythonLibs_FIND_VERSION_MAJOR}_VERSIONS})
+    endif()
+  else()
+    # add an empty version to check the `python` executable first in case no version is requested
+    set(_PYTHON_FIND_OTHER_VERSIONS ${_PYTHON3_VERSIONS} ${_PYTHON2_VERSIONS} ${_PYTHON1_VERSIONS})
   endif()
 
-  if(PYTHON_LIBRARY AND PYTHON_INCLUDE_DIR)
-    break()
+  unset(_PYTHON1_VERSIONS)
+  unset(_PYTHON2_VERSIONS)
+  unset(_PYTHON3_VERSIONS)
+
+  # Set up the versions we know about, in the order we will search. Always add
+  # the user supplied additional versions to the front.
+  # If FindPythonInterp has already found the major and minor version,
+  # insert that version between the user supplied versions and the stock
+  # version list.
+  # If no specific version is requested or suggested by PythonInterp, always look
+  # for "python" executable first
+  set(_PYTHON_VERSIONS ${PythonLibs_FIND_VERSION} ${PythonLibs_ADDITIONAL_VERSIONS} )
+  if(DEFINED PYTHON_VERSION_MAJOR AND DEFINED PYTHON_VERSION_MINOR)
+    list(APPEND _PYTHON_VERSIONS ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR})
   endif()
-endforeach()
+  if (NOT _PYTHON_VERSIONS)
+    set(_PYTHON_VERSIONS ";") # empty entry at the front makeing sure we search for "python" first
+  endif()
+  list(APPEND _PYTHON_VERSIONS ${_PYTHON_FIND_OTHER_VERSIONS})
+
+  unset(_PYTHON_FIND_OTHER_VERSIONS)
+
+  message(STATUS "Looking for versions: ${_PYTHON_VERSIONS}")
+
+  FIND_FILE(_FIND_LIB_PYTHON_PY FindLibPython.py PATHS ${CMAKE_MODULE_PATH} ${CMAKE_ROOT}/Modules)
+
+  if(NOT _FIND_LIB_PYTHON_PY)
+    message(FATAL_ERROR "Could not find required file 'FindLibPython.py'")
+  endif()
+
+  unset(PYTHONLIBS_VERSION_STRING)
+  foreach(_CURRENT_VERSION IN LISTS _PYTHON_VERSIONS)
+
+    STRING(REGEX REPLACE "^([0-9]+).*$"          "\\1" _VERSION_MAJOR "${_CURRENT_VERSION}")
+    STRING(REGEX REPLACE "^[0-9]+\\.([0-9]+).*$" "\\1" _VERSION_MINOR "${_CURRENT_VERSION}")
+
+    set(_PYTHON_NAMES python)
+
+    if (_CURRENT_VERSION MATCHES "^[0-9]+.*$")
+      list(APPEND _PYTHON_NAMES "python${_VERSION_MAJOR}")
+      if (_CURRENT_VERSION MATCHES "^[0-9]+\\.[0-9].*$")
+        list(APPEND _PYTHON_NAMES "python${_VERSION_MAJOR}.${_VERSION_MINOR}")
+      endif()
+    endif()
+
+    message(STATUS "Looking for python version '${_CURRENT_VERSION}' by checking executables: ${_PYTHON_NAMES}.")
+
+    foreach(_CURRENT_PYTHON_NAME IN LISTS _PYTHON_NAMES)
+
+      unset(_PYTHON_EXECUTABLE CACHE)
+      find_program(_PYTHON_EXECUTABLE ${_CURRENT_PYTHON_NAME}
+        PATHS [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath])
+
+      if(_PYTHON_EXECUTABLE)
+
+        EXECUTE_PROCESS(
+          COMMAND ${_PYTHON_EXECUTABLE} "${_FIND_LIB_PYTHON_PY}"
+          OUTPUT_VARIABLE _PYTHON_CONFIG
+          RESULT_VARIABLE _PYTHON_CONFIG_RESULT
+          ERROR_QUIET)
+
+        if(NOT ${_PYTHON_CONFIG_RESULT} AND (NOT ${_PYTHON_CONFIG} STREQUAL ""))
+          STRING(REGEX REPLACE ".*\nmajor_version:([0-9]+).*$" "\\1" _PYTHON_MAJOR_VERSION ${_PYTHON_CONFIG})
+          STRING(REGEX REPLACE ".*\nminor_version:([0-9]+).*$" "\\1" _PYTHON_MINOR_VERSION ${_PYTHON_CONFIG})
+          STRING(REGEX REPLACE ".*\npatch_version:([0-9]+).*$" "\\1" _PYTHON_PATCH_VERSION ${_PYTHON_CONFIG})
+          STRING(REGEX REPLACE ".*\nshort_version:([^\n]+).*$" "\\1" _PYTHON_SHORT_VERSION ${_PYTHON_CONFIG})
+          STRING(REGEX REPLACE ".*\nlong_version:([^\n]+).*$"  "\\1" _PYTHON_LONG_VERSION  ${_PYTHON_CONFIG})
+          STRING(REGEX REPLACE ".*\npy_inc_dir:([^\n]+).*$"    "\\1" _PYTHON_INCLUDE_DIR   ${_PYTHON_CONFIG})
+          STRING(REGEX REPLACE ".*\npy_lib_dir:([^\n]+).*$"    "\\1" _PYTHON_LIBRARY_DIR   ${_PYTHON_CONFIG})
+          STRING(REGEX REPLACE ".*\nexec_prefix:(^\n+).*$"     "\\1" _PYTHON_PREFIX        ${_PYTHON_CONFIG})
+
+          if ("${_CURRENT_VERSION}" STREQUAL ""                         OR
+              "${_CURRENT_VERSION}" STREQUAL "${_PYTHON_MAJOR_VERSION}" OR
+              "${_CURRENT_VERSION}" STREQUAL "${_PYTHON_SHORT_VERSION}" OR
+              "${_CURRENT_VERSION}" STREQUAL "${_PYTHON_LONG_VERSION}")
+
+            message(STATUS "Found executable ${_PYTHON_EXECUTABLE} with suitable version ${_PYTHON_LONG_VERSION}")
+
+            if(NOT EXISTS "${PYTHON_INCLUDE_DIR}")
+              set(PYTHON_INCLUDE_DIR "${_PYTHON_INCLUDE_DIR}")
+            endif()
+
+            if(NOT EXISTS "${PYTHON_LIBRARY}")
+              set(_PYTHON_SHORT_VERSION_NO_DOT "${_PYTHON_MAJOR_VERSION}${_PYTHON_MINOR_VERSION}")
+              set(_PYTHON_LIBRARY_NAMES python${_PYTHON_SHORT_VERSION} python${_PYTHON_SHORT_VERSION_NO_DOT})
+              FIND_LIBRARY(PYTHON_LIBRARY
+                NAMES ${_PYTHON_LIBRARY_NAMES}
+                PATH_SUFFIXES
+                "python${_PYTHON_SHORT_VERSION}/config"
+                "python${_PYTHON_SHORT_VERSION_NO_DOT}/config"
+                PATHS
+                ${_PYTHON_LIBRARY_DIR}
+                ${_PYTHON_PREFIX}/lib
+                ${_PYTHON_PREFIX}/libs
+                ${_PYTHON_LIBRARY_DIR}/x86_64-linux-gnu/
+                NO_DEFAULT_PATH)
+
+              if(WIN32)
+                find_library(PYTHON_DEBUG_LIBRARY
+                  NAMES python${_PYTHON_SHORT_VERSION_NO_DOT}_d python
+                  PATHS
+                  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/libs/Debug
+                  [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/libs/Debug
+                  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/libs
+                  [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/libs
+                  )
+              endif()
+            endif()
+
+            set(PYTHONLIBS_VERSION_STRING ${_PYTHON_LONG_VERSION})
+            if(_PYTHON_PATCH_VERSION STREQUAL "0")
+              # it's called "Python 2.7", not "2.7.0"
+              string(REGEX REPLACE "\\.0$" "" PYTHONLIBS_VERSION_STRING "${PYTHONLIBS_VERSION_STRING}")
+            endif()
+
+            break()
+          else()
+            message(STATUS "Found executable ${_PYTHON_EXECUTABLE} with UNsuitable version ${_PYTHON_LONG_VERSION}")
+          endif() # version ok
+        else()
+          message(WARNING "Found executable ${_PYTHON_EXECUTABLE}, but could not extract version info.")
+        endif() # could extract config
+      endif() # found executable
+    endforeach() # python names
+    if (PYTHONLIBS_VERSION_STRING)
+      break()
+    endif()
+  endforeach() # python versions
+endif()
+
+unset(_PYTHON_NAMES)
+unset(_PYTHON_VERSIONS)
+unset(_PYTHON_EXECUTABLE CACHE)
+unset(_PYTHON_MAJOR_VERSION)
+unset(_PYTHON_MINOR_VERSION)
+unset(_PYTHON_PATCH_VERSION)
+unset(_PYTHON_SHORT_VERSION)
+unset(_PYTHON_LONG_VERSION)
+unset(_PYTHON_LIBRARY_DIR)
+unset(_PYTHON_INCLUDE_DIR)
+unset(_PYTHON_PREFIX)
+unset(_PYTHON_SHORT_VERSION_NO_DOT)
+unset(_PYTHON_LIBRARY_NAMES)
+
+
+# For backward compatibility, set PYTHON_INCLUDE_PATH.
+set(PYTHON_INCLUDE_PATH "${PYTHON_INCLUDE_DIR}")
 
 mark_as_advanced(
   PYTHON_DEBUG_LIBRARY
@@ -194,33 +253,22 @@ set(PYTHON_DEBUG_LIBRARIES "${PYTHON_DEBUG_LIBRARY}")
 # what SELECT_LIBRARY_CONFIGURATIONS() expects.
 set(PYTHON_LIBRARY_DEBUG "${PYTHON_DEBUG_LIBRARY}")
 set(PYTHON_LIBRARY_RELEASE "${PYTHON_LIBRARY}")
-include(SelectLibraryConfigurations)
+include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
 SELECT_LIBRARY_CONFIGURATIONS(PYTHON)
+
+if(PYTHON_LIBRARY AND NOT PYTHON_LIBRARIES)
+  set(PYTHON_LIBRARIES "${PYTHON_LIBRARY}")
+endif()
 # SELECT_LIBRARY_CONFIGURATIONS() sets ${PREFIX}_FOUND if it has a library.
 # Unset this, this prefix doesn't match the module prefix, they are different
 # for historical reasons.
 unset(PYTHON_FOUND)
 
-# This is a hack to make FindPackageHandleStandardArgs not failing
-# when EXACT version of the form "3" or "3.2" is required and
-# PYTHONLIBS_VERSION_STRING is "3.2.4".
-# This hack is in CMake 3.2 and above.
-set(_PYTHONLIBS_VERSION_STRING "${PYTHONLIBS_VERSION_STRING}")
-if(PythonLibs_FIND_VERSION)
-    set(PYTHONLIBS_VERSION_STRING "${PythonLibs_FIND_VERSION_MAJOR}")
-    if(PythonLibs_FIND_VERSION_COUNT GREATER 1)
-        set(PYTHONLIBS_VERSION_STRING "${PYTHONLIBS_VERSION_STRING}.${PythonLibs_FIND_VERSION_MINOR}")
-    endif(PythonLibs_FIND_VERSION_COUNT GREATER 1)
-    if(PythonLibs_FIND_VERSION_COUNT GREATER 2)
-        set(PYTHONLIBS_VERSION_STRING "${PYTHONLIBS_VERSION_STRING}.${PythonLibs_FIND_VERSION_TWEAK}")
-    endif(PythonLibs_FIND_VERSION_COUNT GREATER 2)
-endif()
-
+# include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 include(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(PythonLibs
                                   REQUIRED_VARS PYTHON_LIBRARIES PYTHON_INCLUDE_DIRS
                                   VERSION_VAR PYTHONLIBS_VERSION_STRING)
-set(PYTHONLIBS_VERSION_STRING "${_PYTHONLIBS_VERSION_STRING}")
 
 # PYTHON_ADD_MODULE(<name> src1 src2 ... srcN) is used to build modules for python.
 # PYTHON_WRITE_MODULES_HEADER(<filename>) writes a header file you can include
