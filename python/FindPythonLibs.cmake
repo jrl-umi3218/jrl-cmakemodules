@@ -267,7 +267,6 @@ endif()
 # for historical reasons.
 unset(PYTHON_FOUND)
 
-# include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 include(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(PythonLibs
                                   REQUIRED_VARS PYTHON_LIBRARIES PYTHON_INCLUDE_DIRS
