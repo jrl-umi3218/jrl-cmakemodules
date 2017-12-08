@@ -49,6 +49,17 @@ MACRO(ADD_UNIT_TEST NAME SOURCE)
   ENDIF(DISABLE_TESTS)
 ENDMACRO(ADD_UNIT_TEST NAME SOURCE)
 
+#.rst:
+# .. command:: ADD_PYTHON_UNIT_TEST (NAME SOURCE)
+#
+#   Add a test called `NAME` that runs an equivalent of ``python ${SOURCE}``
+#
+#   .. note:: :command:`FINDPYTHON` should have been called first.
+#
+MACRO(ADD_PYTHON_UNIT_TEST NAME SOURCE)
+  ADD_TEST(${NAME} ${PYTHON_EXECUTABLE} "${SOURCE}")
+ENDMACRO(ADD_PYTHON_UNIT_TEST NAME SOURCE)
+
 # DEFINE_UNIT_TEST(NAME LIB)
 # ----------------------
 #
