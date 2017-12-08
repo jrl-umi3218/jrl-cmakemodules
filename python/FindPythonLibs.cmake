@@ -47,7 +47,7 @@
 
 if(NOT DEFINED PYTHON_INCLUDE_DIR)
   if(DEFINED PYTHON_INCLUDE_PATH)
-    # For backward compatibility, repect PYTHON_INCLUDE_PATH.
+    # For backward compatibility, respect PYTHON_INCLUDE_PATH.
     set(PYTHON_INCLUDE_DIR "${PYTHON_INCLUDE_PATH}" CACHE PATH
       "Path to where Python.h is found" FORCE)
   else()
@@ -115,7 +115,7 @@ else()
 
   message(STATUS "Looking for versions: ${_PYTHON_VERSIONS}")
 
-  FIND_FILE(_FIND_LIB_PYTHON_PY FindLibPython.py PATHS ${CMAKE_MODULE_PATH} ${CMAKE_ROOT}/Modules)
+  FIND_FILE(_FIND_LIB_PYTHON_PY FindLibPython.py PATHS ${CMAKE_MODULE_PATH} "${CMAKE_ROOT}/Modules")
 
   if(NOT _FIND_LIB_PYTHON_PY)
     message(FATAL_ERROR "Could not find required file 'FindLibPython.py'")
