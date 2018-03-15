@@ -33,7 +33,7 @@ IF(DISABLE_TESTS)
 ENDIF(DISABLE_TESTS)
 
 #.rst:
-# .. command:: ADD_UNIT_TEST (NAME)
+# .. command:: ADD_UNIT_TEST (NAME SOURCE)
 #
 #   The behaviour of this function depends on :variable:`DISABLE_TESTS` option.
 #
