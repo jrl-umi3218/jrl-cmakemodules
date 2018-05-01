@@ -86,6 +86,23 @@ MACRO(SEARCH_FOR_BOOST)
       Boost_${UPPERCOMPONENT}_LIBRARY_DEBUG
       Boost_${UPPERCOMPONENT}_LIBRARY_RELEASE
       )
+    # Detect if component has python as a substring
+    STRING(FIND ${COMPONENT} "python" python_comp_pos)
+
+    # If the substring starts with python zero if the result
+    # and the test fails. Thus test greater than 1.
+    IF(${python_comp_pos} GREATER -1)
+      SET(Boost_PYTHON_LIBRARY ${Boost_${UPPERCOMPONENT}_LIBRARY})
+      MESSAGE(STATUS "Boost_PYTHON_LIBRARY :${Boost_PYTHON_LIBRARY}")
+      LIST(APPEND Boost_PYTHON_LIBRARIES
+	${Boost_PYTHON_LIBRARY})
+      LIST(APPEND LOGGING_WATCHED_VARIABLES
+	python_comp_pos
+	Boost_${UPPERCOMPONENT}_LIBRARY
+	Boost_PYTHON_LIBRARY
+	)
+    ENDIF()
+
   ENDFOREACH()
 
   # On darwin systems, we must link againt boost_python with unresolved symbols.
@@ -124,6 +141,9 @@ MACRO(TARGET_LINK_BOOST_PYTHON target)
   ELSE(APPLE)
     TARGET_LINK_LIBRARIES(${target} ${Boost_PYTHON_LIBRARY})
   ENDIF(APPLE)
+  LIST(APPEND LOGGING_WATCHED_VARIABLES
+    Boost_PYTHON_LIBRARIES
+    )
 ENDMACRO(TARGET_LINK_BOOST_PYTHON)
 
 #.rst:
