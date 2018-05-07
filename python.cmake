@@ -32,6 +32,11 @@
 #    or another version that the requested one.
 #
 
+#.rst:
+# .. variable:: PYTHON_SITELIB
+#
+#  Absolute path where Python files will be installed.
+
 IF(CMAKE_VERSION VERSION_LESS "3.2")
     SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/python ${CMAKE_MODULE_PATH})
     MESSAGE(WARNING "CMake versions older than 3.2 do not properly find Python. Custom macros are used to find it.")
@@ -166,10 +171,10 @@ MACRO(DYNAMIC_GRAPH_PYTHON_MODULE SUBMODULENAME LIBRARYNAME TARGETNAME)
 ENDMACRO(DYNAMIC_GRAPH_PYTHON_MODULE SUBMODULENAME)
 
 
-# PYTHON_INSTALL(MODULE FILE DEST)
-# --------------------------------
+#.rst:
+# .. command::  PYTHON_INSTALL(MODULE FILE DEST)
 #
-# Install a Python file and its associated compiled version.
+#  Install a Python file and its associated compiled version.
 #
 MACRO(PYTHON_INSTALL MODULE FILE DEST)
 
@@ -181,10 +186,10 @@ MACRO(PYTHON_INSTALL MODULE FILE DEST)
     DESTINATION "${DEST}/${MODULE}")
 ENDMACRO()
 
-# PYTHON_INSTALL_ON_SITE (MODULE FILE)
-# --------------------------------
+#.rst:
+# .. command:: PYTHON_INSTALL_ON_SITE (MODULE FILE)
 #
-# Install a Python file and its associated compiled version.
+#  Install a Python file and its associated compiled version in :cmake:variable:`PYTHON_SITELIB`.
 #
 MACRO(PYTHON_INSTALL_ON_SITE MODULE FILE)
 

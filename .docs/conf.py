@@ -15,7 +15,7 @@
 import sys
 import os
 
-from sphinx.util.compat import Directive
+from docutils.parsers.rst import Directive
 from docutils import nodes
 from sphinx.util.nodes import set_source_info
 
