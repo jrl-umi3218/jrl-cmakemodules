@@ -1,4 +1,4 @@
-# Copyright (C) 2008-2016 LAAS-CNRS, JRL AIST-CNRS.
+# Copyright (C) 2008-2018 LAAS-CNRS, JRL AIST-CNRS.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
 #.rst:
 # .. variable:: BOOST_COMPONENTS
 #
-#  Controls the components to be detected.  If
-#  this variable is not defined, it defaults to the following component
+#  Controls the components to be detected.  
+#  If this variable is not defined, it defaults to the following component
 #  list:
 #
 #  - Filesystem
@@ -33,6 +33,11 @@
 #
 #  The components to be detected is controlled by :variable:`BOOST_COMPONENTS`.
 #
+#  A special treatment must be done for the boost-python component. 
+#  For boost >= 1.67.0, FindPython macro should be called first in order
+#  to automatically detect the right boost-python component version according
+#  to the Python version (2.7 or 3.x).
+#
 MACRO(SEARCH_FOR_BOOST)
   SET(Boost_USE_STATIC_LIBS OFF)
   SET(Boost_USE_MULTITHREAD ON)
@@ -41,11 +46,52 @@ MACRO(SEARCH_FOR_BOOST)
     SET(BOOST_REQUIRED 1.40)
   ENDIF(NOT BOOST_REQUIRED)
 
+  # First try to find Boost to get the version
+  FIND_PACKAGE(Boost ${BOOST_REQUIRED})
+
   IF(NOT DEFINED BOOST_COMPONENTS)
     SET(BOOST_COMPONENTS
       filesystem system thread program_options unit_test_framework)
   ENDIF(NOT DEFINED BOOST_COMPONENTS)
 
+  # Check if python is in the list and adjust the version according to the current Python version.
+  # This is made mandatory if for Boost version greater than 1.67.0
+  IF(Boost_VERSION VERSION_GREATER "1.67.0")
+    LIST(FIND BOOST_COMPONENTS python PYTHON_IN_BOOST_COMPONENTS)
+    SET(BOOST_COMPONENTS_ ${BOOST_COMPONENTS})
+    IF(${PYTHON_IN_BOOST_COMPONENTS} GREATER -1)
+      # Check if Python has been found
+      IF(NOT PYTHONLIBS_FOUND)
+        MESSAGE(FATAL_ERROR "PYTHON has not been found. You should first call FindPython before calling SEARCH_FOR_BOOST macro.")   
+      ENDIF(NOT PYTHONLIBS_FOUND)
+
+      LIST(REMOVE_AT BOOST_COMPONENTS_ ${PYTHON_IN_BOOST_COMPONENTS})
+      SET(BOOST_PYTHON_COMPONENT "python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}")
+      LIST(APPEND BOOST_COMPONENTS_ ${BOOST_PYTHON_COMPONENT})
+    ENDIF()
+  ELSE(Boost_VERSION VERSION_GREATER "1.67.0")
+    # Check if Python has been found
+    IF(NOT PYTHONLIBS_FOUND)
+      MESSAGE(FATAL_ERROR "PYTHON has not been found. You should first call FindPython before calling SEARCH_FOR_BOOST macro.")   
+    ENDIF(NOT PYTHONLIBS_FOUND)
+    IF(${PYTHON_VERSION_MAJOR} EQUAL 3) 
+      LIST(FIND BOOST_COMPONENTS python PYTHON_IN_BOOST_COMPONENTS)
+      SET(BOOST_COMPONENTS_ ${BOOST_COMPONENTS})
+      LIST(REMOVE_AT BOOST_COMPONENTS_ ${PYTHON_IN_BOOST_COMPONENTS})
+      IF(${PYTHON_IN_BOOST_COMPONENTS} GREATER -1)
+        IF(${UNIX})
+          SET(BOOST_PYTHON_COMPONENT "python-py${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}")
+        ELSE(${UNIX})
+          SET(BOOST_PYTHON_COMPONENT "python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}")
+        ENDIF(${UNIX})
+        LIST(APPEND BOOST_COMPONENTS_ ${BOOST_PYTHON_COMPONENT})
+      ENDIF(${PYTHON_IN_BOOST_COMPONENTS} GREATER -1)
+    ELSE(${PYTHON_VERSION_MAJOR} EQUAL 3) 
+      SET(BOOST_COMPONENTS_ ${BOOST_COMPONENTS})
+    ENDIF(${PYTHON_VERSION_MAJOR} EQUAL 3) 
+  ENDIF(Boost_VERSION VERSION_GREATER "1.67.0")
+  
+  SET(BOOST_COMPONENTS ${BOOST_COMPONENTS_})
   FIND_PACKAGE(Boost ${BOOST_REQUIRED} COMPONENTS ${BOOST_COMPONENTS} REQUIRED)
 
   IF(NOT Boost_FOUND)
