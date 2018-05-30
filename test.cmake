@@ -50,14 +50,23 @@ MACRO(ADD_UNIT_TEST NAME SOURCE)
 ENDMACRO(ADD_UNIT_TEST NAME SOURCE)
 
 #.rst:
-# .. command:: ADD_PYTHON_UNIT_TEST (NAME SOURCE)
+# .. command:: ADD_PYTHON_UNIT_TEST (NAME SOURCE [MODULE_PATH])
 #
-#   Add a test called `NAME` that runs an equivalent of ``python ${SOURCE}``
+#   Add a test called `NAME` that runs an equivalent of ``python ${SOURCE}``,
+#   optionnaly with a `PYTHONPATH` set to `CMAKE_BINARY_DIR/MODULE_PATH` if `MODULE_PATH` is set.
+#   `SOURCE` is relative to `PROJECT_SOURCE_DIR`
 #
 #   .. note:: :command:`FINDPYTHON` should have been called first.
 #
 MACRO(ADD_PYTHON_UNIT_TEST NAME SOURCE)
-  ADD_TEST(${NAME} ${PYTHON_EXECUTABLE} "${SOURCE}")
+  SET(MODULE_PATH "${ARGN}")  # ARGN is not a variable
+  IF(MODULE_PATH)
+    ADD_TEST(NAME ${NAME}
+      COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_BINARY_DIR}/${MODULE_PATH}"
+      ${PYTHON_EXECUTABLE} "${PROJECT_SOURCE_DIR}/${SOURCE}")
+  ELSE(MODULE_PATH)
+    ADD_TEST(${NAME} ${PYTHON_EXECUTABLE} "${PROJECT_SOURCE_DIR}/${SOURCE}")
+  ENDIF(MODULE_PATH)
 ENDMACRO(ADD_PYTHON_UNIT_TEST NAME SOURCE)
 
 # DEFINE_UNIT_TEST(NAME LIB)
