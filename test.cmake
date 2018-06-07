@@ -1,4 +1,4 @@
-# Copyright (C) 2008-2014 LAAS-CNRS, JRL AIST-CNRS.
+# Copyright (C) 2008-2014,2018 LAAS-CNRS, JRL AIST-CNRS.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,19 +18,19 @@
 #
 #   Boolean variable to configure unit test compilation declared with
 #   :command:`ADD_UNIT_TEST`.
+
+#   A target *build_tests* is added to compile the tests and
+#   a test that run target build_tests is run before all other tests.
+#   So command ``make test`` compiles and runs the unit-tests.
 #
 #   * if ``OFF`` (default), nothing special is done.
 #   * if ``ON``, the unit-test is not compiled with target *all*.
-#     A target *build_tests* is added to compile the tests and
-#     a test that run target build_tests is run before all other tests.
-#     So command ``make test`` compiles and runs the unit-tests.
 IF(NOT DEFINED DISABLE_TESTS)
   SET(DISABLE_TESTS OFF)
 ENDIF(NOT DEFINED DISABLE_TESTS)
-IF(DISABLE_TESTS)
-  ADD_TEST(ctest_build_tests "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target build_tests)
-  ADD_CUSTOM_TARGET(build_tests)
-ENDIF(DISABLE_TESTS)
+
+ADD_CUSTOM_TARGET(build_tests)
+ADD_TEST(ctest_build_tests "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target build_tests)
 
 #.rst:
 # .. command:: ADD_UNIT_TEST (NAME SOURCE)
@@ -40,13 +40,13 @@ ENDIF(DISABLE_TESTS)
 MACRO(ADD_UNIT_TEST NAME SOURCE)
   IF(DISABLE_TESTS)
     ADD_EXECUTABLE(${NAME} EXCLUDE_FROM_ALL ${SOURCE})
-    ADD_DEPENDENCIES(build_tests ${NAME})
-    ADD_TEST(${NAME} ${RUNTIME_OUTPUT_DIRECTORY}/${NAME})
-    SET_TESTS_PROPERTIES ( ${NAME} PROPERTIES DEPENDS ctest_build_tests)
   ELSE(DISABLE_TESTS)
     ADD_EXECUTABLE(${NAME} ${SOURCE})
-    ADD_TEST(${NAME} ${RUNTIME_OUTPUT_DIRECTORY}/${NAME})
   ENDIF(DISABLE_TESTS)
+
+  ADD_DEPENDENCIES(build_tests ${NAME})
+  ADD_TEST(${NAME} ${RUNTIME_OUTPUT_DIRECTORY}/${NAME})
+  SET_TESTS_PROPERTIES(${NAME} PROPERTIES DEPENDS ctest_build_tests)
 ENDMACRO(ADD_UNIT_TEST NAME SOURCE)
 
 #.rst:
