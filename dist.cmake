@@ -44,7 +44,7 @@ MACRO(_SETUP_PROJECT_DIST)
       --prefix ${PROJECT_NAME}-${PROJECT_VERSION}/  ${PROJECT_NAME}.tar
       && cd ${CMAKE_BINARY_DIR}/
       && (test -d ${PROJECT_NAME}-${PROJECT_VERSION}
-	&& find ${PROJECT_NAME}-${PROJECT_VERSION}/ -type d -print0
+    	&& find ${PROJECT_NAME}-${PROJECT_VERSION}/ -type d -print0
          | xargs -0 chmod a+w  || true)
       && rm -rf ${PROJECT_NAME}-${PROJECT_VERSION}/
       && ${TAR} xf ${PROJECT_SOURCE_DIR}/${PROJECT_NAME}.tar
