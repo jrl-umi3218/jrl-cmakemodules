@@ -30,11 +30,17 @@ MACRO(_SETUP_PROJECT_DIST)
     FIND_PROGRAM(TAR tar)
     FIND_PROGRAM(GPG gpg)
 
+    IF(APPLE)
+      SET(GIT_ARCHIVE_ALL ${PROJECT_SOURCE_DIR}/cmake/git-archive-all.py)
+    ELSE(APPLE)
+      SET(GIT_ARCHIVE_ALL ${PROJECT_SOURCE_DIR}/cmake/git-archive-all.sh)
+    ENDIF(APPLE)
+
     # Use git-archive-all.sh to generate distributable source code
     ADD_CUSTOM_TARGET(distdir
       COMMAND
       rm -f /tmp/${PROJECT_NAME}.tar
-      && ${PROJECT_SOURCE_DIR}/cmake/git-archive-all.sh
+      && ${GIT_ARCHIVE_ALL}
       --prefix ${PROJECT_NAME}-${PROJECT_VERSION}/  ${PROJECT_NAME}.tar
       && cd ${CMAKE_BINARY_DIR}/
       && (test -d ${PROJECT_NAME}-${PROJECT_VERSION}
