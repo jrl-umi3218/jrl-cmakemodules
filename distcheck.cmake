@@ -88,7 +88,7 @@ MACRO(DISTCHECK_SETUP)
          || (echo "ERROR: the install target failed." && false)
       && make uninstall
          || (echo "ERROR: the uninstall target failed." && false)
-      && test x`find ${INSTDIR} -type f | wc -l` = x0
+      && test `find ${INSTDIR} -type f | wc -l` -eq 0
          || (echo "ERROR: the uninstall target does not work." && false)
       && make clean
          || (echo "ERROR: the clean target failed." && false)
