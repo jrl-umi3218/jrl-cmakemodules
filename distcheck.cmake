@@ -39,44 +39,56 @@
 MACRO(DISTCHECK_SETUP)
   IF(UNIX)
     FIND_PROGRAM(SED sed)
-    SET(INSTDIR ${CMAKE_BINARY_DIR}/${PROJECT_NAME}-${PROJECT_VERSION}/_inst)
+    SET(SRCDIR ${CMAKE_BINARY_DIR}/${PROJECT_NAME}-${PROJECT_VERSION})
+    SET(BUILDDIR ${SRCDIR}/_build)
+    SET(INSTDIR ${SRCDIR}/_inst)
     SET(DISTCHECK_MAKEFLAGS "" CACHE PATH "MAKEFLAGS used for distcheck's make")
+      
+    # The -i argument of sed command differs according on APPLE systems
+    IF(APPLE)
+      SET(SED_I_OPTION "-i'.old' ")
+    ELSE(APPLE)
+      SET(SED_I_OPTION "-i ")
+    ENDIF(APPLE)
+
     ADD_CUSTOM_TARGET(distcheck
       COMMAND
       find . -type d -print0 | xargs -0 chmod a-w
       && chmod u+w . && rm -rf _build _inst && mkdir -p _build && mkdir -p _inst
       && chmod u+rwx _build _inst && chmod a-w .
       && cp ${CMAKE_BINARY_DIR}/CMakeCache.txt _build/
-      && ${SED} -i -e "'s|CMAKE_CACHEFILE_DIR:INTERNAL=.\\+||g'"
-                   -e "'s|CMAKE_HOME_DIRECTORY:INTERNAL=.\\+||g'"
-                   -e "'s|CMAKE_CXX_COMPILER:FILEPATH=.\\+||g'"
-                   -e "'s|CMAKE_CXX_FLAGS:STRING=.\\+||g'"
-                   -e "'s|CMAKE_CXX_FLAGS_DEBUG:STRING=.\\+||g'"
-                   -e "'s|CMAKE_CXX_FLAGS_MINSIZEREL:STRING=.\\+||g'"
-                   -e "'s|CMAKE_CXX_FLAGS_RELEASE:STRING=.\\+||g'"
-                   -e "'s|CMAKE_CXX_FLAGS_RELWITHDEBINFO:STRING=.\\+||g'"
-                   -e "'s|CMAKE_CXX_COMPILER-ADVANCED:INTERNAL=.\\+||g'"
-                   -e "'s|CMAKE_CXX_COMPILER_WORKS:INTERNAL=.\\+||g'"
-                   -e "'s|CMAKE_CXX_FLAGS-ADVANCED:INTERNAL=.\\+||g'"
-                   -e "'s|CMAKE_CXX_FLAGS_DEBUG-ADVANCED:INTERNAL=.\\+||g'"
-                   -e "'s|CMAKE_CXX_FLAGS_MINSIZEREL-ADVANCED:INTERNAL=.\\+||g'"
-                   -e "'s|CMAKE_CXX_FLAGS_RELEASE-ADVANCED:INTERNAL=.\\+||g'"
-                   -e "'s|CMAKE_CXX_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=.\\+||g'"
-                   -e "'s|CMAKE_DETERMINE_CXX_ABI_COMPILED:INTERNAL=.\\+||g'"
-                   -e "'s|CMAKE_C_COMPILER:FILEPATH=.\\+||g'"
-                   -e "'s|CMAKE_C_FLAGS:STRING=.\\+||g'"
-                   -e "'s|CMAKE_C_FLAGS_DEBUG:STRING=.\\+||g'"
-                   -e "'s|CMAKE_C_FLAGS_MINSIZEREL:STRING=.\\+||g'"
-                   -e "'s|CMAKE_C_FLAGS_RELEASE:STRING=.\\+||g'"
-                   -e "'s|CMAKE_C_FLAGS_RELWITHDEBINFO:STRING=.\\+||g'"
-                   -e "'s|CMAKE_C_COMPILER-ADVANCED:INTERNAL=.\\+||g'"
-                   -e "'s|CMAKE_C_FLAGS-ADVANCED:INTERNAL=.\\+||g'"
-                   -e "'s|CMAKE_C_FLAGS_DEBUG-ADVANCED:INTERNAL=.\\+||g'"
-                   -e "'s|CMAKE_C_FLAGS_MINSIZEREL-ADVANCED:INTERNAL=.\\+||g'"
-                   -e "'s|CMAKE_C_FLAGS_RELEASE-ADVANCED:INTERNAL=.\\+||g'"
-                   -e "'s|CMAKE_C_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=.\\+||g'"
-                   -e "'s|CMAKE_DETERMINE_C_ABI_COMPILED:INTERNAL=.\\+||g'"
-                   _build/CMakeCache.txt
+      && ${SED} ${SED_I_OPTION} -e "'s|${CMAKE_BINARY_DIR}|${BUILDDIR}|g'" 
+                                _build/CMakeCache.txt # Change previous binary dir by the current _build one 
+      && ${SED} ${SED_I_OPTION} -e "'s|${CMAKE_SOURCE_DIR}|${SRCDIR}|g'" 
+                                _build/CMakeCache.txt # Change previous source dir to the source one 
+      && ${SED} ${SED_I_OPTION} -e "'s|CMAKE_CXX_COMPILER:FILEPATH=.\\+||g'"
+                                -e "'s|CMAKE_CXX_FLAGS:STRING=.\\+||g'"
+                                -e "'s|CMAKE_CXX_FLAGS_DEBUG:STRING=.\\+||g'"
+                                -e "'s|CMAKE_CXX_FLAGS_MINSIZEREL:STRING=.\\+||g'"
+                                -e "'s|CMAKE_CXX_FLAGS_RELEASE:STRING=.\\+||g'"
+                                -e "'s|CMAKE_CXX_FLAGS_RELWITHDEBINFO:STRING=.\\+||g'"
+                                -e "'s|CMAKE_CXX_COMPILER-ADVANCED:INTERNAL=.\\+||g'"
+                                -e "'s|CMAKE_CXX_COMPILER_WORKS:INTERNAL=.\\+||g'"
+                                -e "'s|CMAKE_CXX_FLAGS-ADVANCED:INTERNAL=.\\+||g'"
+                                -e "'s|CMAKE_CXX_FLAGS_DEBUG-ADVANCED:INTERNAL=.\\+||g'"
+                                -e "'s|CMAKE_CXX_FLAGS_MINSIZEREL-ADVANCED:INTERNAL=.\\+||g'"
+                                -e "'s|CMAKE_CXX_FLAGS_RELEASE-ADVANCED:INTERNAL=.\\+||g'"
+                                -e "'s|CMAKE_CXX_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=.\\+||g'"
+                                -e "'s|CMAKE_DETERMINE_CXX_ABI_COMPILED:INTERNAL=.\\+||g'"
+                                -e "'s|CMAKE_C_COMPILER:FILEPATH=.\\+||g'"
+                                -e "'s|CMAKE_C_FLAGS:STRING=.\\+||g'"
+                                -e "'s|CMAKE_C_FLAGS_DEBUG:STRING=.\\+||g'"
+                                -e "'s|CMAKE_C_FLAGS_MINSIZEREL:STRING=.\\+||g'"
+                                -e "'s|CMAKE_C_FLAGS_RELEASE:STRING=.\\+||g'"
+                                -e "'s|CMAKE_C_FLAGS_RELWITHDEBINFO:STRING=.\\+||g'"
+                                -e "'s|CMAKE_C_COMPILER-ADVANCED:INTERNAL=.\\+||g'"
+                                -e "'s|CMAKE_C_FLAGS-ADVANCED:INTERNAL=.\\+||g'"
+                                -e "'s|CMAKE_C_FLAGS_DEBUG-ADVANCED:INTERNAL=.\\+||g'"
+                                -e "'s|CMAKE_C_FLAGS_MINSIZEREL-ADVANCED:INTERNAL=.\\+||g'"
+                                -e "'s|CMAKE_C_FLAGS_RELEASE-ADVANCED:INTERNAL=.\\+||g'"
+                                -e "'s|CMAKE_C_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=.\\+||g'"
+                                -e "'s|CMAKE_DETERMINE_C_ABI_COMPILED:INTERNAL=.\\+||g'"
+                                _build/CMakeCache.txt
       && cd _build
       && cmake -DCMAKE_INSTALL_PREFIX=${INSTDIR} .. || cmake ..
          || (echo "ERROR: the cmake configuration failed." && false)
@@ -88,7 +100,7 @@ MACRO(DISTCHECK_SETUP)
          || (echo "ERROR: the install target failed." && false)
       && make uninstall
          || (echo "ERROR: the uninstall target failed." && false)
-      && test x`find ${INSTDIR} -type f | wc -l` = x0
+      && test `find ${INSTDIR} -type f | wc -l` -eq 0
          || (echo "ERROR: the uninstall target does not work." && false)
       && make clean
          || (echo "ERROR: the clean target failed." && false)
