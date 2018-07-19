@@ -1,4 +1,4 @@
-# Copyright (C) 2008-2014 LAAS-CNRS, JRL AIST-CNRS.
+# Copyright (C) 2008-2014,2018 LAAS-CNRS, JRL AIST-CNRS.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@
 #   - adding a signed tag following the ``vVERSION`` pattern.
 #   - running ``make distcheck`` (:ref:`distcheck <target-distcheck>`) to make sure everything is ok.
 #   - running ``make dist`` to generate a tarball
+#   - running ``make distclean`` to remove the current dist directory
 #   - reminds that you should push the tag and tarball on the GitHub repository (to be done manually as
 #     it is simple but cannot be reverted).
 #
@@ -65,6 +66,7 @@ MACRO(RELEASE_SETUP)
            && cmake ${PROJECT_SOURCE_DIR}
            && false)
       && make dist
+      && make distclean
       && echo "Please, run 'git push --tags' and upload the tarball to github to finalize this release."
       )
   ENDIF()
