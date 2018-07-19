@@ -1,6 +1,8 @@
 #! /usr/bin/env python
+# This file comes originally from: https://github.com/Kentzo/git-archive-all
+#
 # coding=utf-8
-
+#
 # The MIT License (MIT)
 #
 # Copyright (c) 2010 Ilya Kulakov
