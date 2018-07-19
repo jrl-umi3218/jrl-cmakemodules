@@ -33,7 +33,8 @@
 #
 #   - adding a signed tag following the ``vVERSION`` pattern.
 #   - running ``make distcheck`` (:ref:`distcheck <target-distcheck>`) to make sure everything is ok.
-#   - pushing the tag on the GitHub repository (to be done manually as
+#   - running ``make dist`` to generate a tarball
+#   - reminds that you should push the tag and tarball on the GitHub repository (to be done manually as
 #     it is simple but cannot be reverted).
 #
 #   .. todo::
@@ -63,7 +64,8 @@ MACRO(RELEASE_SETUP)
            && cd ${CMAKE_BINARY_DIR}
            && cmake ${PROJECT_SOURCE_DIR}
            && false)
-      && echo "Please, run 'git push --tags' to finalize this release."
+      && make dist
+      && echo "Please, run 'git push --tags' and upload the tarball to github to finalize this release."
       )
   ENDIF()
 ENDMACRO()
