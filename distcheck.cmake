@@ -39,12 +39,14 @@
 MACRO(DISTCHECK_SETUP)
   IF(UNIX)
     FIND_PROGRAM(SED sed)
-    SET(INSTDIR ${CMAKE_BINARY_DIR}/${PROJECT_NAME}-${PROJECT_VERSION}/_inst)
+    SET(SRCDIR ${CMAKE_BINARY_DIR}/${PROJECT_NAME}-${PROJECT_VERSION})
+    SET(BUILDDIR ${SRCDIR}/_build)
+    SET(INSTDIR ${SRCDIR}/_inst)
     SET(DISTCHECK_MAKEFLAGS "" CACHE PATH "MAKEFLAGS used for distcheck's make")
       
     # The -i argument of sed command differs according on APPLE systems
     IF(APPLE)
-      SET(SED_I_OPTION "-i '' ")
+      SET(SED_I_OPTION "-i'.old' ")
     ELSE(APPLE)
       SET(SED_I_OPTION "-i ")
     ENDIF(APPLE)
@@ -55,9 +57,11 @@ MACRO(DISTCHECK_SETUP)
       && chmod u+w . && rm -rf _build _inst && mkdir -p _build && mkdir -p _inst
       && chmod u+rwx _build _inst && chmod a-w .
       && cp ${CMAKE_BINARY_DIR}/CMakeCache.txt _build/
-      && ${SED} ${SED_I_OPTION} -e "'s|CMAKE_CACHEFILE_DIR:INTERNAL=.\\+||g'"
-                                -e "'s|CMAKE_HOME_DIRECTORY:INTERNAL=.\\+||g'"
-                                -e "'s|CMAKE_CXX_COMPILER:FILEPATH=.\\+||g'"
+      && ${SED} ${SED_I_OPTION} -e "'s|${CMAKE_BINARY_DIR}|${BUILDDIR}|g'" 
+                                _build/CMakeCache.txt # Change previous binary dir by the current _build one 
+      && ${SED} ${SED_I_OPTION} -e "'s|${CMAKE_SOURCE_DIR}|${SRCDIR}|g'" 
+                                _build/CMakeCache.txt # Change previous source dir to the source one 
+      && ${SED} ${SED_I_OPTION} -e "'s|CMAKE_CXX_COMPILER:FILEPATH=.\\+||g'"
                                 -e "'s|CMAKE_CXX_FLAGS:STRING=.\\+||g'"
                                 -e "'s|CMAKE_CXX_FLAGS_DEBUG:STRING=.\\+||g'"
                                 -e "'s|CMAKE_CXX_FLAGS_MINSIZEREL:STRING=.\\+||g'"
