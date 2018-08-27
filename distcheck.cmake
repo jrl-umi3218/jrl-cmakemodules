@@ -53,14 +53,15 @@ MACRO(DISTCHECK_SETUP)
 
     #Set LD_LIBRARY_PATH
     IF(APPLE)
-      SET(EXPORT_LIBRARY_PATH "DYLD_LIBRARY_PATH=$$DYLD_LIBRARY_PATH:$ENV{DYLD_LIBRARY_PATH}")
+      SET(LD_LIBRARY_PATH_VARIABLE_NAME "DYLD_LIBRARY_PATH") 
     ELSE(APPLE)
-      SET(EXPORT_LIBRARY_PATH "LD_LIBRARY_PATH=$$LD_LIBRARY_PATH:$ENV{LD_LIBRARY_PATH}")
+      SET(LD_LIBRARY_PATH_VARIABLE_NAME "LD_LIBRARY_PATH") 
     ENDIF(APPLE)
 
     ADD_CUSTOM_TARGET(distcheck
       COMMAND
-      find . -type d -print0 | xargs -0 chmod a-w
+         export ${LD_LIBRARY_PATH_VARIABLE_NAME}=$ENV{${LD_LIBRARY_PATH_VARIABLE_NAME}}
+      && find . -type d -print0 | xargs -0 chmod a-w
       && chmod u+w . && rm -rf _build _inst && mkdir -p _build && mkdir -p _inst
       && chmod u+rwx _build _inst && chmod a-w .
       && cp ${CMAKE_BINARY_DIR}/CMakeCache.txt _build/
@@ -101,7 +102,6 @@ MACRO(DISTCHECK_SETUP)
          || (echo "ERROR: the cmake configuration failed." && false)
       && make ${DISTCHECK_MAKEFLAGS}
          || (echo "ERROR: the compilation failed." && false)
-      && export ${EXPORT_LIBRARY_PATH}
       && make test
          || (echo "ERROR: the test suite failed." && false)
       && make install
