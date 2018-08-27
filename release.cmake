@@ -50,11 +50,19 @@ MACRO(RELEASE_SETUP)
   IF(UNIX)
     FIND_PROGRAM(GIT git)
 
+    #Set LD_LIBRARY_PATH
+    IF(APPLE)
+      SET(EXPORT_LIBRARY_PATH "DYLD_LIBRARY_PATH=$$DYLD_LIBRARY_PATH:$ENV{DYLD_LIBRARY_PATH}")
+    ELSE(APPLE)
+      SET(EXPORT_LIBRARY_PATH "LD_LIBRARY_PATH=$$LD_LIBRARY_PATH:$ENV{LD_LIBRARY_PATH}")
+    ENDIF(APPLE)
+
     ADD_CUSTOM_TARGET(release
       COMMAND
       ! test x$$VERSION = x
         || (echo "Please set a version for this release" && false)
       && cd ${PROJECT_SOURCE_DIR}
+      && export ${EXPORT_LIBRARY_PATH}
       && ${GIT} tag -s v$$VERSION -m "Release of version $$VERSION."
       && cd ${CMAKE_BINARY_DIR}
       && cmake ${PROJECT_SOURCE_DIR}
