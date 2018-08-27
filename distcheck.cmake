@@ -51,6 +51,13 @@ MACRO(DISTCHECK_SETUP)
       SET(SED_I_OPTION "-i ")
     ENDIF(APPLE)
 
+    #Set LD_LIBRARY_PATH
+    IF(APPLE)
+      SET(EXPORT_LIBRARY_PATH "DYLD_LIBRARY_PATH=$$DYLD_LIBRARY_PATH:$ENV{DYLD_LIBRARY_PATH}")
+    ELSE(APPLE)
+      SET(EXPORT_LIBRARY_PATH "LD_LIBRARY_PATH=$$LD_LIBRARY_PATH:$ENV{LD_LIBRARY_PATH}")
+    ENDIF(APPLE)
+
     ADD_CUSTOM_TARGET(distcheck
       COMMAND
       find . -type d -print0 | xargs -0 chmod a-w
@@ -94,6 +101,7 @@ MACRO(DISTCHECK_SETUP)
          || (echo "ERROR: the cmake configuration failed." && false)
       && make ${DISTCHECK_MAKEFLAGS}
          || (echo "ERROR: the compilation failed." && false)
+      && export ${EXPORT_LIBRARY_PATH}
       && make test
          || (echo "ERROR: the test suite failed." && false)
       && make install
