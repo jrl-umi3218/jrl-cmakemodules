@@ -94,7 +94,7 @@ ENDMACRO(FINDPYTHON)
 
 
 #.rst:
-# .. command:: DYNAMIC_GRAPH_PYTHON_MODULE ( SUBMODULENAME LIBRARYNAME TARGETNAME INSTALL_INIT_PY=1)
+# .. command:: DYNAMIC_GRAPH_PYTHON_MODULE ( SUBMODULENAME LIBRARYNAME TARGETNAME INSTALL_INIT_PY=1 SOURCE_PYTHON_MODULE=cmake/dynamic_graph/python-module-py.cc)
 #
 #   Add a python submodule to dynamic_graph
 #  
@@ -108,6 +108,9 @@ ENDMACRO(FINDPYTHON)
 #   :param INSTALL_INIT_PY: if set to 1 install and generated a __init__.py file.
 #                   Set to 1 by default.
 #
+#   :param SOURCE_PYTHON_MODULE: Location of the cpp file for the python module in the package.
+#                   Set to cmake/dynamic_graph/python-module-py.cc by default.
+# 
 #  .. note::
 #    Before calling this macro, set variable NEW_ENTITY_CLASS as
 #    the list of new Entity types that you want to be bound.
@@ -118,11 +121,16 @@ MACRO(DYNAMIC_GRAPH_PYTHON_MODULE SUBMODULENAME LIBRARYNAME TARGETNAME)
 
   # By default the __init__.py file is installed.
   SET(INSTALL_INIT_PY 1)
-
+  SET(SOURCE_PYTHON_MODULE "cmake/dynamic_graph/python-module-py.cc")
+    
+  # Check if there is optional parameters.
   set(extra_macro_args ${ARGN})
   list(LENGTH extra_macro_args num_extra_args)
   if( ${num_extra_args} GREATER 0)
     list(GET extra_macro_args 0 INSTALL_INIT_PY)
+    if( ${num_extra_args} GREATER 1)
+      list(GET extra_macro_args 1 SOURCE_PYTHON_MODULE)
+    endf(${num_extra_args} GREATER 1)
   endif(${num_extra_args} GREATER 0)
   
   IF(NOT DEFINED PYTHONLIBS_FOUND)
@@ -140,7 +148,7 @@ MACRO(DYNAMIC_GRAPH_PYTHON_MODULE SUBMODULENAME LIBRARYNAME TARGETNAME)
 
   ADD_LIBRARY(${PYTHON_MODULE}
     MODULE
-    ${PROJECT_SOURCE_DIR}/cmake/dynamic_graph/python-module-py.cc)
+    ${PROJECT_SOURCE_DIR}/${SOURCE_PYTHON_MODULE})
 
   FILE(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/src/dynamic_graph/${SUBMODULENAME})
 
