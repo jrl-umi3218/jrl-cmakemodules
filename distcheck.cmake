@@ -39,7 +39,7 @@
 MACRO(DISTCHECK_SETUP)
   IF(UNIX)
     FIND_PROGRAM(SED sed)
-    SET(SRCDIR ${CMAKE_BINARY_DIR}/${PROJECT_NAME}-${PROJECT_VERSION})
+    SET(SRCDIR ${CMAKE_BINARY_DIR}/${PROJECT_NAME}${PROJECT_SUFFIX}-${PROJECT_VERSION})
     SET(BUILDDIR ${SRCDIR}/_build)
     SET(INSTDIR ${SRCDIR}/_inst)
     SET(DISTCHECK_MAKEFLAGS "" CACHE PATH "MAKEFLAGS used for distcheck's make")
@@ -112,14 +112,14 @@ MACRO(DISTCHECK_SETUP)
          || (echo "ERROR: the uninstall target does not work." && false)
       && make clean
          || (echo "ERROR: the clean target failed." && false)
-      && cd ${CMAKE_BINARY_DIR}/${PROJECT_NAME}-${PROJECT_VERSION}
+      && cd ${CMAKE_BINARY_DIR}/${PROJECT_NAME}${PROJECT_SUFFIX}-${PROJECT_VERSION}
       && chmod u+w . _build _inst && rm -rf _build _inst
       && find . -type d -print0 | xargs -0 chmod u+w
       && echo "=============================================================="
-      && echo "${PROJECT_NAME}-${PROJECT_VERSION}"
+      && echo "${PROJECT_NAME}${PROJECT_SUFFIX}-${PROJECT_VERSION}"
               "is ready for distribution."
       && echo "=============================================================="
-      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/${PROJECT_NAME}-${PROJECT_VERSION}
+      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/${PROJECT_NAME}${PROJECT_SUFFIX}-${PROJECT_VERSION}
       COMMENT "Checking generated tarball..."
       )
     ADD_DEPENDENCIES(distcheck distdir)
