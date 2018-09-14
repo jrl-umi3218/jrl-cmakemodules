@@ -130,7 +130,7 @@ MACRO(DYNAMIC_GRAPH_PYTHON_MODULE SUBMODULENAME LIBRARYNAME TARGETNAME)
     list(GET extra_macro_args 0 INSTALL_INIT_PY)
     if( ${num_extra_args} GREATER 1)
       list(GET extra_macro_args 1 SOURCE_PYTHON_MODULE)
-    endf(${num_extra_args} GREATER 1)
+    endif(${num_extra_args} GREATER 1)
   endif(${num_extra_args} GREATER 0)
   
   IF(NOT DEFINED PYTHONLIBS_FOUND)
