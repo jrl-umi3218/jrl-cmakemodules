@@ -94,7 +94,7 @@ ENDMACRO(FINDPYTHON)
 
 
 #.rst:
-# .. command:: DYNAMIC_GRAPH_PYTHON_MODULE ( SUBMODULENAME LIBRARYNAME TARGETNAME )
+# .. command:: DYNAMIC_GRAPH_PYTHON_MODULE ( SUBMODULENAME LIBRARYNAME TARGETNAME INSTALL_INIT_PY=1)
 #
 #   Add a python submodule to dynamic_graph
 #  
@@ -105,6 +105,9 @@ ENDMACRO(FINDPYTHON)
 #   :param TARGETNAME:     name of the target: should be different for several
 #                   calls to the macro.
 #
+#   :param INSTALL_INIT_PY: if set to 1 install and generated a __init__.py file.
+#                   Set to 1 by default.
+#
 #  .. note::
 #    Before calling this macro, set variable NEW_ENTITY_CLASS as
 #    the list of new Entity types that you want to be bound.
@@ -113,7 +116,15 @@ ENDMACRO(FINDPYTHON)
 #
 MACRO(DYNAMIC_GRAPH_PYTHON_MODULE SUBMODULENAME LIBRARYNAME TARGETNAME)
 
+  # By default the __init__.py file is installed.
+  SET(INSTALL_INIT_PY 1)
 
+  set(extra_macro_args ${ARGN})
+  list(LENGTH extra_macro_args num_extra_args)
+  if( ${num_extra_args} GREATER 0)
+    list(GET extra_macro_args 0 INSTALL_INIT_PY)
+  endif(${num_extra_args} GREATER 0)
+  
   IF(NOT DEFINED PYTHONLIBS_FOUND)
     FINDPYTHON()
   ELSEIF(NOT ${PYTHONLIBS_FOUND} STREQUAL "TRUE")
@@ -158,15 +169,20 @@ MACRO(DYNAMIC_GRAPH_PYTHON_MODULE SUBMODULENAME LIBRARYNAME TARGETNAME)
     SET(ENTITY_CLASS_LIST "${ENTITY_CLASS_LIST}${ENTITY}('')\n")
   ENDFOREACH(ENTITY ${NEW_ENTITY_CLASS})
 
-  CONFIGURE_FILE(
-    ${PROJECT_SOURCE_DIR}/cmake/dynamic_graph/submodule/__init__.py.cmake
-    ${PROJECT_BINARY_DIR}/src/dynamic_graph/${SUBMODULENAME}/__init__.py
-    )
+  # Install if INSTALL_INIT_PY is set to 1
+  IF (${INSTALL_INIT_PY} EQUAL 1)
 
-  INSTALL(
-    FILES ${PROJECT_BINARY_DIR}/src/dynamic_graph/${SUBMODULENAME}/__init__.py
-    DESTINATION ${PYTHON_INSTALL_DIR}
-    )
+    CONFIGURE_FILE(
+      ${PROJECT_SOURCE_DIR}/cmake/dynamic_graph/submodule/__init__.py.cmake
+      ${PROJECT_BINARY_DIR}/src/dynamic_graph/${SUBMODULENAME}/__init__.py
+      )
+
+    INSTALL(
+      FILES ${PROJECT_BINARY_DIR}/src/dynamic_graph/${SUBMODULENAME}/__init__.py
+      DESTINATION ${PYTHON_INSTALL_DIR}
+      )
+    
+  ENDIF(${INSTALL_INIT_PY} EQUAL 1)
 
 ENDMACRO(DYNAMIC_GRAPH_PYTHON_MODULE SUBMODULENAME)
 
