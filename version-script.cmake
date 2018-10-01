@@ -26,18 +26,19 @@ MACRO(_CHECK_VERSION_SCRIPT_SUPPORT)
   SET(_HAS_VERSION_SCRIPT_SUPPORT ${HAS_VERSION_SCRIPT_SUPPORT} CACHE INTERNAL "Linker supports version scripts")
 ENDMACRO(_CHECK_VERSION_SCRIPT_SUPPORT)
 
-# ADD_VERSION_SCRIPT(TARGET VERSION_SCRIPT)
-# ------------------
+#.rst:
+# .. command:: ADD_VERSION_SCRIPT(TARGET VERSION_SCRIPT)
 #
-# This macro adds a version script to a given target and a link-time
-# dependency between the target and the version script.
+#   This macro adds a version script to a given target and a link-time
+#   dependency between the target and the version script.
 #
-# It has no effect on WIN32 platform.
+#   See https://www.gnu.org/software/gnulib/manual/html_node/LD-Version-Scripts.html
 #
-# TARGET: Name of the target, the macro does nothing if TARGET is not a
-#         cmake target.
+#   It has no effect on platforms that do not support version script.
 #
-# VERSION_SCRIPT: Version script to add to the library.
+#   :param TARGET:         Name of the target, the macro does nothing if TARGET is not a
+#                          cmake target.
+#   :param VERSION_SCRIPT: Version script to add to the library.
 #
 MACRO(ADD_VERSION_SCRIPT TARGET VERSION_SCRIPT)
   IF(NOT DEFINED _HAS_VERSION_SCRIPT_SUPPORT)
