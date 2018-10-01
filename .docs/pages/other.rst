@@ -4,6 +4,7 @@ Other commands
 Unit-testing
 ============
 .. cmake-module:: ../../test.cmake
+.. cmake-module:: ../../gest.cmake
 
 Xacro
 =====
