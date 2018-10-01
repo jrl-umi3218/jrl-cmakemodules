@@ -56,11 +56,7 @@ MACRO(ADD_GTEST_SUITE)
                    ${CMAKE_CURRENT_BINARY_DIR}/gtest/build
                    EXCLUDE_FROM_ALL)
 
-  # The gtest/gtest_main targets carry header search path
-  # dependencies automatically when using CMake 2.8.11 or
-  # later. Otherwise we have to add them here ourselves.
-if(CMAKE_VERSION VERSION_LESS 2.8.11)
-    include_directories("${gtest_SOURCE_DIR}/include")
-  endif()
+  # Force the include directories to be silent with respect to warnings.
+  include_directories(SYSTEM "${gtest_SOURCE_DIR}/include")
 
 ENDMACRO(ADD_GTEST_SUITE)
