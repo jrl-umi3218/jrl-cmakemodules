@@ -16,12 +16,21 @@
 set(CURRENT_FILE_PATH ${CMAKE_CURRENT_LIST_DIR} CACHE INTERNAL "")
 
 #.rst:
-# .. command:: ADD_GTEST_SUITE()
+# .. command:: ADD_GTEST_SUITE([GIT_TAG])
+#
+#    GIT_TAG: the git tag of gtest. This optional argument allows to use a precise version of gtest (not necessarily the last master branch).
 #
 #    Download and configure gtest.
 #    This macro follows the https://github.com/google/googletest/tree/master/googletest#incorporating-into-an-existing-cmake-project instructions. 
 #
 MACRO(ADD_GTEST_SUITE)
+  # Handle optional argument
+  set(GTEST_GIT_TAG "master")
+  set(extra_macro_args ${ARGN})
+  list(LENGTH extra_macro_args num_extra_args)
+  if(${num_extra_args} GREATER 0)
+    list(GET extra_macro_args 0 GTEST_GIT_TAG)
+  endif()
   # Download and unpack googletest at configure time
   configure_file(${CURRENT_FILE_PATH}/gtest/CMakeLists.txt.in gtest/CMakeLists.txt)
   execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
@@ -50,7 +59,7 @@ MACRO(ADD_GTEST_SUITE)
   # The gtest/gtest_main targets carry header search path
   # dependencies automatically when using CMake 2.8.11 or
   # later. Otherwise we have to add them here ourselves.
-  if (CMAKE_VERSION VERSION_LESS 2.8.11)
+if(CMAKE_VERSION VERSION_LESS 2.8.11)
     include_directories("${gtest_SOURCE_DIR}/include")
   endif()
 
