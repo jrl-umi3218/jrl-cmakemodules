@@ -14,6 +14,11 @@ IDL
 ===
 .. cmake-module:: ../../idl.cmake
 
+Version script
+==============
+
+.. cmake-module:: ../../version-script.cmake
+
 Make targets
 ============
 
