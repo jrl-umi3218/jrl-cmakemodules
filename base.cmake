@@ -65,6 +65,10 @@
 #   but this will also trigger the generation of an appropriate debug
 #   pkg-config file.
 #
+# .. variable:: PROJECT_USE_KEYWORD_LINK_LIBRARIES
+#
+#   If set to true, the jrl-cmakemodules will use the PUBLIC keyword in
+#   ``target_link_libraries``. Defaults to false.
 
 # Please note that functions starting with an underscore are internal
 # functions and should not be used directly.
@@ -184,6 +188,15 @@ MACRO(SETUP_PROJECT)
     IF(DEFINED CMAKE_CONFIGURATION_TYPES)
       SET(PKGCONFIG_POSTFIX ${PROJECT_DEBUG_POSTFIX})
     ENDIF()
+  ENDIF()
+
+  IF(NOT DEFINED PROJECT_USE_KEYWORD_LINK_LIBRARIES)
+    SET(PROJECT_USE_KEYWORD_LINK_LIBRARIES FALSE)
+  ENDIF()
+  IF(${PROJECT_USE_KEYWORD_LINK_LIBRARIES})
+    SET(PUBLIC_KEYWORD PUBLIC)
+  ELSE()
+    SET(PUBLIC_KEYWORD "")
   ENDIF()
 
   IF(${ARGC})
