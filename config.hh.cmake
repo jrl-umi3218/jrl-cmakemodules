@@ -27,9 +27,9 @@
 
 // Package version (header).
 # define @LIBRARY_NAME@_VERSION "@PROJECT_VERSION@"
-# define @LIBRARY_NAME@_MAJOR_VERSION "@PROJECT_VERSION_MAJOR@"
-# define @LIBRARY_NAME@_MINOR_VERSION "@PROJECT_VERSION_MINOR@"
-# define @LIBRARY_NAME@_PATCH_VERSION "@PROJECT_VERSION_PATCH@"
+# define @LIBRARY_NAME@_MAJOR_VERSION @PROJECT_VERSION_MAJOR@
+# define @LIBRARY_NAME@_MINOR_VERSION @PROJECT_VERSION_MINOR@
+# define @LIBRARY_NAME@_PATCH_VERSION @PROJECT_VERSION_PATCH@
 
 // Handle portable symbol export.
 // Defining manually which symbol should be exported is required
