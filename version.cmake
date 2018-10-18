@@ -101,7 +101,7 @@ MACRO(VERSION_COMPUTE)
 
     # Check if git describe worked and store the returned version number.
     IF(GIT_DESCRIBE_RESULT)
-      MESSAGE(
+      MESSAGE(AUTHOR_WARNING
         "Warning: failed to compute the version number,"
         " 'git describe' failed:\n"
         "\t" ${GIT_DESCRIBE_ERROR})
@@ -110,7 +110,7 @@ MACRO(VERSION_COMPUTE)
       # Get rid of the tag prefix to generate the final version.
       STRING(REGEX REPLACE "^v" "" PROJECT_VERSION "${GIT_DESCRIBE_OUTPUT}")
       IF(NOT PROJECT_VERSION)
-	      MESSAGE(
+	      MESSAGE(AUTHOR_WARNING
 	        "Warning: failed to compute the version number,"
           "'git describe' returned an empty string.")
         SET(PROJECT_VERSION UNKNOWN)
