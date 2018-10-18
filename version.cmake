@@ -1,4 +1,4 @@
-# Copyright (C) 2008-2014 LAAS-CNRS, JRL AIST-CNRS.
+# Copyright (C) 2008-2014,2018 LAAS-CNRS, JRL AIST-CNRS, INRIA.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -102,18 +102,18 @@ MACRO(VERSION_COMPUTE)
     # Check if git describe worked and store the returned version number.
     IF(GIT_DESCRIBE_RESULT)
       MESSAGE(
-	"Warning: failed to compute the version number,"
-	" 'git describe' failed:\n"
-	"\t" ${GIT_DESCRIBE_ERROR})
+        "Warning: failed to compute the version number,"
+        " 'git describe' failed:\n"
+        "\t" ${GIT_DESCRIBE_ERROR})
       SET(PROJECT_VERSION UNKNOWN)
     ELSE()
       # Get rid of the tag prefix to generate the final version.
       STRING(REGEX REPLACE "^v" "" PROJECT_VERSION "${GIT_DESCRIBE_OUTPUT}")
       IF(NOT PROJECT_VERSION)
-	MESSAGE(
-	  "Warning: failed to compute the version number,"
-	  "'git describe' returned an empty string.")
-	SET(PROJECT_VERSION UNKNOWN)
+	      MESSAGE(
+	        "Warning: failed to compute the version number,"
+          "'git describe' returned an empty string.")
+        SET(PROJECT_VERSION UNKNOWN)
       ENDIF()
 
       # If there is a dash in the version number, it is an unstable release,
@@ -121,9 +121,9 @@ MACRO(VERSION_COMPUTE)
       # I.e. 1.0, 2, 0.1.3 are stable but 0.2.4-1-dg43 is unstable.
       STRING(REGEX MATCH "-" PROJECT_STABLE "${PROJECT_VERSION}")
       IF(NOT PROJECT_STABLE STREQUAL -)
-	SET(PROJECT_STABLE True)
+        SET(PROJECT_STABLE True)
       ELSE()
-	SET(PROJECT_STABLE False)
+        SET(PROJECT_STABLE False)
       ENDIF()
     ENDIF()
 
