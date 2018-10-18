@@ -1,4 +1,4 @@
-# Copyright (C) 2008-2014 LAAS-CNRS, JRL AIST-CNRS.
+# Copyright (C) 2008-2014,2018 LAAS-CNRS, JRL AIST-CNRS, INRIA.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -110,7 +110,7 @@ MACRO(_SETUP_PROJECT_HEADER)
   # Generate config.h header.
   # This header, unlike the previous one is *not* installed and is generated
   # in the top-level directory of the build tree.
-  # Therefore it must not be inluded by any distributed header.
+  # Therefore it must not be included by any distributed header.
   CONFIGURE_FILE(
     ${PROJECT_SOURCE_DIR}/cmake/config.h.cmake
     ${CMAKE_CURRENT_BINARY_DIR}/config.h
