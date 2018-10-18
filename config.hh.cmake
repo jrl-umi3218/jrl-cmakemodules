@@ -1,4 +1,4 @@
-// Copyright (C) 2008-2018 LAAS-CNRS, JRL AIST-CNRS.
+// Copyright (C) 2008-2018 LAAS-CNRS, JRL AIST-CNRS, INRIA.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -27,6 +27,9 @@
 
 // Package version (header).
 # define @LIBRARY_NAME@_VERSION "@PROJECT_VERSION@"
+# define @LIBRARY_NAME@_MAJOR_VERSION "@PROJECT_VERSION_MAJOR@"
+# define @LIBRARY_NAME@_MINOR_VERSION "@PROJECT_VERSION_MINOR@"
+# define @LIBRARY_NAME@_PATCH_VERSION "@PROJECT_VERSION_PATCH@"
 
 // Handle portable symbol export.
 // Defining manually which symbol should be exported is required
