@@ -69,6 +69,11 @@
 #
 #   If set to true, the jrl-cmakemodules will use the PUBLIC keyword in
 #   ``target_link_libraries``. Defaults to false.
+#
+# .. variable: PROJECT_CUSTOM_HEADER_EXTENSION
+#   Allows to define a custome extension for C/C++ header files (e.g. .h, .hh, .hpp).
+#   The default value is set to .hh.
+#
 
 # Please note that functions starting with an underscore are internal
 # functions and should not be used directly.
