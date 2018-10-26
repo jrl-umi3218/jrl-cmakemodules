@@ -19,11 +19,15 @@
 #
 #  Find python interpreter and python libs.
 #  Arguments are passed to the find_package command so
-#  refer to find_package documentation to learn about valid arguments.
+#  refer to `find_package` documentation to learn about valid arguments.
 #
-#  For instance, the command
-#  ``FINDPYTHON(2.7 EXACT REQUIRED)``
-#  will force CMake to find Python2.7
+#  To specify a specific Python version from the command line,
+#  use the command ``FINDPYTHON()``
+#  and pass the following arguments to CMake
+#  ``-DPYTHON_EXECUTABLE=/usr/bin/python3.5 -DPYTHON_LIBRARY= /usr/lib/x86_64-linux-gnu/libpython3.5m.so.1``
+#
+#  To specify a specific Python version within the CMakeLists.txt,
+#  use the command ``FINDPYTHON(2.7 EXACT REQUIRED)``.
 #
 #  .. warning::
 #    According to the ``FindPythonLibs`` and ``FindPythonInterp``
