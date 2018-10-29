@@ -254,3 +254,27 @@ MACRO(SETUP_PROJECT_FINALIZE)
 
   LOGGING_FINALIZE()
 ENDMACRO(SETUP_PROJECT_FINALIZE)
+
+#.rst:
+# .. ifmode:: user
+#
+# .. command:: CHECK_DEBIAN
+#
+#   Checks is the current system is Debian based
+#
+# Variables
+# ---------
+#
+# .. variable:: IS_DEBIAN
+#
+#   **REQUIRED**
+#
+#   A Boolean, indicating if the current system is Debian based
+#
+MACRO(CHECK_DEBIAN IS_DEBIAN)
+  IF(EXISTS "/etc/debian_version")
+    SET(IS_DEBIAN TRUE)
+  ELSE(EXISTS "/etc/debian_version")
+    SET(IS_DEBIAN FALSE)
+  ENDIF(EXISTS "/etc/debian_version")
+ENDMACRO(CHECK_DEBIAN IS_DEBIAN)
