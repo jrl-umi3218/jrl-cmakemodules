@@ -261,20 +261,9 @@ ENDMACRO(SETUP_PROJECT_FINALIZE)
 # .. command:: CHECK_DEBIAN
 #
 #   Checks is the current system is Debian based
+#   You can then use DEBIAN_FOUND
 #
-# Variables
-# ---------
-#
-# .. variable:: IS_DEBIAN
-#
-#   **REQUIRED**
-#
-#   A Boolean, indicating if the current system is Debian based
-#
-MACRO(CHECK_DEBIAN IS_DEBIAN)
-  IF(EXISTS "/etc/debian_version")
-    SET(IS_DEBIAN TRUE)
-  ELSE(EXISTS "/etc/debian_version")
-    SET(IS_DEBIAN FALSE)
-  ENDIF(EXISTS "/etc/debian_version")
-ENDMACRO(CHECK_DEBIAN IS_DEBIAN)
+MACRO(CHECK_DEBIAN)
+  FIND_FILE(DEBIAN_FOUND debian_version debconf.conf
+    PATHS /etc)
+ENDMACRO(CHECK_DEBIAN)
