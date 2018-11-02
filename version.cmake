@@ -127,6 +127,14 @@ MACRO(VERSION_COMPUTE)
       ENDIF()
     ENDIF()
 
+    # Append dirty if the project is dirty.
+    IF(PROJECT_DIRTY)
+      SET(PROJECT_VERSION "${PROJECT_VERSION}-dirty")
+    ENDIF()
+  ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/.version)
+  
+  # Set PROJECT_VERSION_{MAJOR,MINOR,PATCH} variables
+  IF(PROJECT_VERSION)
     # Compute the major, minor and patch version of the project
     IF(NOT DEFINED PROJECT_VERSION_MAJOR AND
        NOT DEFINED PROJECT_VERSION_MINOR AND
@@ -151,10 +159,6 @@ MACRO(VERSION_COMPUTE)
         ENDIF()
       ENDIF()
     ENDIF()
+  ENDIF()
 
-    # Append dirty if the project is dirty.
-    IF(PROJECT_DIRTY)
-      SET(PROJECT_VERSION "${PROJECT_VERSION}-dirty")
-    ENDIF()
-  ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/.version)
 ENDMACRO()
