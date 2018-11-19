@@ -254,3 +254,16 @@ MACRO(SETUP_PROJECT_FINALIZE)
 
   LOGGING_FINALIZE()
 ENDMACRO(SETUP_PROJECT_FINALIZE)
+
+#.rst:
+# .. ifmode:: user
+#
+# .. command:: CHECK_DEBIAN
+#
+#   Checks is the current system is Debian based
+#   You can then use DEBIAN_FOUND
+#
+MACRO(CHECK_DEBIAN)
+  FIND_FILE(DEBIAN_FOUND debian_version debconf.conf
+    PATHS /etc)
+ENDMACRO(CHECK_DEBIAN)
