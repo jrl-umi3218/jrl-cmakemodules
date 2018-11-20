@@ -13,6 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+include(CheckCXXCompilerFlag)
+
 #.rst:
 # .. ifmode:: user
 #
@@ -22,14 +24,24 @@
 #    with C++11 standards.  
 #
 MACRO(PROJECT_USE_CXX11)
-  IF(CMAKE_VERSION VERSION_LESS "3.1")
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
-  ELSE()
-    SET(CMAKE_CXX_STANDARD 11)
-  ENDIF()
-  IF(APPLE)
-    IF(POLICY CMP0025)
-      CMAKE_POLICY(SET CMP0025 NEW)
+  CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
+  CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
+  IF(COMPILER_SUPPORTS_CXX0X OR COMPILER_SUPPORTS_CXX11)
+    IF(CMAKE_VERSION VERSION_LESS "3.1")
+      IF(COMPILER_SUPPORTS_CXX0X)
+        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+      ELSE()  
+        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+      ENDIF()
+    ELSE()
+      SET(CMAKE_CXX_STANDARD 11)
     ENDIF()
+    IF(APPLE)
+      IF(POLICY CMP0025)
+        CMAKE_POLICY(SET CMP0025 NEW)
+      ENDIF()
+    ENDIF()
+  ELSE()
+    MESSAGE(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support.")
   ENDIF()
 ENDMACRO(PROJECT_USE_CXX11)
