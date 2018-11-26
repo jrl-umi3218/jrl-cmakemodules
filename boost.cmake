@@ -88,18 +88,25 @@ MACRO(SEARCH_FOR_BOOST)
   # This is made mandatory if for Boost version greater than 1.67.0
   LIST(FIND BOOST_COMPONENTS python PYTHON_IN_BOOST_COMPONENTS)
   LIST(FIND BOOST_COMPONENTS numpy NUMPY_IN_BOOST_COMPONENTS)
-  IF(${PYTHON_IN_BOOST_COMPONENTS} GREATER -1)
+  IF(${NUMPY_IN_BOOST_COMPONENTS} GREATER -1)
     # Check if Python has been found
     IF(NOT PYTHONLIBS_FOUND)
       MESSAGE(FATAL_ERROR "PYTHON has not been found. You should first call FindPython before calling SEARCH_FOR_BOOST macro.")   
     ENDIF(NOT PYTHONLIBS_FOUND)
-
-    search_python_specific(python PYTHON_IN_BOOST_COMPONENTS)
-    IF(${NUMPY_IN_BOOST_COMPONENTS} GREATER -1)
-      search_python_specific(numpy NUMPY_IN_BOOST_COMPONENTS)
-    ENDIF(${NUMPY_IN_BOOST_COMPONENTS} GREATER -1)
-
-  ENDIF(${PYTHON_IN_BOOST_COMPONENTS} GREATER -1)
+    # Add python component
+    IF(NOT ${PYTHON_IN_BOOST_COMPONENTS} GREATER -1)
+      LIST(APPEND BOOST_COMPONENTS python)
+      LIST(FIND BOOST_COMPONENTS python PYTHON_IN_BOOST_COMPONENTS)
+    ENDIF(NOT ${PYTHON_IN_BOOST_COMPONENTS} GREATER -1)
+    search_python_specific(python ${PYTHON_IN_BOOST_COMPONENTS})
+    search_python_specific(numpy ${NUMPY_IN_BOOST_COMPONENTS})
+  ELSEIF(${PYTHON_IN_BOOST_COMPONENTS} GREATER -1)
+    # Check if Python has been found
+    IF(NOT PYTHONLIBS_FOUND)
+      MESSAGE(FATAL_ERROR "PYTHON has not been found. You should first call FindPython before calling SEARCH_FOR_BOOST macro.")   
+    ENDIF(NOT PYTHONLIBS_FOUND)
+    search_python_specific(python ${PYTHON_IN_BOOST_COMPONENTS})
+  ENDIF(${NUMPY_IN_BOOST_COMPONENTS} GREATER -1)
 
   FIND_PACKAGE(Boost ${BOOST_REQUIRED} COMPONENTS ${BOOST_COMPONENTS} REQUIRED)
 
@@ -163,7 +170,7 @@ MACRO(SEARCH_FOR_BOOST)
       MESSAGE(STATUS "Boost_NUMPY_LIBRARY: ${Boost_NUMPY_LIBRARY}")
       LIST(APPEND Boost_PYTHON_LIBRARIES ${Boost_NUMPY_LIBRARY})
       LIST(APPEND LOGGING_WATCHED_VARIABLES
-        python_comp_pos
+        numpy_comp_pos
         Boost_${UPPERCOMPONENT}_LIBRARY
         Boost_NUMPY_LIBRARY
       )
