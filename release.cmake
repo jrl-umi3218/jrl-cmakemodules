@@ -1,4 +1,4 @@
-# Copyright (C) 2008-2014 LAAS-CNRS, JRL AIST-CNRS.
+# Copyright (C) 2008-2014,2018 LAAS-CNRS, JRL AIST-CNRS.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -33,7 +33,9 @@
 #
 #   - adding a signed tag following the ``vVERSION`` pattern.
 #   - running ``make distcheck`` (:ref:`distcheck <target-distcheck>`) to make sure everything is ok.
-#   - pushing the tag on the GitHub repository (to be done manually as
+#   - running ``make dist`` to generate a tarball
+#   - running ``make distclean`` to remove the current dist directory
+#   - reminds that you should push the tag and tarball on the GitHub repository (to be done manually as
 #     it is simple but cannot be reverted).
 #
 #   .. todo::
@@ -48,9 +50,17 @@ MACRO(RELEASE_SETUP)
   IF(UNIX)
     FIND_PROGRAM(GIT git)
 
+    #Set LD_LIBRARY_PATH
+    IF(APPLE)
+      SET(LD_LIBRARY_PATH_VARIABLE_NAME "DYLD_LIBRARY_PATH") 
+    ELSE(APPLE)
+      SET(LD_LIBRARY_PATH_VARIABLE_NAME "LD_LIBRARY_PATH") 
+    ENDIF(APPLE)
+    
     ADD_CUSTOM_TARGET(release
       COMMAND
-      ! test x$$VERSION = x
+         export ${LD_LIBRARY_PATH_VARIABLE_NAME}=$ENV{${LD_LIBRARY_PATH_VARIABLE_NAME}}
+      && ! test x$$VERSION = x
         || (echo "Please set a version for this release" && false)
       && cd ${PROJECT_SOURCE_DIR}
       && ${GIT} tag -s v$$VERSION -m "Release of version $$VERSION."
@@ -63,7 +73,9 @@ MACRO(RELEASE_SETUP)
            && cd ${CMAKE_BINARY_DIR}
            && cmake ${PROJECT_SOURCE_DIR}
            && false)
-      && echo "Please, run 'git push --tags' to finalize this release."
+      && make dist
+      && make distclean
+      && echo "Please, run 'git push --tags' and upload the tarball to github to finalize this release."
       )
   ENDIF()
 ENDMACRO()

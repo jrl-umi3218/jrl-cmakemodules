@@ -28,7 +28,7 @@ MACRO(_SETUP_PROJECT_DOCUMENTATION)
   FIND_PACKAGE(Doxygen)
 
   IF(NOT DOXYGEN_FOUND)
-    MESSAGE("Failed to find Doxygen, documentation will not be generated.")
+    MESSAGE(WARNING "Failed to find Doxygen, documentation will not be generated.")
   ELSE(NOT DOXYGEN_FOUND)
     # Generate variable to be substitued in Doxyfile.in
     # for dot use.
@@ -171,16 +171,16 @@ MACRO(_SETUP_PROJECT_DOCUMENTATION_FINALIZE)
       FIND_PROGRAM(GS gs DOC "GhostScript interpreter")
 
       IF(NOT (LATEX AND GS AND DVIPS))
-        MESSAGE("Failed to find latex/dvips/gs, will use MathJax backend.")
+        MESSAGE(STATUS "Failed to find latex/dvips/gs, will use MathJax backend.")
         SET(DOXYGEN_USE_MATHJAX "YES")
       ENDIF()
     ENDIF()
 
     IF(${DOXYGEN_USE_MATHJAX} STREQUAL "YES")
-      MESSAGE("-- Doxygen rendering: using MathJax backend")
+      MESSAGE(STATUS "Doxygen rendering: using MathJax backend")
       SET(DOXYGEN_HEADER_NAME "header-mathjax.html")
     ELSE()
-      MESSAGE("-- Doxygen rendering: using LaTeX backend")
+      MESSAGE(STATUS "Doxygen rendering: using LaTeX backend")
       SET(DOXYGEN_HEADER_NAME "header.html")
     ENDIF()
 
@@ -200,6 +200,18 @@ MACRO(_SETUP_PROJECT_DOCUMENTATION_FINALIZE)
         ENDIF()
       ENDFOREACH()
     ENDIF()
+
+    IF(EXISTS ${PROJECT_SOURCE_DIR}/include)
+      SET (DOXYGEN_INCLUDE_PATH "${DOXYGEN_INCLUDE_PATH} \"${PROJECT_SOURCE_DIR}/include\"")
+      SET (DOXYGEN_INPUT "${DOXYGEN_INPUT} \"${PROJECT_SOURCE_DIR}/include\"")
+    ENDIF()
+    IF(EXISTS ${PROJECT_SOURCE_DIR}/src)
+      SET (DOXYGEN_INPUT "${DOXYGEN_INPUT} \"${PROJECT_SOURCE_DIR}/src\"")
+    ENDIF()
+    IF(EXISTS ${PROJECT_SOURCE_DIR}/tests)
+      SET (DOXYGEN_EXAMPLE_PATH "${DOXYGEN_EXAMPLE_PATH} \"${PROJECT_SOURCE_DIR}/tests\"")
+    ENDIF()
+    SET (DOXYGEN_INCLUDE_PATH "${DOXYGEN_INCLUDE_PATH} \"${CMAKE_BINARY_DIR}/include\"")
 
     # Generate Doxyfile.extra.
     IF(EXISTS ${PROJECT_SOURCE_DIR}/doc/Doxyfile.extra.in)

@@ -65,6 +65,15 @@
 #   but this will also trigger the generation of an appropriate debug
 #   pkg-config file.
 #
+# .. variable:: PROJECT_USE_KEYWORD_LINK_LIBRARIES
+#
+#   If set to true, the jrl-cmakemodules will use the PUBLIC keyword in
+#   ``target_link_libraries``. Defaults to false.
+#
+# .. variable: PROJECT_CUSTOM_HEADER_EXTENSION
+#   Allows to define a custome extension for C/C++ header files (e.g. .h, .hh, .hpp).
+#   The default value is set to .hh.
+#
 
 # Please note that functions starting with an underscore are internal
 # functions and should not be used directly.
@@ -92,6 +101,7 @@ INCLUDE(cmake/install-data.cmake)
 INCLUDE(cmake/release.cmake)
 INCLUDE(cmake/version.cmake)
 INCLUDE(cmake/package-config.cmake)
+INCLUDE(cmake/version-script.cmake)
 
  # --------- #
  # Constants #
@@ -185,6 +195,15 @@ MACRO(SETUP_PROJECT)
     ENDIF()
   ENDIF()
 
+  IF(NOT DEFINED PROJECT_USE_KEYWORD_LINK_LIBRARIES)
+    SET(PROJECT_USE_KEYWORD_LINK_LIBRARIES FALSE)
+  ENDIF()
+  IF(${PROJECT_USE_KEYWORD_LINK_LIBRARIES})
+    SET(PUBLIC_KEYWORD PUBLIC)
+  ELSE()
+    SET(PUBLIC_KEYWORD "")
+  ENDIF()
+
   IF(${ARGC})
     SET(CMAKE_VERBOSE_MAKEFILE ${ARGV0})
   ELSE(${ARGC})
@@ -235,3 +254,16 @@ MACRO(SETUP_PROJECT_FINALIZE)
 
   LOGGING_FINALIZE()
 ENDMACRO(SETUP_PROJECT_FINALIZE)
+
+#.rst:
+# .. ifmode:: user
+#
+# .. command:: CHECK_DEBIAN
+#
+#   Checks is the current system is Debian based
+#   You can then use DEBIAN_FOUND
+#
+MACRO(CHECK_DEBIAN)
+  FIND_FILE(DEBIAN_FOUND debian_version debconf.conf
+    PATHS /etc)
+ENDMACRO(CHECK_DEBIAN)

@@ -19,11 +19,15 @@
 #
 #  Find python interpreter and python libs.
 #  Arguments are passed to the find_package command so
-#  refer to find_package documentation to learn about valid arguments.
+#  refer to `find_package` documentation to learn about valid arguments.
 #
-#  For instance, the command
-#  ``FINDPYTHON(2.7 EXACT REQUIRED)``
-#  will force CMake to find Python2.7
+#  To specify a specific Python version from the command line,
+#  use the command ``FINDPYTHON()``
+#  and pass the following arguments to CMake
+#  ``-DPYTHON_EXECUTABLE=/usr/bin/python3.5 -DPYTHON_LIBRARY= /usr/lib/x86_64-linux-gnu/libpython3.5m.so.1``
+#
+#  To specify a specific Python version within the CMakeLists.txt,
+#  use the command ``FINDPYTHON(2.7 EXACT REQUIRED)``.
 #
 #  .. warning::
 #    According to the ``FindPythonLibs`` and ``FindPythonInterp``
@@ -32,24 +36,38 @@
 #    or another version that the requested one.
 #
 
+#.rst:
+# .. variable:: PYTHON_SITELIB
+#
+#  Absolute path where Python files will be installed.
+
 IF(CMAKE_VERSION VERSION_LESS "3.2")
     SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/python ${CMAKE_MODULE_PATH})
     MESSAGE(WARNING "CMake versions older than 3.2 do not properly find Python. Custom macros are used to find it.")
 ENDIF(CMAKE_VERSION VERSION_LESS "3.2")
 
 MACRO(FINDPYTHON)
+
 FIND_PACKAGE(PythonInterp ${ARGN})
 IF (NOT ${PYTHONINTERP_FOUND} STREQUAL TRUE)
    MESSAGE(FATAL_ERROR "Python executable has not been found.")
 ENDIF (NOT ${PYTHONINTERP_FOUND} STREQUAL TRUE)
+MESSAGE(STATUS "PythonInterp: ${PYTHON_EXECUTABLE}")
 
 FIND_PACKAGE(PythonLibs ${ARGN})
+MESSAGE(STATUS "PythonLibraries: ${PYTHON_LIBRARIES}")
 IF (NOT ${PYTHONLIBS_FOUND} STREQUAL TRUE)
    MESSAGE(FATAL_ERROR "Python has not been found.")
 ENDIF (NOT ${PYTHONLIBS_FOUND} STREQUAL TRUE)
 
+IF (NOT ${PYTHON_VERSION_STRING} STREQUAL ${PYTHONLIBS_VERSION_STRING})
+  MESSAGE(FATAL_ERROR "Python interpreter and libraries are in different version")
+ENDIF (NOT ${PYTHON_VERSION_STRING} STREQUAL ${PYTHONLIBS_VERSION_STRING})
+
 # Find PYTHON_LIBRARY_DIRS
 GET_FILENAME_COMPONENT(PYTHON_LIBRARY_DIRS "${PYTHON_LIBRARIES}" PATH)
+MESSAGE(STATUS "PythonLibraryDirs: ${PYTHON_LIBRARY_DIRS}")
+MESSAGE(STATUS "PythonLibVersionString: ${PYTHONLIBS_VERSION_STRING}")
 
 # Default Python packages directory
 SET(PYTHON_PACKAGES_DIR site-packages)
@@ -70,11 +88,21 @@ EXECUTE_PROCESS(
 # Remove final \n of the variable PYTHON_SITELIB
 STRING(REPLACE "\n" "" PYTHON_SITELIB "${PYTHON_SITELIB}")
 NORMALIZE_PATH(PYTHON_SITELIB)
+
+# Log Python variables
+LIST(APPEND LOGGING_WATCHED_VARIABLES
+  PYTHONINTERP_FOUND
+  PYTHONLIBS_FOUND
+  PYTHON_LIBRARY_DIRS
+  PYTHONLIBS_VERSION_STRING
+  PYTHON_EXECUTABLE
+  )
+
 ENDMACRO(FINDPYTHON)
 
 
 #.rst:
-# .. command:: DYNAMIC_GRAPH_PYTHON_MODULE ( SUBMODULENAME LIBRARYNAME TARGETNAME )
+# .. command:: DYNAMIC_GRAPH_PYTHON_MODULE ( SUBMODULENAME LIBRARYNAME TARGETNAME INSTALL_INIT_PY=1 SOURCE_PYTHON_MODULE=cmake/dynamic_graph/python-module-py.cc)
 #
 #   Add a python submodule to dynamic_graph
 #  
@@ -85,6 +113,12 @@ ENDMACRO(FINDPYTHON)
 #   :param TARGETNAME:     name of the target: should be different for several
 #                   calls to the macro.
 #
+#   :param INSTALL_INIT_PY: if set to 1 install and generated a __init__.py file.
+#                   Set to 1 by default.
+#
+#   :param SOURCE_PYTHON_MODULE: Location of the cpp file for the python module in the package.
+#                   Set to cmake/dynamic_graph/python-module-py.cc by default.
+# 
 #  .. note::
 #    Before calling this macro, set variable NEW_ENTITY_CLASS as
 #    the list of new Entity types that you want to be bound.
@@ -93,7 +127,20 @@ ENDMACRO(FINDPYTHON)
 #
 MACRO(DYNAMIC_GRAPH_PYTHON_MODULE SUBMODULENAME LIBRARYNAME TARGETNAME)
 
-
+  # By default the __init__.py file is installed.
+  SET(INSTALL_INIT_PY 1)
+  SET(SOURCE_PYTHON_MODULE "cmake/dynamic_graph/python-module-py.cc")
+    
+  # Check if there is optional parameters.
+  set(extra_macro_args ${ARGN})
+  list(LENGTH extra_macro_args num_extra_args)
+  if( ${num_extra_args} GREATER 0)
+    list(GET extra_macro_args 0 INSTALL_INIT_PY)
+    if( ${num_extra_args} GREATER 1)
+      list(GET extra_macro_args 1 SOURCE_PYTHON_MODULE)
+    endif(${num_extra_args} GREATER 1)
+  endif(${num_extra_args} GREATER 0)
+  
   IF(NOT DEFINED PYTHONLIBS_FOUND)
     FINDPYTHON()
   ELSEIF(NOT ${PYTHONLIBS_FOUND} STREQUAL "TRUE")
@@ -109,7 +156,7 @@ MACRO(DYNAMIC_GRAPH_PYTHON_MODULE SUBMODULENAME LIBRARYNAME TARGETNAME)
 
   ADD_LIBRARY(${PYTHON_MODULE}
     MODULE
-    ${PROJECT_SOURCE_DIR}/cmake/dynamic_graph/python-module-py.cc)
+    ${PROJECT_SOURCE_DIR}/${SOURCE_PYTHON_MODULE})
 
   FILE(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/src/dynamic_graph/${SUBMODULENAME})
 
@@ -119,8 +166,8 @@ MACRO(DYNAMIC_GRAPH_PYTHON_MODULE SUBMODULENAME LIBRARYNAME TARGETNAME)
    )
   CMAKE_POLICY(POP)
 
-  TARGET_LINK_LIBRARIES(${PYTHON_MODULE} "-Wl,--no-as-needed")
-  TARGET_LINK_LIBRARIES(${PYTHON_MODULE} ${LIBRARYNAME} ${PYTHON_LIBRARY})
+  TARGET_LINK_LIBRARIES(${PYTHON_MODULE} ${PUBLIC_KEYWORD} "-Wl,--no-as-needed")
+  TARGET_LINK_LIBRARIES(${PYTHON_MODULE} ${PUBLIC_KEYWORD} ${LIBRARYNAME} ${PYTHON_LIBRARY})
 
   INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
 
@@ -138,23 +185,28 @@ MACRO(DYNAMIC_GRAPH_PYTHON_MODULE SUBMODULENAME LIBRARYNAME TARGETNAME)
     SET(ENTITY_CLASS_LIST "${ENTITY_CLASS_LIST}${ENTITY}('')\n")
   ENDFOREACH(ENTITY ${NEW_ENTITY_CLASS})
 
-  CONFIGURE_FILE(
-    ${PROJECT_SOURCE_DIR}/cmake/dynamic_graph/submodule/__init__.py.cmake
-    ${PROJECT_BINARY_DIR}/src/dynamic_graph/${SUBMODULENAME}/__init__.py
-    )
+  # Install if INSTALL_INIT_PY is set to 1
+  IF (${INSTALL_INIT_PY} EQUAL 1)
 
-  INSTALL(
-    FILES ${PROJECT_BINARY_DIR}/src/dynamic_graph/${SUBMODULENAME}/__init__.py
-    DESTINATION ${PYTHON_INSTALL_DIR}
-    )
+    CONFIGURE_FILE(
+      ${PROJECT_SOURCE_DIR}/cmake/dynamic_graph/submodule/__init__.py.cmake
+      ${PROJECT_BINARY_DIR}/src/dynamic_graph/${SUBMODULENAME}/__init__.py
+      )
+
+    INSTALL(
+      FILES ${PROJECT_BINARY_DIR}/src/dynamic_graph/${SUBMODULENAME}/__init__.py
+      DESTINATION ${PYTHON_INSTALL_DIR}
+      )
+    
+  ENDIF(${INSTALL_INIT_PY} EQUAL 1)
 
 ENDMACRO(DYNAMIC_GRAPH_PYTHON_MODULE SUBMODULENAME)
 
 
-# PYTHON_INSTALL(MODULE FILE DEST)
-# --------------------------------
+#.rst:
+# .. command::  PYTHON_INSTALL(MODULE FILE DEST)
 #
-# Install a Python file and its associated compiled version.
+#  Install a Python file and its associated compiled version.
 #
 MACRO(PYTHON_INSTALL MODULE FILE DEST)
 
@@ -166,10 +218,10 @@ MACRO(PYTHON_INSTALL MODULE FILE DEST)
     DESTINATION "${DEST}/${MODULE}")
 ENDMACRO()
 
-# PYTHON_INSTALL_ON_SITE (MODULE FILE)
-# --------------------------------
+#.rst:
+# .. command:: PYTHON_INSTALL_ON_SITE (MODULE FILE)
 #
-# Install a Python file and its associated compiled version.
+#  Install a Python file and its associated compiled version in :cmake:variable:`PYTHON_SITELIB`.
 #
 MACRO(PYTHON_INSTALL_ON_SITE MODULE FILE)
 
@@ -272,6 +324,7 @@ MACRO(FIND_NUMPY)
   IF (NOT NUMPY_INCLUDE_DIRS)
     MESSAGE (FATAL_ERROR "Failed to detect numpy")
   ELSE ()
+    STRING(REGEX REPLACE "\n$" "" NUMPY_INCLUDE_DIRS "${NUMPY_INCLUDE_DIRS}")
     MESSAGE (STATUS " NUMPY_INCLUDE_DIRS=${NUMPY_INCLUDE_DIRS}")
   ENDIF()
 ENDMACRO()

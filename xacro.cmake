@@ -14,6 +14,50 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #.rst:
+#
+# .. variable:: XACRO_OPTIONS
+#
+#    Options passed to the xacro command. It defaults to ``--inorder``.
+#
+# .. command:: RUN_XACRO (INPUT OUTPUT)
+#
+#   Add a custom command that runs the following command:
+#
+#     xacro.py -o ${OUTPUT} ${INPUT}
+#
+#   To trigger generation, use::
+#
+#     ADD_CUSTOM_TARGET (generate_urdf_files ALL DEPENDS ${ALL_GENERATED_URDF})
+#
+#   See also :cmake:variable:`XACRO_OPTIONS`.
+#
+MACRO(RUN_XACRO INPUT OUTPUT)
+  FIND_PACKAGE(catkin REQUIRED COMPONENTS xacro)
+
+  IF(NOT DEFINED XACRO_OPTIONS)
+    SET(XACRO_OPTIONS "--inorder")
+  ENDIF()
+
+  ADD_CUSTOM_COMMAND(
+    OUTPUT ${OUTPUT}
+    COMMAND ${_xacro_py}
+    ARGS ${XACRO_OPTIONS} -o ${OUTPUT} ${INPUT}
+    MAIN_DEPENDENCY ${INPUT}
+    COMMENT "Generating ${OUTPUT}"
+    )
+  LIST(APPEND ALL_GENERATED_URDF ${OUTPUT})
+
+  # Clean generated files.
+  SET_PROPERTY(
+    DIRECTORY APPEND PROPERTY
+    ADDITIONAL_MAKE_CLEAN_FILES
+    ${OUTPUT}
+    )
+
+  LIST(APPEND LOGGING_WATCHED_VARIABLES ALL_GENERATED_URDF)
+ENDMACRO(RUN_XACRO INPUT OUTPUT)
+
+#.rst:
 # .. command:: GENERATE_URDF_FILE (FILENAME EXTENSION)
 #
 #   Generate urdf ``${CMAKE_CURRENT_BINARY_DIR}/${FILENAME}.${EXTENSION}``
@@ -30,8 +74,6 @@
 #          the macros tries to configure file ``${CMAKE_CURRENT_SOURCE_DIR}/${FILENAME}.xacro.in``
 #
 MACRO(GENERATE_URDF_FILE FILENAME EXTENSION)
-  FIND_PACKAGE(catkin REQUIRED COMPONENTS xacro)
-
   IF (NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${FILENAME}.xacro)
     IF (NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${FILENAME}.xacro.in)
       MESSAGE(FATAL_ERROR "cannot find \"${FILENAME}.xacro\" or \"${FILENAME}.xacro.in\"")
@@ -45,24 +87,5 @@ MACRO(GENERATE_URDF_FILE FILENAME EXTENSION)
     SET(_XACRO_FILE_ ${CMAKE_CURRENT_SOURCE_DIR}/${FILENAME}.xacro)
   ENDIF (NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${FILENAME}.xacro)
 
-  SET (OUTPUT_FILE ${FILENAME}.${EXTENSION})
-  STRING (TOUPPER ${EXTENSION} EXT_UPPER)
-
-  ADD_CUSTOM_COMMAND(
-    OUTPUT ${OUTPUT_FILE}
-    COMMAND ${_xacro_py}
-    ARGS -o ${CMAKE_CURRENT_BINARY_DIR}/${OUTPUT_FILE} ${_XACRO_FILE_}
-    MAIN_DEPENDENCY ${_XACRO_FILE_}
-    COMMENT "Generating ${EXT_UPPER} from ${_XACRO_FILE_}"
-    )
-  LIST(APPEND ALL_GENERATED_URDF ${OUTPUT_FILE})
-
-  # Clean generated files.
-  SET_PROPERTY(
-    DIRECTORY APPEND PROPERTY
-    ADDITIONAL_MAKE_CLEAN_FILES
-    ${OUTPUT_FILE}
-    )
-
-  LIST(APPEND LOGGING_WATCHED_VARIABLES ALL_GENERATED_URDF)
+  RUN_XACRO(${_XACRO_FILE_} ${CMAKE_CURRENT_BINARY_DIR}/${OUTPUT_FILE})
 ENDMACRO(GENERATE_URDF_FILE FILENAME CONFIGURE)
