@@ -267,3 +267,17 @@ MACRO(CHECK_DEBIAN)
   FIND_FILE(DEBIAN_FOUND debian_version debconf.conf
     PATHS /etc)
 ENDMACRO(CHECK_DEBIAN)
+
+
+#.rst:
+# .. ifmode:: user
+#
+# .. command:: CHECK_NETBSD
+#
+#   Checks is the current system is NetBSD
+#   You can then use NETBSD_FOUND
+#
+MACRO(CHECK_NETBSD)
+  FIND_FILE(NETBSD_FOUND netbsd
+    PATHS /)
+ENDMACRO(CHECK_NETBSD)
