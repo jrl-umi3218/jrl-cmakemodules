@@ -27,12 +27,34 @@ INCLUDE(cmake/hpp/doc.cmake)
 #.rst:
 # .. ifmode:: hpp
 #
+# .. variable:: HPP_DEBUG
+#
+#   Enable logging of debug output in log files.
+#
+# .. variable:: HPP_BENCHMARK
+#
+#   Enable logging of benchmark output in log files.
+
+#.rst:
+# .. ifmode:: hpp
+#
 # .. command:: SETUP_HPP_PROJECT
 #
 #   Initialize a HPP project. Calls :cmake:command:`SETUP_PROJECT`.
 MACRO(SETUP_HPP_PROJECT)
   SETUP_PROJECT()
   _SETUP_PROJECT_HPP_DOCUMENTATION()
+
+  # Activate hpp-util logging if requested
+  SET (HPP_DEBUG FALSE CACHE BOOL "trigger hpp-util debug output")
+  IF (HPP_DEBUG)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHPP_DEBUG")
+  ENDIF()
+  # Activate hpp-util logging if requested
+  SET (HPP_BENCHMARK FALSE CACHE BOOL "trigger hpp-util benchmark output")
+  IF (HPP_BENCHMARK)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHPP_ENABLE_BENCHMARK")
+  ENDIF()
 ENDMACRO(SETUP_HPP_PROJECT)
 
 #.rst:
