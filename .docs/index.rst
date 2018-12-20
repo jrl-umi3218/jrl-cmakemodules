@@ -21,6 +21,7 @@ Contents
    :maxdepth: 3
 
    /pages/base.rst
+   /pages/projects.rst
    /pages/dependencies.rst
    /pages/other.rst
    /pages/internal.rst

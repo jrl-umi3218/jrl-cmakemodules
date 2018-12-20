@@ -500,7 +500,7 @@ FILE_VERSION_FILTER    =
 # file name after the option, if omitted DoxygenLayout.xml will be used as the name
 # of the layout file.
 
-LAYOUT_FILE            =
+LAYOUT_FILE            = @PROJECT_DOCUMENTATION_LAYOUT@
 
 #---------------------------------------------------------------------------
 # configuration options related to warning and progress messages
