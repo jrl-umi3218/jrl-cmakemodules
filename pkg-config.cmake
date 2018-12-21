@@ -62,6 +62,7 @@ MACRO(_SETUP_PROJECT_PKG_CONFIG)
   SET(_PKG_CONFIG_REQUIRES "" CACHE INTERNAL "")
   SET(_PKG_CONFIG_REQUIRES_DEBUG "" CACHE INTERNAL "")
   SET(_PKG_CONFIG_REQUIRES_OPTIMIZED "" CACHE INTERNAL "")
+  SET(_PKG_CONFIG_COMPILE_TIME_REQUIRES "" CACHE INTERNAL "")
   SET(_PKG_CONFIG_CONFLICTS "" CACHE INTERNAL "")
   SET(_PKG_CONFIG_LIBS "" CACHE INTERNAL "")
   SET(_PKG_CONFIG_LIBS_DEBUG "${LIBDIR_KW}\${libdir}" CACHE INTERNAL "")
@@ -97,6 +98,7 @@ MACRO(_SETUP_PROJECT_PKG_CONFIG)
     _PKG_CONFIG_REQUIRES
     _PKG_CONFIG_REQUIRES_DEBUG
     _PKG_CONFIG_REQUIRES_OPTIMIZED
+    _PKG_CONFIG_COMPILE_TIME_REQUIRES 
     _PKG_CONFIG_CONFLICTS
     _PKG_CONFIG_LIBS
     _PKG_CONFIG_LIBS_DEBUG
@@ -410,20 +412,24 @@ MACRO(ADD_DEPENDENCY P_REQUIRED COMPILE_TIME_ONLY PKG_CONFIG_STRING PKG_CONFIG_D
 
   # Add the package to the dependency list if found and if dependency
   # is triggered not only for documentation
-  IF(${PACKAGE_FOUND} AND (NOT ${COMPILE_TIME_ONLY}))
-    IF(DEFINED PROJECT_DEBUG_POSTFIX AND DEFINED ${PREFIX}_DEBUG)
-      _ADD_TO_LIST(_PKG_CONFIG_REQUIRES_DEBUG "${PKG_CONFIG_DEBUG_STRING}" ",")
-      _ADD_TO_LIST(_PKG_CONFIG_REQUIRES_OPTIMIZED "${PKG_CONFIG_STRING}" ",")
-    ELSE()
-      # Warn the user in case he/she is using alternative libraries for debug but no postfix
-      IF(NOT DEFINED PROJECT_DEBUG_POSTFIX AND DEFINED ${PREFIX}_DEBUG)
-        MESSAGE(AUTHOR_WARNING
-          "You are linking with different libraries in debug mode but the
-           generated .pc cannot reflect that, it will default to release flags. Consider
-           setting PROJECT_DEBUG_POSTFIX to generate different libraries and pc files in
-           debug mode.")
+  IF(${PACKAGE_FOUND})
+    IF(NOT ${COMPILE_TIME_ONLY})
+      IF(DEFINED PROJECT_DEBUG_POSTFIX AND DEFINED ${PREFIX}_DEBUG)
+        _ADD_TO_LIST(_PKG_CONFIG_REQUIRES_DEBUG "${PKG_CONFIG_DEBUG_STRING}" ",")
+        _ADD_TO_LIST(_PKG_CONFIG_REQUIRES_OPTIMIZED "${PKG_CONFIG_STRING}" ",")
+      ELSE()
+        # Warn the user in case he/she is using alternative libraries for debug but no postfix
+        IF(NOT DEFINED PROJECT_DEBUG_POSTFIX AND DEFINED ${PREFIX}_DEBUG)
+          MESSAGE(AUTHOR_WARNING
+            "You are linking with different libraries in debug mode but the
+             generated .pc cannot reflect that, it will default to release flags. Consider
+             setting PROJECT_DEBUG_POSTFIX to generate different libraries and pc files in
+             debug mode.")
+        ENDIF()
+        _ADD_TO_LIST(_PKG_CONFIG_REQUIRES "${PKG_CONFIG_STRING}" ",")
       ENDIF()
-      _ADD_TO_LIST(_PKG_CONFIG_REQUIRES "${PKG_CONFIG_STRING}" ",")
+    ELSE()
+      _ADD_TO_LIST(_PKG_CONFIG_COMPILE_TIME_REQUIRES "${PKG_CONFIG_STRING}" ",")
     ENDIF()
   ENDIF()
 
