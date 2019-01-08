@@ -18,13 +18,19 @@
 #
 #   Boolean variable to configure unit test compilation declared with
 #   :command:`ADD_UNIT_TEST`.
-
-#   A target *build_tests* is added to compile the tests and
-#   a test that run target build_tests is run before all other tests.
-#   So command ``make test`` compiles and runs the unit-tests.
 #
-#   * if ``OFF`` (default), nothing special is done.
-#   * if ``ON``, the unit-test is not compiled with target *all*.
+#   A target *build_tests* is added to compile the unit-tests.
+#   In all cases, ``make all && make test`` compiles and runs the unit-tests.
+#
+#   * if ``OFF`` (default), the unit-tests are compiled with target *all*,
+#     as usual.
+#   * if ``ON``, a unit-test called *ctest_build_tests* is added.
+#     It is equivalent to the command ``make build_tests``.
+#     All unit-test added with :command:`ADD_UNIT_TEST` will be executed
+#     after unit-test *ctest_build_tests* completed.
+#
+#     Thus, the unit-tests are not compiled with target *all* but with target *test*.
+#     unit-test  is added and all tests added with
 IF(NOT DEFINED DISABLE_TESTS)
   SET(DISABLE_TESTS OFF)
 ENDIF(NOT DEFINED DISABLE_TESTS)
