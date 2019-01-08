@@ -188,7 +188,9 @@ MACRO(_SETUP_PROJECT_DOCUMENTATION_FINALIZE)
       # Find doxytag files
       # To ignore this list of tag files, add to doc/Doxyfile.extra.in
       # TAGFILES =
-      STRING(REPLACE "," ";" PKG_REQUIRES "${_PKG_CONFIG_REQUIRES}")
+      SET(PKG_REQUIRES ${_PKG_CONFIG_REQUIRES})
+      _ADD_TO_LIST(PKG_REQUIRES "${_PKG_CONFIG_COMPILE_TIME_REQUIRES}" ",")
+      STRING(REPLACE "," ";" PKG_REQUIRES "${PKG_REQUIRES}")
       FOREACH(PKG_CONFIG_STRING ${PKG_REQUIRES})
         _PARSE_PKG_CONFIG_STRING(${PKG_CONFIG_STRING} LIBRARY_NAME PREFIX)
         # If DOXYGENDOCDIR is specified, add a doc path.
