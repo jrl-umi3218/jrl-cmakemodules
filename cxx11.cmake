@@ -1,4 +1,4 @@
-# Copyright (C) 2018 LAAS-CNRS, JRL AIST-CNRS, INRIA
+# Copyright (C) 2018-2019 LAAS-CNRS, JRL AIST-CNRS, INRIA
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,6 +14,25 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 include(CheckCXXCompilerFlag)
+
+#.rst:
+# .. ifmode:: user
+#
+# .. command:: CHECK_CXX11_SUPPORT
+#
+#    Set ouput variable CXX11_SUPPORTED to TRUE if C++11 is supported
+#    by the current compiler. Set to FALSE otherwise.
+#
+FUNCTION(CHECK_CXX11_SUPPORT CXX11_SUPPORTED)
+  CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
+  CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
+
+  IF(COMPILER_SUPPORTS_CXX0X OR COMPILER_SUPPORTS_CXX11)
+    SET(${CXX11_SUPPORTED} TRUE PARENT_SCOPE)
+  ELSE()
+    SET(${CXX11_SUPPORTED} FALSE PARENT_SCOPE)
+  ENDIF()
+ENDFUNCTION(CHECK_CXX11_SUPPORT)
 
 #.rst:
 # .. ifmode:: user
