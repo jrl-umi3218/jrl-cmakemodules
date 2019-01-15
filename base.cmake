@@ -267,3 +267,31 @@ MACRO(CHECK_DEBIAN)
   FIND_FILE(DEBIAN_FOUND debian_version debconf.conf
     PATHS /etc)
 ENDMACRO(CHECK_DEBIAN)
+
+
+#.rst:
+# .. ifmode:: user
+#
+# .. command:: CHECK_NETBSD
+#
+#   Checks is the current system is NetBSD
+#   You can then use NETBSD_FOUND
+#
+MACRO(CHECK_NETBSD)
+  FIND_FILE(NETBSD_FOUND netbsd
+    PATHS /)
+ENDMACRO(CHECK_NETBSD)
+
+
+#.rst:
+# .. ifmode:: user
+#
+# .. command:: CHECK_ARCHLINUX
+#
+#   Checks is the current system is ArchLinux
+#   You can then use ARCHLINUX_FOUND
+#
+MACRO(CHECK_ARCHLINUX)
+  FIND_FILE(ARCHLINUX_FOUND arch-release
+    PATHS /etc)
+ENDMACRO(CHECK_ARCHLINUX)
