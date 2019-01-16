@@ -1,4 +1,4 @@
-# Copyright (C) 2008-2014 LAAS-CNRS, JRL AIST-CNRS.
+# Copyright (C) 2008-2019 LAAS-CNRS, JRL AIST-CNRS, INRIA.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -54,6 +54,8 @@ IF (NOT ${PYTHONINTERP_FOUND} STREQUAL TRUE)
 ENDIF (NOT ${PYTHONINTERP_FOUND} STREQUAL TRUE)
 MESSAGE(STATUS "PythonInterp: ${PYTHON_EXECUTABLE}")
 
+# Inform PythonLibs of the required version of PythonInterp
+SET(PYTHONLIBS_VERSION_STRING ${PYTHON_VERSION_STRING})
 FIND_PACKAGE(PythonLibs ${ARGN})
 MESSAGE(STATUS "PythonLibraries: ${PYTHON_LIBRARIES}")
 IF (NOT ${PYTHONLIBS_FOUND} STREQUAL TRUE)
