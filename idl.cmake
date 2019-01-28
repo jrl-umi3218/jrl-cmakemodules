@@ -52,12 +52,20 @@ ENDMACRO ()
 #   For more information:
 #   http://www.cmake.org/Wiki/CMake_FAQ#How_can_I_add_a_dependency_to_a_source_file_which_is_generated_in_a_subdirectory.3F
 #
-#   :param FILENAME:  IDL filename without the extension.
-#                     Can be prefixed by a path: _path/_filename
-#   :param DIRECTORY: IDL directory.
-#                     The idl file being search for is: ``${DIRECTORY}/${_filename}.idl``
+#   :param FILENAME:   IDL filename without the extension.
+#                      Can be prefixed by a path: _path/_filename
+#   :param DIRECTORY:  IDL directory.
+#                      The idl file being search for is: ``${DIRECTORY}/${_filename}.idl``
+#   :param ENABLE_Wba: Option to trigger generation of code for TypeCode and Any.
+#   :param NO_DEFAULT: Do not add default arguments to omniidl (``-Wbkeep_inc_path``)
+#   :param ARGUMENTS:  The following words are passed as arguments to omniidl
 #
 MACRO(GENERATE_IDL_CPP FILENAME DIRECTORY)
+  SET(options ENABLE_Wba NO_DEFAULT)
+  SET(oneValueArgs )
+  SET(multiValueArgs ARGUMENTS)
+  CMAKE_PARSE_ARGUMENTS(_omni "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
   GET_FILENAME_COMPONENT (_PATH ${FILENAME} PATH)
   GET_FILENAME_COMPONENT (_NAME ${FILENAME} NAME)
   IF (_PATH STREQUAL "")
@@ -69,11 +77,19 @@ MACRO(GENERATE_IDL_CPP FILENAME DIRECTORY)
   ENDIF(${OMNIIDL} STREQUAL OMNIIDL-NOTFOUND)
 
   SET(IDL_COMPILED_FILES ${FILENAME}SK.cc ${FILENAME}.hh)
+  SET(_omniidl_args -bcxx ${_OMNIIDL_INCLUDE_FLAG} ${_omni_ARGUMENTS})
+  # This is to keep backward compatibility
+  IF(NOT _omni_NO_DEFAULT)
+    SET(_omniidl_args ${_omniidl_args} -Wbkeep_inc_path)
+  ENDIF()
+  IF(_omni_ENABLE_Wba)
+    SET(_omniidl_args ${_omniidl_args} -Wba)
+    SET(IDL_COMPILED_FILES ${IDL_COMPILED_FILES} ${FILENAME}DynSK.cc)
+  ENDIF(_omni_ENABLE_Wba)
   ADD_CUSTOM_COMMAND(
     OUTPUT ${IDL_COMPILED_FILES}
     COMMAND ${OMNIIDL}
-    ARGS -bcxx -Wbkeep_inc_path ${_OMNIIDL_INCLUDE_FLAG}
-    -C${_PATH} ${DIRECTORY}/${_NAME}.idl
+    ARGS ${_omniidl_args} -C${_PATH} ${DIRECTORY}/${_NAME}.idl
     MAIN_DEPENDENCY ${DIRECTORY}/${_NAME}.idl
     COMMENT "Generating C++ stubs for ${_NAME}"
     )
