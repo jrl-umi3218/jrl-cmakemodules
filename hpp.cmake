@@ -42,6 +42,15 @@ INCLUDE(cmake/hpp/doc.cmake)
 #
 #   Initialize a HPP project. Calls :cmake:command:`SETUP_PROJECT`.
 MACRO(SETUP_HPP_PROJECT)
+
+  IF (NOT DEFINED PROJECT_ORG)
+    SET(PROJECT_ORG "humanoid-path-planner")
+  ENDIF (NOT DEFINED PROJECT_ORG)
+
+  IF (NOT DEFINED PROJECT_URL)
+    SET(PROJECT_URL "https://github.com/${PROJECT_ORG}/${PROJECT_NAME}")
+  ENDIF (NOT DEFINED PROJECT_URL)
+
   SETUP_PROJECT()
   _SETUP_PROJECT_HPP_DOCUMENTATION()
 
