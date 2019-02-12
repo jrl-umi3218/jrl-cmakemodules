@@ -16,4 +16,4 @@ You can also checkout the more complete [documentation] of the modules.
 
 [wiki]: http://github.com/jrl-umi3218/jrl-cmakemodules/wiki
 
-[documentation]: http://jrl-cmakemodules.readthedocs.io/en/latest/
+[documentation]: http://jrl-cmakemodules.readthedocs.io/en/master/
