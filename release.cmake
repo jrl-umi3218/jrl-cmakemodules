@@ -59,7 +59,9 @@ MACRO(RELEASE_SETUP)
     
     ADD_CUSTOM_TARGET(release
       COMMAND
-         export ${LD_LIBRARY_PATH_VARIABLE_NAME}=$ENV{${LD_LIBRARY_PATH_VARIABLE_NAME}}
+         export LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}
+      && export ${LD_LIBRARY_PATH_VARIABLE_NAME}=$ENV{${LD_LIBRARY_PATH_VARIABLE_NAME}}
+      && export PYTHONPATH=$ENV{PYTHONPATH}
       && ! test x$$VERSION = x
         || (echo "Please set a version for this release" && false)
       && cd ${PROJECT_SOURCE_DIR}

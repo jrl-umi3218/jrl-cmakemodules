@@ -60,7 +60,9 @@ MACRO(DISTCHECK_SETUP)
 
     ADD_CUSTOM_TARGET(distcheck
       COMMAND
-         export ${LD_LIBRARY_PATH_VARIABLE_NAME}=$ENV{${LD_LIBRARY_PATH_VARIABLE_NAME}}
+         export LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}
+      && export ${LD_LIBRARY_PATH_VARIABLE_NAME}=$ENV{${LD_LIBRARY_PATH_VARIABLE_NAME}}
+      && export PYTHONPATH=$ENV{PYTHONPATH}
       && find . -type d -print0 | xargs -0 chmod a-w
       && chmod u+w . && rm -rf _build _inst && mkdir -p _build && mkdir -p _inst
       && chmod u+rwx _build _inst && chmod a-w .
