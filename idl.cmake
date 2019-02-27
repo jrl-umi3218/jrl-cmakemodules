@@ -135,8 +135,14 @@ ENDMACRO(GENERATE_IDL_CPP FILENAME DIRECTORY)
 #                    Can be prefixed by a path: _path/_filename
 #   :param DIRECTORY: IDL directory.
 #                     The idl file being search for is: ``${DIRECTORY}/${_filename}.idl``
+#   :param ARGUMENTS:  The following words are passed as arguments to omniidl
 #
 MACRO(GENERATE_IDL_PYTHON FILENAME DIRECTORY)
+  SET(options)
+  SET(oneValueArgs )
+  SET(multiValueArgs ARGUMENTS)
+  CMAKE_PARSE_ARGUMENTS(_omni "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
   GET_FILENAME_COMPONENT (_PATH ${FILENAME} PATH)
   GET_FILENAME_COMPONENT (_NAME ${FILENAME} NAME)
   IF (_PATH STREQUAL "")
@@ -150,7 +156,7 @@ MACRO(GENERATE_IDL_PYTHON FILENAME DIRECTORY)
     OUTPUT ${FILENAME}_idl.py
     COMMAND ${OMNIIDL}
     ARGS -bpython ${_OMNIIDL_INCLUDE_FLAG}
-    -C${_PATH} ${DIRECTORY}/${_NAME}.idl
+    -C${_PATH} ${_omni_ARGUMENTS} ${DIRECTORY}/${_NAME}.idl
     MAIN_DEPENDENCY ${DIRECTORY}/${_NAME}.idl
     COMMENT "Generating Python stubs for ${_NAME}"
     )
