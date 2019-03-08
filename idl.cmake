@@ -140,7 +140,8 @@ ENDMACRO(GENERATE_IDL_CPP FILENAME DIRECTORY)
 #   :param DIRECTORY: IDL directory.
 #                     The idl file being search for is: ``${DIRECTORY}/${_filename}.idl``
 #   :param ARGUMENTS:  The following words are passed as arguments to omniidl
-#   :param ENABLE_DOCSTRING:
+#   :param ENABLE_DOCSTRING: generate docstrings from doxygen comments
+#   :param STUBS:    set option -Wbstubs of omniidl.
 #
 MACRO(GENERATE_IDL_PYTHON FILENAME DIRECTORY)
   SET(options ENABLE_DOCSTRING)
