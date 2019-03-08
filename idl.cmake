@@ -144,7 +144,7 @@ ENDMACRO(GENERATE_IDL_CPP FILENAME DIRECTORY)
 #
 MACRO(GENERATE_IDL_PYTHON FILENAME DIRECTORY)
   SET(options ENABLE_DOCSTRING)
-  SET(oneValueArgs )
+  SET(oneValueArgs STUBS)
   SET(multiValueArgs ARGUMENTS)
   CMAKE_PARSE_ARGUMENTS(_omni "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
@@ -164,22 +164,28 @@ MACRO(GENERATE_IDL_PYTHON FILENAME DIRECTORY)
     SET(_omniidl_args -bpython)
   ENDIF()
   SET(_omniidl_args ${_omniidl_args} ${_OMNIIDL_INCLUDE_FLAG} -C${_PATH} ${_omni_ARGUMENTS})
+  IF(DEFINED _omni_STUBS)
+    SET(_omniidl_args ${_omniidl_args} -Wbstubs=${_omni_STUBS})
+    STRING(REPLACE "." "/" _omni_STUBS_DIR ${_omni_STUBS})
+  ENDIF()
+  SET(output_files ${CMAKE_CURRENT_BINARY_DIR}/${_PATH}/${_omni_STUBS_DIR}/${FILENAME}_idl.py)
 
   ADD_CUSTOM_COMMAND(
-    OUTPUT ${_PATH}/${FILENAME}_idl.py
+    OUTPUT ${output_files}
     COMMAND ${OMNIIDL}
     ARGS ${_omniidl_args}
     ${DIRECTORY}/${_NAME}.idl
     MAIN_DEPENDENCY ${DIRECTORY}/${_NAME}.idl
     COMMENT "Generating Python stubs for ${_NAME}"
     )
-  SET(ALL_IDL_PYTHON_STUBS ${FILENAME}_idl.py ${ALL_IDL_PYTHON_STUBS})
+
+  LIST(APPEND ALL_IDL_PYTHON_STUBS ${output_files})
 
   # Clean generated files.
   SET_PROPERTY(
     DIRECTORY APPEND PROPERTY
     ADDITIONAL_MAKE_CLEAN_FILES
-    ${_PATH}/${FILENAME}_idl.py
+    ${output_files}
     )
 
   LIST(APPEND LOGGING_WATCHED_VARIABLES OMNIIDL ALL_IDL_PYTHON_STUBS)
