@@ -51,7 +51,11 @@ class CommentToConstVisitor (idlvisitor.AstVisitor):
             text = c.text()
             texts.append (re.sub(self.commentStart, "", text))
         if len(texts)==0:
-            print (node.identifier() + " documentation may be ill-formed.")
+            if isinstance(node, idlast.Attribute):
+                for i in node.identifiers():
+                    print (i + " documentation may be ill-formed.")
+            else:
+                print (node.identifier() + " documentation may be ill-formed.")
         texts.reverse()
         # Extract the prototype of the function
         try:
@@ -80,7 +84,9 @@ class CommentToConstVisitor (idlvisitor.AstVisitor):
                 text # value
                 )
     def _addDoc (self, parent, node):
-        if len(node.comments()) > 0:
+        #Commented in order to add the prototype to the documentation.
+        #if len(node.comments()) > 0:
+        if True:
             const = self._commentToConst (node, node.comments())
             if const is None: return
             if isinstance(parent, idlast.Module):
