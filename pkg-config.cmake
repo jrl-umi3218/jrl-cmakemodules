@@ -890,7 +890,7 @@ ENDMACRO(BUILD_PREFIX_FOR_PKG)
 #.rst:
 # .. ifmode:: import
 #
-#   .. command:: PKG_CONFIG_USE_DEPENDENCY (TARGET DEPENDENCY)
+#   .. command:: PKG_CONFIG_USE_DEPENDENCY (TARGET DEPENDENCY [NO_INCLUDE_SYSTEM])
 #
 #     This macro changes the target properties to properly search for
 #     headers, libraries and link against the required shared libraries
@@ -899,15 +899,20 @@ ENDMACRO(BUILD_PREFIX_FOR_PKG)
 #
 #       PKG_CONFIG_USE_DEPENDENCY(my-binary my-package)
 #
-MACRO(PKG_CONFIG_USE_DEPENDENCY TARGET DEPENDENCY)
-  SET(options NO_INCLUDE_SYSTEM)
-  SET(oneValueArgs )
-  SET(multiValueArgs )
-  cmake_parse_arguments(PKG_CONFIG_USE_DEPENDENCY
-    "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+#     :TARGET: Target that will be manipulated by this macro
+#
+#     :DEPENDENCY: Dependency that will be used
+#
+#     :NO_INCLUDE_SYSTEM: By default, includes are using the SYSTEM option,
+#                         this option changes this behaviour
+#
+
+MACRO(PKG_CONFIG_USE_DEPENDENCY TARGET DEPENDENCY) SET(options
+  NO_INCLUDE_SYSTEM) SET(oneValueArgs ) SET(multiValueArgs )
+  cmake_parse_arguments(PKG_CONFIG_USE_DEPENDENCY "${options}"
+    "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
   BUILD_PREFIX_FOR_PKG(${DEPENDENCY} PREFIX)
-  PKG_CONFIG_USE_LCOMPILE_DEPENDENCY(${TARGET}
-    ${PREFIX}
+  PKG_CONFIG_USE_LCOMPILE_DEPENDENCY(${TARGET} ${PREFIX}
     ${PKG_CONFIG_USE_DEPENDENCY_NO_INCLUDE_SYSTEM})
   PKG_CONFIG_USE_LLINK_DEPENDENCY(${TARGET} ${PREFIX})
 ENDMACRO(PKG_CONFIG_USE_DEPENDENCY TARGET DEPENDENCY)
@@ -916,11 +921,19 @@ ENDMACRO(PKG_CONFIG_USE_DEPENDENCY TARGET DEPENDENCY)
 #.rst:
 # .. ifmode:: import-advanced
 #
-#   .. command:: PKG_CONFIG_USE_COMPILE_DEPENDENCY (TARGET DEPENDENCY)
+#   .. command:: PKG_CONFIG_USE_COMPILE_DEPENDENCY (TARGET DEPENDENCY [NO_INCLUDE_SYSTEM])
 #
 #     This macro changes the target properties to properly search for
 #     headers  against the required shared libraries
 #     when using a dependency detected through pkg-config.
+#
+#     :TARGET: Target that will be manipulated by this macro
+#
+#     :DEPENDENCY: Dependency that will be used
+#
+#     :NO_INCLUDE_SYSTEM: By default, includes are using the SYSTEM option,
+#                         this option changes this behaviour
+#
 #
 MACRO(PKG_CONFIG_USE_COMPILE_DEPENDENCY TARGET DEPENDENCY)
   SET(options NO_INCLUDE_SYSTEM)
