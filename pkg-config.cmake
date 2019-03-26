@@ -761,13 +761,13 @@ MACRO(PKG_CONFIG_USE_LCOMPILE_DEPENDENCY TARGET PREFIX NO_INCLUDE_SYSTEM)
 
   # Include/libraries paths seems to be filtered on Linux, add paths
   # again.
-  IF(NOT NO_INCLUDE_SYSTEM)
-    SET(INCLUDE_DIRECTORIES_VAR "SYSTEM ${${PREFIX}_INCLUDE_DIRS}")
-    SET(DEBUG_INCLUDE_DIRECTORIES_VAR "SYSTEM ${${PREFIX}_DEBUG_INCLUDE_DIRS}")
-  ELSE(NOT NO_INCLUDE_SYSTEM)
-    SET(INCLUDE_DIRECTORIES_VAR "${${PREFIX}_INCLUDE_DIRS}")
-    SET(DEBUG_INCLUDE_DIRECTORIES_VAR "${${PREFIX}_DEBUG_INCLUDE_DIRS}")    
-  ENDIF(NOT NO_INCLUDE_SYSTEM)
+  IF(NO_INCLUDE_SYSTEM EQUAL FALSE)
+    SET(INCLUDE_DIRECTORIES_VAR SYSTEM ${${PREFIX}_INCLUDE_DIRS})
+    SET(DEBUG_INCLUDE_DIRECTORIES_VAR SYSTEM ${${PREFIX}_DEBUG_INCLUDE_DIRS})
+  ELSE(NO_INCLUDE_SYSTEM EQUAL FALSE)
+    SET(INCLUDE_DIRECTORIES_VAR ${${PREFIX}_INCLUDE_DIRS})
+    SET(DEBUG_INCLUDE_DIRECTORIES_VAR ${${PREFIX}_DEBUG_INCLUDE_DIRS})    
+  ENDIF(NO_INCLUDE_SYSTEM EQUAL FALSE) 
   INCLUDE_DIRECTORIES(${INCLUDE_DIRECTORIES_VAR} )
   IF(DEFINED ${PREFIX}_DEBUG_FOUND)
     INCLUDE_DIRECTORIES(${DEBUG_INCLUDE_DIRECTORIES_VAR})
@@ -889,7 +889,7 @@ ENDMACRO(BUILD_PREFIX_FOR_PKG)
 #.rst:
 # .. ifmode:: import
 #
-#   .. command:: PKG_CONFIG_USE_DEPENDENCY (TARGET DEPENDENCY)
+#   .. command:: PKG_CONFIG_USE_DEPENDENCY (TARGET DEPENDENCY OPTIONAL NO_INCLUDE_SYSTEM)
 #
 #     This macro changes the target properties to properly search for
 #     headers, libraries and link against the required shared libraries
@@ -898,12 +898,22 @@ ENDMACRO(BUILD_PREFIX_FOR_PKG)
 #
 #       PKG_CONFIG_USE_DEPENDENCY(my-binary my-package)
 #
+#     If optional NO_INCLUDE_SYSTEM is specified the headers are not consider as system targets.
+#     This happen to be necessary when the order of inclusion is important to switch software version.
+#     Such trick appears for instance in ROS.
+#     I.e.::
+#
+#       PKG_CONFIG_USE_DEPENDENCY(my-binary my-package OPTIONAL NO_INCLUDE_SYSTEM)
+#
 MACRO(PKG_CONFIG_USE_DEPENDENCY TARGET DEPENDENCY)
+  # Checking if the user did not specify to not consider
+  # headers as systems.
   SET(options OPTIONAL NO_INCLUDE_SYSTEM)
   SET(oneValueArgs )
   SET(multiValueArgs )
   cmake_parse_arguments(PKG_CONFIG_USE_DEPENDENCY
     "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+  
   BUILD_PREFIX_FOR_PKG(${DEPENDENCY} PREFIX)
   PKG_CONFIG_USE_LCOMPILE_DEPENDENCY(${TARGET}
     ${PREFIX}
