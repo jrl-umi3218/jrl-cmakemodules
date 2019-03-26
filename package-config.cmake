@@ -49,11 +49,11 @@ set(namespace "${PROJECT_NAME}::")
 set(_PACKAGE_CONFIG_DEPENDENCIES "" CACHE INTERNAL "")
 ENDMACRO(_SETUP_PROJECT_PACKAGE_INIT)
 
-# ADD_PROJECT_DEPENDENCY
-# ----------------------
+#.rst:
+# .. command:: ADD_PROJECT_DEPENDENCY(ARGS)
 #
-# This is a wrapper around find_package to add correct find_dependency calls in
-# the generated config script. All arguments are passed to find_package
+#   This is a wrapper around find_package to add correct find_dependency calls in
+#   the generated config script. All arguments are passed to find_package
 #
 MACRO(ADD_PROJECT_DEPENDENCY)
   string(REPLACE ";" " " PACKAGE_ARGS "${ARGN}")
