@@ -907,8 +907,10 @@ ENDMACRO(BUILD_PREFIX_FOR_PKG)
 #                         this option changes this behaviour
 #
 
-MACRO(PKG_CONFIG_USE_DEPENDENCY TARGET DEPENDENCY) SET(options
-  NO_INCLUDE_SYSTEM) SET(oneValueArgs ) SET(multiValueArgs )
+MACRO(PKG_CONFIG_USE_DEPENDENCY TARGET DEPENDENCY)
+  SET(options NO_INCLUDE_SYSTEM)
+  SET(oneValueArgs )
+  SET(multiValueArgs )
   cmake_parse_arguments(PKG_CONFIG_USE_DEPENDENCY "${options}"
     "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
   BUILD_PREFIX_FOR_PKG(${DEPENDENCY} PREFIX)
