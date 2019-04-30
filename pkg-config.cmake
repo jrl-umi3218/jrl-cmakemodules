@@ -1,4 +1,4 @@
-# Copyright (C) 2008-2016 LAAS-CNRS, JRL AIST-CNRS.
+# Copyright (C) 2008-2019 LAAS-CNRS, JRL AIST-CNRS INRIA.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -693,12 +693,13 @@ MACRO(PKG_CONFIG_APPEND_LIBS LIBS)
       # Check if this project is building this library
       IF(TARGET ${LIB})
         # Single build type generator
+        GET_TARGET_PROPERTY(OUTPUT_LIB_NAME ${PROJECT_NAME} OUTPUT_NAME) 
         IF(DEFINED CMAKE_BUILD_TYPE)
-          SET(_PKG_CONFIG_LIBS "${_PKG_CONFIG_LIBS} ${LIBINCL_KW}${LIB}${PKGCONFIG_POSTFIX}${LIB_EXT}" CACHE INTERNAL "")
+          SET(_PKG_CONFIG_LIBS "${_PKG_CONFIG_LIBS} ${LIBINCL_KW}${OUTPUT_LIB_NAME}${PKGCONFIG_POSTFIX}${LIB_EXT}" CACHE INTERNAL "")
         # Multiple build types generator
         ELSE()
-          SET(_PKG_CONFIG_LIBS_DEBUG "${_PKG_CONFIG_LIBS_DEBUG} ${LIBINCL_KW}${LIB}${PKGCONFIG_POSTFIX}${LIB_EXT}" CACHE INTERNAL "")
-          SET(_PKG_CONFIG_LIBS_OPTIMIZED "${_PKG_CONFIG_LIBS_OPTIMIZED} ${LIBINCL_KW}${LIB}${LIB_EXT}" CACHE INTERNAL "")
+          SET(_PKG_CONFIG_LIBS_DEBUG "${_PKG_CONFIG_LIBS_DEBUG} ${LIBINCL_KW}${OUTPUT_LIB_NAME}${PKGCONFIG_POSTFIX}${LIB_EXT}" CACHE INTERNAL "")
+          SET(_PKG_CONFIG_LIBS_OPTIMIZED "${_PKG_CONFIG_LIBS_OPTIMIZED} ${LIBINCL_KW}${OUTPUT_LIB_NAME}${LIB_EXT}" CACHE INTERNAL "")
         ENDIF()
       ELSE()
         IF(IS_ABSOLUTE ${LIB})
