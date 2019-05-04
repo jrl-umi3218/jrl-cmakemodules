@@ -57,14 +57,18 @@ ENDMACRO ()
 #   :param DIRECTORY:  IDL directory.
 #                      The idl file being search for is: ``${DIRECTORY}/${_filename}.idl``
 #   :param ENABLE_Wba: Option to trigger generation of code for TypeCode and Any.
+#   :param HEADER_SUFFIX: Set option -Wbh of omniidl
 #   :param NO_DEFAULT: Do not add default arguments to omniidl (``-Wbkeep_inc_path``)
 #   :param ARGUMENTS:  The following words are passed as arguments to omniidl
 #
 MACRO(GENERATE_IDL_CPP FILENAME DIRECTORY)
   SET(options ENABLE_Wba NO_DEFAULT)
-  SET(oneValueArgs )
+  SET(oneValueArgs HEADER_SUFFIX)
   SET(multiValueArgs ARGUMENTS)
   CMAKE_PARSE_ARGUMENTS(_omni "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+  IF(NOT DEFINED _omni_HEADER_SUFFIX)
+    SET(_omni_HEADER_SUFFIX ".hh")
+  ENDIF()
 
   GET_FILENAME_COMPONENT (_PATH ${FILENAME} PATH)
   GET_FILENAME_COMPONENT (_NAME ${FILENAME} NAME)
@@ -76,8 +80,8 @@ MACRO(GENERATE_IDL_CPP FILENAME DIRECTORY)
     MESSAGE(FATAL_ERROR "cannot find omniidl.")
   ENDIF(${OMNIIDL} STREQUAL OMNIIDL-NOTFOUND)
 
-  SET(IDL_COMPILED_FILES ${FILENAME}SK.cc ${FILENAME}.hh)
-  SET(_omniidl_args -bcxx ${_OMNIIDL_INCLUDE_FLAG} ${_omni_ARGUMENTS})
+  SET(IDL_COMPILED_FILES ${FILENAME}SK.cc ${FILENAME}${_omni_HEADER_SUFFIX})
+  SET(_omniidl_args -bcxx ${_OMNIIDL_INCLUDE_FLAG} -Wbh=${_omni_HEADER_SUFFIX} ${_omni_ARGUMENTS})
   # This is to keep backward compatibility
   IF(NOT _omni_NO_DEFAULT)
     SET(_omniidl_args ${_omniidl_args} -Wbkeep_inc_path)
@@ -136,10 +140,12 @@ ENDMACRO(GENERATE_IDL_CPP FILENAME DIRECTORY)
 #   :param DIRECTORY: IDL directory.
 #                     The idl file being search for is: ``${DIRECTORY}/${_filename}.idl``
 #   :param ARGUMENTS:  The following words are passed as arguments to omniidl
+#   :param ENABLE_DOCSTRING: generate docstrings from doxygen comments
+#   :param STUBS:    set option -Wbstubs of omniidl.
 #
 MACRO(GENERATE_IDL_PYTHON FILENAME DIRECTORY)
-  SET(options)
-  SET(oneValueArgs )
+  SET(options ENABLE_DOCSTRING)
+  SET(oneValueArgs STUBS)
   SET(multiValueArgs ARGUMENTS)
   CMAKE_PARSE_ARGUMENTS(_omni "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
@@ -152,21 +158,35 @@ MACRO(GENERATE_IDL_PYTHON FILENAME DIRECTORY)
   IF(${OMNIIDL} STREQUAL OMNIIDL-NOTFOUND)
     MESSAGE(FATAL_ERROR "cannot find omniidl.")
   ENDIF(${OMNIIDL} STREQUAL OMNIIDL-NOTFOUND)
+
+  IF(_omni_ENABLE_DOCSTRING)
+    SET(_omniidl_args -p${CMAKE_SOURCE_DIR}/cmake/hpp/idl -bomniidl_be_python_with_docstring -K)
+  ELSE()
+    SET(_omniidl_args -bpython)
+  ENDIF()
+  SET(_omniidl_args ${_omniidl_args} ${_OMNIIDL_INCLUDE_FLAG} -C${_PATH} ${_omni_ARGUMENTS})
+  IF(DEFINED _omni_STUBS)
+    SET(_omniidl_args ${_omniidl_args} -Wbstubs=${_omni_STUBS})
+    STRING(REPLACE "." "/" _omni_STUBS_DIR ${_omni_STUBS})
+  ENDIF()
+  SET(output_files ${CMAKE_CURRENT_BINARY_DIR}/${_PATH}/${_omni_STUBS_DIR}/${FILENAME}_idl.py)
+
   ADD_CUSTOM_COMMAND(
-    OUTPUT ${FILENAME}_idl.py
+    OUTPUT ${output_files}
     COMMAND ${OMNIIDL}
-    ARGS -bpython ${_OMNIIDL_INCLUDE_FLAG}
-    -C${_PATH} ${_omni_ARGUMENTS} ${DIRECTORY}/${_NAME}.idl
+    ARGS ${_omniidl_args}
+    ${DIRECTORY}/${_NAME}.idl
     MAIN_DEPENDENCY ${DIRECTORY}/${_NAME}.idl
     COMMENT "Generating Python stubs for ${_NAME}"
     )
-  SET(ALL_IDL_PYTHON_STUBS ${FILENAME}_idl.py ${ALL_IDL_PYTHON_STUBS})
+
+  LIST(APPEND ALL_IDL_PYTHON_STUBS ${output_files})
 
   # Clean generated files.
   SET_PROPERTY(
     DIRECTORY APPEND PROPERTY
     ADDITIONAL_MAKE_CLEAN_FILES
-    ${FILENAME}_idl.py
+    ${output_files}
     )
 
   LIST(APPEND LOGGING_WATCHED_VARIABLES OMNIIDL ALL_IDL_PYTHON_STUBS)
