@@ -140,7 +140,7 @@ ENDMACRO(GENERATE_IDL_CPP FILENAME DIRECTORY)
 #   :param DIRECTORY: IDL directory.
 #                     The idl file being search for is: ``${DIRECTORY}/${_filename}.idl``
 #   :param ARGUMENTS:  The following words are passed as arguments to omniidl
-#   :param ENABLE_DOCSTRING: generate docstrings from doxygen comments
+#   :param ENABLE_DOCSTRING: generate docstrings from doxygen comments (only in Python 3)
 #   :param STUBS:    set option -Wbstubs of omniidl.
 #
 MACRO(GENERATE_IDL_PYTHON FILENAME DIRECTORY)
@@ -159,7 +159,7 @@ MACRO(GENERATE_IDL_PYTHON FILENAME DIRECTORY)
     MESSAGE(FATAL_ERROR "cannot find omniidl.")
   ENDIF(${OMNIIDL} STREQUAL OMNIIDL-NOTFOUND)
 
-  IF(_omni_ENABLE_DOCSTRING)
+  IF(_omni_ENABLE_DOCSTRING AND PYTHON_VERSION_MAJOR EQUAL 3)
     SET(_omniidl_args -p${CMAKE_SOURCE_DIR}/cmake/hpp/idl -bomniidl_be_python_with_docstring -K)
   ELSE()
     SET(_omniidl_args -bpython)
