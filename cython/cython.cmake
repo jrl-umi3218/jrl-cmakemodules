@@ -114,6 +114,29 @@ macro(_ADD_CYTHON_BINDINGS_TARGETS PYTHON PIP PACKAGE SOURCES TARGETS WITH_TESTS
   install(CODE "EXECUTE_PROCESS(COMMAND \"${CMAKE_COMMAND}\" --build \"${CMAKE_BINARY_DIR}\" --config \${CMAKE_INSTALL_CONFIG_NAME} --target install-${TARGET_NAME})")
 endmacro()
 
+#.rst:
+# .. command:: ADD_CYTHON_BINDINGS(PACKAGE TARGETS targets... [VERSION version] [MODULES modules] [EXPORT_SOURCES sources...] [PRIVATE_SOURCES ...])
+#
+#   This macro add cython bindings using one or more libraries built by the project.
+#
+#   :PACKAGE:         Name of the Python package
+#
+#   :TARGETS:         Name of the targets that the bindings should link to
+#
+#   :VERSION:         Version of the bindings, defaults to ``PROJECT_VERSION``
+#
+#   :MODULES:         Python modules built by this macro call. Defaults to ``PACKAGE.PACKAGE``
+#
+#   :EXPORT_SOURCES:  Sources that will be installed along with the package (typically, public pxd files and __init__.py)
+#
+#   :PRIVATE_SOURCES: Sources that are needed to built the package but will not be installed
+#
+#   The macro will generate a setup.py script in
+#   ``$CMAKE_CURRENT_BINARY_DIR/$PACKAGE/$PYTHON/$<CONFIGURATION>`` and copy the
+#   provided sources in this location. Relative paths are preferred to provide
+#   sources but one can use absolute paths if and only if the absolute path
+#   starts with ``$CMAKE_CURRENT_BINARY_DIR``
+#
 macro(ADD_CYTHON_BINDINGS PACKAGE)
   set(options)
   set(oneValueArgs VERSION)

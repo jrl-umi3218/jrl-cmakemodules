@@ -19,6 +19,11 @@ Version script
 
 .. cmake-module:: ../../version-script.cmake
 
+Cython
+======
+
+.. cmake-module:: ../../cython/cython.cmake
+
 Make targets
 ============
 
