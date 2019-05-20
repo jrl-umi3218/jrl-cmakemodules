@@ -51,6 +51,18 @@ macro(_is_interface_library TARGET OUT)
   endif()
 endmacro()
 
+# Check if pip install supports --system
+macro(_pip_has_install_system PIP OUT)
+  execute_process(COMMAND ${PIP} install --system
+                  RESULT_VARIABLE ${OUT}
+                  OUTPUT_QUIET ERROR_QUIET)
+  if(${${OUT}} EQUAL 0)
+    set(${OUT} True)
+  else()
+    set(${OUT} False)
+  endif()
+endmacro()
+
 # Copy bindings source to build directories and create appropriate target for building, installing and testing
 macro(_ADD_CYTHON_BINDINGS_TARGETS PYTHON PIP PACKAGE SOURCES TARGETS WITH_TESTS)
   set(SETUP_LOCATION "${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE}/${PYTHON}/$<CONFIGURATION>")
@@ -127,6 +139,13 @@ macro(_ADD_CYTHON_BINDINGS_TARGETS PYTHON PIP PACKAGE SOURCES TARGETS WITH_TESTS
     set(PIP_EXTRA_OPTIONS "")
     if(${PYTHON_BINDING_USER_INSTALL})
       set(PIP_EXTRA_OPTIONS "--user")
+    endif()
+    if(DEFINED PIP_INSTALL_PREFIX)
+      _pip_has_install_system(${PIP} PIP_HAS_INSTALL_SYSTEM)
+      set(PIP_EXTRA_OPTIONS --prefix ${PIP_INSTALL_PREFIX})
+      if(${PIP_HAS_INSTALL_SYSTEM})
+        set(PIP_EXTRA_OPTIONS --system ${PIP_EXTRA_OPTIONS})
+      endif()
     endif()
     add_custom_target(install-${TARGET_NAME}
       COMMAND ${CMAKE_COMMAND} -E chdir "${SETUP_LOCATION}" ${PIP} install . ${PIP_EXTRA_OPTIONS} --upgrade
