@@ -100,7 +100,7 @@ macro(_ADD_CYTHON_BINDINGS_TARGETS PYTHON PIP PACKAGE SOURCES TARGETS WITH_TESTS
       set(FILE_OUT "${SETUP_LOCATION}/${SRC}")
     endif()
     add_custom_target(copy-sources-${I}-${TARGET_NAME}
-      COMMAND ${CMAKE_COMMAND} -E copy ${FILE_IN} ${FILE_OUT}
+      COMMAND ${CMAKE_COMMAND} -E copy_if_different ${FILE_IN} ${FILE_OUT}
       DEPENDS ${FILE_IN}
     )
     add_dependencies(${TARGET_NAME} copy-sources-${I}-${TARGET_NAME})
