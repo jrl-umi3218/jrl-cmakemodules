@@ -55,7 +55,19 @@ class pkg_config(object):
 
 config = pkg_config()
 
-config.compile_args.append('-std=c++11')
+def cxx_standard(value):
+    try:
+        return int(value)
+    except:
+        return 0
+def cxx_standard_cmp(lhs):
+    if lhs == 98:
+        return 1
+    return lhs
+cxx_standard = max(map(cxx_standard, "0;@CYTHON_BINDINGS_CXX_STANDARD@".split(';')), key = cxx_standard_cmp)
+if cxx_standard != 0:
+    config.compile_args.append('-std=c++{}'.format(cxx_standard))
+
 if win32_build:
     config.compile_args.append("-DWIN32")
 
