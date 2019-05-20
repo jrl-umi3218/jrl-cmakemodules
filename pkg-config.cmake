@@ -700,8 +700,14 @@ MACRO(PKG_CONFIG_APPEND_LIBS LIBS)
     IF(LIB)
       # Check if this project is building this library
       IF(TARGET ${LIB})
+        # If OUTPUT_NAME property is defined, use this for the library name.
+        GET_PROPERTY(OUTPUT_NAME_SET TARGET ${LIB} PROPERTY OUTPUT_NAME SET)
+        IF(OUTPUT_NAME_SET)
+          GET_TARGET_PROPERTY(OUTPUT_LIB_NAME ${LIB} OUTPUT_NAME) 
+        ELSE(OUTPUT_LIB_NAME_SET)
+          SET(OUTPUT_LIB_NAME ${LIB})
+        ENDIF(OUTPUT_LIB_NAME_SET)
         # Single build type generator
-        GET_TARGET_PROPERTY(OUTPUT_LIB_NAME ${PROJECT_NAME} OUTPUT_NAME) 
         IF(DEFINED CMAKE_BUILD_TYPE)
           SET(_PKG_CONFIG_LIBS "${_PKG_CONFIG_LIBS} ${LIBINCL_KW}${OUTPUT_LIB_NAME}${PKGCONFIG_POSTFIX}${LIB_EXT}" CACHE INTERNAL "")
         # Multiple build types generator
