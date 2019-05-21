@@ -82,7 +82,7 @@ extensions = [ GenExtension(x) for x in '@CYTHON_BINDINGS_MODULES@'.split(';') ]
 extensions = cythonize(extensions)
 
 packages = [ p.split('.')[0] for p in '@CYTHON_BINDINGS_MODULES@'.split(';') ]
-package_data = { p : filter(lambda x: x.startswith(p + '/'), '@CYTHON_BINDINGS_EXPORT_SOURCES@'.split(';')) for p in packages }
+package_data = { p : list(filter(lambda x: x.startswith(p + '/'), '@CYTHON_BINDINGS_EXPORT_SOURCES@'.split(';'))) for p in packages }
 
 setup(
   name = '@CYTHON_BINDINGS_PACKAGE_NAME@',
