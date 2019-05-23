@@ -44,7 +44,7 @@ version_hash = sha512.hexdigest()[:7]
 class pkg_config(object):
     def __init__(self):
         compile_args = "@CYTHON_BINDINGS_COMPILE_DEFINITIONS@"
-        self.compile_args = [ x for x in compile_args.split(';') if len(x) ]
+        self.compile_args = [ "-D" + x for x in compile_args.split(';') if len(x) ]
         include_dirs = "@CYTHON_BINDINGS_INCLUDE_DIRECTORIES@"
         self.include_dirs = [ x for x in include_dirs.split(';') if len(x) ]
         self.include_dirs.append('@CMAKE_CURRENT_SOURCE_DIR@/include')
