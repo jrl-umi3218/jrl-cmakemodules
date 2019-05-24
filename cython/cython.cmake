@@ -38,6 +38,7 @@ macro(_CYTHON_DUMMY_TARGET TARGET)
   if(NOT TARGET _cython_dummy_${TARGET})
     add_library(_cython_dummy_${TARGET} SHARED EXCLUDE_FROM_ALL "${CYTHON_DUMMY_CPP_LOCATION}")
     target_link_libraries(_cython_dummy_${TARGET} PUBLIC ${TARGET})
+    set_target_properties(_cython_dummy_${TARGET} PROPERTIES FOLDER "bindings/details")
   endif()
 endmacro()
 
@@ -84,6 +85,7 @@ macro(_ADD_CYTHON_BINDINGS_TARGETS PYTHON PIP PACKAGE SOURCES TARGETS WITH_TESTS
     COMMENT "Generating local ${PACKAGE} ${PYTHON} bindings"
     DEPENDS ${SOURCES} SOURCES ${SOURCES}
   )
+  set_target_properties(${TARGET_NAME} PROPERTIES FOLDER "bindings")
   add_dependencies(${TARGET_NAME} ${TARGETS})
   # Copy sources
   set(I 0)
@@ -103,6 +105,7 @@ macro(_ADD_CYTHON_BINDINGS_TARGETS PYTHON PIP PACKAGE SOURCES TARGETS WITH_TESTS
       COMMAND ${CMAKE_COMMAND} -E copy_if_different ${FILE_IN} ${FILE_OUT}
       DEPENDS ${FILE_IN}
     )
+    set_target_properties(copy-sources-${I}-${TARGET_NAME} PROPERTIES FOLDER "bindings/details")
     add_dependencies(${TARGET_NAME} copy-sources-${I}-${TARGET_NAME})
     math(EXPR I "${I} + 1")
   endforeach()
@@ -111,6 +114,7 @@ macro(_ADD_CYTHON_BINDINGS_TARGETS PYTHON PIP PACKAGE SOURCES TARGETS WITH_TESTS
     COMMAND ${CMAKE_COMMAND} -E chdir "${SETUP_LOCATION}" ${PYTHON} setup.py build_ext --inplace --force
     COMMENT "Generating local ${PACKAGE} ${PYTHON} bindings (forced)"
   )
+  set_target_properties(force-${TARGET_NAME} PROPERTIES FOLDER "bindings")
   # Tests
   if(${WITH_TESTS} AND NOT ${DISABLE_TESTS})
     if(WIN32)
@@ -151,6 +155,7 @@ macro(_ADD_CYTHON_BINDINGS_TARGETS PYTHON PIP PACKAGE SOURCES TARGETS WITH_TESTS
       COMMAND ${CMAKE_COMMAND} -E chdir "${SETUP_LOCATION}" ${PIP} install . ${PIP_EXTRA_OPTIONS} --upgrade
       COMMENT "Install ${PACKAGE} ${PYTHON} bindings"
     )
+    set_target_properties(install-${TARGET_NAME} PROPERTIES FOLDER "bindings")
   endif()
   install(CODE "EXECUTE_PROCESS(COMMAND \"${CMAKE_COMMAND}\" --build \"${CMAKE_BINARY_DIR}\" --config \${CMAKE_INSTALL_CONFIG_NAME} --target install-${TARGET_NAME})")
 endmacro()
