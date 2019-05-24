@@ -129,9 +129,11 @@ macro(_ADD_CYTHON_BINDINGS_TARGETS PYTHON PIP PACKAGE SOURCES TARGETS WITH_TESTS
         set(EXTRA_LD_PATH "$<TARGET_FILE_DIR:${TGT}>${PATH_SEP}${EXTRA_LD_PATH}")
       endif()
     endforeach()
-    add_test(NAME test-${TARGET_NAME}
-      COMMAND ${CMAKE_COMMAND} -E env LD_LIBRARY_PATH=${EXTRA_LD_PATH}$ENV{LD_LIBRARY_PATH} ${CMAKE_COMMAND} -E chdir "${SETUP_LOCATION}" ${PYTHON} -c "import nose; nose.run()"
-    )
+    if(${WITH_TESTS})
+      add_test(NAME test-${TARGET_NAME}
+        COMMAND ${CMAKE_COMMAND} -E env LD_LIBRARY_PATH=${EXTRA_LD_PATH}$ENV{LD_LIBRARY_PATH} ${CMAKE_COMMAND} -E chdir "${SETUP_LOCATION}" ${PYTHON} -c "import nose; nose.run()"
+      )
+    endif()
   endif()
   # Install targets
   if(DEFINED PYTHON_DEB_ROOT)
