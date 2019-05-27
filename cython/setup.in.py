@@ -52,6 +52,7 @@ class pkg_config(object):
         self.library_dirs = [ x for x in library_dirs.split(';') if len(x) ]
         self.libraries = [ l for l in "@CYTHON_BINDINGS_LIBRARIES@".split(";") if len(l) ]
         self.library_dirs += [os.path.dirname(l) for l in "@CYTHON_BINDINGS_TARGET_FILES@".split(';') if len(l) ]
+        self.link_args = []
 
 config = pkg_config()
 
@@ -70,12 +71,15 @@ if cxx_standard != 0:
 
 if win32_build:
     config.compile_args.append("-DWIN32")
+    if "$<CONFIGURATION>".lower() == "debug":
+        config.compile_args += ["-Zi", "/Od"]
+        config.link_args += ["-debug"]
 
 def GenExtension(name):
     pyx_src = name.replace('.', '/')
     pyx_src = pyx_src + '.pyx'
     ext_src = pyx_src
-    return Extension(name, [ext_src], extra_compile_args = config.compile_args, include_dirs = config.include_dirs + [numpy_get_include()], library_dirs = config.library_dirs, libraries = config.libraries)
+    return Extension(name, [ext_src], extra_compile_args = config.compile_args, include_dirs = config.include_dirs + [numpy_get_include()], library_dirs = config.library_dirs, libraries = config.libraries, extra_link_args = config.link_args)
 
 extensions = [ GenExtension(x) for x in '@CYTHON_BINDINGS_MODULES@'.split(';') ]
 
