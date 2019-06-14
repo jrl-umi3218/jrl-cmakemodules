@@ -45,13 +45,17 @@ class pkg_config(object):
     def __init__(self):
         compile_args = "@CYTHON_BINDINGS_COMPILE_DEFINITIONS@"
         self.compile_args = [ "-D" + x for x in compile_args.split(';') if len(x) ]
+        self.compile_args = list(set(self.compile_args))
         include_dirs = "@CYTHON_BINDINGS_INCLUDE_DIRECTORIES@"
         self.include_dirs = [ x for x in include_dirs.split(';') if len(x) ]
         self.include_dirs.append('@CMAKE_CURRENT_SOURCE_DIR@/include')
+        self.include_dirs = list(set(self.include_dirs))
         library_dirs = "@CYTHON_BINDINGS_LINK_FLAGS@"
         self.library_dirs = [ x for x in library_dirs.split(';') if len(x) ]
         self.libraries = [ l for l in "@CYTHON_BINDINGS_LIBRARIES@".split(";") if len(l) ]
+        self.libraries = list(set(self.libraries))
         self.library_dirs += [os.path.dirname(l) for l in "@CYTHON_BINDINGS_TARGET_FILES@".split(';') if len(l) ]
+        self.library_dirs = list(set(self.library_dirs))
         self.link_args = []
 
 config = pkg_config()
