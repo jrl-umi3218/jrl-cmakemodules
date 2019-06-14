@@ -131,7 +131,7 @@ macro(_ADD_CYTHON_BINDINGS_TARGETS PYTHON PIP PACKAGE SOURCES TARGETS WITH_TESTS
     endforeach()
     if(${WITH_TESTS})
       add_test(NAME test-${TARGET_NAME}
-        COMMAND ${CMAKE_COMMAND} -E env LD_LIBRARY_PATH=${EXTRA_LD_PATH}$ENV{LD_LIBRARY_PATH} ${CMAKE_COMMAND} -E chdir "${SETUP_LOCATION}" ${PYTHON} -c "import nose; nose.run()"
+        COMMAND ${CMAKE_COMMAND} -E env LD_LIBRARY_PATH=${EXTRA_LD_PATH}$ENV{LD_LIBRARY_PATH} ${CMAKE_COMMAND} -E chdir "${SETUP_LOCATION}" ${PYTHON} -c "import nose, sys; sys.exit(not nose.run())"
       )
     endif()
   endif()
