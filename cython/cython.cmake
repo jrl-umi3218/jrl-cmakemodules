@@ -65,7 +65,7 @@ macro(_pip_has_install_system PIP OUT)
 endmacro()
 
 # Copy bindings source to build directories and create appropriate target for building, installing and testing
-macro(_ADD_CYTHON_BINDINGS_TARGETS PYTHON PIP PACKAGE SOURCES TARGETS WITH_TESTS)
+macro(_ADD_CYTHON_BINDINGS_TARGETS PYTHON PIP PACKAGE SOURCES GENERATE_SOURCES TARGETS WITH_TESTS)
   set(SETUP_LOCATION "${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE}/${PYTHON}/$<CONFIGURATION>")
   if(DEFINED CMAKE_BUILD_TYPE)
     file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE}/${PYTHON}/${CMAKE_BUILD_TYPE}")
@@ -83,11 +83,17 @@ macro(_ADD_CYTHON_BINDINGS_TARGETS PYTHON PIP PACKAGE SOURCES TARGETS WITH_TESTS
   add_custom_target(${TARGET_NAME} ALL
     COMMAND ${CMAKE_COMMAND} -E chdir "${SETUP_LOCATION}" ${PYTHON} setup.py build_ext --inplace
     COMMENT "Generating local ${PACKAGE} ${PYTHON} bindings"
-    DEPENDS ${SOURCES} SOURCES ${SOURCES}
+    DEPENDS ${SOURCES} ${GENERATE_SOURCES} SOURCES ${SOURCES} ${GENERATE_SOURCES}
   )
   set_target_properties(${TARGET_NAME} PROPERTIES FOLDER "bindings")
   add_dependencies(${TARGET_NAME} ${TARGETS})
   # Copy sources
+  foreach(F ${GENERATE_SOURCES})
+    file(GENERATE
+         OUTPUT "${SETUP_LOCATION}/${F}"
+         INPUT "${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE}/configured/${F}"
+    )
+  endforeach()
   set(I 0)
   foreach(SRC ${SOURCES})
     if(IS_ABSOLUTE ${SRC})
@@ -167,17 +173,20 @@ endmacro()
 #
 #   This macro add cython bindings using one or more libraries built by the project.
 #
-#   :PACKAGE:         Name of the Python package
+#   :PACKAGE:          Name of the Python package
 #
-#   :TARGETS:         Name of the targets that the bindings should link to
+#   :TARGETS:          Name of the targets that the bindings should link to
 #
-#   :VERSION:         Version of the bindings, defaults to ``PROJECT_VERSION``
+#   :VERSION:          Version of the bindings, defaults to ``PROJECT_VERSION``
 #
-#   :MODULES:         Python modules built by this macro call. Defaults to ``PACKAGE.PACKAGE``
+#   :MODULES:          Python modules built by this macro call. Defaults to ``PACKAGE.PACKAGE``
 #
-#   :EXPORT_SOURCES:  Sources that will be installed along with the package (typically, public pxd files and __init__.py)
+#   :EXPORT_SOURCES:   Sources that will be installed along with the package (typically, public pxd files and __init__.py)
 #
-#   :PRIVATE_SOURCES: Sources that are needed to built the package but will not be installed
+#   :PRIVATE_SOURCES:  Sources that are needed to built the package but will not be installed
+#
+#   :GENERATE_SOURCES: Sources that will be configured and then generated in the correct location,
+#                      the generated files are then considered as PRIVATE_SOURCES
 #
 #   The macro will generate a setup.py script in
 #   ``$CMAKE_CURRENT_BINARY_DIR/$PACKAGE/$PYTHON/$<CONFIGURATION>`` and copy the
@@ -188,7 +197,7 @@ endmacro()
 macro(ADD_CYTHON_BINDINGS PACKAGE)
   set(options)
   set(oneValueArgs VERSION)
-  set(multiValueArgs MODULES TARGETS EXPORT_SOURCES PRIVATE_SOURCES)
+  set(multiValueArgs MODULES TARGETS EXPORT_SOURCES PRIVATE_SOURCES GENERATE_SOURCES)
   cmake_parse_arguments(CYTHON_BINDINGS "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
   if(NOT DEFINED CYTHON_BINDINGS_VERSION)
     set(CYTHON_BINDINGS_VERSION ${PROJECT_VERSION})
@@ -198,6 +207,9 @@ macro(ADD_CYTHON_BINDINGS PACKAGE)
   endif()
   if(NOT DEFINED CYTHON_BINDINGS_PRIVATE_SOURCES)
     set(CYTHON_BINDINGS_PRIVATE_SOURCES)
+  endif()
+  if(NOT DEFINED CYTHON_BINDINGS_GENERATE_SOURCES)
+    set(CYTHON_BINDINGS_GENERATE_SOURCES)
   endif()
   if(NOT DEFINED CYTHON_BINDINGS_MODULES)
     set(CYTHON_BINDINGS_MODULES "${PACKAGE}.${PACKAGE}")
@@ -244,14 +256,17 @@ macro(ADD_CYTHON_BINDINGS PACKAGE)
     endif()
   endforeach()
   configure_file("${CYTHON_SETUP_IN_PY_LOCATION}" "${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE}/setup.in.py")
+  foreach(F ${CYTHON_BINDINGS_GENERATE_SOURCES})
+    configure_file(${F} "${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE}/configured/${F}")
+  endforeach()
   if(${PYTHON_BINDING_BUILD_PYTHON2_AND_PYTHON3})
-    _ADD_CYTHON_BINDINGS_TARGETS("python2" "pip2" ${PACKAGE} "${CYTHON_BINDINGS_SOURCES}" "${CYTHON_BINDINGS_TARGETS}" ${WITH_TESTS})
-    _ADD_CYTHON_BINDINGS_TARGETS("python3" "pip3" ${PACKAGE} "${CYTHON_BINDINGS_SOURCES}" "${CYTHON_BINDINGS_TARGETS}" ${WITH_TESTS})
+    _ADD_CYTHON_BINDINGS_TARGETS("python2" "pip2" ${PACKAGE} "${CYTHON_BINDINGS_SOURCES}" "${CYTHON_BINDINGS_GENERATE_SOURCES}" "${CYTHON_BINDINGS_TARGETS}" ${WITH_TESTS})
+    _ADD_CYTHON_BINDINGS_TARGETS("python3" "pip3" ${PACKAGE} "${CYTHON_BINDINGS_SOURCES}" "${CYTHON_BINDINGS_GENERATE_SOURCES}" "${CYTHON_BINDINGS_TARGETS}" ${WITH_TESTS})
   elseif(${PYTHON_BINDING_FORCE_PYTHON3})
-    _ADD_CYTHON_BINDINGS_TARGETS("python3" "pip3" ${PACKAGE} "${CYTHON_BINDINGS_SOURCES}" "${CYTHON_BINDINGS_TARGETS}" ${WITH_TESTS})
+    _ADD_CYTHON_BINDINGS_TARGETS("python3" "pip3" ${PACKAGE} "${CYTHON_BINDINGS_SOURCES}" "${CYTHON_BINDINGS_GENERATE_SOURCES}" "${CYTHON_BINDINGS_TARGETS}" ${WITH_TESTS})
   elseif(${PYTHON_BINDING_FORCE_PYTHON2})
-    _ADD_CYTHON_BINDINGS_TARGETS("python2" "pip2" ${PACKAGE} "${CYTHON_BINDINGS_SOURCES}" "${CYTHON_BINDINGS_TARGETS}" ${WITH_TESTS})
+    _ADD_CYTHON_BINDINGS_TARGETS("python2" "pip2" ${PACKAGE} "${CYTHON_BINDINGS_SOURCES}" "${CYTHON_BINDINGS_GENERATE_SOURCES}" "${CYTHON_BINDINGS_TARGETS}" ${WITH_TESTS})
   else()
-    _ADD_CYTHON_BINDINGS_TARGETS("python" "pip" ${PACKAGE} "${CYTHON_BINDINGS_SOURCES}" "${CYTHON_BINDINGS_TARGETS}" ${WITH_TESTS})
+    _ADD_CYTHON_BINDINGS_TARGETS("python" "pip" ${PACKAGE} "${CYTHON_BINDINGS_SOURCES}" "${CYTHON_BINDINGS_GENERATE_SOURCES}" "${CYTHON_BINDINGS_TARGETS}" ${WITH_TESTS})
   endif()
 endmacro()
