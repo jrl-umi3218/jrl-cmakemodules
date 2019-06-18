@@ -32,6 +32,7 @@ if(${PYTHON_BINDING_FORCE_PYTHON2} AND ${PYTHON_BINDING_FORCE_PYTHON3})
 endif()
 set(CYTHON_SETUP_IN_PY_LOCATION "${CMAKE_CURRENT_LIST_DIR}/setup.in.py")
 set(CYTHON_DUMMY_CPP_LOCATION "${CMAKE_CURRENT_LIST_DIR}/dummy.cpp")
+set(PYTHON_EXTRA_CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/python")
 
 # This macro adds a dummy shared library target to extract compilation flags from an interface library
 macro(_CYTHON_DUMMY_TARGET TARGET)
@@ -67,6 +68,7 @@ endmacro()
 # Copy bindings source to build directories and create appropriate target for building, installing and testing
 macro(_ADD_CYTHON_BINDINGS_TARGETS PYTHON PIP PACKAGE SOURCES GENERATE_SOURCES TARGETS WITH_TESTS)
   set(SETUP_LOCATION "${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE}/${PYTHON}/$<CONFIGURATION>")
+  set(${PACKAGE}_${PYTHON}_SETUP_LOCATION "${SETUP_LOCATION}" CACHE INTERNAL "")
   if(DEFINED CMAKE_BUILD_TYPE)
     file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE}/${PYTHON}/${CMAKE_BUILD_TYPE}")
   else()
@@ -268,5 +270,76 @@ macro(ADD_CYTHON_BINDINGS PACKAGE)
     _ADD_CYTHON_BINDINGS_TARGETS("python2" "pip2" ${PACKAGE} "${CYTHON_BINDINGS_SOURCES}" "${CYTHON_BINDINGS_GENERATE_SOURCES}" "${CYTHON_BINDINGS_TARGETS}" ${WITH_TESTS})
   else()
     _ADD_CYTHON_BINDINGS_TARGETS("python" "pip" ${PACKAGE} "${CYTHON_BINDINGS_SOURCES}" "${CYTHON_BINDINGS_GENERATE_SOURCES}" "${CYTHON_BINDINGS_TARGETS}" ${WITH_TESTS})
+  endif()
+endmacro()
+
+# In this macro PYTHON is the module we should search and PYTHON_B is the name for the bindings
+macro(_MAKE_CYTHON_LIBRARY PACKAGE PYTHON PYTHON_B OUT)
+  set(SETUP_LOCATION_VAR ${PACKAGE}_${PYTHON_B}_SETUP_LOCATION)
+  set(SETUP_LOCATION "${${SETUP_LOCATION_VAR}}")
+  set(TGT_NAME cython_${PYTHON_B}_${PACKAGE})
+  set(${OUT} ${TGT_NAME})
+  if(NOT TARGET ${TGT_NAME})
+    find_package(${PYTHON} REQUIRED COMPONENTS Interpreter Development)
+    add_library(${TGT_NAME} INTERFACE)
+    target_link_libraries(${TGT_NAME} INTERFACE ${${PYTHON}_LIBRARIES})
+    target_include_directories(${TGT_NAME} INTERFACE "${SETUP_LOCATION}" "${${PYTHON}_INCLUDE_DIR}")
+    add_dependencies(${TGT_NAME} ${PACKAGE}-${PYTHON_B}-bindings)
+  endif()
+endmacro()
+
+macro(_APPEND_CYTHON_LIBRARY PACKAGE PYTHON PYTHON_B OUT)
+  _MAKE_CYTHON_LIBRARY(${PACKAGE} ${PYTHON} ${PYTHON_B} LIB)
+  list(APPEND ${OUT} ${LIB})
+endmacro()
+
+#.rst:
+# .. command:: GET_PYTHON_LIBRARIES(PACKAGE VAR)
+#
+#   This macro search Python versions according to the specified bindings
+#   settings then returns appropriate targets in the provided VAR variable
+#
+#   It creates interface targets that include the generated bindings directory
+#   and link to the correct Python version
+#
+macro(GET_CYTHON_LIBRARIES PACKAGE VAR)
+  # FindPython(2|3).cmake only exists from CMake 3.12
+  if(${CMAKE_VERSION} VERSION_LESS "3.12.0")
+    list(APPEND CMAKE_MODULE_PATH ${PYTHON_EXTRA_CMAKE_MODULE_PATH})
+  endif()
+  set(${VAR})
+  if(${PYTHON_BINDING_BUILD_PYTHON2_AND_PYTHON3})
+    _APPEND_CYTHON_LIBRARY(${PACKAGE} Python2 python2 ${VAR})
+    _APPEND_CYTHON_LIBRARY(${PACKAGE} Python3 python3 ${VAR})
+  elseif(${PYTHON_BINDING_FORCE_PYTHON2})
+    _APPEND_CYTHON_LIBRARY(${PACKAGE} Python2 python2 ${VAR})
+  elseif(${PYTHON_BINDING_FORCE_PYTHON3})
+    _APPEND_CYTHON_LIBRARY(${PACKAGE} Python3 python3 ${VAR})
+  else()
+    execute_process(COMMAND python -c "import sys; print(sys.version_info.major);" OUTPUT_VARIABLE PYTHON_MAJOR OUTPUT_STRIP_TRAILING_WHITESPACE)
+    if("${PYTHON_MAJOR}" STREQUAL "2" OR "${PYTHON_MAJOR}" STREQUAL "3")
+      _APPEND_CYTHON_LIBRARY(${PACKAGE} Python${PYTHON_MAJOR} python ${VAR})
+    else()
+      message(FATAL_ERROR "Could not determine Python major version from command line, got ${PYTHON_MAJOR}, expected 2 or 3")
+    endif()
+  endif()
+endmacro()
+
+#.rst:
+# .. command:: GET_PYTHON_NAMES(VAR)
+#
+#   This macro returns the names of Python versions according to the specified bindings
+#
+macro(GET_PYTHON_NAMES VAR)
+  set(${VAR})
+  if(${PYTHON_BINDING_BUILD_PYTHON2_AND_PYTHON3})
+    list(APPEND ${VAR} Python2)
+    list(APPEND ${VAR} Python3)
+  elseif(${PYTHON_BINDING_FORCE_PYTHON2})
+    list(APPEND ${VAR} Python2)
+  elseif(${PYTHON_BINDING_FORCE_PYTHON3})
+    list(APPEND ${VAR} Python3)
+  else()
+    list(APPEND ${VAR} Python)
   endif()
 endmacro()
