@@ -23,7 +23,7 @@ except ImportError:
 win32_build = os.name == 'nt'
 
 sha512 = hashlib.sha512()
-src_files = '@CYTHON_BINDINGS_SOURCES@;@CYTHON_BINDINGS_GENERATE_SOURCES@'.split(';')
+src_files = filter(len, '@CYTHON_BINDINGS_SOURCES@;@CYTHON_BINDINGS_GENERATE_SOURCES@'.split(';'))
 def absolute(src):
     if os.path.isabs(src):
         return src
