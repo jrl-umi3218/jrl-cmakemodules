@@ -14,7 +14,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #.rst:
-# .. variable:: boost_python_name, found
+# .. command:: SEARCH_FOR_BOOST_COMPONENT
+#
+#   :param boost_python_name:
+#   :param found:
 #
 #  This function returns found to TRUE if the boost_python_name has been found, FALSE otherwise.
 #  This function is for internal use only.
