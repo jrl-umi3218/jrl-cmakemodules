@@ -84,7 +84,7 @@ OPTION(PYTHON_DEB_LAYOUT "Enable Debian-style Python package layout" OFF)
 
 EXECUTE_PROCESS(
   COMMAND "${PYTHON_EXECUTABLE}" "-c"
-  "from distutils import sysconfig; print(sysconfig.get_python_lib(prefix='', plat_specific=True))"
+  "from distutils import sysconfig; print(sysconfig.get_python_lib(prefix='', plat_specific=False))"
   OUTPUT_VARIABLE PYTHON_SITELIB
   OUTPUT_STRIP_TRAILING_WHITESPACE
   ERROR_QUIET)
