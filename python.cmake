@@ -29,6 +29,8 @@
 #  To specify a specific Python version within the CMakeLists.txt,
 #  use the command ``FINDPYTHON(2.7 EXACT REQUIRED)``.
 #
+#  If PYTHON_PACKAGES_DIR is set, then the {dist,site}-packages will be replaced by the value contained in PYTHON_PACKAGES_DIR.
+#
 #  .. warning::
 #    According to the ``FindPythonLibs`` and ``FindPythonInterp``
 #    documentation, you could also set ``Python_ADDITIONAL_VERSIONS``.
@@ -77,25 +79,27 @@ GET_FILENAME_COMPONENT(PYTHON_LIBRARY_DIRS "${PYTHON_LIBRARIES}" PATH)
 MESSAGE(STATUS "PythonLibraryDirs: ${PYTHON_LIBRARY_DIRS}")
 MESSAGE(STATUS "PythonLibVersionString: ${PYTHONLIBS_VERSION_STRING}")
 
-# Default Python packages directory
-SET(PYTHON_PACKAGES_DIR site-packages)
-
 # Use either site-packages (default) or dist-packages (Debian packages) directory
 OPTION(PYTHON_DEB_LAYOUT "Enable Debian-style Python package layout" OFF)
 
-IF (PYTHON_DEB_LAYOUT)
-  SET(PYTHON_PACKAGES_DIR dist-packages)
-ENDIF (PYTHON_DEB_LAYOUT)
-
 EXECUTE_PROCESS(
   COMMAND "${PYTHON_EXECUTABLE}" "-c"
-  "import sys, os; print(os.sep.join(['lib', 'python' + sys.version[:3], '${PYTHON_PACKAGES_DIR}']))"
+  "from distutils import sysconfig; print(sysconfig.get_python_lib(prefix='', plat_specific=False))"
   OUTPUT_VARIABLE PYTHON_SITELIB
+  OUTPUT_STRIP_TRAILING_WHITESPACE
   ERROR_QUIET)
 
-# Remove final \n of the variable PYTHON_SITELIB
-STRING(REPLACE "\n" "" PYTHON_SITELIB "${PYTHON_SITELIB}")
-NORMALIZE_PATH(PYTHON_SITELIB)
+# Keep compatility with former jrl-cmake-modules versions
+IF(PYTHON_DEB_LAYOUT)
+  STRING(REPLACE "site-packages" "dist-packages" PYTHON_SITELIB "${PYTHON_SITELIB}")
+ENDIF(PYTHON_DEB_LAYOUT)
+
+# If PYTHON_PACKAGES_DIR is defined, then force the Python packages directory name
+IF(PYTHON_PACKAGES_DIR)
+  STRING(REGEX REPLACE "(site-packages|dist-packages)" "${PYTHON_PACKAGES_DIR}" PYTHON_SITELIB "${PYTHON_SITELIB}")
+ENDIF(PYTHON_PACKAGES_DIR)
+
+MESSAGE(STATUS "Python site lib: ${PYTHON_SITELIB}")
 
 # Get PYTHON_SOABI
 SET(PYTHON_SOABI "")
