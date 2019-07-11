@@ -29,6 +29,8 @@
 #  To specify a specific Python version within the CMakeLists.txt,
 #  use the command ``FINDPYTHON(2.7 EXACT REQUIRED)``.
 #
+#  If PYTHON_PACKAGES_DIR is set, then the {dist,site}-packages will be replaced by the value contained in PYTHON_PACKAGES_DIR.
+#
 #  .. warning::
 #    According to the ``FindPythonLibs`` and ``FindPythonInterp``
 #    documentation, you could also set ``Python_ADDITIONAL_VERSIONS``.
@@ -91,6 +93,11 @@ EXECUTE_PROCESS(
 IF(PYTHON_DEB_LAYOUT)
   STRING(REPLACE "site-packages" "dist-packages" PYTHON_SITELIB "${PYTHON_SITELIB}")
 ENDIF(PYTHON_DEB_LAYOUT)
+
+# If PYTHON_PACKAGES_DIR is defined, then force the Python packages directory name
+IF(PYTHON_PACKAGES_DIR)
+  STRING(REGEX REPLACE "(site-packages|dist-packages)" "${PYTHON_PACKAGES_DIR}" PYTHON_SITELIB "${PYTHON_SITELIB}")
+ENDIF(PYTHON_PACKAGES_DIR)
 
 # Get PYTHON_SOABI
 SET(PYTHON_SOABI "")
