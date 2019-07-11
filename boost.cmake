@@ -1,4 +1,4 @@
-# Copyright (C) 2008-2018 LAAS-CNRS, JRL AIST-CNRS.
+# Copyright (C) 2008-2019 LAAS-CNRS, JRL AIST-CNRS, INRI
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -12,6 +12,21 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+#.rst:
+# .. variable:: boost_python_name, found
+#
+#  This function returns found to TRUE if the boost_python_name has been found, FALSE otherwise.
+#  This function is for internal use only.
+#
+FUNCTION(SEARCH_FOR_BOOST_COMPONENT boost_python_name found)
+  SET(found FALSE PARENT_SCOPE)
+  FIND_PACKAGE(Boost ${BOOST_REQUIRED} OPTIONAL_COMPONENTS ${boost_python_name}) 
+  STRING(TOUPPER ${boost_python_name} boost_python_name_UPPER)
+  IF(Boost_${boost_python_name_UPPER}_FOUND)
+    SET(${found} TRUE PARENT_SCOPE)
+  ENDIF()
+ENDFUNCTION(SEARCH_FOR_BOOST_COMPONENT boost_python_name found)
 
 #.rst:
 # .. variable:: BOOST_COMPONENTS
