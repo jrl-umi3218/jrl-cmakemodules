@@ -36,9 +36,18 @@ IF(NOT DEFINED DISABLE_TESTS)
 ENDIF(NOT DEFINED DISABLE_TESTS)
 
 ADD_CUSTOM_TARGET(build_tests)
-IF(DISABLE_TESTS)
-   ADD_TEST(ctest_build_tests "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target build_tests)
-ENDIF()
+#.rst:
+# .. command:: CREATE_CTEST_BUILD_TESTS_TARGET
+#
+#    Create target ctest_build_tests if does not exist yet.
+#
+MACRO(CREATE_CTEST_BUILD_TESTS_TARGET)
+  IF(DISABLE_TESTS)
+    IF(NOT TARGET ctest_build_tests)
+      ADD_TEST(ctest_build_tests "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target build_tests)
+    ENDIF(NOT TARGET ctest_build_tests)
+  ENDIF(DISABLE_TESTS)
+ENDMACRO(CREATE_CTEST_BUILD_TESTS_TARGET)
 
 #.rst:
 # .. command:: ADD_UNIT_TEST (NAME SOURCE)
@@ -46,6 +55,8 @@ ENDIF()
 #   The behaviour of this function depends on :variable:`DISABLE_TESTS` option.
 #
 MACRO(ADD_UNIT_TEST NAME SOURCE)
+  CREATE_CTEST_BUILD_TESTS_TARGET()
+
   IF(DISABLE_TESTS)
     ADD_EXECUTABLE(${NAME} EXCLUDE_FROM_ALL ${SOURCE})
   ELSE(DISABLE_TESTS)
