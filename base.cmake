@@ -78,14 +78,6 @@
 # Please note that functions starting with an underscore are internal
 # functions and should not be used directly.
 
- # ---- #
- # TODO #
- # ---- #
-
-# - make install should trigger make doc
-# - unit tests should be tagged as
-#   EXCLUDE_FROM_ALL and make test should trigger their compilation.
-
 # Include base features.
 INCLUDE(cmake/logging.cmake)
 INCLUDE(cmake/portability.cmake)
@@ -175,7 +167,11 @@ MACRO(SETUP_PROJECT)
   ENDFOREACH(VARIABLE)
 
   # Define project name.
-  PROJECT(${PROJECT_NAME} CXX)
+  IF(${CMAKE_VERSION} VERSION_GREATER 3.9.0)
+    PROJECT(${PROJECT_NAME} LANGUAGES CXX DESCRIPTION ${PROJECT_DESCRIPTION})
+  ELSE(${CMAKE_VERSION} VERSION_GREATER 3.9.0)
+    PROJECT(${PROJECT_NAME} CXX)
+  ENDIF(${CMAKE_VERSION} VERSION_GREATER 3.9.0)
 
   # If the project version number is not set, compute it automatically.
   IF(NOT DEFINED PROJECT_VERSION)
