@@ -78,14 +78,6 @@
 # Please note that functions starting with an underscore are internal
 # functions and should not be used directly.
 
- # ---- #
- # TODO #
- # ---- #
-
-# - make install should trigger make doc
-# - unit tests should be tagged as
-#   EXCLUDE_FROM_ALL and make test should trigger their compilation.
-
 # Include base features.
 INCLUDE(cmake/logging.cmake)
 INCLUDE(cmake/portability.cmake)
