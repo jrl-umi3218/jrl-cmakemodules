@@ -1,4 +1,4 @@
-# Copyright (C) 2008-2014,2018 LAAS-CNRS, JRL AIST-CNRS.
+# Copyright (C) 2008-2019 LAAS-CNRS, JRL AIST-CNRS, INRIA.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -34,6 +34,11 @@
 IF(NOT DEFINED DISABLE_TESTS)
   SET(DISABLE_TESTS OFF)
 ENDIF(NOT DEFINED DISABLE_TESTS)
+
+# Active test suites if BUILD_TESTING is ON
+IF(BUILD_TESTING)
+  SET(DISABLE_TESTS OFF)
+ENDIF(BUILD_TESTING)
 
 ADD_CUSTOM_TARGET(build_tests)
 #.rst:
