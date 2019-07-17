@@ -1,4 +1,4 @@
-# Copyright (C) 2008-2014,2018 LAAS-CNRS, JRL AIST-CNRS.
+# Copyright (C) 2008-2019 LAAS-CNRS, JRL AIST-CNRS, INRIA.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -13,8 +13,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+include(CTest)
+
 #.rst:
 # .. variable:: DISABLE_TESTS
+#    :deprecated:
 #
 #   Boolean variable to configure unit test compilation declared with
 #   :command:`ADD_UNIT_TEST`.
@@ -31,9 +34,14 @@
 #
 #     Thus, the unit-tests are not compiled with target *all* but with target *test*.
 #     unit-test  is added and all tests added with
-IF(NOT DEFINED DISABLE_TESTS)
-  SET(DISABLE_TESTS OFF)
-ENDIF(NOT DEFINED DISABLE_TESTS)
+IF(DEFINED DISABLE_TESTS)
+  MESSAGE(AUTHOR_WARNING "DISABLE_TESTS is deprecated. Use BUILD_TESTING instead.")
+  IF(DISABLE_TESTS)
+    SET(BUILD_TESTING OFF)
+  ELSE()
+    SET(BUILD_TESTING ON)
+  ENDIF()
+ENDIF(DEFINED DISABLE_TESTS)
 
 ADD_CUSTOM_TARGET(build_tests)
 #.rst:
@@ -42,26 +50,26 @@ ADD_CUSTOM_TARGET(build_tests)
 #    Create target ctest_build_tests if does not exist yet.
 #
 MACRO(CREATE_CTEST_BUILD_TESTS_TARGET)
-  IF(DISABLE_TESTS)
+  IF(NOT BUILD_TESTING)
     IF(NOT TARGET ctest_build_tests)
       ADD_TEST(ctest_build_tests "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target build_tests)
     ENDIF(NOT TARGET ctest_build_tests)
-  ENDIF(DISABLE_TESTS)
+  ENDIF(NOT BUILD_TESTING)
 ENDMACRO(CREATE_CTEST_BUILD_TESTS_TARGET)
 
 #.rst:
 # .. command:: ADD_UNIT_TEST (NAME SOURCE)
 #
-#   The behaviour of this function depends on :variable:`DISABLE_TESTS` option.
+#   The behaviour of this function depends on :variable:`BUILD_TESTING` option.
 #
 MACRO(ADD_UNIT_TEST NAME SOURCE)
   CREATE_CTEST_BUILD_TESTS_TARGET()
 
-  IF(DISABLE_TESTS)
+  IF(NOT BUILD_TESTING)
     ADD_EXECUTABLE(${NAME} EXCLUDE_FROM_ALL ${SOURCE})
-  ELSE(DISABLE_TESTS)
+  ELSE(NOT BUILD_TESTING)
     ADD_EXECUTABLE(${NAME} ${SOURCE})
-  ENDIF(DISABLE_TESTS)
+  ENDIF(NOT BUILD_TESTING)
 
   ADD_DEPENDENCIES(build_tests ${NAME})
 
@@ -72,9 +80,9 @@ MACRO(ADD_UNIT_TEST NAME SOURCE)
     SET_TESTS_PROPERTIES(${NAME} PROPERTIES ENVIRONMENT "LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}")
   ENDIF(APPLE)
 
-  IF(DISABLE_TESTS)
+  IF(NOT BUILD_TESTING)
     SET_TESTS_PROPERTIES(${NAME} PROPERTIES DEPENDS ctest_build_tests)
-  ENDIF(DISABLE_TESTS)
+  ENDIF(NOT BUILD_TESTING)
 ENDMACRO(ADD_UNIT_TEST NAME SOURCE)
 
 #.rst:
