@@ -15,6 +15,7 @@
 
 #.rst:
 # .. variable:: DISABLE_TESTS
+#    :deprecated:
 #
 #   Boolean variable to configure unit test compilation declared with
 #   :command:`ADD_UNIT_TEST`.
