@@ -16,10 +16,12 @@
 # Shared library related constants
 # (used for pkg-config file generation).
 # FIXME: can't we get these information from CMake directly?
+SET(LIBDIR_KW "-L")
+SET(LIBINCL_KW "-l")
+SET(LIBINCL_KW "")
+SET(LIBINCL_ABSKW "")
+SET(LIB_EXT "")
 IF(WIN32)
-  SET(LIBDIR_KW "/LIBPATH:")
-  SET(LIBINCL_KW "")
-  SET(LIBINCL_ABSKW "")
   SET(LIB_EXT ".lib")
 ELSEIF(UNIX)
   SET(LIBDIR_KW "-L")
