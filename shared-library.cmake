@@ -23,10 +23,6 @@ SET(LIB_EXT "")
 IF(WIN32)
   SET(LIB_EXT ".lib")
 ELSEIF(UNIX)
-  SET(LIBDIR_KW "-L")
-  SET(LIBINCL_KW "-l")
-  SET(LIB_EXT "")
-
   # Using -l:/some/absolute/path.so was an "undocumented ld feature, in
   # actual fact a ld bug, that has since been fixed".
   # This was apparently used (e.g. in ROS) because of pkg-config problems that
