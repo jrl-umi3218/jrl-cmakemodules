@@ -34,8 +34,8 @@ MACRO(SPHINX_SETUP)
     PATHS "${SPHINX_BUILD_PATH}")
 
   IF (NOT SPHINX_BUILD)
-    MESSAGE(FATAL_ERROR "Failed to find sphinx")
-  ENDIF(NOT SPHINX_BUILD)
+    MESSAGE(WARNING "Failed to find sphinx, documentation will not be generated.")
+  ELSE (NOT SPHINX_BUILD)
 
   IF(MSVC)
     # FIXME: it is impossible to trigger documentation installation
@@ -97,6 +97,8 @@ MACRO(SPHINX_SETUP)
       DESTINATION share/doc/${PROJECT_NAME}/sphinx-html)
   ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/doc/pictures)
 
+  ENDIF(NOT SPHINX_BUILD)
+
   LIST(APPEND LOGGING_WATCHED_VARIABLES
     SPHINX_BUILD
     )
@@ -109,6 +111,7 @@ ENDMACRO(SPHINX_SETUP)
 # Generate Sphinx related files.
 #
 MACRO(SPHINX_FINALIZE)
+  IF (SPHINX_BUILD)
   CONFIGURE_FILE(
     ${CMAKE_CURRENT_SOURCE_DIR}/sphinx/index.rst.in
     ${CMAKE_CURRENT_BINARY_DIR}/sphinx/index.rst
@@ -120,4 +123,5 @@ MACRO(SPHINX_FINALIZE)
     ${CMAKE_CURRENT_BINARY_DIR}/sphinx/conf.py
     @ONLY
     )
+  ENDIF(SPHINX_BUILD)
 ENDMACRO(SPHINX_FINALIZE)
