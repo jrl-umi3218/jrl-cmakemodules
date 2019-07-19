@@ -37,65 +37,65 @@ MACRO(SPHINX_SETUP)
     MESSAGE(WARNING "Failed to find sphinx, documentation will not be generated.")
   ELSE (NOT SPHINX_BUILD)
 
-  IF(MSVC)
-    # FIXME: it is impossible to trigger documentation installation
-    # at install, so put the target in ALL instead.
-    ADD_CUSTOM_TARGET(sphinx-doc ALL
-      COMMAND ${SPHINX_BUILD} -b html ${CMAKE_CURRENT_BINARY_DIR}/sphinx
-      ${CMAKE_CURRENT_BINARY_DIR}/sphinx-html
+    IF(MSVC)
+      # FIXME: it is impossible to trigger documentation installation
+      # at install, so put the target in ALL instead.
+      ADD_CUSTOM_TARGET(sphinx-doc ALL
+        COMMAND ${SPHINX_BUILD} -b html ${CMAKE_CURRENT_BINARY_DIR}/sphinx
+        ${CMAKE_CURRENT_BINARY_DIR}/sphinx-html
+        COMMENT "Generating sphinx documentation"
+        )
+    ELSEIF(APPLE)
+      # THE DYLD_LIBRARY_PATH should be completed to run the sphinx command.
+      #  otherwise some symbols won't be found.
+      SET(EXTRA_LD_PATH "\"${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}\":")
+      SET(EXTRA_LD_PATH "${EXTRA_LD_PATH}\"${DYNAMIC_GRAPH_PLUGINDIR}\":")
+      ADD_CUSTOM_TARGET(sphinx-doc
+        COMMAND  export DYLD_LIBRARY_PATH=${EXTRA_LD_PATH}:\$DYLD_LIBRARY_PATH \;
+        ${SPHINX_BUILD} -b html ${CMAKE_CURRENT_BINARY_DIR}/sphinx
+        ${CMAKE_CURRENT_BINARY_DIR}/sphinx-html
+        COMMENT "Generating sphinx documentation"
+        )
+
+      INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${CMAKE_MAKE_PROGRAM} sphinx-doc)")
+    ELSE() #UNIX
+      # THE LD_LIBRARY_PATH should be completed to run the sphinx command.
+      #  otherwise some symbols won't be found.
+      SET(EXTRA_LD_PATH "\"${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}\":")
+      SET(EXTRA_LD_PATH "${EXTRA_LD_PATH}\"${DYNAMIC_GRAPH_PLUGINDIR}\":")
+      ADD_CUSTOM_TARGET(sphinx-doc
+        COMMAND  export LD_LIBRARY_PATH=${EXTRA_LD_PATH}:\$LD_LIBRARY_PATH \;
+        ${SPHINX_BUILD} -b html ${CMAKE_CURRENT_BINARY_DIR}/sphinx
+        ${CMAKE_CURRENT_BINARY_DIR}/sphinx-html
+        COMMENT "Generating sphinx documentation"
+        )
+
+      INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${CMAKE_MAKE_PROGRAM} sphinx-doc)")
+    ENDIF(MSVC)
+
+    ADD_CUSTOM_COMMAND(
+      OUTPUT
+      ${CMAKE_BINARY_DIR}/doc/sphinx-html
+      COMMAND ${SPHINX_BUILD} -b html  ${CMAKE_CURRENT_BINARY_DIR}/sphinx
+        ${CMAKE_CURRENT_BINARY_DIR}/sphinx-html
       COMMENT "Generating sphinx documentation"
       )
-  ELSEIF(APPLE)
-    # THE DYLD_LIBRARY_PATH should be completed to run the sphinx command.
-    #  otherwise some symbols won't be found.
-    SET(EXTRA_LD_PATH "\"${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}\":")
-    SET(EXTRA_LD_PATH "${EXTRA_LD_PATH}\"${DYNAMIC_GRAPH_PLUGINDIR}\":")
-    ADD_CUSTOM_TARGET(sphinx-doc
-      COMMAND  export DYLD_LIBRARY_PATH=${EXTRA_LD_PATH}:\$DYLD_LIBRARY_PATH \;
-      ${SPHINX_BUILD} -b html ${CMAKE_CURRENT_BINARY_DIR}/sphinx
-      ${CMAKE_CURRENT_BINARY_DIR}/sphinx-html
-      COMMENT "Generating sphinx documentation"
+
+    # Clean generated files.
+    SET_PROPERTY(
+      DIRECTORY APPEND PROPERTY
+      ADDITIONAL_MAKE_CLEAN_FILES
+      ${CMAKE_BINARY_DIR}/doc/sphinx-html
       )
 
-    INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${CMAKE_MAKE_PROGRAM} sphinx-doc)")
-  ELSE() #UNIX
-    # THE LD_LIBRARY_PATH should be completed to run the sphinx command.
-    #  otherwise some symbols won't be found.
-    SET(EXTRA_LD_PATH "\"${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}\":")
-    SET(EXTRA_LD_PATH "${EXTRA_LD_PATH}\"${DYNAMIC_GRAPH_PLUGINDIR}\":")
-    ADD_CUSTOM_TARGET(sphinx-doc
-      COMMAND  export LD_LIBRARY_PATH=${EXTRA_LD_PATH}:\$LD_LIBRARY_PATH \;
-      ${SPHINX_BUILD} -b html ${CMAKE_CURRENT_BINARY_DIR}/sphinx
-      ${CMAKE_CURRENT_BINARY_DIR}/sphinx-html
-      COMMENT "Generating sphinx documentation"
-      )
+    # Install generated files.
+    INSTALL(DIRECTORY ${CMAKE_BINARY_DIR}/doc/sphinx-html
+      DESTINATION share/doc/${PROJECT_NAME})
 
-    INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${CMAKE_MAKE_PROGRAM} sphinx-doc)")
-  ENDIF(MSVC)
-
-  ADD_CUSTOM_COMMAND(
-    OUTPUT
-    ${CMAKE_BINARY_DIR}/doc/sphinx-html
-    COMMAND ${SPHINX_BUILD} -b html  ${CMAKE_CURRENT_BINARY_DIR}/sphinx
-      ${CMAKE_CURRENT_BINARY_DIR}/sphinx-html
-    COMMENT "Generating sphinx documentation"
-    )
-
-  # Clean generated files.
-  SET_PROPERTY(
-    DIRECTORY APPEND PROPERTY
-    ADDITIONAL_MAKE_CLEAN_FILES
-    ${CMAKE_BINARY_DIR}/doc/sphinx-html
-    )
-
-  # Install generated files.
-  INSTALL(DIRECTORY ${CMAKE_BINARY_DIR}/doc/sphinx-html
-    DESTINATION share/doc/${PROJECT_NAME})
-
-  IF(EXISTS ${PROJECT_SOURCE_DIR}/doc/pictures)
-    INSTALL(DIRECTORY ${PROJECT_SOURCE_DIR}/doc/pictures
-      DESTINATION share/doc/${PROJECT_NAME}/sphinx-html)
-  ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/doc/pictures)
+    IF(EXISTS ${PROJECT_SOURCE_DIR}/doc/pictures)
+      INSTALL(DIRECTORY ${PROJECT_SOURCE_DIR}/doc/pictures
+        DESTINATION share/doc/${PROJECT_NAME}/sphinx-html)
+    ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/doc/pictures)
 
   ENDIF(NOT SPHINX_BUILD)
 
