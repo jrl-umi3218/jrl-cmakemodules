@@ -225,6 +225,7 @@ MACRO(SETUP_PROJECT)
 
   OPTION(INSTALL_DOCUMENTATION "Generate and install the documentation" ON)
 
+  INCLUDE(CTest)
   ENABLE_TESTING()
 
   LOGGING_INITIALIZE()
