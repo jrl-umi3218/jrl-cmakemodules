@@ -81,10 +81,18 @@ MESSAGE(STATUS "PythonLibVersionString: ${PYTHONLIBS_VERSION_STRING}")
 
 # Use either site-packages (default) or dist-packages (Debian packages) directory
 OPTION(PYTHON_DEB_LAYOUT "Enable Debian-style Python package layout" OFF)
+# ref. https://docs.python.org/3/library/site.html
+OPTION(PYTHON_STANDARD_LAYOUT "Enable standard Python package layout" OFF)
+
+IF(PYTHON_STANDARD_LAYOUT)
+  SET(PYTHON_SITELIB_CMD "import sys, os; print(os.sep.join(['lib', 'python' + sys.version[:3], 'site-packages']))")
+ELSE(PYTHON_STANDARD_LAYOUT)
+  SET(PYTHON_SITELIB_CMD "from distutils import sysconfig; print(sysconfig.get_python_lib(prefix='', plat_specific=False))")
+ENDIF(PYTHON_STANDARD_LAYOUT)
 
 EXECUTE_PROCESS(
   COMMAND "${PYTHON_EXECUTABLE}" "-c"
-  "from distutils import sysconfig; print(sysconfig.get_python_lib(prefix='', plat_specific=False))"
+  ${PYTHON_SITELIB_CMD}
   OUTPUT_VARIABLE PYTHON_SITELIB
   OUTPUT_STRIP_TRAILING_WHITESPACE
   ERROR_QUIET)
