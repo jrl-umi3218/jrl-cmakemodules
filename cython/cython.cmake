@@ -129,8 +129,10 @@ macro(_ADD_CYTHON_BINDINGS_TARGETS PYTHON PIP PACKAGE SOURCES GENERATE_SOURCES T
   # Tests
   if(${WITH_TESTS} AND NOT ${DISABLE_TESTS})
     if(WIN32)
+      set(ENV_VAR "PATH")
       set(PATH_SEP ";")
     else()
+      set(ENV_VAR "LD_LIBRARY_PATH")
       set(PATH_SEP ":")
     endif()
     set(EXTRA_LD_PATH "")
@@ -142,7 +144,7 @@ macro(_ADD_CYTHON_BINDINGS_TARGETS PYTHON PIP PACKAGE SOURCES GENERATE_SOURCES T
     endforeach()
     if(${WITH_TESTS})
       add_test(NAME test-${TARGET_NAME}
-        COMMAND ${CMAKE_COMMAND} -E env LD_LIBRARY_PATH=${EXTRA_LD_PATH}$ENV{LD_LIBRARY_PATH} ${CMAKE_COMMAND} -E chdir "${SETUP_LOCATION}" ${PYTHON} -c "import nose, sys; sys.exit(not nose.run())"
+        COMMAND ${CMAKE_COMMAND} -E env "${ENV_VAR}=${EXTRA_LD_PATH}$ENV{${ENV_VAR}}" ${CMAKE_COMMAND} -E env "PYTHONPATH=.${PATH_SEP}$ENV{PYTHONPATH}" ${CMAKE_COMMAND} -E chdir "${SETUP_LOCATION}" ${PYTHON} -c "import nose, sys; sys.exit(not nose.run())"
       )
     endif()
   endif()
