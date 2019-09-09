@@ -52,7 +52,7 @@ class pkg_config(object):
         self.include_dirs = list(set(self.include_dirs))
         library_dirs = "@CYTHON_BINDINGS_LINK_FLAGS@"
         self.library_dirs = [ x for x in library_dirs.split(';') if len(x) ]
-        self.libraries = [ l for l in "@CYTHON_BINDINGS_LIBRARIES@".split(";") if len(l) ]
+        self.libraries = [ os.path.splitext(os.path.basename(l))[0] for l in "@CYTHON_BINDINGS_LIBRARIES@".split(";") if len(l) ]
         self.libraries = list(set(self.libraries))
         self.library_dirs += [os.path.dirname(l) for l in "@CYTHON_BINDINGS_TARGET_FILES@".split(';') if len(l) ]
         self.library_dirs = list(set(self.library_dirs))
