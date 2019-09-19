@@ -171,6 +171,12 @@ macro(_ADD_CYTHON_BINDINGS_TARGETS PYTHON PIP PACKAGE SOURCES GENERATE_SOURCES T
       COMMENT "Install ${PACKAGE} ${PYTHON} bindings"
     )
     set_target_properties(install-${TARGET_NAME} PROPERTIES FOLDER "bindings")
+    add_custom_target(uninstall-${TARGET_NAME}
+      COMMAND ${CMAKE_COMMAND} -E chdir "${SETUP_LOCATION}" ${PIP} uninstall -y ${PACKAGE}
+      COMMENT "Removing ${PACKAGE} ${PYTHON} bindings"
+    )
+    set_target_properties(uninstall-${TARGET_NAME} PROPERTIES FOLDER "bindings")
+    add_dependencies(uninstall uninstall-${TARGET_NAME})
   endif()
   install(CODE "EXECUTE_PROCESS(COMMAND \"${CMAKE_COMMAND}\" --build \"${CMAKE_BINARY_DIR}\" --config \${CMAKE_INSTALL_CONFIG_NAME} --target install-${TARGET_NAME})")
 endmacro()
