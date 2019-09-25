@@ -237,7 +237,7 @@ ENDMACRO(DYNAMIC_GRAPH_PYTHON_MODULE SUBMODULENAME)
 #.rst:
 # .. command::  PYTHON_INSTALL(MODULE FILE DEST)
 #
-#  Install a Python file and its associated compiled version.
+#  Compile and install a Python file.
 #
 MACRO(PYTHON_INSTALL MODULE FILE DEST)
 
@@ -245,14 +245,13 @@ MACRO(PYTHON_INSTALL MODULE FILE DEST)
 
   INSTALL(FILES
     "${CMAKE_CURRENT_SOURCE_DIR}/${MODULE}/${FILE}"
-    "${CMAKE_CURRENT_BINARY_DIR}/${MODULE}/${FILE}c"
     DESTINATION "${DEST}/${MODULE}")
 ENDMACRO()
 
 #.rst:
 # .. command:: PYTHON_INSTALL_ON_SITE (MODULE FILE)
 #
-#  Install a Python file and its associated compiled version in :cmake:variable:`PYTHON_SITELIB`.
+#  Compile and install a Python file in :cmake:variable:`PYTHON_SITELIB`.
 #
 MACRO(PYTHON_INSTALL_ON_SITE MODULE FILE)
 
@@ -308,6 +307,10 @@ ENDMACRO()
 # associated compiled version.
 #
 MACRO(PYTHON_INSTALL_BUILD MODULE FILE DEST)
+
+  MESSAGE(AUTHOR_WARNING "PYTHON_INSTALL_BUILD is deprecated and will be removed in the future")
+  MESSAGE(AUTHOR_WARNING "Please use PYTHON_INSTALL_ON_SITE")
+  MESSAGE(AUTHOR_WARNING "ref https://github.com/jrl-umi3218/jrl-cmakemodules/issues/136")
 
   FILE(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${MODULE}")
 
