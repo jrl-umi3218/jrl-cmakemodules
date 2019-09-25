@@ -308,7 +308,7 @@ ENDMACRO()
 #
 MACRO(PYTHON_INSTALL_BUILD MODULE FILE DEST)
 
-  MESSAGE(AUTHOR_WARNING "PYTHON_INSTALL_BUILD is deprecated and will be removed")
+  MESSAGE(AUTHOR_WARNING "PYTHON_INSTALL_BUILD is deprecated and will be removed in the future")
   MESSAGE(AUTHOR_WARNING "Please use PYTHON_INSTALL_ON_SITE")
   MESSAGE(AUTHOR_WARNING "ref https://github.com/jrl-umi3218/jrl-cmakemodules/issues/136")
 
