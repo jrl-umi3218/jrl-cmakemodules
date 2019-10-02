@@ -22,12 +22,49 @@ static PyMethodDef functions[] = {
   {NULL, NULL, 0, NULL}        /* Sentinel */
 };
 
-PyMODINIT_FUNC
-initwrap(void)
+#if PY_MAJOR_VERSION >= 3
+static struct PyModuleDef module = {
+    PyModuleDef_HEAD_INIT,
+    "wrap",
+    NULL,
+    0,
+    functions,
+    NULL,
+    NULL,
+    NULL,
+    NULL};
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#if PY_MAJOR_VERSION >= 3
+PyMODINIT_FUNC PyInit_wrap(void)
+#else
+void initwrap(void)
+#endif
 {
     PyObject *m;
 
+#if PY_MAJOR_VERSION >= 3
+    m = PyModule_Create(&module);
+#else
     m = Py_InitModule("wrap", functions);
+#endif
     if (m == NULL)
+#if PY_MAJOR_VERSION >= 3
+        return NULL;
+#else
         return;
+#endif
+
+#if PY_MAJOR_VERSION >= 3
+    return m;
+#endif
 }
+
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
