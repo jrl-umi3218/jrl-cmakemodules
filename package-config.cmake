@@ -84,7 +84,6 @@ ENDMACRO()
 # assumes SETUP_PROJECT() was called
 # internally the real requirement is that _SETUP_PROJECT_PACKAGE_INIT() was called
 MACRO(SETUP_PROJECT_PACKAGE_FINALIZE)
-
 ####
 # Installation (https://github.com/forexample/package-example)
 
