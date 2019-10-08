@@ -111,6 +111,8 @@ SET(REQUIRED_VARIABLES PROJECT_NAME PROJECT_DESCRIPTION PROJECT_URL)
 # Check that required variables are defined.
 FOREACH(VARIABLE ${REQUIRED_VARIABLES})
   IF (NOT DEFINED ${VARIABLE})
+    MESSAGE(AUTHOR_WARNING "Required variable ``${VARIABLE}'' has not been defined, perhaps you are including cmake/base.cmake too early")
+    MESSAGE(AUTHOR_WARNING "Check out https://jrl-cmakemodules.readthedocs.io/en/master/pages/base.html#minimal-working-example for an example")
     MESSAGE(FATAL_ERROR "Required variable ``${VARIABLE}'' has not been defined.")
   ENDIF(NOT DEFINED ${VARIABLE})
 ENDFOREACH(VARIABLE)
