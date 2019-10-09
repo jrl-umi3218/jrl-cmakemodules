@@ -56,6 +56,10 @@
 MACRO(VERSION_COMPUTE)
   SET(PROJECT_STABLE False)
 
+  IF("${PROJECT_SOURCE_DIR}" STREQUAL "")
+    SET(PROJECT_SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/..")
+  ENDIF()
+
   # Check if a version is embedded in the project.
   IF(EXISTS ${PROJECT_SOURCE_DIR}/.version)
     # Yes, use it. This is a stable version.

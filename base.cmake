@@ -74,27 +74,32 @@
 #   Allows to define a custome extension for C/C++ header files (e.g. .h, .hh, .hpp).
 #   The default value is set to .hh.
 #
+# .. variable:: PROJECT_USE_CMAKE_EXPORT
+#
+#   This tells jrl-cmakemodules that you are using export functionalities so it will
+#   hook the installation of your configuration files. Defaults to false
+#
 
 # Please note that functions starting with an underscore are internal
 # functions and should not be used directly.
 
 # Include base features.
-INCLUDE(cmake/logging.cmake)
-INCLUDE(cmake/portability.cmake)
-INCLUDE(cmake/compiler.cmake)
-INCLUDE(cmake/debian.cmake)
-INCLUDE(cmake/dist.cmake)
-INCLUDE(cmake/distcheck.cmake)
-INCLUDE(cmake/doxygen.cmake)
-INCLUDE(cmake/header.cmake)
-INCLUDE(cmake/pkg-config.cmake)
-INCLUDE(cmake/uninstall.cmake)
-INCLUDE(cmake/install-data.cmake)
-INCLUDE(cmake/release.cmake)
-INCLUDE(cmake/version.cmake)
-INCLUDE(cmake/package-config.cmake)
-INCLUDE(cmake/version-script.cmake)
-INCLUDE(cmake/test.cmake)
+INCLUDE(${CMAKE_CURRENT_LIST_DIR}/logging.cmake)
+INCLUDE(${CMAKE_CURRENT_LIST_DIR}/portability.cmake)
+INCLUDE(${CMAKE_CURRENT_LIST_DIR}/compiler.cmake)
+INCLUDE(${CMAKE_CURRENT_LIST_DIR}/debian.cmake)
+INCLUDE(${CMAKE_CURRENT_LIST_DIR}/dist.cmake)
+INCLUDE(${CMAKE_CURRENT_LIST_DIR}/distcheck.cmake)
+INCLUDE(${CMAKE_CURRENT_LIST_DIR}/doxygen.cmake)
+INCLUDE(${CMAKE_CURRENT_LIST_DIR}/header.cmake)
+INCLUDE(${CMAKE_CURRENT_LIST_DIR}/pkg-config.cmake)
+INCLUDE(${CMAKE_CURRENT_LIST_DIR}/uninstall.cmake)
+INCLUDE(${CMAKE_CURRENT_LIST_DIR}/install-data.cmake)
+INCLUDE(${CMAKE_CURRENT_LIST_DIR}/release.cmake)
+INCLUDE(${CMAKE_CURRENT_LIST_DIR}/version.cmake)
+INCLUDE(${CMAKE_CURRENT_LIST_DIR}/package-config.cmake)
+INCLUDE(${CMAKE_CURRENT_LIST_DIR}/version-script.cmake)
+INCLUDE(${CMAKE_CURRENT_LIST_DIR}/test.cmake)
 
  # --------- #
  # Constants #
@@ -102,6 +107,58 @@ INCLUDE(cmake/test.cmake)
 
 # Variables requires by SETUP_PROJECT.
 SET(REQUIRED_VARIABLES PROJECT_NAME PROJECT_DESCRIPTION PROJECT_URL)
+
+# Check that required variables are defined.
+FOREACH(VARIABLE ${REQUIRED_VARIABLES})
+  IF (NOT DEFINED ${VARIABLE})
+    MESSAGE(AUTHOR_WARNING "Required variable ``${VARIABLE}'' has not been defined, perhaps you are including cmake/base.cmake too early")
+    MESSAGE(AUTHOR_WARNING "Check out https://jrl-cmakemodules.readthedocs.io/en/master/pages/base.html#minimal-working-example for an example")
+    MESSAGE(FATAL_ERROR "Required variable ``${VARIABLE}'' has not been defined.")
+  ENDIF(NOT DEFINED ${VARIABLE})
+ENDFOREACH(VARIABLE)
+
+INCLUDE(${CMAKE_CURRENT_LIST_DIR}/GNUInstallDirs.cmake)
+SET(CMAKE_INSTALL_FULL_PKGLIBDIR ${CMAKE_INSTALL_FULL_LIBDIR}/${PROJECT_NAME})
+SET(CMAKE_INSTALL_PKGLIBDIR ${CMAKE_INSTALL_LIBDIR}/${PROJECT_NAME})
+
+# If the project version number is not set, compute it automatically.
+IF(NOT DEFINED PROJECT_VERSION)
+  VERSION_COMPUTE()
+ELSE()
+  IF(NOT DEFINED PROJECT_VERSION_MAJOR AND
+      NOT DEFINED PROJECT_VERSION_MINOR AND
+      NOT DEFINED PROJECT_VERSION_PATCH)
+    SPLIT_VERSION_NUMBER(${PROJECT_VERSION}
+      PROJECT_VERSION_MAJOR
+      PROJECT_VERSION_MINOR
+      PROJECT_VERSION_PATCH)
+  ENDIF()
+ENDIF()
+SET(SAVED_PROJECT_VERSION "${PROJECT_VERSION}")
+SET(SAVED_PROJECT_VERSION_MAJOR "${PROJECT_VERSION_MAJOR}")
+SET(SAVED_PROJECT_VERSION_MINOR "${PROJECT_VERSION_MINOR}")
+SET(SAVED_PROJECT_VERSION_PATCH "${PROJECT_VERSION_PATCH}")
+
+IF(PROJECT_VERSION MATCHES UNKNOWN)
+  SET(PROJECT_VERSION_FULL "")
+ELSE(PROJECT_VERSION MATCHES UNKNOWN)
+  SET(PROJECT_VERSION_FULL "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
+ENDIF(PROJECT_VERSION MATCHES UNKNOWN)
+
+# Set a script to run after project called
+SET(CMAKE_PROJECT_${PROJECT_NAME}_INCLUDE "${CMAKE_CURRENT_LIST_DIR}/post-project.cmake")
+
+# Set a hook to finalize the setup, CMake will set CMAKE_CURRENT_LIST_DIR to "" at the end
+# Based off https://stackoverflow.com/questions/15760580/execute-command-or-macro-in-cmake-as-the-last-step-before-the-configure-step-f
+VARIABLE_WATCH(CMAKE_CURRENT_LIST_DIR SETUP_PROJECT_FINALIZE_HOOK)
+FUNCTION(SETUP_PROJECT_FINALIZE_HOOK VARIABLE ACCESS)
+  IF("${${VARIABLE}}" STREQUAL "")
+    SETUP_PROJECT_FINALIZE()
+    IF(PROJECT_USE_CMAKE_EXPORT)
+      SETUP_PROJECT_PACKAGE_FINALIZE()
+    ENDIF()
+  ENDIF()
+ENDFUNCTION()
 
  # --------------------- #
  # Project configuration #
@@ -155,103 +212,11 @@ ENDMACRO(_CONCATENATE_ARGUMENTS OUTPUT)
 #   file).
 #
 MACRO(SETUP_PROJECT)
-  INCLUDE(cmake/GNUInstallDirs.cmake)
-  SET(CMAKE_INSTALL_FULL_PKGLIBDIR ${CMAKE_INSTALL_FULL_LIBDIR}/${PROJECT_NAME})
-  SET(CMAKE_INSTALL_PKGLIBDIR ${CMAKE_INSTALL_LIBDIR}/${PROJECT_NAME})
-
-  # Check that required variables are defined.
-  FOREACH(VARIABLE ${REQUIRED_VARIABLES})
-    IF (NOT DEFINED ${VARIABLE})
-      MESSAGE(FATAL_ERROR
-	"Required variable ``${VARIABLE}'' has not been defined.")
-    ENDIF(NOT DEFINED ${VARIABLE})
-  ENDFOREACH(VARIABLE)
-
-  # If the project version number is not set, compute it automatically.
-  IF(NOT DEFINED PROJECT_VERSION)
-    VERSION_COMPUTE()
-  ELSE()
-    IF(NOT DEFINED PROJECT_VERSION_MAJOR AND
-        NOT DEFINED PROJECT_VERSION_MINOR AND
-        NOT DEFINED PROJECT_VERSION_PATCH)
-      SPLIT_VERSION_NUMBER(${PROJECT_VERSION}
-        PROJECT_VERSION_MAJOR
-        PROJECT_VERSION_MINOR
-        PROJECT_VERSION_PATCH)
-    ENDIF()
+  # Define project name.
+  PROJECT(${PROJECT_NAME} CXX)
+  IF(${CMAKE_VERSION} VERSION_GREATER 3.15)
+    MESSAGE("Please update your CMakeLists: instead of setup_project() simply call project(\${PROJECT_NAME} CXX) after including cmake/base.cmake\nYou can also remove setup_project_finalize() call")
   ENDIF()
-
-  IF(PROJECT_VERSION MATCHES UNKNOWN)
-    SET(PROJECT_VERSION_FULL "")
-  ELSE(PROJECT_VERSION MATCHES UNKNOWN)
-    SET(PROJECT_VERSION_FULL "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
-  ENDIF(PROJECT_VERSION MATCHES UNKNOWN)
-
-  # Define project
-  IF(${CMAKE_VERSION} VERSION_GREATER 3.0.0)
-    # Remove warnings or errors
-    IF(POLICY CMP0048)
-      CMAKE_POLICY(SET CMP0048 NEW)
-    ENDIF(POLICY CMP0048)
-
-    IF(${CMAKE_VERSION} VERSION_GREATER 3.9.0)
-      PROJECT(${PROJECT_NAME} LANGUAGES CXX DESCRIPTION ${PROJECT_DESCRIPTION} VERSION ${PROJECT_VERSION_FULL})
-    ELSE(NOT ${CMAKE_VERSION} VERSION_GREATER 3.9.0)
-      PROJECT(${PROJECT_NAME} LANGUAGES CXX VERSION ${PROJECT_VERSION_FULL})
-    ENDIF(${CMAKE_VERSION} VERSION_GREATER 3.9.0)
-  ELSE(${CMAKE_VERSION} VERSION_GREATER 3.0.0)
-    PROJECT(${PROJECT_NAME} CXX)
-  ENDIF(${CMAKE_VERSION} VERSION_GREATER 3.0.0)
-
-  IF(DEFINED PROJECT_DEBUG_POSTFIX)
-    SET(CMAKE_DEBUG_POSTFIX ${PROJECT_DEBUG_POSTFIX})
-    STRING(TOLOWER "${CMAKE_BUILD_TYPE}" cmake_build_type)
-    IF(${cmake_build_type} MATCHES debug)
-      SET(PKGCONFIG_POSTFIX ${PROJECT_DEBUG_POSTFIX})
-    ELSE()
-      SET(PKGCONFIG_POSTFIX "")
-    ENDIF()
-    IF(DEFINED CMAKE_CONFIGURATION_TYPES)
-      SET(PKGCONFIG_POSTFIX ${PROJECT_DEBUG_POSTFIX})
-    ENDIF()
-  ENDIF()
-
-  IF(NOT DEFINED PROJECT_USE_KEYWORD_LINK_LIBRARIES)
-    SET(PROJECT_USE_KEYWORD_LINK_LIBRARIES FALSE)
-  ENDIF()
-  IF(${PROJECT_USE_KEYWORD_LINK_LIBRARIES})
-    SET(PUBLIC_KEYWORD PUBLIC)
-  ELSE()
-    SET(PUBLIC_KEYWORD "")
-  ENDIF()
-
-  IF(${ARGC})
-    SET(CMAKE_VERBOSE_MAKEFILE ${ARGV0})
-  ELSE(${ARGC})
-    # Be verbose by default.
-    SET(CMAKE_VERBOSE_MAKEFILE TRUE)
-  ENDIF(${ARGC})
-
-  OPTION(INSTALL_DOCUMENTATION "Generate and install the documentation" ON)
-  OPTION(INSTALL_GENERATED_HEADERS "Generate and install standard headers" ON)
-  OPTION(INSTALL_PKG_CONFIG_FILE "Generate and install standard .pc file" ON)
-
-  INCLUDE(CTest)
-  ENABLE_TESTING()
-
-  LOGGING_INITIALIZE()
-
-  #FIXME: normalize naming to <MODULE>_SETUP()
-  _SETUP_PROJECT_WARNINGS()
-  _SETUP_PROJECT_HEADER()
-  _SETUP_PROJECT_DIST()
-  DISTCHECK_SETUP()
-  RELEASE_SETUP()
-  _SETUP_PROJECT_DEB()
-  _SETUP_PROJECT_UNINSTALL()
-  _SETUP_PROJECT_PKG_CONFIG()
-  _SETUP_PROJECT_DOCUMENTATION()
-  _SETUP_PROJECT_PACKAGE_INIT()
 ENDMACRO(SETUP_PROJECT)
 
 #.rst:
