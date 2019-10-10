@@ -100,6 +100,7 @@ INCLUDE(${CMAKE_CURRENT_LIST_DIR}/version.cmake)
 INCLUDE(${CMAKE_CURRENT_LIST_DIR}/package-config.cmake)
 INCLUDE(${CMAKE_CURRENT_LIST_DIR}/version-script.cmake)
 INCLUDE(${CMAKE_CURRENT_LIST_DIR}/test.cmake)
+INCLUDE(${CMAKE_CURRENT_LIST_DIR}/oscheck.cmake)
 
  # --------- #
  # Constants #
@@ -240,43 +241,3 @@ MACRO(SETUP_PROJECT_FINALIZE)
   LOGGING_FINALIZE()
 ENDMACRO(SETUP_PROJECT_FINALIZE)
 
-#.rst:
-# .. ifmode:: user
-#
-# .. command:: CHECK_DEBIAN
-#
-#   Checks is the current system is Debian based
-#   You can then use DEBIAN_FOUND
-#
-MACRO(CHECK_DEBIAN)
-  FIND_FILE(DEBIAN_FOUND debian_version debconf.conf
-    PATHS /etc)
-ENDMACRO(CHECK_DEBIAN)
-
-
-#.rst:
-# .. ifmode:: user
-#
-# .. command:: CHECK_NETBSD
-#
-#   Checks is the current system is NetBSD
-#   You can then use NETBSD_FOUND
-#
-MACRO(CHECK_NETBSD)
-  FIND_FILE(NETBSD_FOUND netbsd
-    PATHS /)
-ENDMACRO(CHECK_NETBSD)
-
-
-#.rst:
-# .. ifmode:: user
-#
-# .. command:: CHECK_ARCHLINUX
-#
-#   Checks is the current system is ArchLinux
-#   You can then use ARCHLINUX_FOUND
-#
-MACRO(CHECK_ARCHLINUX)
-  FIND_FILE(ARCHLINUX_FOUND arch-release
-    PATHS /etc)
-ENDMACRO(CHECK_ARCHLINUX)
