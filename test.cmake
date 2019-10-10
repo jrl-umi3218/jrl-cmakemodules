@@ -44,16 +44,23 @@ ENDIF(DEFINED DISABLE_TESTS)
 IF(NOT TARGET build_tests)
   ADD_CUSTOM_TARGET(build_tests)
 ENDIF()
+
+IF(NOT DEFINED ctest_build_tests_exists)
+  SET_PROPERTY(GLOBAL PROPERTY ctest_build_tests_exists OFF)
+ENDIF(NOT DEFINED ctest_build_tests_exists)
+
 #.rst:
 # .. command:: CREATE_CTEST_BUILD_TESTS_TARGET
 #
 #    Create target ctest_build_tests if does not exist yet.
 #
 MACRO(CREATE_CTEST_BUILD_TESTS_TARGET)
+  GET_PROPERTY(ctest_build_tests_exists_value GLOBAL PROPERTY ctest_build_tests_exists)
   IF(NOT BUILD_TESTING)
-    IF(NOT TARGET ctest_build_tests)
+    IF(NOT ctest_build_tests_exists_value)
       ADD_TEST(ctest_build_tests "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target build_tests -- $ENV{MAKEFLAGS})
-    ENDIF(NOT TARGET ctest_build_tests)
+      SET_PROPERTY(GLOBAL PROPERTY ctest_build_tests_exists ON)
+    ENDIF(NOT ctest_build_tests_exists_value)
   ENDIF(NOT BUILD_TESTING)
 ENDMACRO(CREATE_CTEST_BUILD_TESTS_TARGET)
 
