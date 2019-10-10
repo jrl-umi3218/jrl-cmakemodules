@@ -127,7 +127,7 @@ macro(_ADD_CYTHON_BINDINGS_TARGETS PYTHON PIP PACKAGE SOURCES GENERATE_SOURCES T
   )
   set_target_properties(force-${TARGET_NAME} PROPERTIES FOLDER "bindings")
   # Tests
-  if(${WITH_TESTS} AND NOT ${DISABLE_TESTS})
+  if(${WITH_TESTS} AND ${BUILD_TESTING})
     if(WIN32)
       set(ENV_VAR "PATH")
       set(PATH_SEP ";")
