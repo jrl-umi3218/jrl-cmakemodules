@@ -182,7 +182,7 @@ macro(_ADD_CYTHON_BINDINGS_TARGETS PYTHON PIP PACKAGE SOURCES GENERATE_SOURCES T
 endmacro()
 
 #.rst:
-# .. command:: ADD_CYTHON_BINDINGS(PACKAGE TARGETS targets... [VERSION version] [MODULES modules] [EXPORT_SOURCES sources...] [PRIVATE_SOURCES ...])
+# .. command:: ADD_CYTHON_BINDINGS(PACKAGE TARGETS targets... [VERSION version] [MODULES modules...] [EXPORT_SOURCES sources...] [PRIVATE_SOURCES ...] [GENERATE_SOURCES ...])
 #
 #   This macro add cython bindings using one or more libraries built by the project.
 #
@@ -308,7 +308,7 @@ macro(_APPEND_CYTHON_LIBRARY PACKAGE PYTHON PYTHON_B OUT)
 endmacro()
 
 #.rst:
-# .. command:: GET_PYTHON_LIBRARIES(PACKAGE VAR)
+# .. command:: GET_CYTHON_LIBRARIES(PACKAGE VAR)
 #
 #   This macro search Python versions according to the specified bindings
 #   settings then returns appropriate targets in the provided VAR variable
