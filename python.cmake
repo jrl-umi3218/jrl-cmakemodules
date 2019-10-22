@@ -43,6 +43,11 @@
 #
 #  Absolute path where Python files will be installed.
 
+#.rst:
+# .. variable:: PYTHON_EXT_SUFFIX
+#
+#  Portable suffix of C++ Python modules.
+
 IF(CMAKE_VERSION VERSION_LESS "3.2")
     SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/python ${CMAKE_MODULE_PATH})
     MESSAGE(WARNING "CMake versions older than 3.2 do not properly find Python. Custom macros are used to find it.")
