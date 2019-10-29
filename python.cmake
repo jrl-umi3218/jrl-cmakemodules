@@ -61,8 +61,31 @@ IF (NOT ${PYTHONINTERP_FOUND} STREQUAL TRUE)
 ENDIF (NOT ${PYTHONINTERP_FOUND} STREQUAL TRUE)
 MESSAGE(STATUS "PythonInterp: ${PYTHON_EXECUTABLE}")
 
+# Set PYTHON_LIBRARY and PYTHON_INCLUDE_DIR variables if they are not defined by the user
+IF(DEFINED PYTHON_EXECUTABLE)
+  # Retrieve the corresponding value of PYTHON_LIBRARY if it is not defined
+  IF(NOT DEFINED PYTHON_LIBRARY)
+      EXECUTE_PROCESS(
+        COMMAND "${PYTHON_EXECUTABLE}" "-c"
+        "import distutils.sysconfig as sysconfig; print(sysconfig.get_config_var('LIBDIR'))"
+        OUTPUT_VARIABLE PYTHON_LIBRARY
+        ERROR_QUIET)
+      STRING(STRIP "${PYTHON_LIBRARY}" PYTHON_LIBRARY)
+  ENDIF(NOT DEFINED PYTHON_LIBRARY)
+  # Retrieve the corresponding value of PYTHON_INCLUDE_DIR if it is not defined
+  IF(NOT DEFINED PYTHON_INCLUDE_DIR)
+      EXECUTE_PROCESS(
+        COMMAND "${PYTHON_EXECUTABLE}" "-c"
+        "import distutils.sysconfig as sysconfig; print(sysconfig.get_python_inc())"
+        OUTPUT_VARIABLE PYTHON_INCLUDE_DIR
+        ERROR_QUIET)
+      STRING(STRIP "${PYTHON_INCLUDE_DIR}" PYTHON_INCLUDE_DIR)
+  ENDIF(NOT DEFINED PYTHON_INCLUDE_DIR)
+ENDIF(DEFINED PYTHON_EXECUTABLE)
+
 # Inform PythonLibs of the required version of PythonInterp
 SET(PYTHONLIBS_VERSION_STRING ${PYTHON_VERSION_STRING})
+
 FIND_PACKAGE(PythonLibs ${ARGN})
 MESSAGE(STATUS "PythonLibraries: ${PYTHON_LIBRARIES}")
 IF (NOT ${PYTHONLIBS_FOUND} STREQUAL TRUE)
