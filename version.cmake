@@ -20,7 +20,7 @@
 #  This mechanism makes sure that version number is always up-to-date and
 #  coherent (i.e. strictly increasing as commits are made).
 #
-#  There is two cases:
+#  There is three cases:
 #
 #  - the software comes from a release (stable version). In this case, the
 #    software is retrieved through a tarball which does not contain the ``.git``
@@ -52,6 +52,9 @@
 #
 #    - ``0.5-2-034f`` if there is no uncommitted changes,
 #    - ``0.5-2-034f-dirty`` if there is some uncommitted changes.
+#
+#  - the software comes with a package.xml file at the root of the project (for ROS build essentially)
+#    then the module extracts the version number which is declared inside between the tag <version>x.y.z<\version>
 #
 MACRO(VERSION_COMPUTE)
   SET(PROJECT_STABLE False)
