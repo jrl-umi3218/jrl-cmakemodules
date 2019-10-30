@@ -129,6 +129,25 @@ MACRO(VERSION_COMPUTE)
       ENDIF()
     ENDIF()
 
+    IF(GIT_DESCRIBE_RESULT) # git has failed to retrieve the project version
+      # Check if a package.xml file exists and try to extract the version from it
+      IF(EXISTS ${PROJECT_SOURCE_DIR}/package.xml)
+        FILE(READ "${PROJECT_SOURCE_DIR}/package.xml" PACKAGE_XML)
+        MESSAGE(STATUS "PACKAGE_XML: ${PACKAGE_XML}")
+        EXECUTE_PROCESS(COMMAND cat "${PROJECT_SOURCE_DIR}/package.xml"
+                        COMMAND grep <version
+                        COMMAND cut -f2 -d >
+                        COMMAND cut -f1 -d <
+                        OUTPUT_STRIP_TRAILING_WHITESPACE
+                        #COMMAND_ECHO STDOUT
+                        OUTPUT_VARIABLE PACKAGE_XML_VERSION)
+        MESSAGE(STATUS "CMAKE: ${PACKAGE_XML_VERSION}")
+        IF(NOT "${PACKAGE_XML_VERSION}" STREQUAL "")
+          SET(PROJECT_VERSION ${PACKAGE_XML_VERSION})
+        ENDIF(NOT "${PACKAGE_XML_VERSION}" STREQUAL "")
+      ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/package.xml)
+    ENDIF(GIT_DESCRIBE_RESULT)
+
     # Append dirty if the project is dirty.
     IF(DEFINED PROJECT_DIRTY)
       SET(PROJECT_VERSION "${PROJECT_VERSION}-dirty")
