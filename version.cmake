@@ -1,4 +1,4 @@
-# Copyright (C) 2008-2018 LAAS-CNRS, JRL AIST-CNRS, INRIA.
+# Copyright (C) 2008-2019 LAAS-CNRS, JRL AIST-CNRS, INRIA.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -64,7 +64,7 @@ MACRO(VERSION_COMPUTE)
   IF(EXISTS ${PROJECT_SOURCE_DIR}/.version)
     # Yes, use it. This is a stable version.
     FILE(STRINGS .version PROJECT_VERSION)
-    SET(PROJECT_STABLE True)
+    SET(PROJECT_STABLE TRUE)
   ELSE(EXISTS ${PROJECT_SOURCE_DIR}/.version)
     # No, there is no '.version' file. Deduce the version from git.
 
@@ -97,10 +97,8 @@ MACRO(VERSION_COMPUTE)
       )
 
     # Check if the tree is clean.
-    IF(NOT GIT_DIFF_INDEX_RESULT AND NOT GIT_DIFF_INDEX_OUTPUT)
-      SET(PROJECT_DIRTY False)
-    ELSE()
-      SET(PROJECT_DIRTY True)
+    IF(GIT_DIFF_INDEX_RESULT OR GIT_DIFF_INDEX_OUTPUT)
+      SET(PROJECT_DIRTY TRUE)
     ENDIF()
 
     # Check if git describe worked and store the returned version number.
@@ -125,14 +123,14 @@ MACRO(VERSION_COMPUTE)
       # I.e. 1.0, 2, 0.1.3 are stable but 0.2.4-1-dg43 is unstable.
       STRING(REGEX MATCH "-" PROJECT_STABLE "${PROJECT_VERSION}")
       IF(NOT PROJECT_STABLE STREQUAL -)
-        SET(PROJECT_STABLE True)
+        SET(PROJECT_STABLE TRUE)
       ELSE()
-        SET(PROJECT_STABLE False)
+        SET(PROJECT_STABLE FALSE)
       ENDIF()
     ENDIF()
 
     # Append dirty if the project is dirty.
-    IF(PROJECT_DIRTY)
+    IF(DEFINED PROJECT_DIRTY)
       SET(PROJECT_VERSION "${PROJECT_VERSION}-dirty")
     ENDIF()
   ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/.version)
@@ -177,3 +175,4 @@ MACRO(SPLIT_VERSION_NUMBER VERSION
     ENDIF()
   ENDIF()
 ENDMACRO()
+
