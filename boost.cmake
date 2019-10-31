@@ -24,7 +24,7 @@
 #
 FUNCTION(SEARCH_FOR_BOOST_COMPONENT boost_python_name found)
   SET(found FALSE PARENT_SCOPE)
-  FIND_PACKAGE(Boost ${BOOST_REQUIRED} OPTIONAL_COMPONENTS ${boost_python_name}) 
+  FIND_PACKAGE(Boost ${BOOST_REQUIRED} QUIET OPTIONAL_COMPONENTS ${boost_python_name}) 
   STRING(TOUPPER ${boost_python_name} boost_python_name_UPPER)
   IF(Boost_${boost_python_name_UPPER}_FOUND)
     SET(${found} TRUE PARENT_SCOPE)
@@ -174,12 +174,12 @@ MACRO(SEARCH_FOR_BOOST)
       SET(Boost_PYTHON_LIBRARY ${Boost_${UPPERCOMPONENT}_LIBRARY})
       MESSAGE(STATUS "Boost_PYTHON_LIBRARY: ${Boost_PYTHON_LIBRARY}")
       LIST(APPEND Boost_PYTHON_LIBRARIES
-	${Boost_PYTHON_LIBRARY})
-      LIST(APPEND LOGGING_WATCHED_VARIABLES
-	python_comp_pos
-	Boost_${UPPERCOMPONENT}_LIBRARY
-	Boost_PYTHON_LIBRARY
-	)
+        ${Boost_PYTHON_LIBRARY})
+            LIST(APPEND LOGGING_WATCHED_VARIABLES
+        python_comp_pos
+        Boost_${UPPERCOMPONENT}_LIBRARY
+        Boost_PYTHON_LIBRARY
+        )
     ENDIF()
 
   ENDFOREACH()
