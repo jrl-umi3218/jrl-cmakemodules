@@ -41,7 +41,7 @@
 // The use of a macro is required as this is /not/ a standardized
 // feature of C++ language or preprocessor, even if most of the
 // compilers support it.
-# ifdef __GNUC__
+# if defined(__GNUC__) || defined(__clang__)
 #  define @PACKAGE_CPPNAME@_DEPRECATED __attribute__ ((deprecated))
 # else
 #  if defined(_MSC_VER) && !defined(__INTEL_COMPILER)
