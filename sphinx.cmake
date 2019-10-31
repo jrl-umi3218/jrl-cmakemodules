@@ -41,7 +41,7 @@ MACRO(SPHINX_SETUP)
       # FIXME: it is impossible to trigger documentation installation
       # at install, so put the target in ALL instead.
       ADD_CUSTOM_TARGET(sphinx-doc ALL
-        COMMAND ${SPHINX_BUILD} -b html ${CMAKE_CURRENT_BINARY_DIR}/sphinx
+        COMMAND ${PYTHON_EXECUTABLE} ${SPHINX_BUILD} -b html ${CMAKE_CURRENT_BINARY_DIR}/sphinx
         ${CMAKE_CURRENT_BINARY_DIR}/sphinx-html
         COMMENT "Generating sphinx documentation"
         )
@@ -52,7 +52,7 @@ MACRO(SPHINX_SETUP)
       SET(EXTRA_LD_PATH "${EXTRA_LD_PATH}\"${DYNAMIC_GRAPH_PLUGINDIR}\":")
       ADD_CUSTOM_TARGET(sphinx-doc
         COMMAND  export DYLD_LIBRARY_PATH=${EXTRA_LD_PATH}:\$DYLD_LIBRARY_PATH \;
-        ${SPHINX_BUILD} -b html ${CMAKE_CURRENT_BINARY_DIR}/sphinx
+        ${PYTHON_EXECUTABLE} ${SPHINX_BUILD} -b html ${CMAKE_CURRENT_BINARY_DIR}/sphinx
         ${CMAKE_CURRENT_BINARY_DIR}/sphinx-html
         COMMENT "Generating sphinx documentation"
         )
@@ -65,7 +65,7 @@ MACRO(SPHINX_SETUP)
       SET(EXTRA_LD_PATH "${EXTRA_LD_PATH}\"${DYNAMIC_GRAPH_PLUGINDIR}\":")
       ADD_CUSTOM_TARGET(sphinx-doc
         COMMAND  export LD_LIBRARY_PATH=${EXTRA_LD_PATH}:\$LD_LIBRARY_PATH \;
-        ${SPHINX_BUILD} -b html ${CMAKE_CURRENT_BINARY_DIR}/sphinx
+        ${PYTHON_EXECUTABLE} ${SPHINX_BUILD} -b html ${CMAKE_CURRENT_BINARY_DIR}/sphinx
         ${CMAKE_CURRENT_BINARY_DIR}/sphinx-html
         COMMENT "Generating sphinx documentation"
         )
@@ -76,7 +76,7 @@ MACRO(SPHINX_SETUP)
     ADD_CUSTOM_COMMAND(
       OUTPUT
       ${CMAKE_BINARY_DIR}/doc/sphinx-html
-      COMMAND ${SPHINX_BUILD} -b html  ${CMAKE_CURRENT_BINARY_DIR}/sphinx
+      COMMAND ${PYTHON_EXECUTABLE} ${SPHINX_BUILD} -b html  ${CMAKE_CURRENT_BINARY_DIR}/sphinx
         ${CMAKE_CURRENT_BINARY_DIR}/sphinx-html
       COMMENT "Generating sphinx documentation"
       )
