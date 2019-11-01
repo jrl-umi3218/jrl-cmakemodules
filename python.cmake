@@ -68,18 +68,16 @@ IF(DEFINED PYTHON_EXECUTABLE AND NOT WIN32)
     EXECUTE_PROCESS(
       COMMAND "${PYTHON_EXECUTABLE}" "-c"
       "import distutils.sysconfig as sysconfig; import os; print(os.path.join(sysconfig.get_config_var('LIBDIR'),sysconfig.get_config_var('LIBRARY')))"
-      OUTPUT_VARIABLE PYTHON_LIBRARY
+      OUTPUT_VARIABLE PYTHON_LIBRARY_HINT
+      OUTPUT_STRIP_TRAILING_WHITESPACE
       ERROR_QUIET)
-    STRING(STRIP "${PYTHON_LIBRARY}" PYTHON_LIBRARY)
     # Remove extension if needed (it may be a static extension)
-    string(REGEX REPLACE "\\.[^.]*$" "" PYTHON_LIBRARY ${PYTHON_LIBRARY})
+    string(REGEX REPLACE "\\.[^.]*$" "" PYTHON_LIBRARY_HINT ${PYTHON_LIBRARY_HINT})
     # Add correct extension
-    IF(WIN32)
-      SET(PYTHON_LIBRARY "${PYTHON_LIBRARY}.bat")
-    ELSEIF(APPLE)
-      SET(PYTHON_LIBRARY "${PYTHON_LIBRARY}.dylib")
+    IF(APPLE)
+      SET(PYTHON_LIBRARY_HINT "${PYTHON_LIBRARY_HINT}.dylib")
     ELSE()
-      SET(PYTHON_LIBRARY "${PYTHON_LIBRARY}.so")
+      SET(PYTHON_LIBRARY_HINT "${PYTHON_LIBRARY_HINT}.so")
     ENDIF()
   ENDIF(NOT DEFINED PYTHON_LIBRARY)
   # Retrieve the corresponding value of PYTHON_INCLUDE_DIR if it is not defined
@@ -97,6 +95,7 @@ ENDIF(DEFINED PYTHON_EXECUTABLE AND NOT WIN32)
 SET(PYTHONLIBS_VERSION_STRING ${PYTHON_VERSION_STRING})
 
 FIND_PACKAGE(PythonLibs ${ARGN})
+MESSAGE(STATUS "PythonLibrary hint: ${PYTHON_LIBRARY_HINT}") # TODO: Should be removed later
 MESSAGE(STATUS "PythonLibraries: ${PYTHON_LIBRARIES}")
 IF (NOT ${PYTHONLIBS_FOUND} STREQUAL TRUE)
    MESSAGE(FATAL_ERROR "Python has not been found.")
