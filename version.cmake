@@ -1,4 +1,4 @@
-# Copyright (C) 2008-2018 LAAS-CNRS, JRL AIST-CNRS, INRIA.
+# Copyright (C) 2008-2019 LAAS-CNRS, JRL AIST-CNRS, INRIA.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 #  This mechanism makes sure that version number is always up-to-date and
 #  coherent (i.e. strictly increasing as commits are made).
 #
-#  There is two cases:
+#  There is three cases:
 #
 #  - the software comes from a release (stable version). In this case, the
 #    software is retrieved through a tarball which does not contain the ``.git``
@@ -53,6 +53,9 @@
 #    - ``0.5-2-034f`` if there is no uncommitted changes,
 #    - ``0.5-2-034f-dirty`` if there is some uncommitted changes.
 #
+#  - the software comes with a package.xml file at the root of the project (for ROS build essentially)
+#    then the module extracts the version number which is declared inside between the tag <version>x.y.z<\version>
+#
 MACRO(VERSION_COMPUTE)
   SET(PROJECT_STABLE False)
 
@@ -64,7 +67,7 @@ MACRO(VERSION_COMPUTE)
   IF(EXISTS ${PROJECT_SOURCE_DIR}/.version)
     # Yes, use it. This is a stable version.
     FILE(STRINGS .version PROJECT_VERSION)
-    SET(PROJECT_STABLE True)
+    SET(PROJECT_STABLE TRUE)
   ELSE(EXISTS ${PROJECT_SOURCE_DIR}/.version)
     # No, there is no '.version' file. Deduce the version from git.
 
@@ -97,10 +100,8 @@ MACRO(VERSION_COMPUTE)
       )
 
     # Check if the tree is clean.
-    IF(NOT GIT_DIFF_INDEX_RESULT AND NOT GIT_DIFF_INDEX_OUTPUT)
-      SET(PROJECT_DIRTY False)
-    ELSE()
-      SET(PROJECT_DIRTY True)
+    IF(GIT_DIFF_INDEX_RESULT OR GIT_DIFF_INDEX_OUTPUT)
+      SET(PROJECT_DIRTY TRUE)
     ENDIF()
 
     # Check if git describe worked and store the returned version number.
@@ -125,14 +126,33 @@ MACRO(VERSION_COMPUTE)
       # I.e. 1.0, 2, 0.1.3 are stable but 0.2.4-1-dg43 is unstable.
       STRING(REGEX MATCH "-" PROJECT_STABLE "${PROJECT_VERSION}")
       IF(NOT PROJECT_STABLE STREQUAL -)
-        SET(PROJECT_STABLE True)
+        SET(PROJECT_STABLE TRUE)
       ELSE()
-        SET(PROJECT_STABLE False)
+        SET(PROJECT_STABLE FALSE)
       ENDIF()
     ENDIF()
 
+    IF(GIT_DESCRIBE_RESULT) # git has failed to retrieve the project version
+      # Check if a package.xml file exists and try to extract the version from it
+      IF(EXISTS ${PROJECT_SOURCE_DIR}/package.xml)
+        FILE(READ "${PROJECT_SOURCE_DIR}/package.xml" PACKAGE_XML)
+        MESSAGE(STATUS "PACKAGE_XML: ${PACKAGE_XML}")
+        EXECUTE_PROCESS(COMMAND cat "${PROJECT_SOURCE_DIR}/package.xml"
+                        COMMAND grep <version
+                        COMMAND cut -f2 -d >
+                        COMMAND cut -f1 -d <
+                        OUTPUT_STRIP_TRAILING_WHITESPACE
+                        #COMMAND_ECHO STDOUT
+                        OUTPUT_VARIABLE PACKAGE_XML_VERSION)
+        MESSAGE(STATUS "CMAKE: ${PACKAGE_XML_VERSION}")
+        IF(NOT "${PACKAGE_XML_VERSION}" STREQUAL "")
+          SET(PROJECT_VERSION ${PACKAGE_XML_VERSION})
+        ENDIF(NOT "${PACKAGE_XML_VERSION}" STREQUAL "")
+      ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/package.xml)
+    ENDIF(GIT_DESCRIBE_RESULT)
+
     # Append dirty if the project is dirty.
-    IF(PROJECT_DIRTY)
+    IF(DEFINED PROJECT_DIRTY)
       SET(PROJECT_VERSION "${PROJECT_VERSION}-dirty")
     ENDIF()
   ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/.version)
@@ -177,3 +197,4 @@ MACRO(SPLIT_VERSION_NUMBER VERSION
     ENDIF()
   ENDIF()
 ENDMACRO()
+
