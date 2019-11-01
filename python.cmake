@@ -65,21 +65,31 @@ MESSAGE(STATUS "PythonInterp: ${PYTHON_EXECUTABLE}")
 IF(DEFINED PYTHON_EXECUTABLE AND NOT WIN32)
   # Retrieve the corresponding value of PYTHON_LIBRARY if it is not defined
   IF(NOT DEFINED PYTHON_LIBRARY)
-      EXECUTE_PROCESS(
-        COMMAND "${PYTHON_EXECUTABLE}" "-c"
-        "import distutils.sysconfig as sysconfig; print(sysconfig.get_config_var('LIBDIR'))"
-        OUTPUT_VARIABLE PYTHON_LIBRARY
-        ERROR_QUIET)
-      STRING(STRIP "${PYTHON_LIBRARY}" PYTHON_LIBRARY)
+    EXECUTE_PROCESS(
+      COMMAND "${PYTHON_EXECUTABLE}" "-c"
+      "import distutils.sysconfig as sysconfig; import os; print(os.path.join(sysconfig.get_config_var('LIBDIR'),sysconfig.get_config_var('LIBRARY')))"
+      OUTPUT_VARIABLE PYTHON_LIBRARY
+      ERROR_QUIET)
+    STRING(STRIP "${PYTHON_LIBRARY}" PYTHON_LIBRARY)
+    # Remove extension if needed (it may be a static extension)
+    string(REGEX REPLACE "\\.[^.]*$" "" PYTHON_LIBRARY ${PYTHON_LIBRARY})
+    # Add correct extension
+    IF(WIN32)
+      SET(PYTHON_LIBRARY "${PYTHON_LIBRARY}.bat")
+    ELSEIF(APPLE)
+      SET(PYTHON_LIBRARY "${PYTHON_LIBRARY}.dylib")
+    ELSE()
+      SET(PYTHON_LIBRARY "${PYTHON_LIBRARY}.so")
+    ENDIF()
   ENDIF(NOT DEFINED PYTHON_LIBRARY)
   # Retrieve the corresponding value of PYTHON_INCLUDE_DIR if it is not defined
   IF(NOT DEFINED PYTHON_INCLUDE_DIR)
-      EXECUTE_PROCESS(
-        COMMAND "${PYTHON_EXECUTABLE}" "-c"
-        "import distutils.sysconfig as sysconfig; print(sysconfig.get_python_inc())"
-        OUTPUT_VARIABLE PYTHON_INCLUDE_DIR
-        ERROR_QUIET)
-      STRING(STRIP "${PYTHON_INCLUDE_DIR}" PYTHON_INCLUDE_DIR)
+    EXECUTE_PROCESS(
+      COMMAND "${PYTHON_EXECUTABLE}" "-c"
+      "import distutils.sysconfig as sysconfig; print(sysconfig.get_python_inc())"
+      OUTPUT_VARIABLE PYTHON_INCLUDE_DIR
+      ERROR_QUIET)
+    STRING(STRIP "${PYTHON_INCLUDE_DIR}" PYTHON_INCLUDE_DIR)
   ENDIF(NOT DEFINED PYTHON_INCLUDE_DIR)
 ENDIF(DEFINED PYTHON_EXECUTABLE AND NOT WIN32)
 
