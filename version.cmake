@@ -78,6 +78,19 @@ MACRO(VERSION_COMPUTE)
       SET(PROJECT_VERSION UNKNOWN)
     ENDIF()
 
+    # Check whether the repository is shallow or not
+    EXECUTE_PROCESS(COMMAND ${GIT} rev-parse --git-dir
+                    OUTPUT_VARIABLE GIT_PROJECT_DIR
+                    OUTPUT_STRIP_TRAILING_WHITESPACE)
+    IF(IS_DIRECTORY "${GIT_PROJECT_DIR}/shallow")
+      SET(IS_SHALLOW TRUE)
+    ELSE(IS_DIRECTORY "${GIT_PROJECT_DIR}/shallow")
+      SET(IS_SHALLOW FALSE)
+    ENDIF(IS_DIRECTORY "${GIT_PROJECT_DIR}/shallow")
+    IF(IS_SHALLOW)
+      EXECUTE_PROCESS(COMMAND ${GIT} fetch --unshallow)
+    ENDIF(IS_SHALLOW)
+
     # Run describe: search for *signed* tags starting with v, from the HEAD and
     # display only the first four characters of the commit id.
     EXECUTE_PROCESS(
