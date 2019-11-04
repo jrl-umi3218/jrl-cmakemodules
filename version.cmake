@@ -52,6 +52,9 @@
 #
 #    - ``0.5-2-034f`` if there is no uncommitted changes,
 #    - ``0.5-2-034f-dirty`` if there is some uncommitted changes.
+#     
+#    If the current repository is a shallow copy, then the function git fecth --unshallow is called to
+#    allow the computation of version from a git tag.  
 #
 #  - the software comes with a package.xml file at the root of the project (for ROS build essentially)
 #    then the module extracts the version number which is declared inside between the tag <version>x.y.z<\version>
