@@ -256,7 +256,7 @@ ENDMACRO()
 #
 # PKG_CONFIG_STRING	: string passed to pkg-config to check the version.
 #			  Typically, this string looks like:
-#                         ``my-package >= 0.5''
+#                         ``my-package>=0.5''
 #
 MACRO(ADD_DEPENDENCY P_REQUIRED COMPILE_TIME_ONLY PKG_CONFIG_STRING PKG_CONFIG_DEBUG_STRING)
   _PARSE_PKG_CONFIG_STRING ("${PKG_CONFIG_STRING}" LIBRARY_NAME PREFIX)
@@ -495,12 +495,12 @@ ENDMACRO(_GET_PKG_CONFIG_DEBUG_STRING)
 #     be found.
 #
 #     :PKG_CONFIG_STRING: string passed to pkg-config to check the version.
-#       Typically, this string looks like: ``my-package >= 0.5``
+#       Typically, this string looks like: ``my-package>=0.5``
 #
 #     :PKG_CONFIG_DEBUG_STRING: (optional) string passed to pkg-config to
 #       check the version. The package found this way will be used in place
 #       of the first provided if the build is happening in DEBUG mode.
-#       This string might look like: ``my-package_d >= 0.5``
+#       This string might look like: ``my-package_d>=0.5``
 #
 #     An optional argument can be passed to define an alternate PKG_CONFIG_STRING
 #     for debug builds. It should follow the same rule as PKG_CONFIG_STRING.
@@ -519,12 +519,12 @@ ENDMACRO(ADD_REQUIRED_DEPENDENCY)
 #     be found.
 #
 #     :PKG_CONFIG_STRING: string passed to pkg-config to check the version.
-#       Typically, this string looks like: ``my-package >= 0.5``
+#       Typically, this string looks like: ``my-package>=0.5``
 #
 #     :PKG_CONFIG_DEBUG_STRING: (optional) string passed to pkg-config to
 #       check the version. The package found this way will be used in place
 #       of the first provided if the build is happening in DEBUG mode.
-#       This string might look like: ``my-package_d >= 0.5``
+#       This string might look like: ``my-package_d>=0.5``
 #
 #     An optional argument can be passed to define an alternate PKG_CONFIG_STRING
 #     for debug builds. It should follow the same rule as PKG_CONFIG_STRING.
@@ -544,12 +544,12 @@ ENDMACRO(ADD_OPTIONAL_DEPENDENCY)
 #     of the PROJECT.
 #
 #     :PKG_CONFIG_STRING: string passed to pkg-config to check the version.
-#       Typically, this string looks like: ``my-package >= 0.5``
+#       Typically, this string looks like: ``my-package>=0.5``
 #
 #     :PKG_CONFIG_DEBUG_STRING: (optional) string passed to pkg-config to
 #       check the version. The package found this way will be used in place
 #       of the first provided if the build is happening in DEBUG mode.  This
-#       string might look like: ``my-package_d >= 0.5``
+#       string might look like: ``my-package_d>=0.5``
 #
 #
 MACRO(ADD_COMPILE_DEPENDENCY PKG_CONFIG_STRING)
