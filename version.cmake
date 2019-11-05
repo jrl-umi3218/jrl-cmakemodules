@@ -52,7 +52,7 @@
 #
 #    - ``0.5-2-034f`` if there is no uncommitted changes,
 #    - ``0.5-2-034f-dirty`` if there is some uncommitted changes.
-#
+#     
 #  - the software comes with a package.xml file at the root of the project (for ROS build essentially)
 #    then the module extracts the version number which is declared inside between the tag <version>x.y.z<\version>
 #
@@ -77,6 +77,24 @@ MACRO(VERSION_COMPUTE)
       MESSAGE("Warning: failed to compute the version number, git not found.")
       SET(PROJECT_VERSION UNKNOWN)
     ENDIF()
+
+    # Check whether the repository is shallow or not
+    EXECUTE_PROCESS(COMMAND ${GIT} rev-parse --git-dir
+                    OUTPUT_VARIABLE GIT_PROJECT_DIR
+                    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                    OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+    SET(GIT_PROJECT_DIR "${PROJECT_SOURCE_DIR}/${GIT_PROJECT_DIR}")
+    IF(IS_DIRECTORY "${GIT_PROJECT_DIR}/shallow")
+      SET(IS_SHALLOW TRUE)
+    ELSE(IS_DIRECTORY "${GIT_PROJECT_DIR}/shallow")
+      SET(IS_SHALLOW FALSE)
+    ENDIF(IS_DIRECTORY "${GIT_PROJECT_DIR}/shallow")
+    IF(IS_SHALLOW)
+      #EXECUTE_PROCESS(COMMAND ${GIT} fetch --unshallow)
+      MESSAGE(WARNING "It appears that your git repository is a shallow copy, meaning that the history has been truncated\n.
+                      Please consider updating your git repository with `git fetch --unshallow` in order to download the full history with tags to recover the current release version.") 
+    ENDIF(IS_SHALLOW)
 
     # Run describe: search for *signed* tags starting with v, from the HEAD and
     # display only the first four characters of the commit id.
