@@ -1,4 +1,4 @@
-# Copyright (C) 2017 LAAS-CNRS, JRL AIST-CNRS.
+# Copyright (C) 2017-2019 LAAS-CNRS, JRL AIST-CNRS, INRIA.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -55,8 +55,18 @@ MACRO(ADD_GROUP GROUP_NAME FILENAMES)
     SET(prefix "")
   ENDIF()
 
+  MESSAGE(STATUS "bin dir: ${${PROJECT_NAME}_BINARY_DIR}")
   FOREACH(filename ${${FILENAMES}})
     GET_FILENAME_COMPONENT(filenamePath ${filename} PATH)
+    MESSAGE(STATUS "file before: ${filenamePath}")
+    STRING(REGEX REPLACE "${${PROJECT_NAME}_BINARY_DIR}" "" filenamePath "${filenamePath}")
+    STRING(REGEX REPLACE "//" "/" filenamePath "${filenamePath}")
+    STRING(REGEX REPLACE "include" "" filenamePath "${filenamePath}")
+    STRING(REGEX REPLACE "//" "/" filenamePath "${filenamePath}")
+    STRING(REGEX REPLACE "${PROJECT_NAME}" "" filenamePath "${filenamePath}")
+    STRING(REGEX REPLACE "//" "/" filenamePath "${filenamePath}")
+    MESSAGE(STATUS "file after: ${filenamePath}")
+    #STRING(REGEX REPLACE "${${PROJECT_NAME}_BINARY_DIR}" "" filenamePath ${filenamePath})
     IF(NOT (filenamePath STREQUAL ""))
       IF(NOT ("${prefix}" STREQUAL ""))
         STRING(REGEX REPLACE "${prefix}" "" filenamePath "${filenamePath}/")
@@ -77,6 +87,7 @@ ENDMACRO(ADD_GROUP)
 # Add FILENAMES to "Header Files" group when using IDE Cmake Generator
 #
 MACRO(ADD_HEADER_GROUP FILENAMES)
+  MESSAGE(STATUS "ADD_HEADER_GROUP: ${FILENAMES}")
   ADD_GROUP("Header Files" ${FILENAMES})
 ENDMACRO(ADD_HEADER_GROUP FILENAMES)
 
