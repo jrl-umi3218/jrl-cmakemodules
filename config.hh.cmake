@@ -13,6 +13,10 @@
 # define @LIBRARY_NAME@_MINOR_VERSION @PROJECT_VERSION_MINOR_CONFIG@
 # define @LIBRARY_NAME@_PATCH_VERSION @PROJECT_VERSION_PATCH_CONFIG@
 
+#define @LIBRARY_NAME@_VERSION_AT_LEAST(major, minor, patch) (@LIBRARY_NAME@_MAJOR_VERSION>major || (@LIBRARY_NAME@_MAJOR_VERSION>=major && \
+                                                             (@LIBRARY_NAME@_MINOR_VERSION>minor || (@LIBRARY_NAME@_MINOR_VERSION>=minor && \
+                                                                                                     @LIBRARY_NAME@_PATCH_VERSION>=patch))))
+
 // Handle portable symbol export.
 // Defining manually which symbol should be exported is required
 // under Windows whether MinGW or MSVC is used.
