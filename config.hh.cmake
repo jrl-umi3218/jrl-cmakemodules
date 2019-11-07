@@ -7,7 +7,7 @@
 # define @LIBRARY_NAME@_CONFIG_HH
 
 // Package version (header).
-# define @LIBRARY_NAME@_VERSION_UNKNOWN_TAG -1 // Used to mention that the current version is unknown.
+# define @LIBRARY_NAME@_VERSION_UNKNOWN_TAG 0 // Used to mention that the current version is unknown.
 # define @LIBRARY_NAME@_VERSION "@PROJECT_VERSION@"
 # define @LIBRARY_NAME@_MAJOR_VERSION @PROJECT_VERSION_MAJOR_CONFIG@
 # define @LIBRARY_NAME@_MINOR_VERSION @PROJECT_VERSION_MINOR_CONFIG@
