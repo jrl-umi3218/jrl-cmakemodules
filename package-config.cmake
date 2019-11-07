@@ -46,6 +46,7 @@ set(PROJECT_CONFIG "${GENERATED_DIR}/${PROJECT_NAME}Config.cmake")
 set(TARGETS_EXPORT_NAME "${PROJECT_NAME}Targets")
 set(namespace "${PROJECT_NAME}::")
 
+set(_PACKAGE_CONFIG_DEPENDENCIES_PROJECTS "" CACHE INTERNAL "")
 set(_PACKAGE_CONFIG_DEPENDENCIES "" CACHE INTERNAL "")
 ENDMACRO(_SETUP_PROJECT_PACKAGE_INIT)
 
@@ -56,6 +57,7 @@ ENDMACRO(_SETUP_PROJECT_PACKAGE_INIT)
 #   the generated config script. All arguments are passed to find_package
 #
 MACRO(ADD_PROJECT_DEPENDENCY)
+  list(APPEND _PACKAGE_CONFIG_DEPENDENCIES_PROJECTS "${ARGV0}")
   string(REPLACE ";" " " PACKAGE_ARGS "${ARGN}")
   if(${CMAKE_VERSION} VERSION_LESS "3.15.0")
     list(APPEND _PACKAGE_CONFIG_DEPENDENCIES "find_package(${PACKAGE_ARGS})")
@@ -102,6 +104,8 @@ set(VERSION_CONFIG "${GENERATED_DIR}/${PROJECT_NAME}ConfigVersion.cmake")
 set(PROJECT_CONFIG "${GENERATED_DIR}/${PROJECT_NAME}Config.cmake")
 set(TARGETS_EXPORT_NAME "${PROJECT_NAME}Targets")
 set(namespace "${PROJECT_NAME}::")
+string(TOUPPER "${PROJECT_NAME}" PROJECT_NAME_UPPER)
+string(REGEX REPLACE "[^a-zA-Z0-9]" "_" PROJECT_NAME_UPPER "${PROJECT_NAME_UPPER}")
 
 # Include module with fuction 'write_basic_package_version_file'
 include(CMakePackageConfigHelpers)
