@@ -26,10 +26,11 @@
 # define @LIBRARY_NAME@_CONFIG_HH
 
 // Package version (header).
+# define @LIBRARY_NAME@_VERSION_UNKNOWN_TAG // Used to mention that the current version is unknown.
 # define @LIBRARY_NAME@_VERSION "@PROJECT_VERSION@"
-# define @LIBRARY_NAME@_MAJOR_VERSION @PROJECT_VERSION_MAJOR@
-# define @LIBRARY_NAME@_MINOR_VERSION @PROJECT_VERSION_MINOR@
-# define @LIBRARY_NAME@_PATCH_VERSION @PROJECT_VERSION_PATCH@
+# define @LIBRARY_NAME@_MAJOR_VERSION @PROJECT_VERSION_MAJOR_CONFIG@
+# define @LIBRARY_NAME@_MINOR_VERSION @PROJECT_VERSION_MINOR_CONFIG@
+# define @LIBRARY_NAME@_PATCH_VERSION @PROJECT_VERSION_PATCH_CONFIG@
 
 // Handle portable symbol export.
 // Defining manually which symbol should be exported is required
