@@ -319,8 +319,10 @@ do
     doxygen_url="https://${git_dep_organization}.github.io/${git_dep_project}/doxygen/HEAD/"
     git_dep_pc=`find /tmp/_ci/build/$git_dep \( ! -regex '.*/\..*' \) -name '*.pc'`
     git_dep_pc=`basename $git_dep_pc .pc`
-    git_dep_doxygen=`pkg-config --variable=doxygendocdir $git_dep_pc`
-    find . -type f -print0 |xargs -0 sed -i "s@$git_dep_doxygen@$doxygen_url@g"
+    git_dep_doxygen=`pkg-config --variable=doxygendocdir $git_dep_pc || echo ""`
+    if `test x${git_dep_doxygen} != x`; then
+      find . -type f -print0 |xargs -0 sed -i "s@$git_dep_doxygen@$doxygen_url@g"
+    fi
   fi
 done
 cd "$tmp/project/"
