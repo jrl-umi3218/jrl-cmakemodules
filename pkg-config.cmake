@@ -220,17 +220,30 @@ MACRO(_SETUP_PROJECT_PKG_CONFIG_FINALIZE)
   ENDIF()
 ENDMACRO(_SETUP_PROJECT_PKG_CONFIG_FINALIZE)
 
-# _PARSE_PKG_CONFIG_STRING (PKG_CONFIG_STRING _PKG_LIB_NAME_VAR _PKG_PREFIX_VAR)
+# _PARSE_PKG_CONFIG_STRING (PKG_CONFIG_STRING _PKG_LIB_NAME_VAR _PKG_PREFIX_VAR _PKG_CONFIG_STRING_NOSPACE_VAR)
 # ----------------------------------------------------------
 # 
-# Retrieve the library name and the prefix used for CMake variable names
-# from the pkg-config string. For instance, `my-package > 0.4` results in
+# Retrieve from the pkg-config string:
+# - the library name,
+# - the prefix used for CMake variable names,
+# - a variant without spaces around the operator (if there is an operator),
+#   as expected by cmake's CHECK_PKG_MODULE.
+# . For instance, `my-package > 0.4` results in
 # - _PKG_LIB_NAME_VAR <- my-package
 # - _PKG_PREFIX_VAR <- MY_PACKAGE
-MACRO(_PARSE_PKG_CONFIG_STRING PKG_CONFIG_STRING _PKG_LIB_NAME_VAR _PKG_PREFIX_VAR)
-  # Retrieve the left part of the equation to get package name.
-  STRING(REGEX MATCH "[^<>= ]+" ${_PKG_LIB_NAME_VAR} "${PKG_CONFIG_STRING}")
-  # And transform it into a valid variable prefix.
+# - _PKG_CONFIG_STRING_NOSPACE_VAR <- `my-package>0.4`
+# `my-package` results in
+# - _PKG_LIB_NAME_VAR <- my-package
+# - _PKG_PREFIX_VAR <- MY_PACKAGE
+# - _PKG_CONFIG_STRING_NOSPACE_VAR <- `my-package`
+MACRO(_PARSE_PKG_CONFIG_STRING PKG_CONFIG_STRING _PKG_LIB_NAME_VAR _PKG_PREFIX_VAR _PKG_CONFIG_NOSPACE_VAR)
+  # Decompose the equation
+  STRING(REGEX MATCH "([^ ]+)( (>|>=|=|<=|<) (.*))?" _UNUSED "${PKG_CONFIG_STRING}")
+  # Reconstruct the equation, without the space around the operator
+  SET(${_PKG_CONFIG_NOSPACE_VAR} "${CMAKE_MATCH_1}${CMAKE_MATCH_3}${CMAKE_MATCH_4}")
+  # The left part of the equation is the package name
+  SET(${_PKG_LIB_NAME_VAR} "${CMAKE_MATCH_1}")
+  # Transform it into a valid variable prefix.
   # 1. replace invalid characters into underscores.
   STRING(REGEX REPLACE "[^a-zA-Z0-9]" "_" ${_PKG_PREFIX_VAR} "${${_PKG_LIB_NAME_VAR}}")
   # 2. make it uppercase.
@@ -259,9 +272,9 @@ ENDMACRO()
 #                         ``my-package >= 0.5''
 #
 MACRO(ADD_DEPENDENCY P_REQUIRED COMPILE_TIME_ONLY PKG_CONFIG_STRING PKG_CONFIG_DEBUG_STRING)
-  _PARSE_PKG_CONFIG_STRING ("${PKG_CONFIG_STRING}" LIBRARY_NAME PREFIX)
+  _PARSE_PKG_CONFIG_STRING ("${PKG_CONFIG_STRING}" LIBRARY_NAME PREFIX PKG_CONFIG_STRING_NOSPACE)
   IF(NOT ${PKG_CONFIG_DEBUG_STRING} STREQUAL "")
-    _PARSE_PKG_CONFIG_STRING ("${PKG_CONFIG_DEBUG_STRING}" LIBRARY_DEBUG_NAME ${PREFIX}_DEBUG)
+    _PARSE_PKG_CONFIG_STRING ("${PKG_CONFIG_DEBUG_STRING}" LIBRARY_DEBUG_NAME ${PREFIX}_DEBUG PKG_CONFIG_DEBUG_STRING_NOSPACE)
   ENDIF()
 
   # Force redetection each time CMake is launched.
@@ -295,20 +308,20 @@ MACRO(ADD_DEPENDENCY P_REQUIRED COMPILE_TIME_ONLY PKG_CONFIG_STRING PKG_CONFIG_D
   # Search for the package.
   IF(${PP_REQUIRED})
     MESSAGE(STATUS "${PKG_CONFIG_STRING} is required.")
-    PKG_CHECK_MODULES("${PREFIX}" REQUIRED "${PKG_CONFIG_STRING}")
+    PKG_CHECK_MODULES("${PREFIX}" REQUIRED "${PKG_CONFIG_STRING_NOSPACE}")
   ELSE(${PP_REQUIRED})
     MESSAGE(STATUS "${PKG_CONFIG_STRING} is optional.")
-    PKG_CHECK_MODULES("${PREFIX}" "${PKG_CONFIG_STRING}")
+    PKG_CHECK_MODULES("${PREFIX}" "${PKG_CONFIG_STRING_NOSPACE}")
   ENDIF(${PP_REQUIRED})
 
   # Search for the debug package
   IF(DEFINED ${PREFIX}_DEBUG)
     IF(${P_DEBUG_REQUIRED})
       MESSAGE(STATUS "${PKG_CONFIG_DEBUG_STRING} is required")
-      PKG_CHECK_MODULES("${PREFIX}_DEBUG" REQUIRED "${PKG_CONFIG_DEBUG_STRING}")
+      PKG_CHECK_MODULES("${PREFIX}_DEBUG" REQUIRED "${PKG_CONFIG_DEBUG_STRING_NOSPACE}")
     ELSE(${P_DEBUG_REQUIRED})
       MESSAGE(STATUS "${PKG_CONFIG_DEBUG_STRING} is optional")
-      PKG_CHECK_MODULES("${PREFIX}_DEBUG" "${PKG_CONFIG_DEBUG_STRING}")
+      PKG_CHECK_MODULES("${PREFIX}_DEBUG" "${PKG_CONFIG_DEBUG_STRING_NOSPACE}")
     ENDIF(${P_DEBUG_REQUIRED})
   ENDIF()
 
