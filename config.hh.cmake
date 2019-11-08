@@ -17,6 +17,10 @@
                                                              (@LIBRARY_NAME@_MINOR_VERSION>minor || (@LIBRARY_NAME@_MINOR_VERSION>=minor && \
                                                                                                      @LIBRARY_NAME@_PATCH_VERSION>=patch))))
 
+#define @LIBRARY_NAME@_VERSION_AT_MOST(major, minor, patch) (@LIBRARY_NAME@_MAJOR_VERSION<major || (@LIBRARY_NAME@_MAJOR_VERSION<=major && \
+                                                            (@LIBRARY_NAME@_MINOR_VERSION<minor || (@LIBRARY_NAME@_MINOR_VERSION<=minor && \
+                                                                                                     @LIBRARY_NAME@_PATCH_VERSION<=patch))))
+
 // Handle portable symbol export.
 // Defining manually which symbol should be exported is required
 // under Windows whether MinGW or MSVC is used.
