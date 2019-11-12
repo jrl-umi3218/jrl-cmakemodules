@@ -13,6 +13,115 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+FUNCTION(_COMPUTE_VERSION_FROM_DOT_VERSION_FILE)
+  IF(EXISTS ${PROJECT_SOURCE_DIR}/.version)
+    # Yes, use it. This is a stable version.
+    FILE(STRINGS .version _PROJECT_VERSION)
+    SET(PROJECT_VERSION ${_PROJECT_VERSION} PARENT_SCOPE)
+    SET(PROJECT_STABLE TRUE PARENT_SCOPE)
+    MESSAGE(STATUS "Package version (.version): ${_PROJECT_VERSION}")
+  ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/.version)
+ENDFUNCTION()
+
+FUNCTION(_COMPUTE_VERSION_FROM_GIT_DESCRIBE)
+  FIND_PROGRAM(GIT git)
+  IF(GIT)
+    ####################################################################
+    # Check whether the repository is shallow or not
+    EXECUTE_PROCESS(COMMAND ${GIT} rev-parse --git-dir
+                    OUTPUT_VARIABLE GIT_PROJECT_DIR
+                    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                    OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+    SET(GIT_PROJECT_DIR "${PROJECT_SOURCE_DIR}/${GIT_PROJECT_DIR}")
+    IF(IS_DIRECTORY "${GIT_PROJECT_DIR}/shallow")
+      SET(IS_SHALLOW TRUE)
+    ELSE(IS_DIRECTORY "${GIT_PROJECT_DIR}/shallow")
+      SET(IS_SHALLOW FALSE)
+    ENDIF(IS_DIRECTORY "${GIT_PROJECT_DIR}/shallow")
+    IF(IS_SHALLOW)
+      #EXECUTE_PROCESS(COMMAND ${GIT} fetch --unshallow)
+      MESSAGE(WARNING "It appears that your git repository is a shallow copy, meaning that the history has been truncated\n.
+                      Please consider updating your git repository with `git fetch --unshallow` in order to download the full history with tags to recover the current release version.") 
+    ENDIF(IS_SHALLOW)
+    ####################################################################
+
+    ####################################################################
+    # Run describe: search for *signed* tags starting with v, from the HEAD and
+    # display only the first four characters of the commit id.
+    EXECUTE_PROCESS(
+      COMMAND ${GIT} describe --tags --abbrev=4 --match=v* HEAD
+      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+      RESULT_VARIABLE GIT_DESCRIBE_RESULT
+      OUTPUT_VARIABLE GIT_DESCRIBE_OUTPUT
+      ERROR_VARIABLE GIT_DESCRIBE_ERROR
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+      )
+
+    # Run diff-index to check whether the tree is clean or not.
+    EXECUTE_PROCESS(
+      COMMAND ${GIT} diff-index --name-only HEAD
+      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+      RESULT_VARIABLE GIT_DIFF_INDEX_RESULT
+      OUTPUT_VARIABLE GIT_DIFF_INDEX_OUTPUT
+      ERROR_VARIABLE GIT_DIFF_INDEX_ERROR
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+      )
+
+    # Check if the tree is clean.
+    IF(GIT_DIFF_INDEX_RESULT OR GIT_DIFF_INDEX_OUTPUT)
+      SET(PROJECT_DIRTY TRUE PARENT_SCOPE)
+    ENDIF()
+
+    # Check if git describe worked and store the returned version number.
+    IF(NOT GIT_DESCRIBE_RESULT)
+      # Get rid of the tag prefix to generate the final version.
+      STRING(REGEX REPLACE "^v" "" _PROJECT_VERSION "${GIT_DESCRIBE_OUTPUT}")
+
+      # Append dirty if the project is dirty.
+      IF(DEFINED PROJECT_DIRTY)
+        SET(_PROJECT_VERSION "${_PROJECT_VERSION}-dirty")
+      ENDIF()
+
+      IF(_PROJECT_VERSION)
+        SET(PROJECT_VERSION ${_PROJECT_VERSION} PARENT_SCOPE)
+      ENDIF()
+
+      # If there is a dash in the version number, it is an unstable release,
+      # otherwise it is a stable release.
+      # I.e. 1.0, 2, 0.1.3 are stable but 0.2.4-1-dg43 is unstable.
+      STRING(REGEX MATCH "-" PROJECT_STABLE "${_PROJECT_VERSION}")
+      IF(NOT PROJECT_STABLE STREQUAL -)
+        SET(PROJECT_STABLE TRUE PARENT_SCOPE)
+      ELSE()
+        SET(PROJECT_STABLE FALSE PARENT_SCOPE)
+      ENDIF()
+
+      MESSAGE(STATUS "Package version (git describe): ${_PROJECT_VERSION}")
+    ENDIF()
+    ####################################################################
+  ENDIF()
+ENDFUNCTION()
+
+FUNCTION(_COMPUTE_VERSION_FROM_ROS_PACKAGE_XML_FILE)
+  IF(EXISTS ${PROJECT_SOURCE_DIR}/package.xml)
+    FILE(READ "${PROJECT_SOURCE_DIR}/package.xml" PACKAGE_XML)
+    MESSAGE(STATUS "PACKAGE_XML: ${PACKAGE_XML}")
+    EXECUTE_PROCESS(COMMAND cat "${PROJECT_SOURCE_DIR}/package.xml"
+      COMMAND grep <version
+      COMMAND cut -f2 -d >
+      COMMAND cut -f1 -d <
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+      #COMMAND_ECHO STDOUT
+      OUTPUT_VARIABLE PACKAGE_XML_VERSION)
+    IF(NOT "${PACKAGE_XML_VERSION}" STREQUAL "")
+      SET(PROJECT_VERSION ${PACKAGE_XML_VERSION} PARENT_SCOPE)
+    ENDIF(NOT "${PACKAGE_XML_VERSION}" STREQUAL "")
+    MESSAGE(STATUS "Package version (ROS package.xml): ${PACKAGE_XML_VERSION}")
+  ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/package.xml)
+ENDFUNCTION()
+
+
 #.rst:
 # .. command:: VERSION_COMPUTE
 #
@@ -62,118 +171,23 @@ MACRO(VERSION_COMPUTE)
   IF("${PROJECT_SOURCE_DIR}" STREQUAL "")
     SET(PROJECT_SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/..")
   ENDIF()
+  IF(NOT DEFINED PROJECT_VERSION_COMPUTATION_METHODS)
+    LIST(APPEND PROJECT_VERSION_COMPUTATION_METHODS "DOT_VERSION_FILE" "GIT_DESCRIBE")
+  ENDIF()
 
-  # Check if a version is embedded in the project.
-  IF(EXISTS ${PROJECT_SOURCE_DIR}/.version)
-    # Yes, use it. This is a stable version.
-    FILE(STRINGS .version PROJECT_VERSION)
-    SET(PROJECT_STABLE TRUE)
-  ELSE(EXISTS ${PROJECT_SOURCE_DIR}/.version)
-    # No, there is no '.version' file. Deduce the version from git.
-
-    # Search for git.
-    FIND_PROGRAM(GIT git)
-    IF(NOT GIT)
-      MESSAGE("Warning: failed to compute the version number, git not found.")
-      SET(PROJECT_VERSION UNKNOWN)
-    ENDIF()
-
-    # Check whether the repository is shallow or not
-    EXECUTE_PROCESS(COMMAND ${GIT} rev-parse --git-dir
-                    OUTPUT_VARIABLE GIT_PROJECT_DIR
-                    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-                    OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-    SET(GIT_PROJECT_DIR "${PROJECT_SOURCE_DIR}/${GIT_PROJECT_DIR}")
-    IF(IS_DIRECTORY "${GIT_PROJECT_DIR}/shallow")
-      SET(IS_SHALLOW TRUE)
-    ELSE(IS_DIRECTORY "${GIT_PROJECT_DIR}/shallow")
-      SET(IS_SHALLOW FALSE)
-    ENDIF(IS_DIRECTORY "${GIT_PROJECT_DIR}/shallow")
-    IF(IS_SHALLOW)
-      #EXECUTE_PROCESS(COMMAND ${GIT} fetch --unshallow)
-      MESSAGE(WARNING "It appears that your git repository is a shallow copy, meaning that the history has been truncated\n.
-                      Please consider updating your git repository with `git fetch --unshallow` in order to download the full history with tags to recover the current release version.") 
-    ENDIF(IS_SHALLOW)
-
-    # Run describe: search for *signed* tags starting with v, from the HEAD and
-    # display only the first four characters of the commit id.
-    EXECUTE_PROCESS(
-      COMMAND ${GIT} describe --tags --abbrev=4 --match=v* HEAD
-      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-      RESULT_VARIABLE GIT_DESCRIBE_RESULT
-      OUTPUT_VARIABLE GIT_DESCRIBE_OUTPUT
-      ERROR_VARIABLE GIT_DESCRIBE_ERROR
-      OUTPUT_STRIP_TRAILING_WHITESPACE
-      )
-
-    # Run diff-index to check whether the tree is clean or not.
-    EXECUTE_PROCESS(
-      COMMAND ${GIT} diff-index --name-only HEAD
-      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-      RESULT_VARIABLE GIT_DIFF_INDEX_RESULT
-      OUTPUT_VARIABLE GIT_DIFF_INDEX_OUTPUT
-      ERROR_VARIABLE GIT_DIFF_INDEX_ERROR
-      OUTPUT_STRIP_TRAILING_WHITESPACE
-      )
-
-    # Check if the tree is clean.
-    IF(GIT_DIFF_INDEX_RESULT OR GIT_DIFF_INDEX_OUTPUT)
-      SET(PROJECT_DIRTY TRUE)
-    ENDIF()
-
-    # Check if git describe worked and store the returned version number.
-    IF(GIT_DESCRIBE_RESULT)
-      MESSAGE(AUTHOR_WARNING
-        "Warning: failed to compute the version number,"
-        " 'git describe' failed:\n"
-        "\t" ${GIT_DESCRIBE_ERROR})
-      SET(PROJECT_VERSION UNKNOWN)
-    ELSE()
-      # Get rid of the tag prefix to generate the final version.
-      STRING(REGEX REPLACE "^v" "" PROJECT_VERSION "${GIT_DESCRIBE_OUTPUT}")
-      IF(NOT PROJECT_VERSION)
-	      MESSAGE(AUTHOR_WARNING
-	        "Warning: failed to compute the version number,"
-          "'git describe' returned an empty string.")
-        SET(PROJECT_VERSION UNKNOWN)
+  FOREACH(_computation_method ${PROJECT_VERSION_COMPUTATION_METHODS})
+    IF(NOT PROJECT_VERSION)
+      IF    (${_computation_method} STREQUAL "DOT_VERSION_FILE")
+        _COMPUTE_VERSION_FROM_DOT_VERSION_FILE()
+      ELSEIF(${_computation_method} STREQUAL "GIT_DESCRIBE")
+        _COMPUTE_VERSION_FROM_GIT_DESCRIBE()
+      ELSEIF(${_computation_method} STREQUAL "ROS_PACKAGE_XML_FILE")
+        _COMPUTE_VERSION_FROM_ROS_PACKAGE_XML_FILE()
+      ELSE  ()
+        MESSAGE(AUTHOR_WARNING "${_computation_method} is not a valid method to compute the project version.")
       ENDIF()
-
-      # If there is a dash in the version number, it is an unstable release,
-      # otherwise it is a stable release.
-      # I.e. 1.0, 2, 0.1.3 are stable but 0.2.4-1-dg43 is unstable.
-      STRING(REGEX MATCH "-" PROJECT_STABLE "${PROJECT_VERSION}")
-      IF(NOT PROJECT_STABLE STREQUAL -)
-        SET(PROJECT_STABLE TRUE)
-      ELSE()
-        SET(PROJECT_STABLE FALSE)
-      ENDIF()
-    ENDIF()
-
-    IF(GIT_DESCRIBE_RESULT) # git has failed to retrieve the project version
-      # Check if a package.xml file exists and try to extract the version from it
-      IF(EXISTS ${PROJECT_SOURCE_DIR}/package.xml)
-        FILE(READ "${PROJECT_SOURCE_DIR}/package.xml" PACKAGE_XML)
-        MESSAGE(STATUS "PACKAGE_XML: ${PACKAGE_XML}")
-        EXECUTE_PROCESS(COMMAND cat "${PROJECT_SOURCE_DIR}/package.xml"
-                        COMMAND grep <version
-                        COMMAND cut -f2 -d >
-                        COMMAND cut -f1 -d <
-                        OUTPUT_STRIP_TRAILING_WHITESPACE
-                        #COMMAND_ECHO STDOUT
-                        OUTPUT_VARIABLE PACKAGE_XML_VERSION)
-        MESSAGE(STATUS "CMAKE: ${PACKAGE_XML_VERSION}")
-        IF(NOT "${PACKAGE_XML_VERSION}" STREQUAL "")
-          SET(PROJECT_VERSION ${PACKAGE_XML_VERSION})
-        ENDIF(NOT "${PACKAGE_XML_VERSION}" STREQUAL "")
-      ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/package.xml)
-    ENDIF(GIT_DESCRIBE_RESULT)
-
-    # Append dirty if the project is dirty.
-    IF(DEFINED PROJECT_DIRTY)
-      SET(PROJECT_VERSION "${PROJECT_VERSION}-dirty")
-    ENDIF()
-  ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/.version)
+    ENDIF(NOT PROJECT_VERSION)
+  ENDFOREACH()
   
   # Set PROJECT_VERSION_{MAJOR,MINOR,PATCH} variables
   IF(PROJECT_VERSION)
