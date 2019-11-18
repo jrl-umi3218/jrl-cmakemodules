@@ -76,6 +76,9 @@
 #     This tells jrl-cmakemodules that you are using export functionalities so it will
 #     hook the installation of your configuration files. Defaults to false
 #
+#   Macros
+#   ------
+#
 
 # Please note that functions starting with an underscore are internal
 # functions and should not be used directly.
@@ -240,3 +243,29 @@ MACRO(SETUP_PROJECT_FINALIZE)
   LOGGING_FINALIZE()
 ENDMACRO(SETUP_PROJECT_FINALIZE)
 
+#.rst:
+# .. ifmode:: user
+#
+#   .. command:: COMPUTE_PROJECT_ARGS
+#
+#     Compute the arguments to be passed to command PROJECT.
+#     For instance::
+#
+#       COMPUTE_PROJECT_ARGS(PROJECT_ARGS)
+#       PROJECT(${PROJECT_NAME} ${PROJECT_ARGS})
+#
+#     :param VARIABLE: the variable where to write the result
+#
+MACRO(COMPUTE_PROJECT_ARGS VARIABLE)
+  IF(CMAKE_VERSION VERSION_GREATER "3.0.0")
+    CMAKE_POLICY(SET CMP0048 NEW)
+    SET(${VARIABLE} VERSION ${PROJECT_VERSION_FULL} LANGUAGES CXX)
+
+    # Append description for CMake >= 3.9
+    IF(CMAKE_VERSION VERSION_GREATER "3.9.0")
+      SET(${VARIABLE} ${VARIABLE} DESCRIPTION ${PROJECT_DESCRIPTION})
+    ENDIF(CMAKE_VERSION VERSION_GREATER "3.9.0")
+  ELSE(CMAKE_VERSION VERSION_GREATER "3.0.0")
+    SET(${VARIABLE} CXX)
+  ENDIF(CMAKE_VERSION VERSION_GREATER "3.0.0")
+ENDMACRO(COMPUTE_PROJECT_ARGS)
