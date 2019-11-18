@@ -121,49 +121,70 @@ FUNCTION(_COMPUTE_VERSION_FROM_ROS_PACKAGE_XML_FILE)
   ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/package.xml)
 ENDFUNCTION()
 
+#.rst:
+# .. ifmode:: user
+#
+#   .. variable:: PROJECT_VERSION_COMPUTATION_METHODS
+#
+#    List of methods used to compute the version number.
+#    Possible values are:
+#
+#    - *DOT_VERSION_FILE*:
+#
+#        If a .version file exists, interpret its content as the project version.
+#
+#    - *GIT_DESCRIBE*
+#
+#        ``git describe`` is used to retrieve the version number
+#        (see 'man git-describe'). This tool generates a version number from the git
+#        history. The version number follows this pattern ``TAG[-N-SHA1][-dirty]``,
+#        where:
+#      
+#        - ``TAG``: last matching tag (i.e. last signed tag starting with v, i.e. v0.1)
+#        - ``N``: number of commits since the last maching tag
+#        - ``SHA1``: sha1 of the current commit
+#        - ``-dirty``: added if the workig directory is dirty (there is some uncommitted
+#          changes).
+#
+#        For stable releases, i.e. the current commit is a matching tag, ``-N-SHA1`` is
+#        omitted. If the HEAD is on the signed tag v0.1, the version number will be
+#        0.1.
+#    
+#        If the HEAD is two commits after v0.5 and the last commit is 034f6d...
+#        The version number will be:
+#    
+#        - ``0.5-2-034f`` if there is no uncommitted changes,
+#        - ``0.5-2-034f-dirty`` if there is some uncommitted changes.
+#
+#    - *ROS_PACKAGE_XML_FILE*
+#
+#        If a package.xml file exists, interpret its content as a ROS package.xml file
+#        and extract the project version from its version tag.
+#
+#    .. note::
+#
+#      To safely compute the project version, you may consider the following cases:
+#
+#      - the software is retrieved through a tarball which does not contain the ``.git``
+#        directory. Hence, there is no way to search in the Git history to generate
+#        the version number.
+#
+#      - the softwares is retrieved through by clone a distant repository. In this case,
+#        the history may not be complete (shallow clone), thus the *GIT_DESCRIBE* method may fail.
+#
+#      - the *DOT_VERSION_FILE* and *ROS_PACKAGE_XML_FILE* will always work but
+#        forces the version number to be in the git tags and hardcoded in a file.
 
 #.rst:
-# .. command:: VERSION_COMPUTE
+# .. ifmode:: internal
 #
-#  Deduce automatically the version number.
-#  This mechanism makes sure that version number is always up-to-date and
-#  coherent (i.e. strictly increasing as commits are made).
+#   .. command:: VERSION_COMPUTE
 #
-#  There is three cases:
+#    Deduce the version number using the method as requested by
+#    :cmake:variable:`PROJECT_VERSION_COMPUTATION_METHODS`.
+#    The methods are called in order until one sets the variable ``PROJECT_VERSION``.
 #
-#  - the software comes from a release (stable version). In this case, the
-#    software is retrieved through a tarball which does not contain the ``.git``
-#    directory. Hence, there is no way to search in the Git history to generate
-#    the version number.
-#    In this case, a ``.version`` file is put at the top-directory of the source
-#    tree which contains the project version. Read the file to retrieve the
-#    version number.
-#
-#  - the softwares comes from git (possibly unstable version).
-#    ``git describe`` is used to retrieve the version number
-#    (see 'man git-describe'). This tool generates a version number from the git
-#    history. The version number follows this pattern:
-#
-#      ``TAG[-N-SHA1][-dirty]``
-#
-#    - ``TAG``: last matching tag (i.e. last signed tag starting with v, i.e. v0.1)
-#    - ``N``: number of commits since the last maching tag
-#    - ``SHA1``: sha1 of the current commit
-#    - ``-dirty``: added if the workig directory is dirty (there is some uncommitted
-#      changes).
-#
-#    For stable releases, i.e. the current commit is a matching tag, ``-N-SHA1`` is
-#    omitted. If the HEAD is on the signed tag v0.1, the version number will be
-#    0.1.
-#
-#    If the HEAD is two commits after v0.5 and the last commit is 034f6d...
-#    The version number will be:
-#
-#    - ``0.5-2-034f`` if there is no uncommitted changes,
-#    - ``0.5-2-034f-dirty`` if there is some uncommitted changes.
-#     
-#  - the software comes with a package.xml file at the root of the project (for ROS build essentially)
-#    then the module extracts the version number which is declared inside between the tag <version>x.y.z<\version>
+#    If `PROJECT_VERSION`` is already set, this macro does nothing.
 #
 MACRO(VERSION_COMPUTE)
   SET(PROJECT_STABLE False)
