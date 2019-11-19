@@ -246,26 +246,35 @@ ENDMACRO(SETUP_PROJECT_FINALIZE)
 #.rst:
 # .. ifmode:: user
 #
-#   .. command:: COMPUTE_PROJECT_ARGS
+#   .. command:: COMPUTE_PROJECT_ARGS (OUTPUT_VARIABLE [LANGUAGES <languages>...])
 #
 #     Compute the arguments to be passed to command PROJECT.
 #     For instance::
 #
-#       COMPUTE_PROJECT_ARGS(PROJECT_ARGS)
+#       COMPUTE_PROJECT_ARGS(PROJECT_ARGS LANGUAGES CXX)
 #       PROJECT(${PROJECT_NAME} ${PROJECT_ARGS})
 #
-#     :param VARIABLE: the variable where to write the result
+#     :param OUTPUT_VARIABLE: the variable where to write the result
+#     :param LANGUAGES: the project languages. It defaults to CXX.
 #
-MACRO(COMPUTE_PROJECT_ARGS VARIABLE)
+MACRO(COMPUTE_PROJECT_ARGS)
+  CMAKE_PARSE_ARGUMENTS(_project "" "VARIABLE" "LANGUAGES" ${ARGN})
+  IF(NOT DEFINED _project_LANGUAGES)
+    SET(_project_LANGUAGES "CXX")
+  ENDIF()
+
   IF(CMAKE_VERSION VERSION_GREATER "3.0.0")
+    # CMake >= 3.0
     CMAKE_POLICY(SET CMP0048 NEW)
-    SET(${VARIABLE} VERSION ${PROJECT_VERSION_FULL} LANGUAGES CXX)
+    SET(${_project_VARIABLE} VERSION ${PROJECT_VERSION_FULL} LANGUAGES ${_project_LANGUAGES})
 
     # Append description for CMake >= 3.9
     IF(CMAKE_VERSION VERSION_GREATER "3.9.0")
-      SET(${VARIABLE} ${VARIABLE} DESCRIPTION ${PROJECT_DESCRIPTION})
+      SET(${_project_VARIABLE} ${_project_VARIABLE} DESCRIPTION ${PROJECT_DESCRIPTION})
     ENDIF(CMAKE_VERSION VERSION_GREATER "3.9.0")
   ELSE(CMAKE_VERSION VERSION_GREATER "3.0.0")
-    SET(${VARIABLE} CXX)
+
+    # CMake < 3.0
+    SET(${_project_VARIABLE} ${_project_LANGUAGES})
   ENDIF(CMAKE_VERSION VERSION_GREATER "3.0.0")
 ENDMACRO(COMPUTE_PROJECT_ARGS)
