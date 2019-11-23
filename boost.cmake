@@ -193,11 +193,12 @@ MACRO(SEARCH_FOR_BOOST)
 ENDMACRO(SEARCH_FOR_BOOST)
 
 #.rst:
-# .. command:: TARGET_LINK_BOOST_PYTHON (TARGET)
+# .. command:: TARGET_LINK_BOOST_PYTHON (TARGET <PRIVATE|PUBLIC|INTERFACE>)
 #
 #   Link target againt boost_python library.
 #
-#   :TARGET: is either a library or an executable
+#   :target: is either a library or an executable
+#   :private,public,interface: The PUBLIC, PRIVATE and INTERFACE keywords can be used to specify both the link dependencies and the link interface.
 #
 #   On darwin systems, boost_python is not linked against any python library.
 #   This linkage is resolved at execution time via the python interpreter.
@@ -205,6 +206,10 @@ ENDMACRO(SEARCH_FOR_BOOST)
 #   Otherwise, for executables we need to link to a specific version of python.
 #
 MACRO(TARGET_LINK_BOOST_PYTHON target)
+  IF(${ARGC} GREATER 1)
+    SET(PUBLIC_KEYWORD ${ARGV1})
+  ENDIF()
+
   IF(APPLE)
     GET_TARGET_PROPERTY(TARGET_TYPE ${target} TYPE)
 
