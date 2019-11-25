@@ -7,9 +7,8 @@ set(PROJECT_DESCRIPTION "A HPP project example")
 # hpp.cmake includes base.cmake.
 include(cmake/hpp.cmake)
 
-# Tell CMake that we compute the PROJECT_VERSION manually.
-CMAKE_POLICY(SET CMP0048 OLD)
-project(${PROJECT_NAME} CXX)
+COMPUTE_PROJECT_ARGS(PROJECT_ARGS LANGUAGES CXX)
+project(${PROJECT_NAME} ${PROJECT_ARGS})
 
 # Configure the build of your project here
 # add_subdirectory(src)
