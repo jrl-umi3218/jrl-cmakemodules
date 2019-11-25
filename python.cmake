@@ -55,7 +55,11 @@ ENDIF(CMAKE_VERSION VERSION_LESS "3.2")
 
 MACRO(FINDPYTHON)
 
-FIND_PACKAGE(PythonInterp ${ARGN})
+IF(ARGN)
+  FIND_PACKAGE(PythonInterp ${ARGN})
+ELSE(ARGN)
+  FIND_PACKAGE(PythonInterp 3)
+ENDIF(ARGN)
 IF (NOT ${PYTHONINTERP_FOUND} STREQUAL TRUE)
    MESSAGE(FATAL_ERROR "Python executable has not been found.")
 ENDIF (NOT ${PYTHONINTERP_FOUND} STREQUAL TRUE)
@@ -193,11 +197,11 @@ ENDMACRO(FINDPYTHON)
 # .. command:: DYNAMIC_GRAPH_PYTHON_MODULE ( SUBMODULENAME LIBRARYNAME TARGETNAME INSTALL_INIT_PY=1 SOURCE_PYTHON_MODULE=cmake/dynamic_graph/python-module-py.cc)
 #
 #   Add a python submodule to dynamic_graph
-#  
+#
 #   :param SUBMODULENAME: the name of the submodule (can be foo/bar),
-#  
+#
 #   :param LIBRARYNAME:   library to link the submodule with.
-#  
+#
 #   :param TARGETNAME:     name of the target: should be different for several
 #                   calls to the macro.
 #
@@ -206,7 +210,7 @@ ENDMACRO(FINDPYTHON)
 #
 #   :param SOURCE_PYTHON_MODULE: Location of the cpp file for the python module in the package.
 #                   Set to cmake/dynamic_graph/python-module-py.cc by default.
-# 
+#
 #  .. note::
 #    Before calling this macro, set variable NEW_ENTITY_CLASS as
 #    the list of new Entity types that you want to be bound.
@@ -218,7 +222,7 @@ MACRO(DYNAMIC_GRAPH_PYTHON_MODULE SUBMODULENAME LIBRARYNAME TARGETNAME)
   # By default the __init__.py file is installed.
   SET(INSTALL_INIT_PY 1)
   SET(SOURCE_PYTHON_MODULE "cmake/dynamic_graph/python-module-py.cc")
-    
+
   # Check if there is optional parameters.
   set(extra_macro_args ${ARGN})
   list(LENGTH extra_macro_args num_extra_args)
@@ -228,7 +232,7 @@ MACRO(DYNAMIC_GRAPH_PYTHON_MODULE SUBMODULENAME LIBRARYNAME TARGETNAME)
       list(GET extra_macro_args 1 SOURCE_PYTHON_MODULE)
     endif(${num_extra_args} GREATER 1)
   endif(${num_extra_args} GREATER 0)
-  
+
   IF(NOT DEFINED PYTHONLIBS_FOUND)
     FINDPYTHON()
   ELSEIF(NOT ${PYTHONLIBS_FOUND} STREQUAL "TRUE")
@@ -285,7 +289,7 @@ MACRO(DYNAMIC_GRAPH_PYTHON_MODULE SUBMODULENAME LIBRARYNAME TARGETNAME)
       FILES ${PROJECT_BINARY_DIR}/src/dynamic_graph/${SUBMODULENAME}/__init__.py
       DESTINATION ${PYTHON_INSTALL_DIR}
       )
-    
+
   ENDIF(${INSTALL_INIT_PY} EQUAL 1)
 
 ENDMACRO(DYNAMIC_GRAPH_PYTHON_MODULE SUBMODULENAME)
