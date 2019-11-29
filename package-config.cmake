@@ -123,9 +123,7 @@ write_basic_package_version_file(
 #   * TARGETS_EXPORT_NAME
 #   * PROJECT_NAME
 #   * _PKG_CONFIG_REQUIRES_LIST
-if(_PKG_CONFIG_REQUIRES)
-  string(REPLACE "," ";" _PKG_CONFIG_REQUIRES_LIST ${_PKG_CONFIG_REQUIRES})
-endif(_PKG_CONFIG_REQUIRES)
+string(REPLACE "," ";" _PKG_CONFIG_REQUIRES_LIST "${_PKG_CONFIG_REQUIRES}")
 configure_package_config_file(
     "cmake/Config.cmake.in"
     "${PROJECT_CONFIG}"
