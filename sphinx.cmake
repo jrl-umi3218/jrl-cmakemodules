@@ -57,7 +57,9 @@ MACRO(SPHINX_SETUP)
         COMMENT "Generating sphinx documentation"
         )
 
-      INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${CMAKE_MAKE_PROGRAM} sphinx-doc)")
+      IF(INSTALL_DOCUMENTATION)
+        INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${CMAKE_MAKE_PROGRAM} sphinx-doc)")
+      ENDIF(INSTALL_DOCUMENTATION)
     ELSE() #UNIX
       # THE LD_LIBRARY_PATH should be completed to run the sphinx command.
       #  otherwise some symbols won't be found.
@@ -70,7 +72,9 @@ MACRO(SPHINX_SETUP)
         COMMENT "Generating sphinx documentation"
         )
 
-      INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${CMAKE_MAKE_PROGRAM} sphinx-doc)")
+      IF(INSTALL_DOCUMENTATION)
+        INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${CMAKE_MAKE_PROGRAM} sphinx-doc)")
+      ENDIF(INSTALL_DOCUMENTATION)
     ENDIF(MSVC)
 
     ADD_CUSTOM_COMMAND(
@@ -89,13 +93,15 @@ MACRO(SPHINX_SETUP)
       )
 
     # Install generated files.
-    INSTALL(DIRECTORY ${CMAKE_BINARY_DIR}/doc/sphinx-html
-      DESTINATION share/doc/${PROJECT_NAME})
+    IF(INSTALL_DOCUMENTATION)
+      INSTALL(DIRECTORY ${CMAKE_BINARY_DIR}/doc/sphinx-html
+        DESTINATION share/doc/${PROJECT_NAME})
 
-    IF(EXISTS ${PROJECT_SOURCE_DIR}/doc/pictures)
-      INSTALL(DIRECTORY ${PROJECT_SOURCE_DIR}/doc/pictures
-        DESTINATION share/doc/${PROJECT_NAME}/sphinx-html)
-    ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/doc/pictures)
+      IF(EXISTS ${PROJECT_SOURCE_DIR}/doc/pictures)
+        INSTALL(DIRECTORY ${PROJECT_SOURCE_DIR}/doc/pictures
+          DESTINATION share/doc/${PROJECT_NAME}/sphinx-html)
+      ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/doc/pictures)
+    ENDIF(INSTALL_DOCUMENTATION)
 
   ENDIF(NOT SPHINX_BUILD)
 
