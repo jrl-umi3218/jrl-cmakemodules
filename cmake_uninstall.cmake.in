@@ -76,3 +76,9 @@ FOREACH(file ${files})
       )
   ENDIF(EXISTS "$ENV{DESTDIR}${file}")
 ENDFOREACH(file)
+EXECUTE_PROCESS(
+  COMMAND "@CMAKE_COMMAND@" -E remove "@CMAKE_CURRENT_BINARY_DIR@/install_manifest.txt"
+  RESULT_VARIABLE rm_resval
+  OUTPUT_VARIABLE rm_out
+  ERROR_QUIET
+  )
