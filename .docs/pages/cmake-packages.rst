@@ -6,14 +6,8 @@ This modules allow to work with the target-based approach of CMake introduced in
 Generating a CMake package
 ==========================
 
-Compared to the default minimal project one needs to:
-
-- Specify: ``EXPORT ${TARGETS_EXPORT_NAME}`` for at least one target the
-  project should export;
-
-- Call ``SETUP_PROJECT_PACKAGE_FINALIZE()``
-
-The following two conditions will ensure that a correct version, config and targets scripts are generated.
+Compared to the default minimal project one needs to ``EXPORT ${TARGETS_EXPORT_NAME}``
+for at least one target the project should export.
 
 Note that all exported targets will be in the ``${PROJECT_NAME}`` namespace.
 
