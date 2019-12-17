@@ -1,4 +1,4 @@
-include(../pkg-config.cmake)
+include(cmake/pkg-config.cmake)
 
 cmake_policy(SET CMP0054 NEW)
 #cmake -P
