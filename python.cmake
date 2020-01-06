@@ -61,25 +61,8 @@ IF (NOT ${PYTHONINTERP_FOUND} STREQUAL TRUE)
 ENDIF (NOT ${PYTHONINTERP_FOUND} STREQUAL TRUE)
 MESSAGE(STATUS "PythonInterp: ${PYTHON_EXECUTABLE}")
 
-# Set PYTHON_LIBRARY and PYTHON_INCLUDE_DIR variables if they are not defined by the user
+# Set PYTHON_INCLUDE_DIR variables if it is not defined by the user
 IF(DEFINED PYTHON_EXECUTABLE AND NOT WIN32)
-  # Retrieve the corresponding value of PYTHON_LIBRARY if it is not defined
-  IF(NOT DEFINED PYTHON_LIBRARY)
-    EXECUTE_PROCESS(
-      COMMAND "${PYTHON_EXECUTABLE}" "-c"
-      "import distutils.sysconfig as sysconfig; import os; print(os.path.join(sysconfig.get_config_var('LIBDIR'),sysconfig.get_config_var('LIBRARY')))"
-      OUTPUT_VARIABLE PYTHON_LIBRARY_HINT
-      OUTPUT_STRIP_TRAILING_WHITESPACE
-      ERROR_QUIET)
-    # Remove extension if needed (it may be a static extension)
-    string(REGEX REPLACE "\\.[^.]*$" "" PYTHON_LIBRARY_HINT ${PYTHON_LIBRARY_HINT})
-    # Add correct extension
-    IF(APPLE)
-      SET(PYTHON_LIBRARY_HINT "${PYTHON_LIBRARY_HINT}.dylib")
-    ELSE()
-      SET(PYTHON_LIBRARY_HINT "${PYTHON_LIBRARY_HINT}.so")
-    ENDIF()
-  ENDIF(NOT DEFINED PYTHON_LIBRARY)
   # Retrieve the corresponding value of PYTHON_INCLUDE_DIR if it is not defined
   IF(NOT DEFINED PYTHON_INCLUDE_DIR)
     EXECUTE_PROCESS(
