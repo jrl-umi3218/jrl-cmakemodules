@@ -6,6 +6,8 @@ This modules allow to work with the target-based approach of CMake introduced in
 Generating a CMake package
 ==========================
 
+You should first add the line ``set(PROJECT_USE_CMAKE_EXPORT TRUE)`` in the header of your project.
+
 Compared to the default minimal project one needs to ``EXPORT ${TARGETS_EXPORT_NAME}``
 for at least one target the project should export.
 
