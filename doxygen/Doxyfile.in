@@ -1012,7 +1012,7 @@ DOCSET_FEEDNAME        = "@DOXYGEN_DOCSET_FEEDNAME@"
 # reverse domain-name style string, e.g. com.mycompany.MyDocSet. Doxygen
 # will append .docset to the name.
 
-DOCSET_BUNDLE_ID       = org.doxygen.@PACKAGE_NAME@
+DOCSET_BUNDLE_ID       = @DOXYGEN_DOCSET_BUNDLE_ID@
 
 # The DOCSET_PUBLISHER_ID tag specifies a string that should uniquely identify
 # the documentation publisher. This should be a reverse domain-name style
@@ -1087,7 +1087,7 @@ QCH_FILE               = "@DOXYGEN_QCH_FILE@"
 # Qt Help Project output. For more information please see
 # http://doc.trolltech.com/qthelpproject.html#namespace
 
-QHP_NAMESPACE          = org.doxygen.@PACKAGE_NAME@
+QHP_NAMESPACE          = @DOXYGEN_QHP_NAMESPACE@
 
 # The QHP_VIRTUAL_FOLDER tag specifies the namespace to use when generating
 # Qt Help Project output. For more information please see
@@ -1135,7 +1135,7 @@ GENERATE_ECLIPSEHELP   = @DOXYGEN_GENERATE_ECLIPSEHELP@
 # the directory name containing the HTML and XML files should also have
 # this name.
 
-ECLIPSE_DOC_ID         = org.doxygen.@PACKAGE_NAME@
+ECLIPSE_DOC_ID         = @DOXYGEN_ECLIPSE_DOC_ID@
 
 # The DISABLE_INDEX tag can be used to turn on/off the condensed index at
 # top of each HTML page. The value NO (the default) enables the index and
@@ -1713,7 +1713,7 @@ EXTERNAL_PAGES         = @DOXYGEN_EXTERNAL_PAGES@
 # The PERL_PATH should be the absolute path and name of the perl script
 # interpreter (i.e. the result of `which perl').
 
-PERL_PATH              = "@PERL@"
+PERL_PATH              = "@DOXYGEN_PERL_PATH@"
 
 #---------------------------------------------------------------------------
 # Configuration options related to the dot tool
@@ -1748,7 +1748,7 @@ HIDE_UNDOC_RELATIONS   = @DOXYGEN_HIDE_UNDOC_RELATIONS@
 # toolkit from AT&T and Lucent Bell Labs. The other options in this section
 # have no effect if this option is set to NO (the default)
 
-HAVE_DOT               = @HAVE_DOT@
+HAVE_DOT               = @DOXYGEN_HAVE_DOT@
 
 # The DOT_NUM_THREADS specifies the number of dot invocations doxygen is
 # allowed to run in parallel. When set to 0 doxygen will base this on the
