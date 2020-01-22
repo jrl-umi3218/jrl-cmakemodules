@@ -1,4 +1,4 @@
-# Copyright (C) 2008-2019 LAAS-CNRS, JRL AIST-CNRS, INRIA.
+# Copyright (C) 2008-2020 LAAS-CNRS, JRL AIST-CNRS, INRIA.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -55,118 +55,144 @@ ENDIF(CMAKE_VERSION VERSION_LESS "3.2")
 
 MACRO(FINDPYTHON)
 
-FIND_PACKAGE(PythonInterp ${ARGN})
-IF (NOT ${PYTHONINTERP_FOUND} STREQUAL TRUE)
-   MESSAGE(FATAL_ERROR "Python executable has not been found.")
-ENDIF (NOT ${PYTHONINTERP_FOUND} STREQUAL TRUE)
-MESSAGE(STATUS "PythonInterp: ${PYTHON_EXECUTABLE}")
+  IF(NOT CMAKE_VERSION VERSION_LESS "3.12")
 
-# Set PYTHON_INCLUDE_DIR variables if it is not defined by the user
-IF(DEFINED PYTHON_EXECUTABLE AND NOT WIN32)
-  # Retrieve the corresponding value of PYTHON_INCLUDE_DIR if it is not defined
-  IF(NOT DEFINED PYTHON_INCLUDE_DIR)
+    FIND_PACKAGE(Python COMPONENTS Interpreter Development)
+    IF(Python_FOUND)
+      SET(PYTHON_EXECUTABLE          ${Python_EXECUTABLE})
+      SET(PYTHON_LIBRARY             ${Python_LIBRARIES})
+      SET(PYTHON_LIBRARIES           ${Python_LIBRARIES})
+      SET(PYTHON_INCLUDE_DIR         ${Python_INCLUDE_DIRS})
+      SET(PYTHON_INCLUDE_DIRS        ${Python_INCLUDE_DIRS})
+      SET(PYTHON_VERSION_STRING      ${Python_VERSION})
+      SET(PYTHONLIBS_VERSION_STRING  ${Python_VERSION})
+      SET(PYTHON_FOUND               ${Python_FOUND})
+      SET(PYTHONLIBS_FOUND           ${Python_FOUND})
+      SET(PYTHON_VERSION_MAJOR       ${Python_VERSION_MAJOR})
+      SET(PYTHON_VERSION_MINOR       ${Python_VERSION_MINOR})
+      SET(PYTHON_VERSION_PATCH       ${Python_VERSION_PATCH})
+    ENDIF()
+
+  ELSE(NOT CMAKE_VERSION VERSION_LESS "3.12")
+
+    FIND_PACKAGE(PythonInterp ${ARGN})
+    IF (NOT ${PYTHONINTERP_FOUND} STREQUAL TRUE)
+       MESSAGE(FATAL_ERROR "Python executable has not been found.")
+    ENDIF (NOT ${PYTHONINTERP_FOUND} STREQUAL TRUE)
+    MESSAGE(STATUS "PythonInterp: ${PYTHON_EXECUTABLE}")
+
+    # Set PYTHON_INCLUDE_DIR variables if it is not defined by the user
+    IF(DEFINED PYTHON_EXECUTABLE AND NOT WIN32)
+      # Retrieve the corresponding value of PYTHON_INCLUDE_DIR if it is not defined
+      IF(NOT DEFINED PYTHON_INCLUDE_DIR)
+        EXECUTE_PROCESS(
+          COMMAND "${PYTHON_EXECUTABLE}" "-c"
+          "import distutils.sysconfig as sysconfig; print(sysconfig.get_python_inc())"
+          OUTPUT_VARIABLE PYTHON_INCLUDE_DIR
+          ERROR_QUIET)
+        STRING(STRIP "${PYTHON_INCLUDE_DIR}" PYTHON_INCLUDE_DIR)
+      ENDIF(NOT DEFINED PYTHON_INCLUDE_DIR)
+      SET(PYTHON_INCLUDE_DIRS ${PYTHON_INCLUDE_DIR})
+    ENDIF(DEFINED PYTHON_EXECUTABLE AND NOT WIN32)
+
+    MESSAGE(STATUS "PYTHON_INCLUDE_DIRS:${PYTHON_INCLUDE_DIRS}")
+    MESSAGE(STATUS "PYTHON_INCLUDE_DIR:${PYTHON_INCLUDE_DIR}")
+
+    # Inform PythonLibs of the required version of PythonInterp
+    SET(PYTHONLIBS_VERSION_STRING ${PYTHON_VERSION_STRING})
+
+    FIND_PACKAGE(PythonLibs ${ARGN})
+    MESSAGE(STATUS "PythonLibraries: ${PYTHON_LIBRARIES}")
+    IF (NOT ${PYTHONLIBS_FOUND} STREQUAL TRUE)
+       MESSAGE(FATAL_ERROR "Python has not been found.")
+    ENDIF (NOT ${PYTHONLIBS_FOUND} STREQUAL TRUE)
+
+    STRING(REPLACE "." ";" _PYTHONLIBS_VERSION ${PYTHONLIBS_VERSION_STRING})
+    LIST(GET _PYTHONLIBS_VERSION 0 PYTHONLIBS_VERSION_MAJOR)
+    LIST(GET _PYTHONLIBS_VERSION 1 PYTHONLIBS_VERSION_MINOR)
+
+    IF (NOT ${PYTHON_VERSION_MAJOR} EQUAL ${PYTHONLIBS_VERSION_MAJOR} OR
+        NOT ${PYTHON_VERSION_MINOR} EQUAL ${PYTHONLIBS_VERSION_MINOR})
+      MESSAGE(FATAL_ERROR "Python interpreter and libraries are in different version: ${PYTHON_VERSION_STRING} vs ${PYTHONLIBS_VERSION_STRING}")
+    ENDIF (NOT ${PYTHON_VERSION_MAJOR} EQUAL ${PYTHONLIBS_VERSION_MAJOR} OR
+           NOT ${PYTHON_VERSION_MINOR} EQUAL ${PYTHONLIBS_VERSION_MINOR})
+
+  ENDIF(NOT CMAKE_VERSION VERSION_LESS "3.12")
+
+  # Find PYTHON_LIBRARY_DIRS
+  GET_FILENAME_COMPONENT(PYTHON_LIBRARY_DIRS "${PYTHON_LIBRARIES}" PATH)
+  MESSAGE(STATUS "PythonLibraryDirs: ${PYTHON_LIBRARY_DIRS}")
+  MESSAGE(STATUS "PythonLibVersionString: ${PYTHONLIBS_VERSION_STRING}")
+
+  # Use either site-packages (default) or dist-packages (Debian packages) directory
+  OPTION(PYTHON_DEB_LAYOUT "Enable Debian-style Python package layout" OFF)
+  # ref. https://docs.python.org/3/library/site.html
+  OPTION(PYTHON_STANDARD_LAYOUT "Enable standard Python package layout" OFF)
+
+  IF(PYTHON_STANDARD_LAYOUT)
+    SET(PYTHON_SITELIB_CMD "import sys, os; print(os.sep.join(['lib', 'python' + sys.version[:3], 'site-packages']))")
+  ELSE(PYTHON_STANDARD_LAYOUT)
+    SET(PYTHON_SITELIB_CMD "from distutils import sysconfig; print(sysconfig.get_python_lib(prefix='', plat_specific=False))")
+  ENDIF(PYTHON_STANDARD_LAYOUT)
+
+  EXECUTE_PROCESS(
+    COMMAND "${PYTHON_EXECUTABLE}" "-c"
+    "${PYTHON_SITELIB_CMD}"
+    OUTPUT_VARIABLE PYTHON_SITELIB
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_QUIET)
+
+  # Keep compatility with former jrl-cmake-modules versions
+  IF(PYTHON_DEB_LAYOUT)
+    STRING(REPLACE "site-packages" "dist-packages" PYTHON_SITELIB "${PYTHON_SITELIB}")
+  ENDIF(PYTHON_DEB_LAYOUT)
+
+  # If PYTHON_PACKAGES_DIR is defined, then force the Python packages directory name
+  IF(PYTHON_PACKAGES_DIR)
+    STRING(REGEX REPLACE "(site-packages|dist-packages)" "${PYTHON_PACKAGES_DIR}" PYTHON_SITELIB "${PYTHON_SITELIB}")
+  ENDIF(PYTHON_PACKAGES_DIR)
+
+  MESSAGE(STATUS "Python site lib: ${PYTHON_SITELIB}")
+
+  # Get PYTHON_SOABI
+  # We should be in favor of using PYTHON_EXT_SUFFIX in future for better portability.
+  # However we keep it here for backward compatibility.
+  SET(PYTHON_SOABI "")
+  IF(PYTHON_VERSION_MAJOR EQUAL 3 AND NOT WIN32)
     EXECUTE_PROCESS(
       COMMAND "${PYTHON_EXECUTABLE}" "-c"
-      "import distutils.sysconfig as sysconfig; print(sysconfig.get_python_inc())"
-      OUTPUT_VARIABLE PYTHON_INCLUDE_DIR
-      ERROR_QUIET)
-    STRING(STRIP "${PYTHON_INCLUDE_DIR}" PYTHON_INCLUDE_DIR)
-  ENDIF(NOT DEFINED PYTHON_INCLUDE_DIR)
-ENDIF(DEFINED PYTHON_EXECUTABLE AND NOT WIN32)
+      "from distutils.sysconfig import get_config_var; print('.' + get_config_var('SOABI'))"
+      OUTPUT_VARIABLE PYTHON_SOABI)
+    STRING(STRIP ${PYTHON_SOABI} PYTHON_SOABI)
+  ENDIF(PYTHON_VERSION_MAJOR EQUAL 3 AND NOT WIN32)
 
-# Inform PythonLibs of the required version of PythonInterp
-SET(PYTHONLIBS_VERSION_STRING ${PYTHON_VERSION_STRING})
-
-FIND_PACKAGE(PythonLibs ${ARGN})
-MESSAGE(STATUS "PythonLibraries: ${PYTHON_LIBRARIES}")
-IF (NOT ${PYTHONLIBS_FOUND} STREQUAL TRUE)
-   MESSAGE(FATAL_ERROR "Python has not been found.")
-ENDIF (NOT ${PYTHONLIBS_FOUND} STREQUAL TRUE)
-
-STRING(REPLACE "." ";" _PYTHONLIBS_VERSION ${PYTHONLIBS_VERSION_STRING})
-LIST(GET _PYTHONLIBS_VERSION 0 PYTHONLIBS_VERSION_MAJOR)
-LIST(GET _PYTHONLIBS_VERSION 1 PYTHONLIBS_VERSION_MINOR)
-
-IF (NOT ${PYTHON_VERSION_MAJOR} EQUAL ${PYTHONLIBS_VERSION_MAJOR} OR
-    NOT ${PYTHON_VERSION_MINOR} EQUAL ${PYTHONLIBS_VERSION_MINOR})
-  MESSAGE(FATAL_ERROR "Python interpreter and libraries are in different version: ${PYTHON_VERSION_STRING} vs ${PYTHONLIBS_VERSION_STRING}")
-ENDIF (NOT ${PYTHON_VERSION_MAJOR} EQUAL ${PYTHONLIBS_VERSION_MAJOR} OR
-       NOT ${PYTHON_VERSION_MINOR} EQUAL ${PYTHONLIBS_VERSION_MINOR})
-
-# Find PYTHON_LIBRARY_DIRS
-GET_FILENAME_COMPONENT(PYTHON_LIBRARY_DIRS "${PYTHON_LIBRARIES}" PATH)
-MESSAGE(STATUS "PythonLibraryDirs: ${PYTHON_LIBRARY_DIRS}")
-MESSAGE(STATUS "PythonLibVersionString: ${PYTHONLIBS_VERSION_STRING}")
-
-# Use either site-packages (default) or dist-packages (Debian packages) directory
-OPTION(PYTHON_DEB_LAYOUT "Enable Debian-style Python package layout" OFF)
-# ref. https://docs.python.org/3/library/site.html
-OPTION(PYTHON_STANDARD_LAYOUT "Enable standard Python package layout" OFF)
-
-IF(PYTHON_STANDARD_LAYOUT)
-  SET(PYTHON_SITELIB_CMD "import sys, os; print(os.sep.join(['lib', 'python' + sys.version[:3], 'site-packages']))")
-ELSE(PYTHON_STANDARD_LAYOUT)
-  SET(PYTHON_SITELIB_CMD "from distutils import sysconfig; print(sysconfig.get_python_lib(prefix='', plat_specific=False))")
-ENDIF(PYTHON_STANDARD_LAYOUT)
-
-EXECUTE_PROCESS(
-  COMMAND "${PYTHON_EXECUTABLE}" "-c"
-  "${PYTHON_SITELIB_CMD}"
-  OUTPUT_VARIABLE PYTHON_SITELIB
-  OUTPUT_STRIP_TRAILING_WHITESPACE
-  ERROR_QUIET)
-
-# Keep compatility with former jrl-cmake-modules versions
-IF(PYTHON_DEB_LAYOUT)
-  STRING(REPLACE "site-packages" "dist-packages" PYTHON_SITELIB "${PYTHON_SITELIB}")
-ENDIF(PYTHON_DEB_LAYOUT)
-
-# If PYTHON_PACKAGES_DIR is defined, then force the Python packages directory name
-IF(PYTHON_PACKAGES_DIR)
-  STRING(REGEX REPLACE "(site-packages|dist-packages)" "${PYTHON_PACKAGES_DIR}" PYTHON_SITELIB "${PYTHON_SITELIB}")
-ENDIF(PYTHON_PACKAGES_DIR)
-
-MESSAGE(STATUS "Python site lib: ${PYTHON_SITELIB}")
-
-# Get PYTHON_SOABI
-# We should be in favor of using PYTHON_EXT_SUFFIX in future for better portability.
-# However we keep it here for backward compatibility.
-SET(PYTHON_SOABI "")
-IF(PYTHON_VERSION_MAJOR EQUAL 3 AND NOT WIN32)
-  EXECUTE_PROCESS(
-    COMMAND "${PYTHON_EXECUTABLE}" "-c"
-    "from distutils.sysconfig import get_config_var; print('.' + get_config_var('SOABI'))"
-    OUTPUT_VARIABLE PYTHON_SOABI)
-  STRING(STRIP ${PYTHON_SOABI} PYTHON_SOABI)
-ENDIF(PYTHON_VERSION_MAJOR EQUAL 3 AND NOT WIN32)
-
-# Get PYTHON_EXT_SUFFIX
-SET(PYTHON_EXT_SUFFIX "")
-IF(PYTHON_VERSION_MAJOR EQUAL 3)
-  EXECUTE_PROCESS(
-    COMMAND "${PYTHON_EXECUTABLE}" "-c"
-    "from distutils.sysconfig import get_config_var; print(get_config_var('EXT_SUFFIX'))"
-    OUTPUT_VARIABLE PYTHON_EXT_SUFFIX)
-  STRING(STRIP ${PYTHON_EXT_SUFFIX} PYTHON_EXT_SUFFIX)
-ENDIF(PYTHON_VERSION_MAJOR EQUAL 3)
-IF("${PYTHON_EXT_SUFFIX}" STREQUAL "")
-  IF(WIN32)
-    SET(PYTHON_EXT_SUFFIX ".pyd")
-  ELSE()
-    SET(PYTHON_EXT_SUFFIX ".so")
+  # Get PYTHON_EXT_SUFFIX
+  SET(PYTHON_EXT_SUFFIX "")
+  IF(PYTHON_VERSION_MAJOR EQUAL 3)
+    EXECUTE_PROCESS(
+      COMMAND "${PYTHON_EXECUTABLE}" "-c"
+      "from distutils.sysconfig import get_config_var; print(get_config_var('EXT_SUFFIX'))"
+      OUTPUT_VARIABLE PYTHON_EXT_SUFFIX)
+    STRING(STRIP ${PYTHON_EXT_SUFFIX} PYTHON_EXT_SUFFIX)
+  ENDIF(PYTHON_VERSION_MAJOR EQUAL 3)
+  IF("${PYTHON_EXT_SUFFIX}" STREQUAL "")
+    IF(WIN32)
+      SET(PYTHON_EXT_SUFFIX ".pyd")
+    ELSE()
+      SET(PYTHON_EXT_SUFFIX ".so")
+    ENDIF()
   ENDIF()
-ENDIF()
 
-# Log Python variables
-LIST(APPEND LOGGING_WATCHED_VARIABLES
-  PYTHONINTERP_FOUND
-  PYTHONLIBS_FOUND
-  PYTHON_LIBRARY_DIRS
-  PYTHONLIBS_VERSION_STRING
-  PYTHON_EXECUTABLE
-  PYTHON_SOABI
-  PYTHON_EXT_SUFFIX
-  )
+  # Log Python variables
+  LIST(APPEND LOGGING_WATCHED_VARIABLES
+    PYTHONINTERP_FOUND
+    PYTHONLIBS_FOUND
+    PYTHON_LIBRARY_DIRS
+    PYTHONLIBS_VERSION_STRING
+    PYTHON_EXECUTABLE
+    PYTHON_SOABI
+    PYTHON_EXT_SUFFIX
+    )
 
 ENDMACRO(FINDPYTHON)
 
