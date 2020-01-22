@@ -13,6 +13,21 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#.rst:
+#  By default, Doxygen_, if found, is used to generate a HTML documentation
+#  of the code. You can configure it as follows:
+#
+#  - Many Doxygen options can be configured from CMake itself. E.g. Doxygen option
+#    `PROJECT_NAME` can be set using CMake variable `DOXYGEN_PROJECT_NAME`.
+#
+#  - If present, the file *doc/Doxyfile.extra.in* will be configured and append to
+#    the above mentionned configuration file.
+#
+#  For a good documentation of the available options, see either `local documentation
+#  <file:///usr/share/doc/doxygen/html/config.html>`_ provided by package *doxygen-doc*
+#  or the `online version <http://www.doxygen.nl/manual/config.html>`_.
+#
+#  .. _Doxygen: http://www.doxygen.nl
 
 # _SETUP_DOXYGEN_DEFAULT_OPTIONS
 # ----------------------------

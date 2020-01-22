@@ -16,3 +16,7 @@ Minimal working example
 
 .. literalinclude:: ../examples/minimal.cmake
   :language: cmake
+
+Code documentation using Doxygen
+================================
+.. cmake-module:: ../../doxygen.cmake
