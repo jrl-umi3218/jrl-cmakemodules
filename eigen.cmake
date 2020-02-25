@@ -19,10 +19,12 @@
 #   This macro gets eigen include path from pkg-config file, and adds it include directories.
 #   If there is no pkg-config for Eigen, we fall back to a manual search.
 #
-#   If no version requirement argument is passed to the macro, it looks for the 
+#   If no version requirement argument is passed to the macro, it looks for the
 #   variable Eigen_REQUIRED. If this variable is not defined before calling
 #   the method SEARCH_FOR_EIGEN, the minimum version requirement is 3.0.0 by default.
 MACRO(SEARCH_FOR_EIGEN)
+  # ref https://github.com/jrl-umi3218/jrl-cmakemodules/issues/319
+  MESSAGE(AUTHOR_WARNING "SEARCH_FOR_EIGEN is deprecated and will be removed in the future")
   SET(_Eigen_FOUND 0)
   IF(${ARGC} GREATER 0)
     SET(Eigen_REQUIRED ${ARGV0})
