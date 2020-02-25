@@ -51,7 +51,7 @@ set(_PACKAGE_CONFIG_DEPENDENCIES "" CACHE INTERNAL "")
 ENDMACRO(_SETUP_PROJECT_PACKAGE_INIT)
 
 #.rst:
-# .. command:: ADD_PROJECT_DEPENDENCY(ARGS)
+# .. command:: ADD_PROJECT_DEPENDENCY(ARGS [PKG_CONFIG_REQUIRES pkg])
 #
 #   This is a wrapper around find_package to add correct find_dependency calls in
 #   the generated config script. All arguments are passed to find_package.
@@ -60,15 +60,24 @@ ENDMACRO(_SETUP_PROJECT_PACKAGE_INIT)
 #   versions, one should provide a custom <PackageName>Config.cmake or use a more
 #   traditional way to get a dependency.
 #
+#   If PKG_CONFIG_REQUIRES is provided, it will also add pkg to the Requires
+#   section of the generated .pc file
+#
 MACRO(ADD_PROJECT_DEPENDENCY)
   list(APPEND _PACKAGE_CONFIG_DEPENDENCIES_PROJECTS "${ARGV0}")
-  string(REPLACE ";" " " PACKAGE_ARGS "${ARGN}")
+
+  # add dependency to the generated .pc
+  # ref https://github.com/jrl-umi3218/jrl-cmakemodules/pull/335
+  cmake_parse_arguments(PARSED_ARGN "" "PKG_CONFIG_REQUIRES" "" ${ARGN})
+  _ADD_TO_LIST(_PKG_CONFIG_REQUIRES "${PARSED_ARGN_PKG_CONFIG_REQUIRES}" ",")
+
+  string(REPLACE ";" " " PACKAGE_ARGS "${PARSED_ARGN_UNPARSED_ARGUMENTS}")
   if(${CMAKE_VERSION} VERSION_LESS "3.15.0")
     list(APPEND _PACKAGE_CONFIG_DEPENDENCIES "find_package(${PACKAGE_ARGS})")
   else()
     list(APPEND _PACKAGE_CONFIG_DEPENDENCIES "find_dependency(${PACKAGE_ARGS})")
   endif()
-  find_package(${ARGN})
+  find_package(${PARSED_ARGN_UNPARSED_ARGUMENTS})
 ENDMACRO()
 
 
