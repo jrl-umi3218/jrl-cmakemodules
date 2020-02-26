@@ -54,7 +54,11 @@ ENDMACRO(_SETUP_PROJECT_PACKAGE_INIT)
 # .. command:: ADD_PROJECT_DEPENDENCY(ARGS)
 #
 #   This is a wrapper around find_package to add correct find_dependency calls in
-#   the generated config script. All arguments are passed to find_package
+#   the generated config script. All arguments are passed to find_package.
+#
+#   In cases where find_package is not supported by a project, or only in recent
+#   versions, one should provide a custom <PackageName>Config.cmake or use a more
+#   traditional way to get a dependency.
 #
 MACRO(ADD_PROJECT_DEPENDENCY)
   list(APPEND _PACKAGE_CONFIG_DEPENDENCIES_PROJECTS "${ARGV0}")
@@ -71,7 +75,7 @@ ENDMACRO()
 # SETUP_PROJECT_PACKAGE_FINALIZE
 # -------------
 #
-# Generates CMake PackageConfig.cmake, Targets, and Version 
+# Generates CMake PackageConfig.cmake, Targets, and Version
 # files so users can call:
 #
 # find_package(MyPackage)
