@@ -59,7 +59,7 @@ ENDFUNCTION(SEARCH_FOR_BOOST_COMPONENT boost_python_name found)
 
 IF(CMAKE_VERSION VERSION_LESS "3.12")
   SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/boost ${CMAKE_MODULE_PATH})
-  MESSAGE(WARNING "CMake versions older than 3.12 may warn when looking to Boost components. Custom macros are used to find it.")
+  MESSAGE(STATUS "CMake versions older than 3.12 may warn when looking to Boost components. Custom macros are used to find it.")
 ENDIF(CMAKE_VERSION VERSION_LESS "3.12")
 
 MACRO(SEARCH_FOR_BOOST)
