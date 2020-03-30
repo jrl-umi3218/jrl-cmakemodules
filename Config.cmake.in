@@ -6,18 +6,8 @@ set("@PROJECT_NAME@_DOXYGENDOCDIR" "${PACKAGE_PREFIX_DIR}/share/doc/@PROJECT_NAM
 set("@PROJECT_NAME_UPPER@_DOXYGENDOCDIR" "${PACKAGE_PREFIX_DIR}/share/doc/@PROJECT_NAME@/doxygen-html")
 set("@PROJECT_NAME@_DEPENDENCIES" "@_PACKAGE_CONFIG_DEPENDENCIES_PROJECTS@")
 set("@PROJECT_NAME@_PKG_CONFIG_DEPENDENCIES" "@_PKG_CONFIG_REQUIRES_LIST@")
-
-# Find absolute library paths for all _PKG_CONFIG_LIBS as CMake expects full paths, while pkg-config does not.
-set(@PROJECT_NAME@_LIBRARIES "")
-foreach(lib @_PKG_CONFIG_LIBS@)
-  # If the component is a link directory ("-L/full/path"), skip.
-  string(FIND ${lib} "-L" _is_library_dir)
-  if(${_is_library_dir} EQUAL -1)
-    string(REPLACE "-l" "" lib ${lib})
-    find_library(abs_lib_${lib} ${lib} HINTS @_PKG_CONFIG_LIBDIR@)
-    list(APPEND @PROJECT_NAME@_LIBRARIES "${abs_lib_${lib}}")
-  endif()
-endforeach()
+set("@PROJECT_NAME@_LIBRARIES" "@_PACKAGE_CONFIG_LIBRARIES@")
+set("@PROJECT_NAME_UPPER@_LIBRARIES" "@_PACKAGE_CONFIG_LIBRARIES@")
 
 include(CMakeFindDependencyMacro)
 @PACKAGE_DEPENDENCIES@
