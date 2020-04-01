@@ -131,19 +131,6 @@ write_basic_package_version_file(
     "${VERSION_CONFIG}" VERSION ${PROJECT_VERSION} COMPATIBILITY SameMajorVersion
 )
 
-# Find absolute library paths for all _PKG_CONFIG_LIBS as CMake expects full paths, while pkg-config does not.
-set(_PACKAGE_CONFIG_LIBRARIES "")
-string(REPLACE " " ";" _PKG_CONFIG_LIBS_LIST ${_PKG_CONFIG_LIBS})
-foreach(lib ${_PKG_CONFIG_LIBS_LIST})
-  # If the component is a link directory ("-L/full/path"), skip.
-  string(FIND ${lib} "-L" _is_library_dir)
-  if(${_is_library_dir} EQUAL -1)
-    string(REPLACE "-l" "" lib ${lib})
-    find_library(abs_lib_${lib} ${lib} HINTS ${_PKG_CONFIG_LIBDIR})
-    list(APPEND _PACKAGE_CONFIG_LIBRARIES "${abs_lib_${lib}}")
-  endif()
-endforeach()
-
 # Configure '<PROJECT-NAME>Config.cmake'
 # Use variables:
 #   * TARGETS_EXPORT_NAME
