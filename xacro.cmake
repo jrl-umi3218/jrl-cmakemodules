@@ -31,6 +31,9 @@
 #
 #   See also :cmake:variable:`XACRO_OPTIONS`.
 #
+
+INCLUDE(cmake/python.cmake)
+
 MACRO(RUN_XACRO INPUT OUTPUT)
   FIND_PACKAGE(catkin REQUIRED COMPONENTS xacro)
 
