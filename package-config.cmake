@@ -150,6 +150,7 @@ endforeach()
 #   * PROJECT_NAME
 #   * _PKG_CONFIG_REQUIRES_LIST
 string(REPLACE "," ";" _PKG_CONFIG_REQUIRES_LIST "${_PKG_CONFIG_REQUIRES}")
+list(REMOVE_DUPLICATES _PKG_CONFIG_REQUIRES_LIST)
 configure_package_config_file(
     "cmake/Config.cmake.in"
     "${PROJECT_CONFIG}"
