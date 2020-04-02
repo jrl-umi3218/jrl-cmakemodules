@@ -141,6 +141,7 @@ foreach(lib ${_PKG_CONFIG_LIBS_LIST})
     string(REPLACE "-l" "" lib ${lib})
     find_library(abs_lib_${lib} ${lib} HINTS ${_PKG_CONFIG_LIBDIR})
     list(APPEND _PACKAGE_CONFIG_LIBRARIES "${abs_lib_${lib}}")
+    unset(abs_lib_${lib} CACHE)
   endif()
 endforeach()
 
