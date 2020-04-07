@@ -413,7 +413,7 @@ MACRO(_SETUP_DOXYGEN_DEFAULT_OPTIONS)
   # Configuration options related to the input files
   #---------------------------------------------------------------------------
   _set_if_undefined(DOXYGEN_IMAGE_PATH           "${PROJECT_SOURCE_DIR}/doc")
-  _set_if_undefined(DOXYGEN_FILE_PATTERNS        "*.cc *.cpp *.hh *.hxx")
+  _set_if_undefined(DOXYGEN_FILE_PATTERNS        "*.cc *.cpp *.h *.hh *.hxx *.idl")
   _set_if_undefined(DOXYGEN_RECURSIVE            YES)
   #---------------------------------------------------------------------------
   # Configuration options related to source browsing
@@ -669,25 +669,25 @@ MACRO(_SETUP_PROJECT_DOCUMENTATION_FINALIZE)
     ENDIF()
     SET (DOXYGEN_INCLUDE_PATH "${DOXYGEN_INCLUDE_PATH} \"${CMAKE_BINARY_DIR}/include\"")
 
-    # Generate Doxyfile.extra.
+    # Generate Doxyfile and Doxyfile.extra.
     IF(EXISTS ${PROJECT_SOURCE_DIR}/doc/Doxyfile.extra.in)
       CONFIGURE_FILE(
         ${PROJECT_SOURCE_DIR}/doc/Doxyfile.extra.in
         ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile.extra
         @ONLY
         )
+      # Generate Doxyfile.
+      _SETUP_DOXYGEN_CONFIG_FILE("${CMAKE_BINARY_DIR}/doc/Doxyfile")
+      FILE(STRINGS ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile.extra doxyfile_extra)
+      FOREACH(x ${doxyfile_extra})
+        FILE(APPEND ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile ${x} "\n")
+      ENDFOREACH(x in doxyfile_extra)
     ELSE()
-      CONFIGURE_FILE(
-        ${PROJECT_SOURCE_DIR}/cmake/doxygen/Doxyfile.extra.in
-        ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile.extra
-        @ONLY
-        )
+      # This is kept for bacward compatibility. It was the only thing left in
+      # doxygen/Doxyfile.extra.in
+      set(DOXYGEN_IMAGE_PATH "${PROJECT_SOURCE_DIR}/doc/pictures")
+      # Generate Doxyfile.
+      _SETUP_DOXYGEN_CONFIG_FILE("${CMAKE_BINARY_DIR}/doc/Doxyfile")
     ENDIF()
-    # Generate Doxyfile.
-    _SETUP_DOXYGEN_CONFIG_FILE("${CMAKE_BINARY_DIR}/doc/Doxyfile")
-    FILE(STRINGS ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile.extra doxyfile_extra)
-    FOREACH(x ${doxyfile_extra})
-      FILE(APPEND ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile ${x} "\n")
-    ENDFOREACH(x in doxyfile_extra)
   ENDIF(DOXYGEN_FOUND)
 ENDMACRO(_SETUP_PROJECT_DOCUMENTATION_FINALIZE)
