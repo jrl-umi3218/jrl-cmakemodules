@@ -555,7 +555,7 @@ MACRO(_SETUP_PROJECT_DOCUMENTATION)
       )
 
     # Install MathJax minimal version.
-    IF(${DOXYGEN_USE_MATHJAX} STREQUAL "YES")
+    IF("${DOXYGEN_USE_MATHJAX}" STREQUAL "YES")
       FILE(COPY ${PROJECT_SOURCE_DIR}/cmake/doxygen/MathJax
            DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/doc/doxygen-html)
     ENDIF()
@@ -616,7 +616,7 @@ ENDMACRO()
 #
 MACRO(_SETUP_PROJECT_DOCUMENTATION_FINALIZE)
   IF(DOXYGEN_FOUND)
-    IF(NOT ${DOXYGEN_USE_MATHJAX} STREQUAL "YES")
+    IF(NOT "${DOXYGEN_USE_MATHJAX}" STREQUAL "YES")
       # Make sure latex, dvips and gs are available
       FIND_PROGRAM(LATEX latex DOC "LaTeX compiler")
       FIND_PROGRAM(DVIPS dvips DOC "DVI to PostScript converter")
@@ -628,7 +628,7 @@ MACRO(_SETUP_PROJECT_DOCUMENTATION_FINALIZE)
       ENDIF()
     ENDIF()
 
-    IF(${DOXYGEN_USE_MATHJAX} STREQUAL "YES")
+    IF("${DOXYGEN_USE_MATHJAX}" STREQUAL "YES")
       MESSAGE(STATUS "Doxygen rendering: using MathJax backend")
       SET(DOXYGEN_HEADER_NAME "header-mathjax.html")
     ELSE()
