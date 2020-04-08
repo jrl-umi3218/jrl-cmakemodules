@@ -7,6 +7,13 @@ https://github.com/jrl-umi3218/jrl-cmakemodules.
 Update the doc
 ==============
 
+Syntax
+------
+
+See `ReStructuredText`_ for an overview of the syntax.
+
+.. _ReStructuredText: https://en.wikipedia.org/wiki/ReStructuredText
+
 Generate the documentation locally
 ------------------------------------
 
