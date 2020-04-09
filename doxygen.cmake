@@ -464,7 +464,7 @@ MACRO(_SETUP_DOXYGEN_DEFAULT_OPTIONS)
   #---------------------------------------------------------------------------
   # Configuration options related to external references
   #---------------------------------------------------------------------------
-  _set_if_undefined(DOXYGEN_GENERATE_TAGFILE     "${PROJECT_NAME}.doxytag"
+  _set_if_undefined(DOXYGEN_GENERATE_TAGFILE     "${PROJECT_NAME}.doxytag")
   #---------------------------------------------------------------------------
   # Configuration options related to the dot tool
   #---------------------------------------------------------------------------
