@@ -135,16 +135,18 @@ write_basic_package_version_file(
 # Use variables:
 #   * TARGETS_EXPORT_NAME
 #   * PROJECT_NAME
-#   * _PKG_CONFIG_REQUIRES_LIST
-string(REPLACE "," ";" _PKG_CONFIG_REQUIRES_LIST "${_PKG_CONFIG_REQUIRES}")
-unset(_PKG_CONFIG_REQUIRES_STRIPPED)
-foreach(_pkg ${_PKG_CONFIG_REQUIRES_LIST})
-  string(STRIP "${_pkg}" _pkg_stripped)
-  list(APPEND _PKG_CONFIG_REQUIRES_STRIPPED ${_pkg_stripped})
-endforeach()
-list(REMOVE_DUPLICATES _PKG_CONFIG_REQUIRES_STRIPPED)
-set(_PKG_CONFIG_REQUIRES_LIST ${_PKG_CONFIG_REQUIRES_STRIPPED})
-unset(_PKG_CONFIG_REQUIRES_STRIPPED)
+#   * _PKG_CONFIG_REQUIRES
+if(_PKG_CONFIG_REQUIRES)
+  string(REPLACE "," ";" _PKG_CONFIG_REQUIRES_LIST "${_PKG_CONFIG_REQUIRES}")
+  unset(_PKG_CONFIG_REQUIRES_STRIPPED)
+  foreach(_pkg ${_PKG_CONFIG_REQUIRES_LIST})
+    string(STRIP "${_pkg}" _pkg_stripped)
+    list(APPEND _PKG_CONFIG_REQUIRES_STRIPPED ${_pkg_stripped})
+  endforeach()
+  list(REMOVE_DUPLICATES _PKG_CONFIG_REQUIRES_STRIPPED)
+  set(_PKG_CONFIG_REQUIRES_LIST ${_PKG_CONFIG_REQUIRES_STRIPPED})
+  unset(_PKG_CONFIG_REQUIRES_STRIPPED)
+endif(_PKG_CONFIG_REQUIRES)
 configure_package_config_file(
     "cmake/Config.cmake.in"
     "${PROJECT_CONFIG}"
