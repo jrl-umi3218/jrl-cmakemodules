@@ -404,6 +404,7 @@ MACRO(_SETUP_DOXYGEN_DEFAULT_OPTIONS)
   _set_if_undefined(DOXYGEN_PROJECT_BRIEF        "\"${PROJECT_DESCRIPTION}\"")
   _set_if_undefined(DOXYGEN_STRIP_FROM_PATH      "${PROJECT_SOURCE_DIR}")
   _set_if_undefined(DOXYGEN_STRIP_FROM_INC_PATH  "${PROJECT_SOURCE_DIR}/src ${PROJECT_SOURCE_DIR}/include")
+  _set_if_undefined(DOXYGEN_EXTRACT_ALL          "YES")
   #---------------------------------------------------------------------------
   # Configuration options related to warning and progress messages
   #---------------------------------------------------------------------------
