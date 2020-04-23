@@ -29,6 +29,11 @@
 #  <file:///usr/share/doc/doxygen/html/config.html>`_ provided by package *doxygen-doc*
 #  or the `online version <http://www.doxygen.nl/manual/config.html>`_.
 #
+#   .. variable:: INSTALL_DOCUMENTATION
+#
+#     whether the documentation should be installed.
+#     Turning this to OFF does not prevent the documentation generation.
+#
 #  .. _Doxygen: http://www.doxygen.nl
 
 #.rst:
