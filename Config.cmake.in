@@ -81,7 +81,11 @@ include(CMakeFindDependencyMacro)
 
 IF(COMMAND ADD_REQUIRED_DEPENDENCY)
   FOREACH(pkgcfg_dep ${@PROJECT_NAME@_PKG_CONFIG_DEPENDENCIES})
-    ADD_REQUIRED_DEPENDENCY(${pkgcfg_dep})
+    # Avoid duplicated lookup.
+    LIST (FIND $_PKG_CONFIG_REQUIRES "${pkgcfg_dep}" _index)
+    IF(${_index} EQUAL -1)
+      ADD_REQUIRED_DEPENDENCY(${pkgcfg_dep})
+    ENDIF()
   ENDFOREACH()
 ENDIF(COMMAND ADD_REQUIRED_DEPENDENCY)
 
