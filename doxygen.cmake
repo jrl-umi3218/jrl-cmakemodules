@@ -439,6 +439,7 @@ MACRO(_SETUP_DOXYGEN_DEFAULT_OPTIONS)
   #---------------------------------------------------------------------------
   _set_if_undefined(DOXYGEN_GENERATE_LATEX       NO)
   _set_if_undefined(DOXYGEN_LATEX_OUTPUT         doxygen-latex)
+  _set_if_undefined(DOXYGEN_EXTRA_PACKAGES       "amssymb,amsmath")
   #---------------------------------------------------------------------------
   # Configuration options related to the RTF output
   #---------------------------------------------------------------------------
