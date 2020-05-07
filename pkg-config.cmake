@@ -17,6 +17,25 @@ INCLUDE(cmake/shared-library.cmake)
 
 FIND_PACKAGE(PkgConfig)
 
+# For CMake >= 3.12, this can be replace by
+# list(JOIN ${${var_in}} ${sep} out)
+function(_list_join var_in sep var_out)
+  if(CMAKE_VERSION GREATER 3.12)
+    list(JOIN ${${var_in}} ${sep} out)
+  else()
+    set(first TRUE)
+    foreach(el ${${var_in}})
+      if(first)
+        set(out "${el}")
+        set(first FALSE)
+      else()
+        set(out "${out}${sep}${el}")
+      endif()
+    endforeach()
+  endif()
+  set(${var_out} ${out} PARENT_SCOPE)
+endfunction()
+
 # Additional pkg-config variables whose value will be imported
 # during the dependency check.
 SET(PKG_CONFIG_ADDITIONAL_VARIABLES bindir pkglibdir datarootdir pkgdatarootdir docdir doxygendocdir)
@@ -136,7 +155,7 @@ MACRO(_SETUP_PROJECT_PKG_CONFIG_FINALIZE_DEBUG)
   SET(_PKG_CONFIG_LIBS "${_PKG_CONFIG_LIBS_DEBUG} ${_PKG_CONFIG_LIBS}")
   SET(TEMP_REQUIRES ${_PKG_CONFIG_REQUIRES})
   LIST(APPEND _PKG_CONFIG_REQUIRES "${_PKG_CONFIG_REQUIRES_DEBUG}")
-  STRING(REPLACE ";" "," _PKG_CONFIG_REQUIRES_LIST ${_PKG_CONFIG_REQUIRES})
+  _list_join(_PKG_CONFIG_REQUIRES ", " _PKG_CONFIG_REQUIRES_LIST)
   CONFIGURE_FILE(
     "${PROJECT_SOURCE_DIR}/cmake/pkg-config.pc.cmake"
     "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}${PKGCONFIG_POSTFIX}.pc"
@@ -173,7 +192,7 @@ MACRO(_SETUP_PROJECT_PKG_CONFIG_FINALIZE_OPTIMIZED)
   SET(_PKG_CONFIG_LIBS "${_PKG_CONFIG_LIBS_OPTIMIZED} ${_PKG_CONFIG_LIBS}")
   SET(TEMP_REQUIRES ${_PKG_CONFIG_REQUIRES})
   LIST(APPEND _PKG_CONFIG_REQUIRES "${_PKG_CONFIG_REQUIRES_OPTIMIZED}")
-  STRING(REPLACE ";" "," _PKG_CONFIG_REQUIRES_LIST "${_PKG_CONFIG_REQUIRES}")
+  _list_join(_PKG_CONFIG_REQUIRES ", " _PKG_CONFIG_REQUIRES_LIST)
   IF(DEFINED CUSTOM_PKG_CONFIG_FILENAME)
     SET(_PKG_CONFIG_FILENAME "${CUSTOM_PKG_CONFIG_FILENAME}.pc" CACHE INTERNAL "")
   ENDIF(DEFINED CUSTOM_PKG_CONFIG_FILENAME)
