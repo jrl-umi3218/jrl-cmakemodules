@@ -180,6 +180,29 @@ MACRO(_ADD_TO_LIST LIST VALUE SEPARATOR)
   ENDIF("${${LIST}}" STREQUAL "")
 ENDMACRO(_ADD_TO_LIST LIST VALUE)
 
+# _ADD_TO_LIST_IF_NOT_PRESENT LIST VALUE
+# -----------------------
+#
+# Add a value to a CMake standard list list.
+#
+# LIST		: the list.
+# VALUE		: the value to be appended.
+#
+MACRO(_ADD_TO_LIST_IF_NOT_PRESENT LIST VALUE)
+  IF(CMAKE_VERSION VERSION_GREATER "3.3.0")
+    CMAKE_POLICY(SET CMP0057 NEW)
+    # To be more robust, value should be stripped
+    IF(NOT "${VALUE}" IN_LIST ${LIST})
+      LIST(APPEND ${LIST} "${VALUE}")
+    ENDIF()
+  ELSE()
+    LIST (FIND LIST "${VALUE}" _index)
+    IF(${_index} EQUAL -1)
+      LIST(APPEND LIST "${VALUE}")
+    ENDIF()
+  ENDIF()
+ENDMACRO(_ADD_TO_LIST_IF_NOT_PRESENT LIST VALUE)
+
 # _CONCATENATE_ARGUMENTS
 # ----------------------
 #
