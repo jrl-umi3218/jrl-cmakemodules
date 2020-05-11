@@ -13,71 +13,20 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#.rst:
-# .. command:: VERSION_COMPUTE
-#
-#  Deduce automatically the version number.
-#  This mechanism makes sure that version number is always up-to-date and
-#  coherent (i.e. strictly increasing as commits are made).
-#
-#  There is three cases:
-#
-#  - the software comes from a release (stable version). In this case, the
-#    software is retrieved through a tarball which does not contain the ``.git``
-#    directory. Hence, there is no way to search in the Git history to generate
-#    the version number.
-#    In this case, a ``.version`` file is put at the top-directory of the source
-#    tree which contains the project version. Read the file to retrieve the
-#    version number.
-#
-#  - the softwares comes from git (possibly unstable version).
-#    ``git describe`` is used to retrieve the version number
-#    (see 'man git-describe'). This tool generates a version number from the git
-#    history. The version number follows this pattern:
-#
-#      ``TAG[-N-SHA1][-dirty]``
-#
-#    - ``TAG``: last matching tag (i.e. last signed tag starting with v, i.e. v0.1)
-#    - ``N``: number of commits since the last maching tag
-#    - ``SHA1``: sha1 of the current commit
-#    - ``-dirty``: added if the workig directory is dirty (there is some uncommitted
-#      changes).
-#
-#    For stable releases, i.e. the current commit is a matching tag, ``-N-SHA1`` is
-#    omitted. If the HEAD is on the signed tag v0.1, the version number will be
-#    0.1.
-#
-#    If the HEAD is two commits after v0.5 and the last commit is 034f6d...
-#    The version number will be:
-#
-#    - ``0.5-2-034f`` if there is no uncommitted changes,
-#    - ``0.5-2-034f-dirty`` if there is some uncommitted changes.
-#     
-#  - the software comes with a package.xml file at the root of the project (for ROS build essentially)
-#    then the module extracts the version number which is declared inside between the tag <version>x.y.z<\version>
-#
-MACRO(VERSION_COMPUTE)
-  SET(PROJECT_STABLE False)
-
-  IF("${PROJECT_SOURCE_DIR}" STREQUAL "")
-    SET(PROJECT_SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/..")
-  ENDIF()
-
-  # Check if a version is embedded in the project.
+FUNCTION(_COMPUTE_VERSION_FROM_DOT_VERSION_FILE)
   IF(EXISTS ${PROJECT_SOURCE_DIR}/.version)
     # Yes, use it. This is a stable version.
-    FILE(STRINGS .version PROJECT_VERSION)
-    SET(PROJECT_STABLE TRUE)
-  ELSE(EXISTS ${PROJECT_SOURCE_DIR}/.version)
-    # No, there is no '.version' file. Deduce the version from git.
+    FILE(STRINGS .version _PROJECT_VERSION)
+    SET(PROJECT_VERSION ${_PROJECT_VERSION} PARENT_SCOPE)
+    SET(PROJECT_STABLE TRUE PARENT_SCOPE)
+    MESSAGE(STATUS "Package version (.version): ${_PROJECT_VERSION}")
+  ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/.version)
+ENDFUNCTION()
 
-    # Search for git.
-    FIND_PROGRAM(GIT git)
-    IF(NOT GIT)
-      MESSAGE("Warning: failed to compute the version number, git not found.")
-      SET(PROJECT_VERSION UNKNOWN)
-    ENDIF()
-
+FUNCTION(_COMPUTE_VERSION_FROM_GIT_DESCRIBE)
+  FIND_PROGRAM(GIT git)
+  IF(GIT)
+    ####################################################################
     # Check whether the repository is shallow or not
     EXECUTE_PROCESS(COMMAND ${GIT} rev-parse --git-dir
                     OUTPUT_VARIABLE GIT_PROJECT_DIR
@@ -95,7 +44,9 @@ MACRO(VERSION_COMPUTE)
       MESSAGE(WARNING "It appears that your git repository is a shallow copy, meaning that the history has been truncated\n.
                       Please consider updating your git repository with `git fetch --unshallow` in order to download the full history with tags to recover the current release version.") 
     ENDIF(IS_SHALLOW)
+    ####################################################################
 
+    ####################################################################
     # Run describe: search for *signed* tags starting with v, from the HEAD and
     # display only the first four characters of the commit id.
     EXECUTE_PROCESS(
@@ -119,61 +70,145 @@ MACRO(VERSION_COMPUTE)
 
     # Check if the tree is clean.
     IF(GIT_DIFF_INDEX_RESULT OR GIT_DIFF_INDEX_OUTPUT)
-      SET(PROJECT_DIRTY TRUE)
+      SET(PROJECT_DIRTY TRUE PARENT_SCOPE)
     ENDIF()
 
     # Check if git describe worked and store the returned version number.
-    IF(GIT_DESCRIBE_RESULT)
-      MESSAGE(AUTHOR_WARNING
-        "Warning: failed to compute the version number,"
-        " 'git describe' failed:\n"
-        "\t" ${GIT_DESCRIBE_ERROR})
-      SET(PROJECT_VERSION UNKNOWN)
-    ELSE()
+    IF(NOT GIT_DESCRIBE_RESULT)
       # Get rid of the tag prefix to generate the final version.
-      STRING(REGEX REPLACE "^v" "" PROJECT_VERSION "${GIT_DESCRIBE_OUTPUT}")
-      IF(NOT PROJECT_VERSION)
-	      MESSAGE(AUTHOR_WARNING
-	        "Warning: failed to compute the version number,"
-          "'git describe' returned an empty string.")
-        SET(PROJECT_VERSION UNKNOWN)
+      STRING(REGEX REPLACE "^v" "" _PROJECT_VERSION "${GIT_DESCRIBE_OUTPUT}")
+
+      # Append dirty if the project is dirty.
+      IF(DEFINED PROJECT_DIRTY)
+        SET(_PROJECT_VERSION "${_PROJECT_VERSION}-dirty")
+      ENDIF()
+
+      IF(_PROJECT_VERSION)
+        SET(PROJECT_VERSION ${_PROJECT_VERSION} PARENT_SCOPE)
       ENDIF()
 
       # If there is a dash in the version number, it is an unstable release,
       # otherwise it is a stable release.
       # I.e. 1.0, 2, 0.1.3 are stable but 0.2.4-1-dg43 is unstable.
-      STRING(REGEX MATCH "-" PROJECT_STABLE "${PROJECT_VERSION}")
+      STRING(REGEX MATCH "-" PROJECT_STABLE "${_PROJECT_VERSION}")
       IF(NOT PROJECT_STABLE STREQUAL -)
-        SET(PROJECT_STABLE TRUE)
+        SET(PROJECT_STABLE TRUE PARENT_SCOPE)
       ELSE()
-        SET(PROJECT_STABLE FALSE)
+        SET(PROJECT_STABLE FALSE PARENT_SCOPE)
       ENDIF()
-    ENDIF()
 
-    IF(GIT_DESCRIBE_RESULT) # git has failed to retrieve the project version
-      # Check if a package.xml file exists and try to extract the version from it
-      IF(EXISTS ${PROJECT_SOURCE_DIR}/package.xml)
-        FILE(READ "${PROJECT_SOURCE_DIR}/package.xml" PACKAGE_XML)
-        MESSAGE(STATUS "PACKAGE_XML: ${PACKAGE_XML}")
-        EXECUTE_PROCESS(COMMAND cat "${PROJECT_SOURCE_DIR}/package.xml"
-                        COMMAND grep <version
-                        COMMAND cut -f2 -d >
-                        COMMAND cut -f1 -d <
-                        OUTPUT_STRIP_TRAILING_WHITESPACE
-                        #COMMAND_ECHO STDOUT
-                        OUTPUT_VARIABLE PACKAGE_XML_VERSION)
-        MESSAGE(STATUS "CMAKE: ${PACKAGE_XML_VERSION}")
-        IF(NOT "${PACKAGE_XML_VERSION}" STREQUAL "")
-          SET(PROJECT_VERSION ${PACKAGE_XML_VERSION})
-        ENDIF(NOT "${PACKAGE_XML_VERSION}" STREQUAL "")
-      ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/package.xml)
-    ENDIF(GIT_DESCRIBE_RESULT)
-
-    # Append dirty if the project is dirty.
-    IF(DEFINED PROJECT_DIRTY)
-      SET(PROJECT_VERSION "${PROJECT_VERSION}-dirty")
+      MESSAGE(STATUS "Package version (git describe): ${_PROJECT_VERSION}")
     ENDIF()
-  ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/.version)
+    ####################################################################
+  ENDIF()
+ENDFUNCTION()
+
+FUNCTION(_COMPUTE_VERSION_FROM_ROS_PACKAGE_XML_FILE)
+  IF(EXISTS ${PROJECT_SOURCE_DIR}/package.xml)
+    FILE(READ "${PROJECT_SOURCE_DIR}/package.xml" PACKAGE_XML)
+    MESSAGE(STATUS "PACKAGE_XML: ${PACKAGE_XML}")
+    EXECUTE_PROCESS(COMMAND cat "${PROJECT_SOURCE_DIR}/package.xml"
+      COMMAND grep <version
+      COMMAND cut -f2 -d >
+      COMMAND cut -f1 -d <
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+      #COMMAND_ECHO STDOUT
+      OUTPUT_VARIABLE PACKAGE_XML_VERSION)
+    IF(NOT "${PACKAGE_XML_VERSION}" STREQUAL "")
+      SET(PROJECT_VERSION ${PACKAGE_XML_VERSION} PARENT_SCOPE)
+    ENDIF(NOT "${PACKAGE_XML_VERSION}" STREQUAL "")
+    MESSAGE(STATUS "Package version (ROS package.xml): ${PACKAGE_XML_VERSION}")
+  ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/package.xml)
+ENDFUNCTION()
+
+#.rst:
+# .. ifmode:: user
+#
+#   .. variable:: PROJECT_VERSION_COMPUTATION_METHODS
+#
+#    List of methods used to compute the version number.
+#    Possible values are:
+#
+#    - *DOT_VERSION_FILE*:
+#
+#        If a .version file exists, interpret its content as the project version.
+#
+#    - *GIT_DESCRIBE*
+#
+#        ``git describe`` is used to retrieve the version number
+#        (see 'man git-describe'). This tool generates a version number from the git
+#        history. The version number follows this pattern ``TAG[-N-SHA1][-dirty]``,
+#        where:
+#      
+#        - ``TAG``: last matching tag (i.e. last signed tag starting with v, i.e. v0.1)
+#        - ``N``: number of commits since the last maching tag
+#        - ``SHA1``: sha1 of the current commit
+#        - ``-dirty``: added if the workig directory is dirty (there is some uncommitted
+#          changes).
+#
+#        For stable releases, i.e. the current commit is a matching tag, ``-N-SHA1`` is
+#        omitted. If the HEAD is on the signed tag v0.1, the version number will be
+#        0.1.
+#    
+#        If the HEAD is two commits after v0.5 and the last commit is 034f6d...
+#        The version number will be:
+#    
+#        - ``0.5-2-034f`` if there is no uncommitted changes,
+#        - ``0.5-2-034f-dirty`` if there is some uncommitted changes.
+#
+#    - *ROS_PACKAGE_XML_FILE*
+#
+#        If a package.xml file exists, interpret its content as a ROS package.xml file
+#        and extract the project version from its version tag.
+#
+#    .. note::
+#
+#      To safely compute the project version, you may consider the following cases:
+#
+#      - the software is retrieved through a tarball which does not contain the ``.git``
+#        directory. Hence, there is no way to search in the Git history to generate
+#        the version number.
+#
+#      - the softwares is retrieved through by clone a distant repository. In this case,
+#        the history may not be complete (shallow clone), thus the *GIT_DESCRIBE* method may fail.
+#
+#      - the *DOT_VERSION_FILE* and *ROS_PACKAGE_XML_FILE* will always work but
+#        forces the version number to be in the git tags and hardcoded in a file.
+
+#.rst:
+# .. ifmode:: internal
+#
+#   .. command:: VERSION_COMPUTE
+#
+#    Deduce the version number using the method as requested by
+#    :cmake:variable:`PROJECT_VERSION_COMPUTATION_METHODS`.
+#    The methods are called in order until one sets the variable ``PROJECT_VERSION``.
+#
+#    If `PROJECT_VERSION`` is already set, this macro does nothing.
+#
+MACRO(VERSION_COMPUTE)
+  SET(PROJECT_STABLE False)
+
+  IF("${PROJECT_SOURCE_DIR}" STREQUAL "")
+    SET(PROJECT_SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/..")
+  ENDIF()
+  IF(NOT DEFINED PROJECT_VERSION_COMPUTATION_METHODS)
+    LIST(APPEND PROJECT_VERSION_COMPUTATION_METHODS "ROS_PACKAGE_XML_FILE" "DOT_VERSION_FILE" "GIT_DESCRIBE")
+  ENDIF()
+
+  FOREACH(_computation_method ${PROJECT_VERSION_COMPUTATION_METHODS})
+    IF(NOT PROJECT_VERSION)
+      IF    (${_computation_method} STREQUAL "DOT_VERSION_FILE")
+        _COMPUTE_VERSION_FROM_DOT_VERSION_FILE()
+      ELSEIF(${_computation_method} STREQUAL "GIT_DESCRIBE")
+        _COMPUTE_VERSION_FROM_GIT_DESCRIBE()
+      ELSEIF(${_computation_method} STREQUAL "ROS_PACKAGE_XML_FILE")
+        _COMPUTE_VERSION_FROM_ROS_PACKAGE_XML_FILE()
+      ELSE  ()
+        MESSAGE(AUTHOR_WARNING "${_computation_method} is not a valid method to compute the project version.")
+      ENDIF()
+    ENDIF(NOT PROJECT_VERSION)
+  ENDFOREACH()
   
   # Set PROJECT_VERSION_{MAJOR,MINOR,PATCH} variables
   IF(PROJECT_VERSION)
