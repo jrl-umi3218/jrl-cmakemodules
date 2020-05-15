@@ -208,6 +208,10 @@ MACRO(VERSION_COMPUTE)
       ENDIF()
     ENDIF(NOT PROJECT_VERSION)
   ENDFOREACH()
+  IF(NOT PROJECT_VERSION)
+    # set a default, ref https://github.com/jrl-umi3218/jrl-cmakemodules/issues/381
+    SET(PROJECT_VERSION 0.0.0)
+  ENDIF(NOT PROJECT_VERSION)
   
   # Set PROJECT_VERSION_{MAJOR,MINOR,PATCH} variables
   IF(PROJECT_VERSION)
