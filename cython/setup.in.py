@@ -48,6 +48,7 @@ class pkg_config(object):
         self.compile_args = [ "-D" + x for x in compile_args.split(';') if len(x) ]
         self.compile_args = list(set(self.compile_args))
         include_dirs = "@CYTHON_BINDINGS_INCLUDE_DIRECTORIES@"
+        include_dirs += ';{}'.format(numpy_get_include())
         self.include_dirs = [ x for x in include_dirs.split(';') if len(x) ]
         self.include_dirs.append('@CMAKE_CURRENT_SOURCE_DIR@/include')
         self.include_dirs = list(set(self.include_dirs))
@@ -84,7 +85,7 @@ def GenExtension(name):
     pyx_src = name.replace('.', '/')
     pyx_src = pyx_src + '.pyx'
     ext_src = pyx_src
-    return Extension(name, [ext_src], extra_compile_args = config.compile_args, include_dirs = config.include_dirs + [numpy_get_include()], library_dirs = config.library_dirs, libraries = config.libraries, extra_link_args = config.link_args)
+    return Extension(name, [ext_src], extra_compile_args = config.compile_args, include_dirs = config.include_dirs, library_dirs = config.library_dirs, libraries = config.libraries, extra_link_args = config.link_args)
 
 extensions = [ GenExtension(x) for x in '@CYTHON_BINDINGS_MODULES@'.split(';') ]
 
