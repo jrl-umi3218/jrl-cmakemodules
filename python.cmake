@@ -387,14 +387,14 @@ ENDMACRO()
 # Build a Python file from the source directory in the build directory.
 #
 MACRO(PYTHON_BUILD MODULE FILE)
-
+  IF(NOT TARGET compile_pyc)
+    ADD_CUSTOM_TARGET(compile_pyc ALL)
+  ENDIF()
   FILE(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${MODULE}")
 
-  # convert "/" to "_"
-  STRING(REGEX REPLACE "/|:" "_" FILE_TARGET_NAME
-    "${CMAKE_CURRENT_BINARY_DIR}/${MODULE}/${FILE}c")
-
-  ADD_CUSTOM_TARGET(${FILE_TARGET_NAME} ALL
+  ADD_CUSTOM_COMMAND(
+    TARGET compile_pyc
+    PRE_BUILD
     COMMAND
     "${PYTHON_EXECUTABLE}"
     "${PROJECT_SOURCE_DIR}/cmake/compile.py"
