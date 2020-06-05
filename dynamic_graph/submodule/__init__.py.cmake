@@ -29,6 +29,4 @@ from . import wrap
 # Recover previous flags
 sys.setdlopenflags(flags)
 
-dg.entity.updateEntityClasses(globals())
-
 ${ENTITY_CLASS_LIST}
