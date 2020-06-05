@@ -15,9 +15,7 @@
 
 #include "dynamic-graph/python/module.hh"
 
-@ENTITY_INCLUDES@
-
-typedef boost::mpl::vector<@ENTITY_CLASS_NAMES@> entities_t;
+#include "@DYNAMICGRAPH_MODULE_HEADER@"
 
 struct register_entity
 {

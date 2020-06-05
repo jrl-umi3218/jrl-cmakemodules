@@ -275,19 +275,13 @@ ENDMACRO(FINDPYTHON)
 MACRO(DYNAMIC_GRAPH_PYTHON_MODULE SUBMODULENAME LIBRARYNAME TARGETNAME)
 
   set(options DONT_INSTALL_INIT_PY)
-  set(oneValueArgs SOURCE_PYTHON_MODULE)
-  set(multiValueArgs CXX_INCLUDES ENTITIES)
+  set(oneValueArgs SOURCE_PYTHON_MODULE MODULE_HEADER)
   cmake_parse_arguments(ARG "${options}" "${oneValueArgs}"
                         "${multiValueArgs}" ${ARGN} )
 
   # By default the __init__.py file is installed.
   if(NOT DEFINED ARG_SOURCE_PYTHON_MODULE)
-    set(ENTITY_CLASS_NAMES ${ARG_ENTITIES})
-    string(REPLACE ";" "," ENTITY_CLASS_NAMES "${ENTITY_CLASS_NAMES}")
-    set(ENTITY_INCLUDES "")
-    foreach(include ${ARG_CXX_INCLUDES})
-      set(ENTITY_INCLUDES "${ENTITY_INCLUDES}\n#include<${include}>")
-    endforeach()
+    set(DYNAMICGRAPH_MODULE_HEADER ${ARG_MODULE_HEADER})
     configure_file(
       ${PROJECT_SOURCE_DIR}/cmake/dynamic_graph/python-module-py.cc.in
       ${PROJECT_BINARY_DIR}/src/dynamic_graph/${SUBMODULENAME}/python-module-py.cc
