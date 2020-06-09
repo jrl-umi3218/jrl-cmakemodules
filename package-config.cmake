@@ -168,12 +168,9 @@ install(
 
 # Config
 #   * <prefix>/lib/cmake/Foo/FooTargets.cmake
-if(${TARGETS_EXPORT_NAME})
-  install(
+install(
     EXPORT "${TARGETS_EXPORT_NAME}"
     NAMESPACE "${namespace}"
     DESTINATION "${CONFIG_INSTALL_DIR}"
-    )
-endif(${TARGETS_EXPORT_NAME})
-
+)
 ENDMACRO(SETUP_PROJECT_PACKAGE_FINALIZE)
