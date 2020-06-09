@@ -17,7 +17,7 @@ FIND_PATH(CppAD_INCLUDE_DIR
   PATHS ${CppAD_PREFIX}
   )
 FIND_LIBRARY(CppAD_LIBRARY
-  NAMES libcppad_lib.so
+  NAMES cppad_lib
   PATHS ${CppAD_PREFIX}
   )
 
