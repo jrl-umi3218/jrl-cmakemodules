@@ -87,6 +87,60 @@ MACRO(ADD_PROJECT_DEPENDENCY)
   set(_PACKAGE_CONFIG_DEPENDENCIES_FIND_DEPENDENCY "${_PACKAGE_CONFIG_DEPENDENCIES_FIND_DEPENDENCY}" CACHE INTERNAL "")
 ENDMACRO()
 
+# COMPUTE_TARGETS_LIST
+# -------------------
+# This macro creates a list of targets based on the targets
+# for each directory. It creates a list of targets called TARGETS_LIST
+# The macro is searching across the subdirectories of the root and
+# the root itself.
+#
+MACRO(COMPUTE_TARGETS_LIST)
+###
+set(TARGETS_LIST )
+
+# Search subdirectories of the root
+get_property(subdirs_list
+  DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+  PROPERTY SUBDIRECTORIES)
+
+# Put the root itself in the list
+LIST(APPEND subdirs_list ${CMAKE_CURRENT_SOURCE_DIR})
+
+
+# For each subdirectory
+foreach (_varsubdir ${subdirs_list})
+
+  # Get the list of targets
+  get_property(_variableNames
+    DIRECTORY ${_varsubdir}
+    PROPERTY BUILDSYSTEM_TARGETS)
+  list (SORT _variableNames)
+
+  # Append each target to the list of targets
+  foreach (_variableName ${_variableNames})
+    LIST(APPEND TARGETS_LIST ${_variableName})
+  endforeach()
+
+endforeach()
+
+# Standard targets
+SET( STD_TARGETS_TO_FILTER Continuous ContinuousBuild ContinuousConfigure
+  ContinuousCoverage ContinuousMemCheck ContinuousStart ContinuousSubmit
+  ContinuousTest ContinuousUpdate Experimental ExperimentalBuild
+  ExperimentalConfigure ExperimentalCoverage ExperimentalMemCheck
+  ExperimentalStart ExperimentalSubmit ExperimentalTest ExperimentalUpdate
+  Nightly NightlyBuild NightlyConfigure NightlyCoverage NightlyMemCheck
+  NightlyMemoryCheck NightlyStart NightlySubmit NightlyTest NightlyUpdate
+  build_tests dist dist_tarbz2 dist_targz dist_tarxz distcheck distclean
+  distdir distorig doc reinstall release uninstall)
+
+# Removing standard targets
+list(REMOVE_ITEM TARGETS_LIST ${STD_TARGETS_TO_FILTER})
+
+# Set the number of targets
+list(LENGTH TARGETS_LIST TARGETS_LIST_LENGTH)
+
+ENDMACRO()
 
 # SETUP_PROJECT_PACKAGE_FINALIZE
 # -------------
@@ -152,6 +206,12 @@ if(_PKG_CONFIG_REQUIRES)
   endforeach()
   list(REMOVE_DUPLICATES _PKG_CONFIG_REQUIRES_LIST)
 endif(_PKG_CONFIG_REQUIRES)
+
+COMPUTE_TARGETS_LIST()
+if(TARGETS_LIST_LENGTH)
+  SET(VALID_TARGETS_EXPORT_NAME "SET(VALID_TARGETS_EXPORT_NAME TRUE)")
+endif(TARGETS_LIST_LENGTH)
+
 configure_package_config_file(
     "cmake/Config.cmake.in"
     "${PROJECT_CONFIG}"
@@ -168,9 +228,12 @@ install(
 
 # Config
 #   * <prefix>/lib/cmake/Foo/FooTargets.cmake
-install(
+if(TARGETS_LIST_LENGTH)
+  install(
     EXPORT "${TARGETS_EXPORT_NAME}"
     NAMESPACE "${namespace}"
     DESTINATION "${CONFIG_INSTALL_DIR}"
-)
+    )
+endif(TARGETS_LIST_LENGTH)
+
 ENDMACRO(SETUP_PROJECT_PACKAGE_FINALIZE)
