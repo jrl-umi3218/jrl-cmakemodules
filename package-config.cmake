@@ -178,7 +178,7 @@ install(
 ENDMACRO(SETUP_PROJECT_PACKAGE_FINALIZE)
 
 #.rst:
-# .. command:: PROJECT_INSTALL_COMPONENT(COMPONENT [EXTRA_MACRO cmake_code])
+# .. command:: PROJECT_INSTALL_COMPONENT(COMPONENT [EXTRA_MACRO cmake_code] [NAMESPACE namespace])
 #
 #   Generates CMake componentConfig.cmake and Targets files so users can call::
 #
@@ -186,11 +186,15 @@ ENDMACRO(SETUP_PROJECT_PACKAGE_FINALIZE)
 #
 #   :param EXTRA_MACRO: optional argument. `cmake_code` will be appended to
 #          the generated *Config.cmake*.
+#   :param NAMESPACE: optional argument. Defaults to `${PROJECT_NAME}::`.
 #
 macro(PROJECT_INSTALL_COMPONENT COMPONENT)
-  cmake_parse_arguments(PARSED_ARGN "" "EXTRA_MACRO" "" ${ARGN})
-
-  set(namespace "${PROJECT_NAME}::")
+  cmake_parse_arguments(PARSED_ARGN "" "NAMESPACE;EXTRA_MACRO" "" ${ARGN})
+  if(PARSED_ARGN_NAMESPACE)
+    set(namespace "${PARSED_ARGN_NAMESPACE}")
+  else()
+    set(namespace "${PROJECT_NAME}::")
+  endif()
 
   install(EXPORT ${COMPONENT}Targets
     NAMESPACE "${namespace}"
