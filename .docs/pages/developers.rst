@@ -45,6 +45,18 @@ To document a macro or a variable in a ``.cmake`` file, use
   #   Variable details details (Mind the empty line before).
   #   Related to :cmake:command:`HOW_TO_DOCUMENT_A_COMMAND`.
   #
+  #   A code block::
+  #   
+  #     notice the double : and the indention
+  #
+  #   or the more verbose, but supports other language
+  #
+  #   .. code-block:: bash
+  #
+  #      make html
+  #      # Open build/html/index.html to see the doc
+  #      firefox build/html/index.html
+  #
   # .. command:: HOW_TO_DOCUMENT_A_COMMAND(argname)
   #
   #   Macro details (Mind the empty line before).
@@ -58,8 +70,20 @@ gives
 
 .. variable:: HOW_TO_DOCUMENT_A_VARIABLE
 
- Variable details (Mind the empty line before).
- Related to :cmake:command:`HOW_TO_DOCUMENT_A_COMMAND`.
+  Variable details (Mind the empty line before).
+  Related to :cmake:command:`HOW_TO_DOCUMENT_A_COMMAND`.
+
+  A cmake code block::
+  
+    set(foo "notice the double : and the indention")
+
+  or the more verbose, but supports other language
+
+  .. code-block:: bash
+
+     make html
+     # Open build/html/index.html to see the doc
+     firefox build/html/index.html
 
 .. command:: HOW_TO_DOCUMENT_A_COMMAND(argname)
 
