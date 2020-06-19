@@ -76,6 +76,13 @@
 #     This tells jrl-cmakemodules that you are using export functionalities so it will
 #     hook the installation of your configuration files. Defaults to false
 #
+#   .. variable:: PROJECT_EXPORT_NO_TARGET
+#
+#     This tells jrl-cmakemodules that there is no targets in the project.
+#     However the export functionalities are still provided to detect the
+#     project properties. Not setting this variable when no target is present
+#     will result in an error.
+#
 #   Macros
 #   ------
 #
