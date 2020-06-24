@@ -40,7 +40,7 @@ MACRO(_SETUP_PROJECT_WARNINGS)
  # especially with boost, which is way too verbose
  # The default levels (W3/W4) are enough
  # The next macro remove warnings on deprecations due to stl.
- IF(WIN32)
+ IF(MSVC)
   SET(WARNING_CXX_FLAGS "-D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS")
   SET(WARNING_CXX_FLAGS "${WARNING_CXX_FLAGS} -D_CRT_SECURE_NO_DEPRECATE")
   ## -- The following warnings are removed to highlight the output
@@ -56,7 +56,7 @@ MACRO(_SETUP_PROJECT_WARNINGS)
   SET(WARNING_CXX_FLAGS "${WARNING_CXX_FLAGS} /wd4275")
   # C4355 "this" used in base member initializer list
   SET(WARNING_CXX_FLAGS "${WARNING_CXX_FLAGS} /wd4355")
- ENDIF(WIN32)
+ ENDIF()
 
  SET(CMAKE_CXX_FLAGS "${WARNING_CXX_FLAGS} ${CMAKE_CXX_FLAGS}")
 
