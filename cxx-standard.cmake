@@ -4,6 +4,12 @@
 # Author: Guilhem Saurel
 #
 
+#.rst:
+# .. ifmode:: internal
+#
+#   .. variable:: ENFORCE_MINIMAL_CXX_STANDARD
+#
+#      When this is ON, every call to :cmake:command:`CHECK_MINIMAL_CXX_STANDARD` updates the :cmake:variable:`CMAKE_CXX_STANDARD`.
 option(ENFORCE_MINIMAL_CXX_STANDARD "Set CMAKE_CXX_STANDARD if a dependency require it" OFF)
 
 set(_CXX_STANDARD_SOURCE "${CMAKE_CURRENT_LIST_DIR}/cxx-standard.cpp")
@@ -11,16 +17,16 @@ set(_CXX_STANDARD_SOURCE "${CMAKE_CURRENT_LIST_DIR}/cxx-standard.cpp")
 #.rst:
 # .. ifmode:: user
 #
-# .. command:: CHECK_MINIMAL_CXX_STANDARD(STANDARD [ENFORCE])
+#   .. command:: CHECK_MINIMAL_CXX_STANDARD(STANDARD [ENFORCE])
 #
-#    Ensure that a minimal C++ standard will be used.
+#      Ensure that a minimal C++ standard will be used.
 #
-#    This will check the default standard of the current compiler,
-#    and set CMAKE_CXX_STANDARD if necessary, and "ENFORCE" is provided,
-#    or ENFORCE_MINIMAL_CXX_STANDARD is ON.
-#    Multiple calls to this macro will keep the highest standard.
+#      This will check the default standard of the current compiler,
+#      and set :cmake:variable:`CMAKE_CXX_STANDARD` if necessary, and `ENFORCE` is provided,
+#      or :cmake:variable:`ENFORCE_MINIMAL_CXX_STANDARD` is `ON`.
+#      Multiple calls to this macro will keep the highest standard.
 #
-#    Supported values are 98, 11, 14, 17, and 20.
+#      Supported values are 98, 11, 14, 17, and 20.
 #
 macro(CHECK_MINIMAL_CXX_STANDARD STANDARD)
   set(options ENFORCE)
