@@ -398,13 +398,15 @@ ENDMACRO()
 # Build a Python file from the source directory in the build directory.
 #
 MACRO(PYTHON_BUILD MODULE FILE)
-  IF(NOT TARGET compile_pyc)
-    ADD_CUSTOM_TARGET(compile_pyc ALL)
+  # Regex from IsValidTargetName in CMake/Source/cmGeneratorExpression.cxx
+  STRING(REGEX REPLACE "[^A-Za-z0-9_.:+-]" "_" compile_pyc "compile_pyc_${CMAKE_CURRENT_SOURCE_DIR}")
+  IF(NOT TARGET ${compile_pyc})
+    ADD_CUSTOM_TARGET(${compile_pyc} ALL)
   ENDIF()
   FILE(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${MODULE}")
 
   ADD_CUSTOM_COMMAND(
-    TARGET compile_pyc
+    TARGET ${compile_pyc}
     PRE_BUILD
     COMMAND
     "${PYTHON_EXECUTABLE}"
