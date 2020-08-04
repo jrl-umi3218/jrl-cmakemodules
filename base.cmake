@@ -108,6 +108,7 @@ INCLUDE(${CMAKE_CURRENT_LIST_DIR}/package-config.cmake)
 INCLUDE(${CMAKE_CURRENT_LIST_DIR}/version-script.cmake)
 INCLUDE(${CMAKE_CURRENT_LIST_DIR}/test.cmake)
 INCLUDE(${CMAKE_CURRENT_LIST_DIR}/oscheck.cmake)
+INCLUDE(${CMAKE_CURRENT_LIST_DIR}/cxx-standard.cmake)
 
  # --------- #
  # Constants #

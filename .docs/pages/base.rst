@@ -15,6 +15,10 @@ Version
 
 .. cmake-module:: ../../version.cmake
 
+Set a minimal C++ standard
+==========================
+.. cmake-module:: ../../cxx-standard.cmake
+
 .. _minimal-working-example:
 
 Minimal working example
