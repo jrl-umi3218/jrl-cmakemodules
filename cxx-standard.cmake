@@ -39,6 +39,10 @@ macro(CHECK_MINIMAL_CXX_STANDARD STANDARD)
 
   # Get compiler default cxx standard, by printing "__cplusplus" (only once)
   if(NOT DEFINED _COMPILER_DEFAULT_CXX_STANDARD)
+    if(MSVC)
+      # See https://devblogs.microsoft.com/cppblog/msvc-now-correctly-reports-__cplusplus/
+      string(APPEND CMAKE_CXX_FLAGS " /Zc:__cplusplus")
+    endif()
     try_run(_cxx_standard_run_status _cxx_standard_build_status
       ${CMAKE_CURRENT_BINARY_DIR} ${_CXX_STANDARD_SOURCE}
       RUN_OUTPUT_VARIABLE _COMPILER_DEFAULT_CXX_STANDARD)
