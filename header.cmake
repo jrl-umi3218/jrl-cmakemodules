@@ -21,13 +21,6 @@
 #     List of C++ header filenames. They will be installed automatically
 #     using :command:`HEADER_INSTALL`, unless
 #     :cmake:variable:`INSTALL_PROJECT_HEADERS` is set to `OFF`
-#
-#   .. variable:: INSTALL_PROJECT_HEADERS
-#
-#      Set this to `OFF` if you don't want your headers to be automatically
-#      installed
-#
-option(INSTALL_PROJECT_HEADERS "Automatically install your \${PROJECT_NAME}_HEADERS" ON)
 
 #.rst:
 # .. ifmode:: internal

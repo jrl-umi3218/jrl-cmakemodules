@@ -37,6 +37,15 @@ ELSE(${ARGC})
   SET(CMAKE_VERBOSE_MAKEFILE TRUE)
 ENDIF(${ARGC})
 
+#.rst:
+# .. ifmode:: user
+#
+#   .. variable:: INSTALL_PROJECT_HEADERS
+#
+#      Set this to `OFF` if you don't want your headers to be automatically
+#      installed
+#
+OPTION(INSTALL_PROJECT_HEADERS "Automatically install your \${PROJECT_NAME}_HEADERS" ON)
 OPTION(INSTALL_DOCUMENTATION "Generate and install the documentation" ON)
 OPTION(INSTALL_GENERATED_HEADERS "Generate and install standard headers" ON)
 OPTION(INSTALL_PKG_CONFIG_FILE "Generate and install standard .pc file" ON)
