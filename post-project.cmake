@@ -67,6 +67,10 @@ ENDIF(${ARGC})
 #
 #      Set this to `OFF` if you don't want the generated .pc file to be automatically installed
 #
+#   .. variable:: INSTALL_DEFAULT_PACKAGE_CONFIG_FILE
+#
+#      Set this to `OFF` if you don't want the generated main .cmake files to be automatically installed
+#
 IF(INSTALL_PYTHON_INTERFACE_ONLY)
   OPTION(INSTALL_DEFAULT "default value for the 4 next options" OFF)
 ELSE()
@@ -77,11 +81,13 @@ IF(INSTALL_DEFAULT)
   OPTION(INSTALL_GENERATED_HEADERS "Generate and install standard headers" ON)
   OPTION(INSTALL_DOCUMENTATION "Generate and install the documentation" ON)
   OPTION(INSTALL_PKG_CONFIG_FILE "Generate and install standard .pc file" ON)
+  OPTION(INSTALL_DEFAULT_PACKAGE_CONFIG_FILE "Generate and install standard .cmake file" ON)
 ELSE()
   OPTION(INSTALL_PROJECT_HEADERS "Automatically install your \${PROJECT_NAME}_HEADERS" OFF)
   OPTION(INSTALL_GENERATED_HEADERS "Generate and install standard headers" OFF)
   OPTION(INSTALL_DOCUMENTATION "Generate and install the documentation" OFF)
   OPTION(INSTALL_PKG_CONFIG_FILE "Generate and install standard .pc file" OFF)
+  OPTION(INSTALL_DEFAULT_PACKAGE_CONFIG_FILE "Generate and install standard .cmake file" OFF)
 ENDIF()
 
 INCLUDE(CTest)

@@ -179,14 +179,16 @@ configure_package_config_file(
 # Config
 #   * <prefix>/lib/cmake/Foo/FooConfig.cmake
 #   * <prefix>/lib/cmake/Foo/FooConfigVersion.cmake
-install(
-    FILES "${PROJECT_CONFIG}" "${VERSION_CONFIG}"
-    DESTINATION "${CONFIG_INSTALL_DIR}"
-)
+if(INSTALL_DEFAULT_PACKAGE_CONFIG_FILE)
+  install(
+      FILES "${PROJECT_CONFIG}" "${VERSION_CONFIG}"
+      DESTINATION "${CONFIG_INSTALL_DIR}"
+  )
+endif()
 
 # Config
 #   * <prefix>/lib/cmake/Foo/FooTargets.cmake
-if(NOT PROJECT_EXPORT_NO_TARGET)
+if(INSTALL_DEFAULT_PACKAGE_CONFIG_FILE AND NOT PROJECT_EXPORT_NO_TARGET)
   install(
     EXPORT "${TARGETS_EXPORT_NAME}"
     NAMESPACE "${namespace}"
