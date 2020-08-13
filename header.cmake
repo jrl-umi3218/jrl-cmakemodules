@@ -19,8 +19,15 @@
 #   .. variable:: ${PROJECT_NAME}_HEADERS
 #
 #     List of C++ header filenames. They will be installed automatically
-#     using :command:`HEADER_INSTALL`
+#     using :command:`HEADER_INSTALL`, unless
+#     :cmake:variable:`INSTALL_PROJECT_HEADERS` is set to `OFF`
 #
+#   .. variable:: INSTALL_PROJECT_HEADERS
+#
+#      Set this to `OFF` if you don't want your headers to be automatically
+#      installed
+#
+option(INSTALL_PROJECT_HEADERS "Automatically install your \${PROJECT_NAME}_HEADERS" ON)
 
 #.rst:
 # .. ifmode:: internal
@@ -195,11 +202,11 @@ ENDFUNCTION(GENERATE_CONFIGURATION_HEADER)
 #
 MACRO(_SETUP_PROJECT_HEADER_FINAlIZE)
   # If the header list is set, install it.
-  IF(DEFINED ${PROJECT_NAME}_HEADERS)
+  IF(DEFINED ${PROJECT_NAME}_HEADERS AND INSTALL_PROJECT_HEADERS)
     FOREACH(FILE ${${PROJECT_NAME}_HEADERS})
       HEADER_INSTALL (${FILE})
     ENDFOREACH(FILE)
-  ENDIF(DEFINED ${PROJECT_NAME}_HEADERS)
+  ENDIF(DEFINED ${PROJECT_NAME}_HEADERS AND INSTALL_PROJECT_HEADERS)
 ENDMACRO(_SETUP_PROJECT_HEADER_FINAlIZE)
 
 
