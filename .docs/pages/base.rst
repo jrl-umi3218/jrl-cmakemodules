@@ -15,6 +15,11 @@ Version
 
 .. cmake-module:: ../../version.cmake
 
+Installation options
+====================
+
+.. cmake-module:: ../../post-project.cmake
+
 Set a minimal C++ standard
 ==========================
 .. cmake-module:: ../../cxx-standard.cmake
