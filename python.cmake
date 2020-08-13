@@ -40,8 +40,8 @@ OPTION(INSTALL_PYTHON_INTERFACE_ONLY "Install *ONLY* the python bindings" OFF)
 #
 #  To specify a specific Python version from the command line,
 #  use the command ``FINDPYTHON()``
-#  and pass the following arguments to CMake
-#  ``-DPYTHON_EXECUTABLE=/usr/bin/python3.5 -DPYTHON_LIBRARY= /usr/lib/x86_64-linux-gnu/libpython3.5m.so.1``
+#  and pass the following argument to CMake
+#  ``-DPYTHON_EXECUTABLE=/usr/bin/python3.5``
 #
 #  To specify a specific Python version within the CMakeLists.txt,
 #  use the command ``FINDPYTHON(2.7 EXACT REQUIRED)``.
