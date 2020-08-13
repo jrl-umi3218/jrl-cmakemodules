@@ -42,8 +42,19 @@ ENDIF(${ARGC})
 #
 #   .. variable:: INSTALL_PROJECT_HEADERS
 #
-#      Set this to `OFF` if you don't want your headers to be automatically
-#      installed
+#      Set this to `OFF` if you don't want your headers to be automatically installed
+#
+#   .. variable:: INSTALL_DOCUMENTATION
+#
+#      Set this to `OFF` if you don't want the documentation to be automatically installed
+#
+#   .. variable:: INSTALL_GENERATED_HEADERS
+#
+#      Set this to `OFF` if you don't want the generated headers to be automatically installed
+#
+#   .. variable:: INSTALL_PKG_CONFIG_FILE
+#
+#      Set this to `OFF` if you don't want the generated .pc file to be automatically installed
 #
 OPTION(INSTALL_PROJECT_HEADERS "Automatically install your \${PROJECT_NAME}_HEADERS" ON)
 OPTION(INSTALL_DOCUMENTATION "Generate and install the documentation" ON)
