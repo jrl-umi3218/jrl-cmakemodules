@@ -40,26 +40,49 @@ ENDIF(${ARGC})
 #.rst:
 # .. ifmode:: user
 #
+#   .. variable:: INSTALL_DEFAULT
+#
+#      Set this to `OFF` to turn to `OFF` the default value of :
+#
+#     - :cmake:variable:`INSTALL_PROJECT_HEADERS`
+#     - :cmake:variable:`INSTALL_GENERATED_HEADERS`
+#     - :cmake:variable:`INSTALL_DOCUMENTATION`
+#     - :cmake:variable:`INSTALL_PKG_CONFIG_FILE`
+#
+#     This can also be set OFF by :cmake:variable:`INSTALL_PYTHON_INTERFACE_ONLY`
+#
 #   .. variable:: INSTALL_PROJECT_HEADERS
 #
 #      Set this to `OFF` if you don't want your headers to be automatically installed
-#
-#   .. variable:: INSTALL_DOCUMENTATION
-#
-#      Set this to `OFF` if you don't want the documentation to be automatically installed
 #
 #   .. variable:: INSTALL_GENERATED_HEADERS
 #
 #      Set this to `OFF` if you don't want the generated headers to be automatically installed
 #
+#   .. variable:: INSTALL_DOCUMENTATION
+#
+#      Set this to `OFF` if you don't want the documentation to be automatically installed
+#
 #   .. variable:: INSTALL_PKG_CONFIG_FILE
 #
 #      Set this to `OFF` if you don't want the generated .pc file to be automatically installed
 #
-OPTION(INSTALL_PROJECT_HEADERS "Automatically install your \${PROJECT_NAME}_HEADERS" ON)
-OPTION(INSTALL_DOCUMENTATION "Generate and install the documentation" ON)
-OPTION(INSTALL_GENERATED_HEADERS "Generate and install standard headers" ON)
-OPTION(INSTALL_PKG_CONFIG_FILE "Generate and install standard .pc file" ON)
+IF(INSTALL_PYTHON_INTERFACE_ONLY)
+  OPTION(INSTALL_DEFAULT "default value for the 4 next options" OFF)
+ELSE()
+  OPTION(INSTALL_DEFAULT "default value for the 4 next options" ON)
+ENDIF()
+IF(INSTALL_DEFAULT)
+  OPTION(INSTALL_PROJECT_HEADERS "Automatically install your \${PROJECT_NAME}_HEADERS" ON)
+  OPTION(INSTALL_GENERATED_HEADERS "Generate and install standard headers" ON)
+  OPTION(INSTALL_DOCUMENTATION "Generate and install the documentation" ON)
+  OPTION(INSTALL_PKG_CONFIG_FILE "Generate and install standard .pc file" ON)
+ELSE()
+  OPTION(INSTALL_PROJECT_HEADERS "Automatically install your \${PROJECT_NAME}_HEADERS" OFF)
+  OPTION(INSTALL_GENERATED_HEADERS "Generate and install standard headers" OFF)
+  OPTION(INSTALL_DOCUMENTATION "Generate and install the documentation" OFF)
+  OPTION(INSTALL_PKG_CONFIG_FILE "Generate and install standard .pc file" OFF)
+ENDIF()
 
 INCLUDE(CTest)
 ENABLE_TESTING()

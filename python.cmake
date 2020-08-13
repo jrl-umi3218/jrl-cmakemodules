@@ -13,6 +13,23 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#.rst:
+# .. ifmode:: user
+#
+#   .. variable:: BUILD_PYTHON_INTERFACE
+#
+#      Set this to `OFF` if you don't want to build and install the python interface.
+#      This doesn't do anything in this jrl-cmakemodule, but you can use that option
+#      in the logic of your own CMakeLists.txt
+#
+#   .. variable:: INSTALL_PYTHON_INTERFACE_ONLY
+#
+#      Set this to `ON` if you don't want to install *ONLY* the python interface.
+#      This will deactivate :cmake:variable:`INSTALL_DEFAULT`, and you can use that option
+#      in the logic of your own CMakeLists.txt
+#
+OPTION(BUILD_PYTHON_INTERFACE "Build the python bindings" ON)
+OPTION(INSTALL_PYTHON_INTERFACE_ONLY "Install *ONLY* the python bindings" OFF)
 
 #.rst:
 # .. command:: FINDPYTHON
