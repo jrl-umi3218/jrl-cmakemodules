@@ -41,7 +41,7 @@
 #.rst:
 # .. variable:: PYTHON_SITELIB
 #
-#  Absolute path where Python files will be installed.
+#  Relative path where Python files will be installed.
 
 #.rst:
 # .. variable:: PYTHON_EXT_SUFFIX
