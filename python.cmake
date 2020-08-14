@@ -400,6 +400,7 @@ ENDMACRO()
 MACRO(PYTHON_BUILD MODULE FILE)
   # Regex from IsValidTargetName in CMake/Source/cmGeneratorExpression.cxx
   STRING(REGEX REPLACE "[^A-Za-z0-9_.:+-]" "_" compile_pyc "compile_pyc_${CMAKE_CURRENT_SOURCE_DIR}")
+  STRING(REGEX REPLACE ":" "_" compile_pyc "${compile_pyc}")
   IF(NOT TARGET ${compile_pyc})
     ADD_CUSTOM_TARGET(${compile_pyc} ALL)
   ENDIF()
