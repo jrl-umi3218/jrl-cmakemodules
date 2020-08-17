@@ -24,7 +24,7 @@
 #
 FUNCTION(SEARCH_FOR_BOOST_COMPONENT boost_python_name found)
   SET(${found} FALSE PARENT_SCOPE)
-  FIND_PACKAGE(Boost ${BOOST_REQUIRED} QUIET OPTIONAL_COMPONENTS ${boost_python_name}) 
+  FIND_PACKAGE(Boost ${BOOST_REQUIRED} QUIET OPTIONAL_COMPONENTS ${boost_python_name})
   STRING(TOUPPER ${boost_python_name} boost_python_name_UPPER)
   IF(Boost_${boost_python_name_UPPER}_FOUND)
     SET(${found} TRUE PARENT_SCOPE)
@@ -40,7 +40,7 @@ ENDIF(CMAKE_VERSION VERSION_LESS "3.12")
 #.rst:
 # .. variable:: BOOST_COMPONENTS
 #
-#  Controls the components to be detected.  
+#  Controls the components to be detected.
 #  If this variable is not defined, it defaults to the following component
 #  list:
 #
@@ -70,38 +70,26 @@ MACRO(SEARCH_FOR_BOOST_PYTHON)
     MESSAGE(FATAL_ERROR "PYTHON has not been found. You should first call FindPython before calling SEARCH_FOR_BOOST_PYTHON macro.")
   ENDIF(NOT PYTHONLIBS_FOUND)
 
-  # 1st step: check if we need to find boost python under a more precise name
-  SET(BOOST_PYTHON_WITH_PYTHON_VERSION_NAMING FALSE)
-  IF("${Boost_SHORT_VERSION}" VERSION_GREATER "1.69" OR "${Boost_SHORT_VERSION}" VERSION_EQUAL "1.69")
-    SET(BOOST_PYTHON_WITH_PYTHON_VERSION_NAMING TRUE)
-  ELSE("${Boost_SHORT_VERSION}" VERSION_GREATER "1.69" OR "${Boost_SHORT_VERSION}" VERSION_EQUAL "1.69")
-    IF(${PYTHON_VERSION_MAJOR} EQUAL 3)
-      SET(BOOST_PYTHON_WITH_PYTHON_VERSION_NAMING TRUE)
-    ENDIF(${PYTHON_VERSION_MAJOR} EQUAL 3)
-  ENDIF("${Boost_SHORT_VERSION}" VERSION_GREATER "1.69" OR "${Boost_SHORT_VERSION}" VERSION_EQUAL "1.69")
+  # Test: pythonX, pythonXY and python-pyXY
+  SET(BOOST_PYTHON_COMPONENT_LIST
+    "python${PYTHON_VERSION_MAJOR}"
+    "python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}"
+    "python-py${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}")
 
-  # 2nd step: retrive BOOST_PYTHON_MODULE naming
-  IF(BOOST_PYTHON_WITH_PYTHON_VERSION_NAMING)
-    # Test: pythonX, pythonXY and python-pyXY
-    SET(BOOST_PYTHON_COMPONENT_LIST
-      "python${PYTHON_VERSION_MAJOR}"
-      "python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}"
-      "python-py${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}")
+  SET(BOOST_PYTHON_FOUND FALSE)
+  FOREACH(BOOST_PYTHON_COMPONENT ${BOOST_PYTHON_COMPONENT_LIST})
+    SEARCH_FOR_BOOST_COMPONENT(${BOOST_PYTHON_COMPONENT} BOOST_PYTHON_FOUND)
+    IF(BOOST_PYTHON_FOUND)
+      SET(BOOST_PYTHON_NAME ${BOOST_PYTHON_COMPONENT})
+      BREAK()
+    ENDIF(BOOST_PYTHON_FOUND)
+  ENDFOREACH(BOOST_PYTHON_COMPONENT ${BOOST_PYTHON_COMPONENT_LIST})
 
-    SET(BOOST_PYTHON_FOUND FALSE)
-    FOREACH(BOOST_PYTHON_COMPONENT ${BOOST_PYTHON_COMPONENT_LIST})
-      SEARCH_FOR_BOOST_COMPONENT(${BOOST_PYTHON_COMPONENT} BOOST_PYTHON_FOUND)
-      IF(BOOST_PYTHON_FOUND)
-        SET(BOOST_PYTHON_NAME ${BOOST_PYTHON_COMPONENT})
-        BREAK()
-      ENDIF(BOOST_PYTHON_FOUND)
-    ENDFOREACH(BOOST_PYTHON_COMPONENT ${BOOST_PYTHON_COMPONENT_LIST})
+  # If boost-python has not been found, warn the user, and look for just "python"
+  IF(NOT BOOST_PYTHON_FOUND)
+    MESSAGE(WARNING "Impossible to check boost python version. Trying with 'python'.")
+  ENDIF(NOT BOOST_PYTHON_FOUND)
 
-    # If boost-python has not been found, warn the user, and look for just "python"
-    IF(NOT BOOST_PYTHON_FOUND)
-      MESSAGE(WARNING "Impossible to check boost python version. Trying with 'python'.")
-    ENDIF(NOT BOOST_PYTHON_FOUND)
-  ENDIF(BOOST_PYTHON_WITH_PYTHON_VERSION_NAMING)
   FIND_PACKAGE(Boost ${BOOST_PYTHON_REQUIRED} COMPONENTS ${BOOST_PYTHON_NAME})
   STRING(TOUPPER ${BOOST_PYTHON_NAME} UPPERCOMPONENT)
 
@@ -128,7 +116,7 @@ ENDMACRO(SEARCH_FOR_BOOST_PYTHON)
 #
 #  The components to be detected is controlled by :variable:`BOOST_COMPONENTS`.
 #
-#  A special treatment must be done for the boost-python component. 
+#  A special treatment must be done for the boost-python component.
 #  For boost >= 1.67.0, FindPython macro should be called first in order
 #  to automatically detect the right boost-python component version according
 #  to the Python version (2.7 or 3.x).
