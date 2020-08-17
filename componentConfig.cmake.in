@@ -1,9 +1,9 @@
 @PACKAGE_INIT@
 
-if(NOT @PROJECT_NAME@_FOUND)
-  set(@PROJECT_NAME@_@COMPONENT@_FOUND FALSE)
-  return()
-endif()
+#if(NOT @PROJECT_NAME@_FOUND)
+  #set(@PROJECT_NAME@_@COMPONENT@_FOUND FALSE)
+  #return()
+#endif()
 
 # At the moment, components only support targets
 #set("@PROJECT_NAME@_@COMPONENT@_INCLUDE_DIRS" "@CMAKE_INSTALL_FULL_INCLUDEDIR@")
