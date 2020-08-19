@@ -67,7 +67,7 @@ MACRO(SEARCH_FOR_BOOST_PYTHON)
   ENDIF(_BOOST_PYTHON_REQUIRED)
 
   IF(NOT PYTHONLIBS_FOUND)
-    MESSAGE(FATAL_ERROR "PYTHON has not been found. You should first call FindPython before calling SEARCH_FOR_BOOST_PYTHON macro.")
+    MESSAGE(FATAL_ERROR "Python has not been found. You should first call FindPython before calling SEARCH_FOR_BOOST_PYTHON macro.")
   ENDIF(NOT PYTHONLIBS_FOUND)
 
   # Test: pythonX, pythonXY and python-pyXY
@@ -87,7 +87,7 @@ MACRO(SEARCH_FOR_BOOST_PYTHON)
 
   # If boost-python has not been found, warn the user, and look for just "python"
   IF(NOT BOOST_PYTHON_FOUND)
-    MESSAGE(WARNING "Impossible to check boost python version. Trying with 'python'.")
+    MESSAGE(WARNING "Impossible to check Boost.Python version. Trying with 'python'.")
   ENDIF(NOT BOOST_PYTHON_FOUND)
 
   FIND_PACKAGE(Boost ${BOOST_PYTHON_REQUIRED} COMPONENTS ${BOOST_PYTHON_NAME})
