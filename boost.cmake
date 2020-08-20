@@ -40,7 +40,9 @@ ENDIF(CMAKE_VERSION VERSION_LESS "3.12")
 #.rst:
 # .. variable:: BOOST_COMPONENTS
 #
-#  Controls the components to be detected.
+# This variable is *deprecated*. See :cmake:command:`SEARCH_FOR_BOOST` for more info.
+#
+#  Controls the components to be detected by the deprecated macro :cmake:command:`SEARCH_FOR_BOOST`.
 #  If this variable is not defined, it defaults to the following component
 #  list:
 #
@@ -107,9 +109,16 @@ MACRO(SEARCH_FOR_BOOST_PYTHON)
 ENDMACRO(SEARCH_FOR_BOOST_PYTHON)
 
 #
+#.rst:
 # .. command:: SEARCH_FOR_BOOST
 #
-#  Deprecated. See :command:`SEARCH_FOR_BOOST_PYTHON`
+#  Deprecated. For Boost Python, use :command:`SEARCH_FOR_BOOST_PYTHON`. For other Boost components, use::
+#
+#    add_project_dependency(Boost COMPONENTS ...) # or other argument to the find_package command.
+#
+#  or, if you don't want it to be exported::
+#
+#    find_package(Boost COMPONENTS ...) # or other argument to the find_package command.
 #
 #  This macro deals with Visual Studio Fortran incompatibilities
 #  and add detected flags to the pkg-config file automatically.
