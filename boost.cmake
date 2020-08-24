@@ -36,7 +36,6 @@ IF(CMAKE_VERSION VERSION_LESS "3.12")
   MESSAGE(STATUS "CMake versions older than 3.12 may warn when looking to Boost components. Custom macros are used to find it.")
 ENDIF(CMAKE_VERSION VERSION_LESS "3.12")
 
-
 #.rst:
 # .. variable:: BOOST_COMPONENTS
 #
@@ -61,6 +60,20 @@ ENDIF(CMAKE_VERSION VERSION_LESS "3.12")
 #
 
 MACRO(SEARCH_FOR_BOOST_PYTHON)
+
+  IF(NOT Boost_FOUND)
+    # Set Boost default settings
+    # First try to find Boost to get the version
+    FIND_PACKAGE(Boost ${BOOST_REQUIRED})
+    STRING(REPLACE "_" "." Boost_SHORT_VERSION ${Boost_LIB_VERSION})
+    SET(Boost_USE_STATIC_LIBS OFF)
+    SET(Boost_USE_MULTITHREADED ON)
+    IF("${Boost_SHORT_VERSION}" VERSION_GREATER "1.70" OR "${Boost_SHORT_VERSION}" VERSION_EQUAL "1.70")
+      SET(BUILD_SHARED_LIBS ON) 
+      SET(Boost_NO_BOOST_CMAKE ON) 
+    ENDIF("${Boost_SHORT_VERSION}" VERSION_GREATER "1.70" OR "${Boost_SHORT_VERSION}" VERSION_EQUAL "1.70")
+  ENDIF(NOT Boost_FOUND)
+
   CMAKE_PARSE_ARGUMENTS(_BOOST_PYTHON_REQUIRED "REQUIRED" "" "" ${ARGN})
   SET(BOOST_PYTHON_NAME "python")
   SET(BOOST_PYTHON_REQUIRED "")
