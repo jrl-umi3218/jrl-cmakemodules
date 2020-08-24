@@ -23,18 +23,26 @@
 #  This function is for internal use only.
 #
 FUNCTION(SEARCH_FOR_BOOST_COMPONENT boost_python_name found)
-  SET(found FALSE PARENT_SCOPE)
-  FIND_PACKAGE(Boost ${BOOST_REQUIRED} QUIET OPTIONAL_COMPONENTS ${boost_python_name}) 
+  SET(${found} FALSE PARENT_SCOPE)
+  FIND_PACKAGE(Boost ${BOOST_REQUIRED} QUIET OPTIONAL_COMPONENTS ${boost_python_name})
   STRING(TOUPPER ${boost_python_name} boost_python_name_UPPER)
   IF(Boost_${boost_python_name_UPPER}_FOUND)
     SET(${found} TRUE PARENT_SCOPE)
   ENDIF()
 ENDFUNCTION(SEARCH_FOR_BOOST_COMPONENT boost_python_name found)
 
+IF(CMAKE_VERSION VERSION_LESS "3.12")
+  SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/boost ${CMAKE_MODULE_PATH})
+  MESSAGE(STATUS "CMake versions older than 3.12 may warn when looking to Boost components. Custom macros are used to find it.")
+ENDIF(CMAKE_VERSION VERSION_LESS "3.12")
+
+
 #.rst:
 # .. variable:: BOOST_COMPONENTS
 #
-#  Controls the components to be detected.  
+# This variable is *deprecated*. See :cmake:command:`SEARCH_FOR_BOOST` for more info.
+#
+#  Controls the components to be detected by the deprecated macro :cmake:command:`SEARCH_FOR_BOOST`.
 #  If this variable is not defined, it defaults to the following component
 #  list:
 #
@@ -44,25 +52,88 @@ ENDFUNCTION(SEARCH_FOR_BOOST_COMPONENT boost_python_name found)
 #  - Thread
 #  - Unit_test_framework
 #
+# .. command:: SEARCH_FOR_BOOST_PYTHON([REQUIRED])
+#
+#  Find boost-python component.
+#  For boost >= 1.67.0, FindPython macro should be called first in order
+#  to automatically detect the right boost-python component version according
+#  to the Python version (2.7 or 3.x).
+#
+
+MACRO(SEARCH_FOR_BOOST_PYTHON)
+  CMAKE_PARSE_ARGUMENTS(_BOOST_PYTHON_REQUIRED "REQUIRED" "" "" ${ARGN})
+  SET(BOOST_PYTHON_NAME "python")
+  SET(BOOST_PYTHON_REQUIRED "")
+  IF(_BOOST_PYTHON_REQUIRED)
+    SET(BOOST_PYTHON_REQUIRED REQUIRED)
+  ENDIF(_BOOST_PYTHON_REQUIRED)
+
+  IF(NOT PYTHONLIBS_FOUND)
+    MESSAGE(FATAL_ERROR "Python has not been found. You should first call FindPython before calling SEARCH_FOR_BOOST_PYTHON macro.")
+  ENDIF(NOT PYTHONLIBS_FOUND)
+
+  # Test: pythonX, pythonXY and python-pyXY
+  SET(BOOST_PYTHON_COMPONENT_LIST
+    "python-py${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}"
+    "python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}"
+    "python${PYTHON_VERSION_MAJOR}")
+
+  SET(BOOST_PYTHON_FOUND FALSE)
+  FOREACH(BOOST_PYTHON_COMPONENT ${BOOST_PYTHON_COMPONENT_LIST})
+    SEARCH_FOR_BOOST_COMPONENT(${BOOST_PYTHON_COMPONENT} BOOST_PYTHON_FOUND)
+    IF(BOOST_PYTHON_FOUND)
+      SET(BOOST_PYTHON_NAME ${BOOST_PYTHON_COMPONENT})
+      BREAK()
+    ENDIF(BOOST_PYTHON_FOUND)
+  ENDFOREACH(BOOST_PYTHON_COMPONENT ${BOOST_PYTHON_COMPONENT_LIST})
+
+  # If boost-python has not been found, warn the user, and look for just "python"
+  IF(NOT BOOST_PYTHON_FOUND)
+    MESSAGE(WARNING "Impossible to check Boost.Python version. Trying with 'python'.")
+  ENDIF(NOT BOOST_PYTHON_FOUND)
+
+  FIND_PACKAGE(Boost ${BOOST_PYTHON_REQUIRED} COMPONENTS ${BOOST_PYTHON_NAME})
+  STRING(TOUPPER ${BOOST_PYTHON_NAME} UPPERCOMPONENT)
+
+  LIST(APPEND LOGGING_WATCHED_VARIABLES
+    Boost_${UPPERCOMPONENT}_FOUND
+    Boost_${UPPERCOMPONENT}_LIBRARY
+    Boost_${UPPERCOMPONENT}_LIBRARY_DEBUG
+    Boost_${UPPERCOMPONENT}_LIBRARY_RELEASE
+    )
+
+  SET(Boost_PYTHON_LIBRARY ${Boost_${UPPERCOMPONENT}_LIBRARY})
+  MESSAGE(STATUS "Boost_PYTHON_LIBRARY: ${Boost_PYTHON_LIBRARY}")
+  LIST(APPEND Boost_PYTHON_LIBRARIES ${Boost_PYTHON_LIBRARY})
+  LIST(APPEND LOGGING_WATCHED_VARIABLES Boost_PYTHON_LIBRARY)
+ENDMACRO(SEARCH_FOR_BOOST_PYTHON)
+
+#
+#.rst:
 # .. command:: SEARCH_FOR_BOOST
+#
+#  Deprecated. For Boost Python, use :command:`SEARCH_FOR_BOOST_PYTHON`. For other Boost components, use::
+#
+#    add_project_dependency(Boost COMPONENTS ...) # or other argument to the find_package command.
+#
+#  or, if you don't want it to be exported::
+#
+#    find_package(Boost COMPONENTS ...) # or other argument to the find_package command.
 #
 #  This macro deals with Visual Studio Fortran incompatibilities
 #  and add detected flags to the pkg-config file automatically.
 #
 #  The components to be detected is controlled by :variable:`BOOST_COMPONENTS`.
 #
-#  A special treatment must be done for the boost-python component. 
+#  A special treatment must be done for the boost-python component.
 #  For boost >= 1.67.0, FindPython macro should be called first in order
 #  to automatically detect the right boost-python component version according
 #  to the Python version (2.7 or 3.x).
 #
 
-IF(CMAKE_VERSION VERSION_LESS "3.12")
-  SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/boost ${CMAKE_MODULE_PATH})
-  MESSAGE(STATUS "CMake versions older than 3.12 may warn when looking to Boost components. Custom macros are used to find it.")
-ENDIF(CMAKE_VERSION VERSION_LESS "3.12")
 
 MACRO(SEARCH_FOR_BOOST)
+  MESSAGE(AUTHOR_WARNING "SEARCH_FOR_BOOST is deprecated. Please use find_package() / SEARCH_FOR_BOOST_PYTHON()")
   SET(Boost_USE_STATIC_LIBS OFF)
   SET(Boost_USE_MULTITHREADED ON)
 
@@ -83,53 +154,8 @@ MACRO(SEARCH_FOR_BOOST)
   # This is made mandatory if for Boost version greater than 1.67.0
   LIST(FIND BOOST_COMPONENTS python PYTHON_IN_BOOST_COMPONENTS)
   IF(${PYTHON_IN_BOOST_COMPONENTS} GREATER -1)
-    # 1st step: check if Python has been found
-    IF(NOT PYTHONLIBS_FOUND)
-      MESSAGE(FATAL_ERROR "PYTHON has not been found. You should first call FindPython before calling SEARCH_FOR_BOOST macro.")   
-    ENDIF(NOT PYTHONLIBS_FOUND)
-
-    # 2nd step: copy BOOST_COMPONENTS
-    SET(BOOST_COMPONENTS_ ${BOOST_COMPONENTS})
-
-    # 3rd step: check BOOST_VERSION 
-    SET(BOOST_PYTHON_WITH_PYTHON_VERSION_NAMING FALSE)
-    IF("${Boost_SHORT_VERSION}" VERSION_GREATER "1.69" OR "${Boost_SHORT_VERSION}" VERSION_EQUAL "1.69")
-      SET(BOOST_PYTHON_WITH_PYTHON_VERSION_NAMING TRUE)
-    ELSE("${Boost_SHORT_VERSION}" VERSION_GREATER "1.69" OR "${Boost_SHORT_VERSION}" VERSION_EQUAL "1.69")
-      IF(${PYTHON_VERSION_MAJOR} EQUAL 3) 
-        SET(BOOST_PYTHON_WITH_PYTHON_VERSION_NAMING TRUE)
-      ENDIF(${PYTHON_VERSION_MAJOR} EQUAL 3) 
-    ENDIF("${Boost_SHORT_VERSION}" VERSION_GREATER "1.69" OR "${Boost_SHORT_VERSION}" VERSION_EQUAL "1.69")
-
-    # 4th step: retrive BOOST_PYTHON_MODULE naming
-    IF(BOOST_PYTHON_WITH_PYTHON_VERSION_NAMING)
-      LIST(REMOVE_AT BOOST_COMPONENTS_ ${PYTHON_IN_BOOST_COMPONENTS})
-
-      SET(BOOST_PYTHON_COMPONENT_LIST)
-      # Test: python2 or python3
-      LIST(APPEND BOOST_PYTHON_COMPONENT_LIST "python${PYTHON_VERSION_MAJOR}") 
-      # Test: python2x or python3x
-      LIST(APPEND BOOST_PYTHON_COMPONENT_LIST "python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}") 
-      # Test: python-py2x or python-py3x
-      LIST(APPEND BOOST_PYTHON_COMPONENT_LIST "python-py${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}") 
-
-      SET(BOOST_PYTHON_FOUND FALSE)
-      FOREACH(BOOST_PYTHON_COMPONENT ${BOOST_PYTHON_COMPONENT_LIST})
-        SEARCH_FOR_BOOST_COMPONENT(${BOOST_PYTHON_COMPONENT} BOOST_PYTHON_FOUND)
-        IF(BOOST_PYTHON_FOUND)
-          LIST(APPEND BOOST_COMPONENTS_ ${BOOST_PYTHON_COMPONENT})
-          BREAK()
-        ENDIF(BOOST_PYTHON_FOUND)
-      ENDFOREACH(BOOST_PYTHON_COMPONENT ${BOOST_PYTHON_COMPONENT_LIST})
-
-      # If boost-python has not been found, then force warning from FIND_PACKAGE directly
-      IF(NOT BOOST_PYTHON_FOUND)
-        LIST(APPEND BOOST_COMPONENTS_ "python")
-      ENDIF(NOT BOOST_PYTHON_FOUND)
-      
-    ENDIF(BOOST_PYTHON_WITH_PYTHON_VERSION_NAMING)
-
-    SET(BOOST_COMPONENTS ${BOOST_COMPONENTS_})
+    LIST(REMOVE_AT BOOST_COMPONENTS ${PYTHON_IN_BOOST_COMPONENTS})
+    SEARCH_FOR_BOOST_PYTHON(${BOOST_REQUIRED})
   ENDIF(${PYTHON_IN_BOOST_COMPONENTS} GREATER -1)
 
   # Make Boost component exportable
@@ -175,23 +201,6 @@ MACRO(SEARCH_FOR_BOOST)
       Boost_${UPPERCOMPONENT}_LIBRARY_DEBUG
       Boost_${UPPERCOMPONENT}_LIBRARY_RELEASE
       )
-    # Detect if component has python as a substring
-    STRING(FIND ${COMPONENT} "python" python_comp_pos)
-
-    # If the substring starts with python zero if the result
-    # and the test fails. Thus test greater than 1.
-    IF(${python_comp_pos} GREATER -1)
-      SET(Boost_PYTHON_LIBRARY ${Boost_${UPPERCOMPONENT}_LIBRARY})
-      MESSAGE(STATUS "Boost_PYTHON_LIBRARY: ${Boost_PYTHON_LIBRARY}")
-      LIST(APPEND Boost_PYTHON_LIBRARIES
-        ${Boost_PYTHON_LIBRARY})
-            LIST(APPEND LOGGING_WATCHED_VARIABLES
-        python_comp_pos
-        Boost_${UPPERCOMPONENT}_LIBRARY
-        Boost_PYTHON_LIBRARY
-        )
-    ENDIF()
-
   ENDFOREACH()
 
   # On darwin systems, we must link againt boost_python with unresolved symbols.
@@ -199,7 +208,6 @@ MACRO(SEARCH_FOR_BOOST)
   IF(Boost_PYTHON_LIBRARY)
     LIST(REMOVE_ITEM Boost_LIBRARIES ${Boost_PYTHON_LIBRARY})
   ENDIF(Boost_PYTHON_LIBRARY)
-
 ENDMACRO(SEARCH_FOR_BOOST)
 
 #.rst:
