@@ -76,6 +76,13 @@
 #     This tells jrl-cmakemodules that you are using export functionalities so it will
 #     hook the installation of your configuration files. Defaults to false
 #
+#   .. variable:: PROJECT_EXPORT_NO_TARGET
+#
+#     This tells jrl-cmakemodules that there is no targets in the project.
+#     However the export functionalities are still provided to detect the
+#     project properties. Not setting this variable when no target is present
+#     will result in an error.
+#
 #   Macros
 #   ------
 #
@@ -101,6 +108,7 @@ INCLUDE(${CMAKE_CURRENT_LIST_DIR}/package-config.cmake)
 INCLUDE(${CMAKE_CURRENT_LIST_DIR}/version-script.cmake)
 INCLUDE(${CMAKE_CURRENT_LIST_DIR}/test.cmake)
 INCLUDE(${CMAKE_CURRENT_LIST_DIR}/oscheck.cmake)
+INCLUDE(${CMAKE_CURRENT_LIST_DIR}/cxx-standard.cmake)
 
  # --------- #
  # Constants #
@@ -190,11 +198,13 @@ ENDMACRO(_ADD_TO_LIST LIST VALUE)
 #
 MACRO(_ADD_TO_LIST_IF_NOT_PRESENT LIST VALUE)
   IF(CMAKE_VERSION VERSION_GREATER "3.3.0")
+    CMAKE_POLICY(PUSH)
     CMAKE_POLICY(SET CMP0057 NEW)
     # To be more robust, value should be stripped
     IF(NOT "${VALUE}" IN_LIST ${LIST})
       LIST(APPEND ${LIST} "${VALUE}")
     ENDIF()
+    CMAKE_POLICY(POP)
   ELSE()
     LIST (FIND LIST "${VALUE}" _index)
     IF(${_index} EQUAL -1)

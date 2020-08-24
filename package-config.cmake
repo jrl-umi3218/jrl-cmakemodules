@@ -53,7 +53,7 @@ set(PACKAGE_EXTRA_MACROS "" CACHE INTERNAL "")
 ENDMACRO(_SETUP_PROJECT_PACKAGE_INIT)
 
 #.rst:
-# .. command:: ADD_PROJECT_DEPENDENCY(ARGS [PKG_CONFIG_REQUIRES pkg])
+# .. command:: ADD_PROJECT_DEPENDENCY(ARGS [PKG_CONFIG_REQUIRES pkg] [FOR_COMPONENT component])
 #
 #   This is a wrapper around find_package to add correct find_dependency calls in
 #   the generated config script. All arguments are passed to find_package.
@@ -66,25 +66,27 @@ ENDMACRO(_SETUP_PROJECT_PACKAGE_INIT)
 #   section of the generated .pc file
 #
 MACRO(ADD_PROJECT_DEPENDENCY)
-  list(APPEND _PACKAGE_CONFIG_DEPENDENCIES_PROJECTS "${ARGV0}")
-
   # add dependency to the generated .pc
   # ref https://github.com/jrl-umi3218/jrl-cmakemodules/pull/335
-  cmake_parse_arguments(PARSED_ARGN "" "PKG_CONFIG_REQUIRES" "" ${ARGN})
+  cmake_parse_arguments(PARSED_ARGN "" "PKG_CONFIG_REQUIRES;FOR_COMPONENT" "" ${ARGN})
   IF(PARSED_ARGN_PKG_CONFIG_REQUIRES)
     _ADD_TO_LIST_IF_NOT_PRESENT(_PKG_CONFIG_REQUIRES "${PARSED_ARGN_PKG_CONFIG_REQUIRES}")
     _ADD_TO_LIST_IF_NOT_PRESENT(_PKG_CONFIG_DEP_NOT_FOR_CONFIG_CMAKE "${PARSED_ARGN_PKG_CONFIG_REQUIRES}")
   ENDIF()
+  if(PARSED_ARGN_FOR_COMPONENT)
+    set(component "_${PARSED_ARGN_FOR_COMPONENT}")
+  endif(PARSED_ARGN_FOR_COMPONENT)
+  _ADD_TO_LIST_IF_NOT_PRESENT(_PACKAGE_CONFIG${component}_DEPENDENCIES_PROJECTS "${ARGV0}")
 
   string(REPLACE ";" " " PACKAGE_ARGS "${PARSED_ARGN_UNPARSED_ARGUMENTS}")
-  list(APPEND _PACKAGE_CONFIG_DEPENDENCIES_FIND_PACKAGE "  find_package(${PACKAGE_ARGS})")
-  list(APPEND _PACKAGE_CONFIG_DEPENDENCIES_FIND_DEPENDENCY "  find_dependency(${PACKAGE_ARGS})")
+  _ADD_TO_LIST_IF_NOT_PRESENT(_PACKAGE_CONFIG${component}_DEPENDENCIES_FIND_PACKAGE "find_package(${PACKAGE_ARGS})")
+  _ADD_TO_LIST_IF_NOT_PRESENT(_PACKAGE_CONFIG${component}_DEPENDENCIES_FIND_DEPENDENCY "find_dependency(${PACKAGE_ARGS})")
   find_package(${PARSED_ARGN_UNPARSED_ARGUMENTS})
 
   # Propagate variables changes to the cached values
-  set(_PACKAGE_CONFIG_DEPENDENCIES_PROJECTS "${_PACKAGE_CONFIG_DEPENDENCIES_PROJECTS}" CACHE INTERNAL "")
-  set(_PACKAGE_CONFIG_DEPENDENCIES_FIND_PACKAGE "${_PACKAGE_CONFIG_DEPENDENCIES_FIND_PACKAGE}" CACHE INTERNAL "")
-  set(_PACKAGE_CONFIG_DEPENDENCIES_FIND_DEPENDENCY "${_PACKAGE_CONFIG_DEPENDENCIES_FIND_DEPENDENCY}" CACHE INTERNAL "")
+  set(_PACKAGE_CONFIG${component}_DEPENDENCIES_PROJECTS "${_PACKAGE_CONFIG${component}_DEPENDENCIES_PROJECTS}" CACHE INTERNAL "")
+  set(_PACKAGE_CONFIG${component}_DEPENDENCIES_FIND_PACKAGE "${_PACKAGE_CONFIG${component}_DEPENDENCIES_FIND_PACKAGE}" CACHE INTERNAL "")
+  set(_PACKAGE_CONFIG${component}_DEPENDENCIES_FIND_DEPENDENCY "${_PACKAGE_CONFIG${component}_DEPENDENCIES_FIND_DEPENDENCY}" CACHE INTERNAL "")
 ENDMACRO()
 
 
@@ -130,8 +132,17 @@ string(REGEX REPLACE "[^a-zA-Z0-9]" "_" PROJECT_NAME_UPPER "${PROJECT_NAME_UPPER
 # Include module with fuction 'write_basic_package_version_file'
 include(CMakePackageConfigHelpers)
 
-string(REPLACE ";" "\n" PACKAGE_DEPENDENCIES_FIND_PACKAGE "${_PACKAGE_CONFIG_DEPENDENCIES_FIND_PACKAGE}")
-string(REPLACE ";" "\n" PACKAGE_DEPENDENCIES_FIND_DEPENDENCY "${_PACKAGE_CONFIG_DEPENDENCIES_FIND_DEPENDENCY}")
+string(REPLACE ";" "\n  " PACKAGE_DEPENDENCIES_FIND_PACKAGE "${_PACKAGE_CONFIG_DEPENDENCIES_FIND_PACKAGE}")
+string(REPLACE ";" "\n  " PACKAGE_DEPENDENCIES_FIND_DEPENDENCY "${_PACKAGE_CONFIG_DEPENDENCIES_FIND_DEPENDENCY}")
+
+if(DEFINED _MINIMAL_CXX_STANDARD)
+  set(PACKAGE_EXTRA_MACROS "${PACKAGE_EXTRA_MACROS}
+if(COMMAND CHECK_MINIMAL_CXX_STANDARD)
+  CHECK_MINIMAL_CXX_STANDARD(${_MINIMAL_CXX_STANDARD})
+else()
+  MESSAGE(WARNING \"This dependency requires C++ >= ${_MINIMAL_CXX_STANDARD}\")
+endif()")
+endif()
 
 # Configure '<PROJECT-NAME>ConfigVersion.cmake'
 # Note: PROJECT_VERSION is used as a VERSION
@@ -152,6 +163,13 @@ if(_PKG_CONFIG_REQUIRES)
   endforeach()
   list(REMOVE_DUPLICATES _PKG_CONFIG_REQUIRES_LIST)
 endif(_PKG_CONFIG_REQUIRES)
+
+if(NOT PROJECT_EXPORT_NO_TARGET)
+  set(INCLUDE_TARGETS_FILE "include(\"\${CMAKE_CURRENT_LIST_DIR}/${TARGETS_EXPORT_NAME}.cmake\")")
+else()
+  set(INCLUDE_TARGETS_FILE "# Package with no targets")
+endif()
+
 configure_package_config_file(
     "cmake/Config.cmake.in"
     "${PROJECT_CONFIG}"
@@ -168,9 +186,54 @@ install(
 
 # Config
 #   * <prefix>/lib/cmake/Foo/FooTargets.cmake
-install(
+if(NOT PROJECT_EXPORT_NO_TARGET)
+  install(
     EXPORT "${TARGETS_EXPORT_NAME}"
     NAMESPACE "${namespace}"
     DESTINATION "${CONFIG_INSTALL_DIR}"
-)
+    )
+endif()
+
 ENDMACRO(SETUP_PROJECT_PACKAGE_FINALIZE)
+
+#.rst:
+# .. command:: PROJECT_INSTALL_COMPONENT(COMPONENT [EXTRA_MACRO cmake_code] [NAMESPACE namespace])
+#
+#   Generates CMake componentConfig.cmake and Targets files so users can call::
+#
+#     find_package(MyPackage COMPONENT component)
+#
+#   :param EXTRA_MACRO: optional argument. `cmake_code` will be appended to
+#          the generated *Config.cmake*.
+#   :param NAMESPACE: optional argument. Defaults to `${PROJECT_NAME}::`.
+#
+macro(PROJECT_INSTALL_COMPONENT COMPONENT)
+  cmake_parse_arguments(PARSED_ARGN "" "NAMESPACE;EXTRA_MACRO" "" ${ARGN})
+  if(PARSED_ARGN_NAMESPACE)
+    set(namespace "${PARSED_ARGN_NAMESPACE}")
+  else()
+    set(namespace "${PROJECT_NAME}::")
+  endif()
+
+  install(EXPORT ${COMPONENT}Targets
+    NAMESPACE "${namespace}"
+    DESTINATION "${CONFIG_INSTALL_DIR}")
+
+  set(COMPONENT ${COMPONENT})
+  set(_PACKAGE_CONFIG_COMPONENT_DEPENDENCIES_PROJECTS "${_PACKAGE_CONFIG_${COMPONENT}_DEPENDENCIES_PROJECTS}")
+  string(REPLACE ";" "\n  " COMPONENT_FIND_PACKAGE
+    "${_PACKAGE_CONFIG_${COMPONENT}_DEPENDENCIES_FIND_PACKAGE}")
+  string(REPLACE ";" "\n  " COMPONENT_FIND_DEPENDENCY
+    "${_PACKAGE_CONFIG_${COMPONENT}_DEPENDENCIES_FIND_DEPENDENCY}")
+  set(COMPONENT_CONFIG "${CMAKE_BINARY_DIR}/generated/${COMPONENT}Config.cmake")
+  set(COMPONENT_EXTRA_MACRO "${PARSED_ARGN_EXTRA_MACRO}")
+  include(CMakePackageConfigHelpers)
+  configure_package_config_file(
+      "${CMAKE_SOURCE_DIR}/cmake/componentConfig.cmake.in"
+      "${COMPONENT_CONFIG}"
+      INSTALL_DESTINATION "${CONFIG_INSTALL_DIR}"
+      NO_CHECK_REQUIRED_COMPONENTS_MACRO
+      NO_SET_AND_CHECK_MACRO)
+  install(FILES "${COMPONENT_CONFIG}"
+      DESTINATION "${CONFIG_INSTALL_DIR}")
+endmacro()

@@ -61,10 +61,14 @@ class CommentToConstVisitor (idlvisitor.AstVisitor):
         try:
             if isinstance(node, idlast.Operation):
                 with open(node.file()) as fp:
-                    for i, line in enumerate(fp):
-                        if i == node.line()-1:
-                            texts.append("\nPrototype:\t"+line)
+                    for _ in range(node.line()-1): fp.readline()
+                    line = fp.readline()
+                    texts.append("\nPrototype:\t"+ line)
+                    while line != "":
+                        if ';' in line:
                             break
+                        line = fp.readline()
+                        texts.append("           \t"+ line)
         except:
             pass
         if len(texts)==0: return None
