@@ -37,15 +37,15 @@ IF(CMAKE_VERSION VERSION_LESS "3.12")
 ENDIF(CMAKE_VERSION VERSION_LESS "3.12")
 
 #.rst:
-# .. command:: USE_BOOST_DEFAULT_OPTIONS
+# .. command:: SET_BOOST_DEFAULT_OPTIONS
 #
-#  This function allows to set up the default option for detecting Boost components.
+#  This function allows to set up the default options for detecting Boost components.
 # 
-MACRO(USE_BOOST_DEFAULT_OPTIONS)
+MACRO(SET_BOOST_DEFAULT_OPTIONS)
   SET(Boost_USE_STATIC_LIBS OFF)
   SET(Boost_USE_MULTITHREADED ON)
   SET(Boost_NO_BOOST_CMAKE ON) 
-ENDMACRO(USE_BOOST_DEFAULT_OPTIONS)
+ENDMACRO(SET_BOOST_DEFAULT_OPTIONS)
 
 #.rst:
 # .. variable:: BOOST_COMPONENTS
@@ -79,7 +79,7 @@ MACRO(SEARCH_FOR_BOOST_PYTHON)
     SET(BOOST_PYTHON_REQUIRED REQUIRED)
   ENDIF(_BOOST_PYTHON_REQUIRED)
 
-  USE_BOOST_DEFAULT_OPTIONS()
+  SET_BOOST_DEFAULT_OPTIONS()
 
   IF(NOT PYTHONLIBS_FOUND)
     MESSAGE(FATAL_ERROR "Python has not been found. You should first call FindPython before calling SEARCH_FOR_BOOST_PYTHON macro.")
