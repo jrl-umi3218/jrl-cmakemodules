@@ -16,10 +16,12 @@
 FIND_PATH(cppad_INCLUDE_DIR
   NAMES cppad/configure.hpp
   PATHS ${cppad_PREFIX}
+  PATH_SUFFIXES include
   )
 FIND_LIBRARY(cppad_LIBRARY
   NAMES cppad_lib
   PATHS ${cppad_PREFIX}
+  PATH_SUFFIXES lib
   )
 
 IF(cppad_INCLUDE_DIR AND EXISTS "${cppad_INCLUDE_DIR}/cppad/configure.hpp")
