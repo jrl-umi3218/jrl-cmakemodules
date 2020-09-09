@@ -14,6 +14,7 @@
 FIND_PATH(cppadcg_INCLUDE_DIR
   NAMES cppad/cg.hpp
   PATHS ${cppadcg_PREFIX}
+  PATH_SUFFIXES include
   )
 
 IF(cppadcg_INCLUDE_DIR AND EXISTS "${cppadcg_INCLUDE_DIR}/cppad/cg/configure.hpp")
