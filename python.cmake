@@ -175,7 +175,9 @@ MACRO(FINDPYTHON)
   MESSAGE(STATUS "PythonLibraryDirs: ${PYTHON_LIBRARY_DIRS}")
   MESSAGE(STATUS "PythonLibVersionString: ${PYTHONLIBS_VERSION_STRING}")
 
-  IF(NOT PYTHON_SITELIB)
+  IF(PYTHON_SITELIB)
+    FILE(TO_CMAKE_PATH "${PYTHON_SITELIB}" PYTHON_SITELIB)
+  ELSE(PYTHON_SITELIB)
     # Use either site-packages (default) or dist-packages (Debian packages) directory
     OPTION(PYTHON_DEB_LAYOUT "Enable Debian-style Python package layout" OFF)
     # ref. https://docs.python.org/3/library/site.html
@@ -203,7 +205,7 @@ MACRO(FINDPYTHON)
     IF(PYTHON_PACKAGES_DIR)
       STRING(REGEX REPLACE "(site-packages|dist-packages)" "${PYTHON_PACKAGES_DIR}" PYTHON_SITELIB "${PYTHON_SITELIB}")
     ENDIF(PYTHON_PACKAGES_DIR)
-  ENDIF(NOT PYTHON_SITELIB)
+  ENDIF(PYTHON_SITELIB)
 
   MESSAGE(STATUS "Python site lib: ${PYTHON_SITELIB}")
 
