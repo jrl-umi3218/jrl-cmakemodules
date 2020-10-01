@@ -171,7 +171,7 @@ else()
 endif()
 
 configure_package_config_file(
-    "cmake/Config.cmake.in"
+    "${CMAKE_CURRENT_LIST_DIR}/Config.cmake.in"
     "${PROJECT_CONFIG}"
     INSTALL_DESTINATION "${CONFIG_INSTALL_DIR}"
 )
@@ -229,7 +229,7 @@ macro(PROJECT_INSTALL_COMPONENT COMPONENT)
   set(COMPONENT_EXTRA_MACRO "${PARSED_ARGN_EXTRA_MACRO}")
   include(CMakePackageConfigHelpers)
   configure_package_config_file(
-      "${CMAKE_SOURCE_DIR}/cmake/componentConfig.cmake.in"
+      "${CMAKE_CURRENT_LIST_DIR}/componentConfig.cmake.in"
       "${COMPONENT_CONFIG}"
       INSTALL_DESTINATION "${CONFIG_INSTALL_DIR}"
       NO_CHECK_REQUIRED_COMPONENTS_MACRO

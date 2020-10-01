@@ -49,7 +49,7 @@
 #  Portable suffix of C++ Python modules.
 
 IF(CMAKE_VERSION VERSION_LESS "3.2")
-    SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/python ${CMAKE_MODULE_PATH})
+    SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/python ${CMAKE_MODULE_PATH})
     MESSAGE(STATUS "CMake versions older than 3.2 do not properly find Python. Custom macros are used to find it.")
 ENDIF(CMAKE_VERSION VERSION_LESS "3.2")
 
@@ -280,7 +280,7 @@ MACRO(DYNAMIC_GRAPH_PYTHON_MODULE SUBMODULENAME LIBRARYNAME TARGETNAME)
 
   # By default the __init__.py file is installed.
   SET(INSTALL_INIT_PY 1)
-  SET(SOURCE_PYTHON_MODULE "cmake/dynamic_graph/python-module-py.cc")
+  SET(SOURCE_PYTHON_MODULE "${CMAKE_CURRENT_LIST_DIR}/dynamic_graph/python-module-py.cc")
 
   # Check if there is optional parameters.
   set(extra_macro_args ${ARGN})
@@ -343,7 +343,7 @@ MACRO(DYNAMIC_GRAPH_PYTHON_MODULE SUBMODULENAME LIBRARYNAME TARGETNAME)
   IF (${INSTALL_INIT_PY} EQUAL 1)
 
     CONFIGURE_FILE(
-      ${PROJECT_SOURCE_DIR}/cmake/dynamic_graph/submodule/__init__.py.cmake
+      ${CMAKE_CURRENT_LIST_DIR}/dynamic_graph/submodule/__init__.py.cmake
       ${PROJECT_BINARY_DIR}/src/dynamic_graph/${SUBMODULENAME}/__init__.py
       )
 
@@ -406,7 +406,7 @@ MACRO(PYTHON_BUILD MODULE FILE)
     PRE_BUILD
     COMMAND
     "${PYTHON_EXECUTABLE}"
-    "${PROJECT_SOURCE_DIR}/cmake/compile.py"
+    "${CMAKE_CURRENT_LIST_DIR}/compile.py"
     "${CMAKE_CURRENT_SOURCE_DIR}"
     "${CMAKE_CURRENT_BINARY_DIR}"
     "${MODULE}/${FILE}"
@@ -442,7 +442,7 @@ MACRO(PYTHON_INSTALL_BUILD MODULE FILE DEST)
   INSTALL(CODE
     "EXECUTE_PROCESS(COMMAND
     \"${PYTHON_EXECUTABLE}\"
-    \"${PROJECT_SOURCE_DIR}/cmake/compile.py\"
+    \"${CMAKE_CURRENT_LIST_DIR}/compile.py\"
     \"${CMAKE_CURRENT_BINARY_DIR}\"
     \"${CMAKE_CURRENT_BINARY_DIR}\"
     \"${MODULE}/${FILE}\")

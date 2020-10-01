@@ -62,8 +62,8 @@ IF (NOT DEFINED PROJECT_URL)
   SET(PROJECT_URL "https://github.com/${PROJECT_ORG}/${PROJECT_NAME}")
 ENDIF (NOT DEFINED PROJECT_URL)
 
-INCLUDE(cmake/base.cmake)
-INCLUDE(cmake/hpp/doc.cmake)
+INCLUDE(${CMAKE_CURRENT_LIST_DIR}/base.cmake)
+INCLUDE(${CMAKE_CURRENT_LIST_DIR}/hpp/doc.cmake)
 
 # Activate hpp-util logging if requested
 SET (HPP_DEBUG FALSE CACHE BOOL "trigger hpp-util debug output")
