@@ -14,7 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # OpenRTM-aist
-INCLUDE(cmake/openrtm.cmake)
+INCLUDE(${CMAKE_CURRENT_LIST_DIR}/openrtm.cmake)
 
 macro(create_simple_controller CONTROLLER_NAME)
   openrtm()

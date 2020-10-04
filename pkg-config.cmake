@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-INCLUDE(cmake/shared-library.cmake)
+INCLUDE(${CMAKE_CURRENT_LIST_DIR}/shared-library.cmake)
 
 FIND_PACKAGE(PkgConfig)
 
@@ -159,7 +159,7 @@ MACRO(_SETUP_PROJECT_PKG_CONFIG_FINALIZE_DEBUG)
   ENDIF()
   _list_join(_PKG_CONFIG_REQUIRES ", " _PKG_CONFIG_REQUIRES_LIST)
   CONFIGURE_FILE(
-    "${PROJECT_SOURCE_DIR}/cmake/pkg-config.pc.cmake"
+    "${CMAKE_CURRENT_LIST_DIR}/pkg-config.pc.cmake"
     "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}${PKGCONFIG_POSTFIX}.pc"
     )
   # Restore altered variables
@@ -202,7 +202,7 @@ MACRO(_SETUP_PROJECT_PKG_CONFIG_FINALIZE_OPTIMIZED)
   ENDIF(DEFINED CUSTOM_PKG_CONFIG_FILENAME)
   # Generate the pkg-config file.
   CONFIGURE_FILE(
-    "${PROJECT_SOURCE_DIR}/cmake/pkg-config.pc.cmake"
+    "${CMAKE_CURRENT_LIST_DIR}/pkg-config.pc.cmake"
     "${CMAKE_CURRENT_BINARY_DIR}/${_PKG_CONFIG_FILENAME}"
     )
   # Restore altered variables
