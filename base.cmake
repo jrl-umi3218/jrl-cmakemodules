@@ -155,7 +155,7 @@ SET(CMAKE_PROJECT_${PROJECT_NAME}_INCLUDE "${CMAKE_CURRENT_LIST_DIR}/post-projec
 
 # Set a hook to finalize the setup, CMake will set CMAKE_CURRENT_LIST_DIR to "" at the end
 # Based off https://stackoverflow.com/questions/15760580/execute-command-or-macro-in-cmake-as-the-last-step-before-the-configure-step-f
-VARIABLE_WATCH(CMAKE_CURRENT_LIST_DIR SETUP_PROJECT_FINALIZE_HOOK)
+VARIABLE_WATCH(CMAKE_CURRENT_SOURCE_DIR SETUP_PROJECT_FINALIZE_HOOK)
 FUNCTION(SETUP_PROJECT_FINALIZE_HOOK VARIABLE ACCESS)
   IF("${${VARIABLE}}" STREQUAL "")
     SETUP_PROJECT_FINALIZE()
