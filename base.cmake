@@ -83,7 +83,7 @@
 #     project properties. Not setting this variable when no target is present
 #     will result in an error.
 #
-#   .. variable:: PROJECT_CMAKE_MODULE_DIR
+#   .. variable:: PROJECT_JRL_CMAKE_MODULE_DIR
 #
 #     This variable provides the full path pointing to the JRL cmake module.
 #
@@ -91,7 +91,7 @@
 #   ------
 #
 
-SET(PROJECT_CMAKE_MODULE_DIR ${CMAKE_CURRENT_LIST_DIR})
+SET(PROJECT_JRL_CMAKE_MODULE_DIR ${CMAKE_CURRENT_LIST_DIR})
 
 # Please note that functions starting with an underscore are internal
 # functions and should not be used directly.
