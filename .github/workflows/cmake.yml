@@ -9,7 +9,17 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
-    - name: Run tests
+
+    - name: Run project tests
+      run: |
+        set -e
+        set -x
+        cd _unittests
+        CMAKE_BIN="cmake"
+        $CMAKE_BIN --version
+        ./run_unit_tests.sh
+
+    - name: Run script tests
       run: |
         set -e
         set -x

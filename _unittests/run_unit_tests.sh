@@ -17,7 +17,11 @@ here="`pwd`"
 rm -rf build install
 mkdir build install
 
+if [[ -z "${CMAKE_BIN}" ]]; then
+  CMAKE_BIN=cmake
+fi
 cmake_options="-DCMAKE_INSTALL_PREFIX='${here}/install'"
+export CMAKE_PREFIX_PATH=$here/install
 
 for unittest in ${unittests}; do
   mkdir build/${unittest}
@@ -25,7 +29,7 @@ for unittest in ${unittests}; do
   if [[ "$(type -t run_${unittest})" == "function" ]]; then
     run_${unittest}
   else
-    cmake ${cmake_options} "$here/$unittest"
+    $CMAKE_BIN ${cmake_options} "$here/$unittest"
     make all
     make install
   fi
