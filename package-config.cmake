@@ -171,7 +171,7 @@ else()
 endif()
 
 configure_package_config_file(
-    "${CMAKE_CURRENT_LIST_DIR}/Config.cmake.in"
+    "${PROJECT_JRL_CMAKE_MODULE_DIR}/Config.cmake.in"
     "${PROJECT_CONFIG}"
     INSTALL_DESTINATION "${CONFIG_INSTALL_DIR}"
 )
