@@ -1,6 +1,6 @@
 #!/bin/bash
 
-unittests="python"
+unittests="python cpp dependency"
 
 # Code for running a specific unit test
 # For unit test foo, function `run_foo` is executed if defined.
@@ -11,6 +11,17 @@ unittests="python"
 #   echo "run_foo"
 # }
 
+function run_default()
+{
+  $CMAKE_BIN ${cmake_options} "$1"
+  make all
+  make install
+}
+
+function run_cpp()
+{
+  run_default $here/cpp
+}
 
 # The code below run all the unit tests
 here="`pwd`"
@@ -29,9 +40,7 @@ for unittest in ${unittests}; do
   if [[ "$(type -t run_${unittest})" == "function" ]]; then
     run_${unittest}
   else
-    $CMAKE_BIN ${cmake_options} "$here/$unittest"
-    make all
-    make install
+    run_default "$here/$unittest"
   fi
   cd "$here"
 done
