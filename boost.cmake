@@ -57,21 +57,8 @@ MACRO(EXPORT_BOOST_DEFAULT_OPTIONS)
   LIST(INSERT _PACKAGE_CONFIG_DEPENDENCIES_FIND_DEPENDENCY 0 "SET(Boost_USE_STATIC_LIBS OFF);SET(Boost_USE_MULTITHREADED ON);SET(Boost_NO_BOOST_CMAKE ON)")
 ENDMACRO(EXPORT_BOOST_DEFAULT_OPTIONS)
 
-#.rst:
-# .. variable:: BOOST_COMPONENTS
 #
-# This variable is *deprecated*. See :cmake:command:`SEARCH_FOR_BOOST` for more info.
-#
-#  Controls the components to be detected by the deprecated macro :cmake:command:`SEARCH_FOR_BOOST`.
-#  If this variable is not defined, it defaults to the following component
-#  list:
-#
-#  - Filesystem
-#  - Program_options
-#  - System
-#  - Thread
-#  - Unit_test_framework
-#
+#.rst
 # .. command:: SEARCH_FOR_BOOST_PYTHON([REQUIRED])
 #
 #  Find boost-python component.
