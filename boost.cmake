@@ -100,6 +100,7 @@ MACRO(SEARCH_FOR_BOOST_PYTHON)
   # If boost-python has not been found, warn the user, and look for just "python"
   IF(NOT BOOST_PYTHON_FOUND)
     MESSAGE(WARNING "Impossible to check Boost.Python version. Trying with 'python'.")
+    SET(BOOST_PYTHON_NAME "python")
   ENDIF(NOT BOOST_PYTHON_FOUND)
 
   FIND_PACKAGE(Boost ${BOOST_PYTHON_REQUIRED} COMPONENTS ${BOOST_PYTHON_NAME})
