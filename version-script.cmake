@@ -21,7 +21,7 @@ INCLUDE(CheckCCompilerFlag)
 # Internal macro to check if version scripts are supported by the current
 # linker.
 MACRO(_CHECK_VERSION_SCRIPT_SUPPORT)
-  SET(CMAKE_REQUIRED_FLAGS "-Wl,--version-script=${PROJECT_SOURCE_DIR}/cmake/version-script-test.lds")
+  SET(CMAKE_REQUIRED_FLAGS "-Wl,--version-script=${CMAKE_CURRENT_LIST_DIR}/version-script-test.lds")
   CHECK_C_COMPILER_FLAG("" HAS_VERSION_SCRIPT_SUPPORT)
   SET(_HAS_VERSION_SCRIPT_SUPPORT ${HAS_VERSION_SCRIPT_SUPPORT} CACHE INTERNAL "Linker supports version scripts")
 ENDMACRO(_CHECK_VERSION_SCRIPT_SUPPORT)

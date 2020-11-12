@@ -31,9 +31,9 @@ MACRO(_SETUP_PROJECT_DIST)
     FIND_PROGRAM(GPG gpg)
 
     IF(APPLE)
-      SET(GIT_ARCHIVE_ALL ${PROJECT_SOURCE_DIR}/cmake/git-archive-all.py)
+      SET(GIT_ARCHIVE_ALL ${PROJECT_JRL_CMAKE_MODULE_DIR}/git-archive-all.py)
     ELSE(APPLE)
-      SET(GIT_ARCHIVE_ALL ${PROJECT_SOURCE_DIR}/cmake/git-archive-all.sh)
+      SET(GIT_ARCHIVE_ALL ${PROJECT_JRL_CMAKE_MODULE_DIR}/git-archive-all.sh)
     ENDIF(APPLE)
 
     # Use git-archive-all.sh to generate distributable source code
@@ -50,7 +50,7 @@ MACRO(_SETUP_PROJECT_DIST)
       && ${TAR} xf ${PROJECT_SOURCE_DIR}/${PROJECT_NAME}.tar
       && echo "${PROJECT_VERSION}" >
          ${CMAKE_BINARY_DIR}/${PROJECT_NAME}${PROJECT_SUFFIX}-${PROJECT_VERSION}/.version
-      && ${PROJECT_SOURCE_DIR}/cmake/gitlog-to-changelog >
+      && ${PROJECT_JRL_CMAKE_MODULE_DIR}/gitlog-to-changelog >
       ${CMAKE_BINARY_DIR}/${PROJECT_NAME}${PROJECT_SUFFIX}-${PROJECT_VERSION}/ChangeLog
       && rm -f ${PROJECT_SOURCE_DIR}/${PROJECT_NAME}.tar
       WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}

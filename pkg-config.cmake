@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-INCLUDE(cmake/shared-library.cmake)
+INCLUDE(${CMAKE_CURRENT_LIST_DIR}/shared-library.cmake)
 
 FIND_PACKAGE(PkgConfig)
 
@@ -121,7 +121,7 @@ MACRO(_SETUP_PROJECT_PKG_CONFIG)
     _PKG_CONFIG_REQUIRES
     _PKG_CONFIG_REQUIRES_DEBUG
     _PKG_CONFIG_REQUIRES_OPTIMIZED
-    _PKG_CONFIG_COMPILE_TIME_REQUIRES 
+    _PKG_CONFIG_COMPILE_TIME_REQUIRES
     _PKG_CONFIG_CONFLICTS
     _PKG_CONFIG_LIBS
     _PKG_CONFIG_LIBS_DEBUG
@@ -159,7 +159,7 @@ MACRO(_SETUP_PROJECT_PKG_CONFIG_FINALIZE_DEBUG)
   ENDIF()
   _list_join(_PKG_CONFIG_REQUIRES ", " _PKG_CONFIG_REQUIRES_LIST)
   CONFIGURE_FILE(
-    "${PROJECT_SOURCE_DIR}/cmake/pkg-config.pc.cmake"
+    "${CMAKE_CURRENT_LIST_DIR}/pkg-config.pc.cmake"
     "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}${PKGCONFIG_POSTFIX}.pc"
     )
   # Restore altered variables
@@ -202,7 +202,7 @@ MACRO(_SETUP_PROJECT_PKG_CONFIG_FINALIZE_OPTIMIZED)
   ENDIF(DEFINED CUSTOM_PKG_CONFIG_FILENAME)
   # Generate the pkg-config file.
   CONFIGURE_FILE(
-    "${PROJECT_SOURCE_DIR}/cmake/pkg-config.pc.cmake"
+    "${PROJECT_JRL_CMAKE_MODULE_DIR}/pkg-config.pc.cmake"
     "${CMAKE_CURRENT_BINARY_DIR}/${_PKG_CONFIG_FILENAME}"
     )
   # Restore altered variables
@@ -247,7 +247,7 @@ ENDMACRO(_SETUP_PROJECT_PKG_CONFIG_FINALIZE)
 
 # _PARSE_PKG_CONFIG_STRING (PKG_CONFIG_STRING _PKG_LIB_NAME_VAR _PKG_PREFIX_VAR _PKG_CONFIG_STRING_NOSPACE_VAR)
 # ----------------------------------------------------------
-# 
+#
 # Retrieve from the pkg-config string:
 # - the library name,
 # - the prefix used for CMake variable names,
@@ -290,7 +290,7 @@ ENDMACRO()
 #              the package becomes required.
 #
 # COMPILE_TIME_ONLY : if set to 1, the package is only requiered at compile time and won't
-#                     appear as a dependency inside the *.pc file. 
+#                     appear as a dependency inside the *.pc file.
 #
 # PKG_CONFIG_STRING	: string passed to pkg-config to check the version.
 #			  Typically, this string looks like:
@@ -755,7 +755,7 @@ MACRO(PKG_CONFIG_APPEND_LIBS LIBS)
         IF(SUFFIX_SET)
           GET_TARGET_PROPERTY(LIB_SUFFIX ${LIB} SUFFIX)
         ENDIF(SUFFIX_SET)
-        
+
         GET_PROPERTY(PREFIX_SET TARGET ${LIB} PROPERTY PREFIX SET)
         IF(PREFIX_SET)
           GET_TARGET_PROPERTY(LIB_PREFIX ${LIB} PREFIX)

@@ -104,7 +104,7 @@ MACRO(GENERATE_MSVC_DOT_USER_FILE NAME)
     endif()
     
     GET_MSVC_VERSION()
-    set(DOT_USER_TEMPLATE_PATH ${CMAKE_SOURCE_DIR}/cmake/msvc.vcxproj.user.in)
+    set(DOT_USER_TEMPLATE_PATH ${PROJECT_JRL_CMAKE_MODULE_DIR}/msvc.vcxproj.user.in)
     set(DOT_USER_FILE_PATH ${CMAKE_CURRENT_BINARY_DIR}/${NAME}.vcxproj.user)
     configure_file(${DOT_USER_TEMPLATE_PATH} ${DOT_USER_FILE_PATH})
     

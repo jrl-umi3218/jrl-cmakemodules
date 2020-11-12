@@ -539,8 +539,8 @@ MACRO(_SETUP_PROJECT_DOCUMENTATION)
       _set_if_undefined(DOXYGEN_HTML_FOOTER     "${CMAKE_CURRENT_BINARY_DIR}/doc/footer.html")
       _set_if_undefined(DOXYGEN_HTML_STYLESHEET "${CMAKE_CURRENT_BINARY_DIR}/doc/doxygen.css")
     ELSE (DOXYGEN_USE_TEMPLATE_CSS)
-      _set_if_undefined(DOXYGEN_HTML_FOOTER     "${PROJECT_SOURCE_DIR}/cmake/doxygen/footer.html")
-      _set_if_undefined(DOXYGEN_HTML_STYLESHEET "${PROJECT_SOURCE_DIR}/cmake/doxygen/doxygen.css")
+      _set_if_undefined(DOXYGEN_HTML_FOOTER     "${PROJECT_JRL_CMAKE_MODULE_DIR}/doxygen/footer.html")
+      _set_if_undefined(DOXYGEN_HTML_STYLESHEET "${PROJECT_JRL_CMAKE_MODULE_DIR}/doxygen/doxygen.css")
     ENDIF (DOXYGEN_USE_TEMPLATE_CSS)
 
     ADD_CUSTOM_COMMAND(
@@ -563,7 +563,7 @@ MACRO(_SETUP_PROJECT_DOCUMENTATION)
 
     # Install MathJax minimal version.
     IF("${DOXYGEN_USE_MATHJAX}" STREQUAL "YES")
-      FILE(COPY ${PROJECT_SOURCE_DIR}/cmake/doxygen/MathJax
+      FILE(COPY ${PROJECT_JRL_CMAKE_MODULE_DIR}/doxygen/MathJax
            DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/doc/doxygen-html)
     ENDIF()
 
@@ -644,7 +644,7 @@ MACRO(_SETUP_PROJECT_DOCUMENTATION_FINALIZE)
       MESSAGE(STATUS "Doxygen rendering: using LaTeX backend")
       SET(DOXYGEN_HEADER_NAME "header.html")
     ENDIF()
-    _set_if_undefined (DOXYGEN_HTML_HEADER "${PROJECT_SOURCE_DIR}/cmake/doxygen/${DOXYGEN_HEADER_NAME}")
+    _set_if_undefined (DOXYGEN_HTML_HEADER "${PROJECT_JRL_CMAKE_MODULE_DIR}/doxygen/${DOXYGEN_HEADER_NAME}")
 
     IF(INSTALL_DOCUMENTATION)
       # Find doxytag files
