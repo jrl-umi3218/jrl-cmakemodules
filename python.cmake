@@ -294,7 +294,7 @@ MACRO(DYNAMIC_GRAPH_PYTHON_MODULE SUBMODULENAME LIBRARYNAME TARGETNAME)
   if(NOT DEFINED ARG_SOURCE_PYTHON_MODULE)
     set(DYNAMICGRAPH_MODULE_HEADER ${ARG_MODULE_HEADER})
     configure_file(
-      ${CMAKE_CURRENT_LIST_DIR}/dynamic_graph/python-module-py.cc.in
+      ${PROJECT_JRL_CMAKE_MODULE_DIR}/dynamic_graph/python-module-py.cc.in
       ${PROJECT_BINARY_DIR}/src/dynamic_graph/${SUBMODULENAME}/python-module-py.cc
       @ONLY
       )
@@ -361,7 +361,7 @@ MACRO(DYNAMIC_GRAPH_PYTHON_MODULE SUBMODULENAME LIBRARYNAME TARGETNAME)
   if(NOT DONT_INSTALL_INIT_PY)
 
     CONFIGURE_FILE(
-      ${CMAKE_CURRENT_LIST_DIR}/dynamic_graph/submodule/__init__.py.cmake
+      ${PROJECT_JRL_CMAKE_MODULE_DIR}/dynamic_graph/submodule/__init__.py.cmake
       ${PROJECT_BINARY_DIR}/src/dynamic_graph/${SUBMODULENAME}/__init__.py
       )
 
