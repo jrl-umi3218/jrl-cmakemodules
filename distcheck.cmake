@@ -42,6 +42,7 @@ MACRO(DISTCHECK_SETUP)
     SET(SRCDIR ${CMAKE_BINARY_DIR}/${PROJECT_NAME}${PROJECT_SUFFIX}-${PROJECT_VERSION})
     SET(BUILDDIR ${SRCDIR}/_build)
     SET(INSTDIR ${SRCDIR}/_inst)
+    SET(TEST_RESULTS_DIR ${BUILDDIR}/test_results)
     SET(DISTCHECK_MAKEFLAGS "" CACHE PATH "MAKEFLAGS used for distcheck's make")
       
     # The -i argument of sed command differs according on APPLE systems
@@ -100,7 +101,7 @@ MACRO(DISTCHECK_SETUP)
                                 -e "'s|CMAKE_DETERMINE_C_ABI_COMPILED:INTERNAL=.\\+||g'"
                                 _build/CMakeCache.txt
       && cd _build
-      && cmake -DCMAKE_INSTALL_PREFIX=${INSTDIR} .. || cmake ..
+      && cmake -DCMAKE_INSTALL_PREFIX=${INSTDIR} -DCATKIN_TEST_RESULTS_DIR=${TEST_RESULTS_DIR} .. || cmake ..
          || (echo "ERROR: the cmake configuration failed." && false)
       && make ${DISTCHECK_MAKEFLAGS}
          || (echo "ERROR: the compilation failed." && false)
