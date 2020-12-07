@@ -14,7 +14,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 include(CheckCCompilerFlag)
-if(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.18.0)
+# Introduced in 3.18.0 but VERSION_GREAT_OR_EQUAL is not available in CMake 3.1
+if(${CMAKE_VERSION} VERSION_GREATER 3.17.6)
   include(CheckLinkerFlag)
 endif()
 
