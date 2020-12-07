@@ -1,4 +1,4 @@
-# Copyright (C) 2017 LAAS-CNRS, JRL AIST-CNRS.
+# Copyright (C) 2017-2020 LAAS-CNRS, JRL AIST-CNRS.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -13,18 +13,25 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-INCLUDE(CheckCCompilerFlag)
+include(CheckCCompilerFlag)
+if(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.18.0)
+  include(CheckLinkerFlag)
+endif()
 
 # _CHECK_VERSION_SCRIPT_SUPPORT
 # -----------------------------
 #
 # Internal macro to check if version scripts are supported by the current
 # linker.
-MACRO(_CHECK_VERSION_SCRIPT_SUPPORT)
-  SET(CMAKE_REQUIRED_FLAGS "-Wl,--version-script=${CMAKE_CURRENT_LIST_DIR}/version-script-test.lds")
-  CHECK_C_COMPILER_FLAG("" HAS_VERSION_SCRIPT_SUPPORT)
-  SET(_HAS_VERSION_SCRIPT_SUPPORT ${HAS_VERSION_SCRIPT_SUPPORT} CACHE INTERNAL "Linker supports version scripts")
-ENDMACRO(_CHECK_VERSION_SCRIPT_SUPPORT)
+macro(_CHECK_VERSION_SCRIPT_SUPPORT)
+  set(VERSION_SCRIPT "${PROJECT_JRL_CMAKE_MODULE_DIR}/version-script-test.lds")
+  if(COMMAND check_linker_flag)
+    check_linker_flag("-Wl,--version-script=${VERSION_SCRIPT}" HAS_VERSION_SCRIPT_SUPPORT)
+  else()
+    check_c_compiler_flag("-Wl,--version-script=${VERSION_SCRIPT}" HAS_VERSION_SCRIPT_SUPPORT)
+  endif()
+  set(_HAS_VERSION_SCRIPT_SUPPORT ${HAS_VERSION_SCRIPT_SUPPORT} CACHE INTERNAL "Linker supports version scripts")
+endmacro(_CHECK_VERSION_SCRIPT_SUPPORT)
 
 #.rst:
 # .. command:: ADD_VERSION_SCRIPT(TARGET VERSION_SCRIPT)
@@ -40,15 +47,15 @@ ENDMACRO(_CHECK_VERSION_SCRIPT_SUPPORT)
 #                          cmake target.
 #   :param VERSION_SCRIPT: Version script to add to the library.
 #
-MACRO(ADD_VERSION_SCRIPT TARGET VERSION_SCRIPT)
-  IF(NOT DEFINED _HAS_VERSION_SCRIPT_SUPPORT)
+macro(ADD_VERSION_SCRIPT TARGET VERSION_SCRIPT)
+  if(NOT DEFINED _HAS_VERSION_SCRIPT_SUPPORT)
     _CHECK_VERSION_SCRIPT_SUPPORT()
-  ENDIF()
-  IF(_HAS_VERSION_SCRIPT_SUPPORT)
-    IF(TARGET ${TARGET})
-      SET_PROPERTY(TARGET ${TARGET} APPEND_STRING PROPERTY
-                   LINK_FLAGS " -Wl,--version-script,${VERSION_SCRIPT}")
-      SET_TARGET_PROPERTIES(${TARGET} PROPERTIES LINK_DEPENDS ${VERSION_SCRIPT})
-    ENDIF()
-  ENDIF()
-ENDMACRO(ADD_VERSION_SCRIPT)
+  endif()
+  if(_HAS_VERSION_SCRIPT_SUPPORT)
+    if(TARGET ${TARGET})
+      set_property(TARGET ${TARGET} APPEND_STRING PROPERTY
+                   LINK_FLAGS " -Wl,--version-script=${VERSION_SCRIPT}")
+      set_target_properties(${TARGET} PROPERTIES LINK_DEPENDS ${VERSION_SCRIPT})
+    endif()
+  endif()
+endmacro(ADD_VERSION_SCRIPT)
