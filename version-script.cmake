@@ -16,7 +16,10 @@
 include(CheckCCompilerFlag)
 # Introduced in 3.18.0 but VERSION_GREAT_OR_EQUAL is not available in CMake 3.1
 if(${CMAKE_VERSION} VERSION_GREATER 3.17.6)
+  cmake_policy(PUSH)
+  cmake_policy(SET CMP0057 NEW) # if IN_LIST
   include(CheckLinkerFlag)
+  cmake_policy(POP)
 endif()
 
 # _CHECK_VERSION_SCRIPT_SUPPORT
@@ -27,10 +30,7 @@ endif()
 macro(_CHECK_VERSION_SCRIPT_SUPPORT)
   set(VERSION_SCRIPT "${PROJECT_JRL_CMAKE_MODULE_DIR}/version-script-test.lds")
   if(COMMAND check_linker_flag)
-    cmake_policy(PUSH)
-    cmake_policy(SET CMP0057 NEW) # if IN_LIST
     check_linker_flag("C" "-Wl,--version-script=${VERSION_SCRIPT}" HAS_VERSION_SCRIPT_SUPPORT)
-    cmake_policy(POP)
   else()
     check_c_compiler_flag("-Wl,--version-script=${VERSION_SCRIPT}" HAS_VERSION_SCRIPT_SUPPORT)
   endif()
