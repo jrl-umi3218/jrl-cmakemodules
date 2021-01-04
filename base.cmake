@@ -91,7 +91,7 @@
 #   ------
 #
 
-SET(PROJECT_JRL_CMAKE_MODULE_DIR ${CMAKE_CURRENT_LIST_DIR})
+SET(PROJECT_JRL_CMAKE_MODULE_DIR ${CMAKE_CURRENT_LIST_DIR} CACHE INTERNAL "")
 
 # Please note that functions starting with an underscore are internal
 # functions and should not be used directly.
