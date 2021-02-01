@@ -160,7 +160,7 @@ MACRO(GENERATE_IDL_PYTHON FILENAME DIRECTORY)
   ENDIF(${OMNIIDL} STREQUAL OMNIIDL-NOTFOUND)
 
   IF(_omni_ENABLE_DOCSTRING AND PYTHON_VERSION_MAJOR EQUAL 3)
-    SET(_omniidl_args -p${CMAKE_CURRENT_LIST_DIR}/hpp/idl -bomniidl_be_python_with_docstring -K)
+    SET(_omniidl_args -p${PROJECT_JRL_CMAKE_MODULE_DIR}/hpp/idl -bomniidl_be_python_with_docstring -K)
   ELSE()
     SET(_omniidl_args -bpython)
   ENDIF()
