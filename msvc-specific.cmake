@@ -21,6 +21,8 @@
 # GET_MSVC_VERSION
 # ----------------
 #
+# Deprecated
+#
 # This macro return a string corresponding to the version of the MSVC compiler
 # used.
 # The value is returned in the variable MSVC_VERSION. It is an empty string if
@@ -29,6 +31,7 @@
 #  - or newer than MSVC 14.0
 #
 MACRO(GET_MSVC_VERSION)
+  message("This macro is deprecated. Use GET_MSVC_TOOLS_VERSION instead." DEPRECATION)
   if(MSVC60)
     set(MSVC_VERSION "6.0")
   elseif(MSVC70)
@@ -49,14 +52,64 @@ MACRO(GET_MSVC_VERSION)
     set(MSVC_VERSION "14.0")
   else()
     if(MSVC)
-	  set(MSVC_VERSION "14.0")
-	  message("MSVC version not found. Set MSVC_VERSION to 14.0 by default. Please update the GET_MSVC_VERSION macro." AUTHOR_WARNING)
-	else()
+      set(MSVC_VERSION "14.0")
+      message("MSVC version not found. Set MSVC_VERSION to 14.0 by default. Please update the GET_MSVC_VERSION macro." AUTHOR_WARNING)
+    else()
       set(MSVC_VERSION "")
-	  message("MSVC version not found. You are not using a MSVC generator." AUTHOR_WARNING)
-	endif()
+      message("MSVC version not found. You are not using a MSVC generator." AUTHOR_WARNING)
+    endif()
   endif()
 ENDMACRO(GET_MSVC_VERSION)
+
+
+# GET_MSVC_TOOLS_VERSION
+# ----------------------
+#
+# This macro return a string corresponding to the version of the MSVC compiler
+# used.
+# The value is returned in the variable MSVC_TOOLS_VERSION. It is an empty
+# string if the compiler used is not MSVC.
+#
+MACRO(GET_MSVC_TOOLS_VERSION)
+  string(REGEX MATCH "\\." CONTAINS_DOT ${MSVC_VERSION})
+  if(CONTAINS_DOT)
+    message("MSVC_VERSION has been overwritten with a tools version number (likely by a call to deprecated GET_MSVC_VERSION. Using this number." AUTHOR_WARNING)
+    set(MSVC_TOOLS_VERSION ${MSVC_VERSION})
+  else()
+    if(MSVC_VERSION EQUAL 1200)
+      set(MSVC_TOOLS_VERSION "6.0")
+    elseif(MSVC_VERSION EQUAL 1300)
+      set(MSVC_TOOLS_VERSION "7.0")
+    elseif(MSVC_VERSION EQUAL 1310)
+      set(MSVC_TOOLS_VERSION "7.1")
+    elseif(MSVC_VERSION EQUAL 1400)
+      set(MSVC_TOOLS_VERSION "8.0")
+    elseif(MSVC_VERSION EQUAL 1500)
+      set(MSVC_TOOLS_VERSION "9.0")
+    elseif(MSVC_VERSION EQUAL 1600)
+      set(MSVC_TOOLS_VERSION "10.0")
+    elseif(MSVC_VERSION EQUAL 1700)
+      set(MSVC_TOOLS_VERSION "11.0")
+    elseif(MSVC_VERSION EQUAL 1800)
+      set(MSVC_TOOLS_VERSION "12.0")
+    elseif(MSVC_VERSION EQUAL 1900)
+      set(MSVC_TOOLS_VERSION "14.0")
+    elseif((MSVC_VERSION GREATER_EQUAL 1910) AND (MSVC_VERSION LESS 1920))
+      set(MSVC_TOOLS_VERSION "15.0")
+    elseif((MSVC_VERSION GREATER_EQUAL 1920) AND (MSVC_VERSION LESS 1930))
+      set(MSVC_TOOLS_VERSION "16.0")
+    else()
+      if(MSVC)
+        set(MSVC_TOOLS_VERSION "16.0")
+        message("MSVC version not found. Assuming newer version and set MSVC_TOOLS_VERSION to 16.0 by default. Please update the GET_MSVC_TOOLS_VERSION macro." AUTHOR_WARNING)
+      else()
+        set(MSVC_TOOLS_VERSION "")
+        message("MSVC version not found. You are not using a MSVC generator." AUTHOR_WARNING)
+      endif()
+    endif()
+  endif()
+  unset(CONTAINS_DOT)
+ENDMACRO()
 
 
 # REQUEST_MINIMUM_MSVC_VERSION(VER)
@@ -66,23 +119,24 @@ ENDMACRO(GET_MSVC_VERSION)
 # or when no MSVC compiler or an unknown version of it is used.
 #
 # A reason for the version to be unknown is that it is newer than the versions
-# recognize by the above macro GET_MSVC_VERSION. In this case, please update 
+# recognize by the above macro GET_MSVC_TOOLS_VERSION. In this case, please update 
 # the macro and its documentation.
 #
 MACRO(REQUIRE_MINIMUM_MSVC_VERSION VERSION)
-  GET_MSVC_VERSION()
-  if (${MSVC_VERSION})
-    if (NOT ${MSVC_VERSION} VERSION_GREATER ${VERSION})
-	  message("Minimum MSVC version required is " ${VERSION} " but version " ${MSVC_VERSION} " was found." FATAL_ERROR)
+  GET_MSVC_TOOLS_VERSION()
+  if (${MSVC_TOOLS_VERSION})
+    if (NOT ${MSVC_TOOLS_VERSION} VERSION_GREATER ${VERSION})
+	  message("Minimum MSVC version required is " ${VERSION} " but version " ${MSVC_TOOLS_VERSION} " was found." FATAL_ERROR)
     endif()
   else()
     message("You are requiring a minimum version for MSVC but you do not use a MSVC generator." FATAL_ERROR)
-  endif(${MSVC_VERSION})
+  endif(${MSVC_TOOLS_VERSION})
 ENDMACRO(REQUIRE_MINIMUM_MSVC_VERSION)
 
 if(${CMAKE_VERSION} VERSION_LESS "3.5.0") 
     include(CMakeParseArguments)
 endif()
+
 
 # GENERATE_MSVC_DOT_USER_FILE(<name> [<additional_path>])
 # GENERATE_MSVC_DOT_USER_FILE(NAME <name> [COMMAND <command>] 
@@ -136,7 +190,7 @@ MACRO(GENERATE_MSVC_DOT_USER_FILE)
       set(MSVC_DOT_USER_ADDITIONAL_PATH_DOT_USER ";${GMDUT_ADDITIONAL_PATH}")
     endif()
     
-    GET_MSVC_VERSION()
+    GET_MSVC_TOOLS_VERSION()
     set(DOT_USER_TEMPLATE_PATH ${PROJECT_JRL_CMAKE_MODULE_DIR}/msvc.vcxproj.user.in)
     set(DOT_USER_FILE_PATH ${CMAKE_CURRENT_BINARY_DIR}/${GMDUT_NAME}.vcxproj.user)
     configure_file(${DOT_USER_TEMPLATE_PATH} ${DOT_USER_FILE_PATH})
