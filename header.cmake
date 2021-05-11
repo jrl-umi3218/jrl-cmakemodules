@@ -89,7 +89,7 @@ MACRO(_SETUP_PROJECT_HEADER)
 
   # Generate deprecated.hh header.
   CONFIGURE_FILE(
-    ${CMAKE_CURRENT_LIST_DIR}/deprecated.hh.cmake
+    ${PROJECT_JRL_CMAKE_MODULE_DIR}/deprecated.hh.cmake
     ${CMAKE_CURRENT_BINARY_DIR}/include/${HEADER_DIR}/deprecated.${PROJECT_CUSTOM_HEADER_EXTENSION}
     @ONLY
     )
@@ -104,7 +104,7 @@ MACRO(_SETUP_PROJECT_HEADER)
 
   # Generate warning.hh header.
   CONFIGURE_FILE(
-    ${CMAKE_CURRENT_LIST_DIR}/warning.hh.cmake
+    ${PROJECT_JRL_CMAKE_MODULE_DIR}/warning.hh.cmake
     ${CMAKE_CURRENT_BINARY_DIR}/include/${HEADER_DIR}/warning.${PROJECT_CUSTOM_HEADER_EXTENSION}
     @ONLY
     )
@@ -123,7 +123,7 @@ MACRO(_SETUP_PROJECT_HEADER)
   # in the top-level directory of the build tree.
   # Therefore it must not be included by any distributed header.
   CONFIGURE_FILE(
-    ${CMAKE_CURRENT_LIST_DIR}/config.h.cmake
+    ${PROJECT_JRL_CMAKE_MODULE_DIR}/config.h.cmake
     ${CMAKE_CURRENT_BINARY_DIR}/config.h
     )
 
