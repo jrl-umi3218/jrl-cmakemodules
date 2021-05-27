@@ -54,7 +54,7 @@ macro(CHECK_MINIMAL_CXX_STANDARD STANDARD)
       OR (NOT ${STANDARD} EQUAL "98"
         AND (_MINIMAL_CXX_STANDARD EQUAL "98" OR _MINIMAL_CXX_STANDARD LESS ${STANDARD})))
     set(_MINIMAL_CXX_STANDARD "${STANDARD}" CACHE INTERNAL "")
-    message(WARNING "Minimal C++ standard upgraded to ${_MINIMAL_CXX_STANDARD}")
+    message(STATUS "Minimal C++ standard upgraded to ${_MINIMAL_CXX_STANDARD}")
   endif()
 
   # Check if a non-trivial minimum has been requested
