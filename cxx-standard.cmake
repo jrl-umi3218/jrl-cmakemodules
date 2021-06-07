@@ -12,8 +12,6 @@
 #      When this is ON, every call to :cmake:command:`CHECK_MINIMAL_CXX_STANDARD` updates the :cmake:variable:`CMAKE_CXX_STANDARD`.
 option(ENFORCE_MINIMAL_CXX_STANDARD "Set CMAKE_CXX_STANDARD if a dependency require it" OFF)
 
-set(_CXX_STANDARD_SOURCE "${CMAKE_CURRENT_LIST_DIR}/cxx-standard.cpp")
-
 #.rst:
 # .. ifmode:: user
 #
@@ -43,8 +41,9 @@ macro(CHECK_MINIMAL_CXX_STANDARD STANDARD)
       # See https://devblogs.microsoft.com/cppblog/msvc-now-correctly-reports-__cplusplus/
       string(APPEND CMAKE_CXX_FLAGS " /Zc:__cplusplus")
     endif()
+    write_file(${CMAKE_CURRENT_BINARY_DIR}/tmp-cxx-standard.cpp "#include <iostream>\nint main(){std::cout << __cplusplus;return 0;}")
     try_run(_cxx_standard_run_status _cxx_standard_build_status
-      ${CMAKE_CURRENT_BINARY_DIR} ${_CXX_STANDARD_SOURCE}
+      ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR}/tmp-cxx-standard.cpp
       RUN_OUTPUT_VARIABLE _COMPILER_DEFAULT_CXX_STANDARD)
     message(STATUS "Default C++ standard: ${_COMPILER_DEFAULT_CXX_STANDARD}")
   endif()
