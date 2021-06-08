@@ -12,8 +12,6 @@
 #      When this is ON, every call to :cmake:command:`CHECK_MINIMAL_CXX_STANDARD` updates the :cmake:variable:`CMAKE_CXX_STANDARD`.
 option(ENFORCE_MINIMAL_CXX_STANDARD "Set CMAKE_CXX_STANDARD if a dependency require it" OFF)
 
-set(_CXX_STANDARD_SOURCE "${CMAKE_CURRENT_LIST_DIR}/cxx-standard.cpp")
-
 #.rst:
 # .. ifmode:: user
 #
@@ -43,10 +41,11 @@ macro(CHECK_MINIMAL_CXX_STANDARD STANDARD)
       # See https://devblogs.microsoft.com/cppblog/msvc-now-correctly-reports-__cplusplus/
       string(APPEND CMAKE_CXX_FLAGS " /Zc:__cplusplus")
     endif()
+    write_file(${CMAKE_CURRENT_BINARY_DIR}/tmp-cxx-standard.cpp "#include <iostream>\nint main(){std::cout << __cplusplus;return 0;}")
     try_run(_cxx_standard_run_status _cxx_standard_build_status
-      ${CMAKE_CURRENT_BINARY_DIR} ${_CXX_STANDARD_SOURCE}
+      ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR}/tmp-cxx-standard.cpp
       RUN_OUTPUT_VARIABLE _COMPILER_DEFAULT_CXX_STANDARD)
-    message(STATUS "currently used  C++ standard: ${_COMPILER_DEFAULT_CXX_STANDARD}")
+    message(STATUS "Default C++ standard: ${_COMPILER_DEFAULT_CXX_STANDARD}")
   endif()
 
   # Check if we need to upgrade the current minimum
@@ -54,7 +53,7 @@ macro(CHECK_MINIMAL_CXX_STANDARD STANDARD)
       OR (NOT ${STANDARD} EQUAL "98"
         AND (_MINIMAL_CXX_STANDARD EQUAL "98" OR _MINIMAL_CXX_STANDARD LESS ${STANDARD})))
     set(_MINIMAL_CXX_STANDARD "${STANDARD}" CACHE INTERNAL "")
-    message(STATUS "minimal C++ standard upgraded to ${_MINIMAL_CXX_STANDARD}")
+    message(STATUS "Minimal C++ standard upgraded to ${_MINIMAL_CXX_STANDARD}")
   endif()
 
   # Check if a non-trivial minimum has been requested
@@ -64,16 +63,30 @@ macro(CHECK_MINIMAL_CXX_STANDARD STANDARD)
     if(_COMPILER_DEFAULT_CXX_STANDARD EQUAL 199711
         OR (_COMPILER_DEFAULT_CXX_STANDARD EQUAL 201103 AND _MINIMAL_CXX_STANDARD GREATER 11)
         OR (_COMPILER_DEFAULT_CXX_STANDARD EQUAL 201402 AND _MINIMAL_CXX_STANDARD GREATER 14)
-        OR (_COMPILER_DEFAULT_CXX_STANDARD EQUAL 201703 AND _MINIMAL_CXX_STANDARD GREATER 17))
+        OR (_COMPILER_DEFAULT_CXX_STANDARD EQUAL 201703 AND _MINIMAL_CXX_STANDARD GREATER 17)
+        # C++20: g++-9 defines c++2a with literal 201709, g++-11 & clang-10 define c++2a with literal 202002
+        OR (_COMPILER_DEFAULT_CXX_STANDARD EQUAL 202002 AND _MINIMAL_CXX_STANDARD GREATER 20)
+        OR (DEFINED CMAKE_CXX_STANDARD AND CMAKE_CXX_STANDARD LESS 98 AND _MINIMAL_CXX_STANDARD GREATER CMAKE_CXX_STANDARD)
+        OR (DEFINED CMAKE_CXX_STANDARD AND CMAKE_CXX_STANDARD EQUAL 98 AND _MINIMAL_CXX_STANDARD LESS CMAKE_CXX_STANDARD)
+        )
+      message(STATUS "Incompatible C++ standard detected: Current standard is ${CMAKE_CXX_STANDARD} and minimal is ${_MINIMAL_CXX_STANDARD}")
       # Check that the requested minimum is higher than any pre-existing CMAKE_CXX_STANDARD
       if(NOT CMAKE_CXX_STANDARD OR CMAKE_CXX_STANDARD EQUAL 98 OR CMAKE_CXX_STANDARD LESS _MINIMAL_CXX_STANDARD)
+        # Throw error if a specific version is required and the currently desired one is incompatible
+        if(CMAKE_CXX_STANDARD_REQUIRED)
+          message(FATAL_ERROR "CMAKE_CXX_STANDARD_REQUIRED set - cannot upgrade incompatible standard")
+        endif()
+        # Enforcing a standard version is required - check if we can upgrade automatically
         if(ENFORCE_MINIMAL_CXX_STANDARD OR MINIMAL_CXX_STANDARD_ENFORCE)
-          set(CMAKE_CXX_STANDARD ${STANDARD})
-          message(STATUS "CMAKE_CXX_STANDARD upgraded to ${CMAKE_CXX_STANDARD}")
+          set(ORIGINAL_CMAKE_CXX_STANDARD ${CMAKE_CXX_STANDARD})
+          set(CMAKE_CXX_STANDARD ${_MINIMAL_CXX_STANDARD})
+          message(AUTHOR_WARNING "CMAKE_CXX_STANDARD automatically upgraded to ${CMAKE_CXX_STANDARD} (from ${ORIGINAL_CMAKE_CXX_STANDARD})")
         else()
-          message(FATAL_ERROR "CMAKE_CXX_STANDARD upgrade to >= ${STANDARD} required")
+          message(FATAL_ERROR "CMAKE_CXX_STANDARD upgrade to >= ${_MINIMAL_CXX_STANDARD} required")
         endif()
       endif()
-    endif()
-  endif()
+    else()  # Large _COMPILER_DEFAULT_CXX_STANDARD check
+      message(STATUS "C++ standard sufficient: Minimal required ${_MINIMAL_CXX_STANDARD}, currently defined: ${CMAKE_CXX_STANDARD}")
+    endif()  # Large _COMPILER_DEFAULT_CXX_STANDARD check
+  endif(DEFINED _MINIMAL_CXX_STANDARD AND NOT _MINIMAL_CXX_STANDARD EQUAL 98)
 endmacro()
