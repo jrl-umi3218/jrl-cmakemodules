@@ -48,7 +48,7 @@ ENDIF()
 # Add new target 'run_tests' to improve integration with build tooling
 IF(NOT TARGET run_tests)
   ADD_CUSTOM_TARGET(run_tests
-    COMMAND ctest --output-on-failure -V
+    COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure -V
     VERBATIM
   )
 ENDIF()
