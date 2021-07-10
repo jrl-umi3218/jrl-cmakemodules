@@ -70,7 +70,7 @@ MACRO(RELEASE_SETUP)
           (echo "Updating package.xml to $$VERSION"
            && sed -i \"s!<version>[0-9].[0-9].[0-9]</version>!<version>$$VERSION</version>!g\" package.xml
            && ${GIT} add package.xml
-           && ${GIT} commit -m "Update package.xml version to $$VERSION"
+           && ${GIT} commit -m "release: Update package.xml version to $$VERSION"
            && echo "Updated package.xml and committed") ;
          fi
       && ${GIT} tag -s v$$VERSION -m "Release of version $$VERSION."
