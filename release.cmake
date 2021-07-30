@@ -69,7 +69,7 @@ MACRO(RELEASE_SETUP)
       # Update version in package.xml if it exists
       && if [ -f "package.xml" ]; then
           (echo "Updating package.xml to $$VERSION"
-           && sed -i ${SED_I_ARG} -E \"s|<version>.*</version>|<version>$$VERSION</version>|g\" package.xml
+           && sed -i ${SED_I_ARG} \"s|<version>.*</version>|<version>$$VERSION</version>|g\" package.xml
            && ${GIT} add package.xml
            && ${GIT} commit -m "release: Update package.xml version to $$VERSION"
            && echo "Updated package.xml and committed") ;
