@@ -53,6 +53,7 @@ MACRO(RELEASE_SETUP)
     #Set LD_LIBRARY_PATH
     IF(APPLE)
       SET(LD_LIBRARY_PATH_VARIABLE_NAME "DYLD_LIBRARY_PATH") 
+      SET(SED_I_ARG "''")
     ELSE(APPLE)
       SET(LD_LIBRARY_PATH_VARIABLE_NAME "LD_LIBRARY_PATH") 
     ENDIF(APPLE)
@@ -68,7 +69,7 @@ MACRO(RELEASE_SETUP)
       # Update version in package.xml if it exists
       && if [ -f "package.xml" ]; then
           (echo "Updating package.xml to $$VERSION"
-           && sed -i '' -E \"s|<version>[0-9].[0-9].[0-9]</version>|<version>$$VERSION</version>|g\" package.xml
+           && sed -i ${SED_I_ARG} -E \"s|<version>.*</version>|<version>$$VERSION</version>|g\" package.xml
            && ${GIT} add package.xml
            && ${GIT} commit -m "release: Update package.xml version to $$VERSION"
            && echo "Updated package.xml and committed") ;
