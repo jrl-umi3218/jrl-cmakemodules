@@ -46,7 +46,7 @@ IF(NOT TARGET build_tests)
 ENDIF()
 
 # Add new target 'run_tests' to improve integration with build tooling
-IF(NOT TARGET run_tests)
+IF(NOT CMAKE_GENERATOR MATCHES "Visual Studio" AND NOT TARGET run_tests)
   ADD_CUSTOM_TARGET(run_tests
     COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure -V
     VERBATIM
