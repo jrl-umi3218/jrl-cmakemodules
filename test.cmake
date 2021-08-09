@@ -45,6 +45,14 @@ IF(NOT TARGET build_tests)
   ADD_CUSTOM_TARGET(build_tests)
 ENDIF()
 
+# Add new target 'run_tests' to improve integration with build tooling
+IF(NOT CMAKE_GENERATOR MATCHES "Visual Studio" AND NOT TARGET run_tests)
+  ADD_CUSTOM_TARGET(run_tests
+    COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure -V
+    VERBATIM
+  )
+ENDIF()
+
 IF(NOT DEFINED ctest_build_tests_exists)
   SET_PROPERTY(GLOBAL PROPERTY ctest_build_tests_exists OFF)
 ENDIF(NOT DEFINED ctest_build_tests_exists)
