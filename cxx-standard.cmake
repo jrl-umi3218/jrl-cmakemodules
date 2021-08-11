@@ -58,18 +58,28 @@ macro(CHECK_MINIMAL_CXX_STANDARD STANDARD)
 
   # Check if a non-trivial minimum has been requested
   if(DEFINED _MINIMAL_CXX_STANDARD AND NOT _MINIMAL_CXX_STANDARD EQUAL 98)
-    # Check that the requested minimum is higher than the compiler default
+
     # ref https://en.cppreference.com/w/cpp/preprocessor/replace#Predefined_macros for constants
-    if(_COMPILER_DEFAULT_CXX_STANDARD EQUAL 199711
-        OR (_COMPILER_DEFAULT_CXX_STANDARD EQUAL 201103 AND _MINIMAL_CXX_STANDARD GREATER 11)
-        OR (_COMPILER_DEFAULT_CXX_STANDARD EQUAL 201402 AND _MINIMAL_CXX_STANDARD GREATER 14)
-        OR (_COMPILER_DEFAULT_CXX_STANDARD EQUAL 201703 AND _MINIMAL_CXX_STANDARD GREATER 17)
-        # C++20: g++-9 defines c++2a with literal 201709, g++-11 & clang-10 define c++2a with literal 202002
-        OR (_COMPILER_DEFAULT_CXX_STANDARD EQUAL 202002 AND _MINIMAL_CXX_STANDARD GREATER 20)
-        OR (DEFINED CMAKE_CXX_STANDARD AND CMAKE_CXX_STANDARD LESS 98 AND _MINIMAL_CXX_STANDARD GREATER CMAKE_CXX_STANDARD)
-        OR (DEFINED CMAKE_CXX_STANDARD AND CMAKE_CXX_STANDARD EQUAL 98 AND _MINIMAL_CXX_STANDARD LESS CMAKE_CXX_STANDARD)
-        )
-      message(STATUS "Incompatible C++ standard detected: Current standard is ${CMAKE_CXX_STANDARD} and minimal is ${_MINIMAL_CXX_STANDARD}")
+    if (DEFINED CMAKE_CXX_STANDARD)
+      set(_CURRENT_STANDARD ${CMAKE_CXX_STANDARD})
+    elseif(_COMPILER_DEFAULT_CXX_STANDARD EQUAL 199711)
+      set(_CURRENT_STANDARD 98)
+    elseif(_COMPILER_DEFAULT_CXX_STANDARD EQUAL 201103)
+      set(_CURRENT_STANDARD 11)
+    elseif(_COMPILER_DEFAULT_CXX_STANDARD EQUAL 201402)
+      set(_CURRENT_STANDARD 14)
+    elseif(_COMPILER_DEFAULT_CXX_STANDARD EQUAL 201703)
+      set(_CURRENT_STANDARD 17)
+    # C++20: g++-9 defines c++2a with literal 201709, g++-11 & clang-10 define c++2a with literal 202002
+    elseif(_COMPILER_DEFAULT_CXX_STANDARD EQUAL 201709 OR _COMPILER_DEFAULT_CXX_STANDARD EQUAL 202002)
+      set(_CURRENT_STANDARD 20)
+    else()
+      message(FATAL_ERROR "Unknown current C++ standard ${_COMPILER_DEFAULT_CXX_STANDARD} while trying to check for >= ${_MINIMAL_CXX_STANDARD}")
+    endif()
+
+    # Check that the requested minimum is higher than the currently selected
+    if(_CURRENT_STANDARD EQUAL 98 OR _CURRENT_STANDARD LESS _MINIMAL_CXX_STANDARD)
+      message(STATUS "Incompatible C++ standard detected: upgrade required from ${_CURRENT_STANDARD} to >= ${_MINIMAL_CXX_STANDARD}")
       # Check that the requested minimum is higher than any pre-existing CMAKE_CXX_STANDARD
       if(NOT CMAKE_CXX_STANDARD OR CMAKE_CXX_STANDARD EQUAL 98 OR CMAKE_CXX_STANDARD LESS _MINIMAL_CXX_STANDARD)
         # Throw error if a specific version is required and the currently desired one is incompatible
@@ -78,15 +88,14 @@ macro(CHECK_MINIMAL_CXX_STANDARD STANDARD)
         endif()
         # Enforcing a standard version is required - check if we can upgrade automatically
         if(ENFORCE_MINIMAL_CXX_STANDARD OR MINIMAL_CXX_STANDARD_ENFORCE)
-          set(ORIGINAL_CMAKE_CXX_STANDARD ${CMAKE_CXX_STANDARD})
           set(CMAKE_CXX_STANDARD ${_MINIMAL_CXX_STANDARD})
-          message(AUTHOR_WARNING "CMAKE_CXX_STANDARD automatically upgraded to ${CMAKE_CXX_STANDARD} (from ${ORIGINAL_CMAKE_CXX_STANDARD})")
+          message(AUTHOR_WARNING "CMAKE_CXX_STANDARD automatically upgraded from ${_CURRENT_STANDARD} to ${CMAKE_CXX_STANDARD}")
         else()
-          message(FATAL_ERROR "CMAKE_CXX_STANDARD upgrade to >= ${_MINIMAL_CXX_STANDARD} required")
+          message(FATAL_ERROR "CMAKE_CXX_STANDARD upgrade from ${_CURRENT_STANDARD} to >= ${_MINIMAL_CXX_STANDARD} required")
         endif()
       endif()
-    else()  # Large _COMPILER_DEFAULT_CXX_STANDARD check
-      message(STATUS "C++ standard sufficient: Minimal required ${_MINIMAL_CXX_STANDARD}, currently defined: ${CMAKE_CXX_STANDARD}")
-    endif()  # Large _COMPILER_DEFAULT_CXX_STANDARD check
+    else()  # requested minimum is higher than the currently selected
+      message(STATUS "C++ standard sufficient: Minimal required ${_MINIMAL_CXX_STANDARD}, currently defined: ${_CURRENT_STANDARD}")
+    endif()  # requested minimum is higher than the currently selected
   endif(DEFINED _MINIMAL_CXX_STANDARD AND NOT _MINIMAL_CXX_STANDARD EQUAL 98)
 endmacro()
