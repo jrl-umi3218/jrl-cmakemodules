@@ -73,6 +73,8 @@ macro(CHECK_MINIMAL_CXX_STANDARD STANDARD)
     # C++20: g++-9 defines c++2a with literal 201709, g++-11 & clang-10 define c++2a with literal 202002
     elseif(_COMPILER_DEFAULT_CXX_STANDARD EQUAL 201709 OR _COMPILER_DEFAULT_CXX_STANDARD EQUAL 202002)
       set(_CURRENT_STANDARD 20)
+    else()
+      message(FATAL_ERROR "Unknown current C++ standard ${_COMPILER_DEFAULT_CXX_STANDARD} while trying to check for >= ${_MINIMAL_CXX_STANDARD}")
     endif()
 
     # Check that the requested minimum is higher than the currently selected
