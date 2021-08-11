@@ -1,5 +1,8 @@
 # Copyright (C) 2016 LAAS-CNRS, JRL AIST-CNRS.
 #
+
+MESSAGE(WARNING "This file is DEPRECATED and will be removed")
+
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -32,6 +35,7 @@
 #   See also :cmake:variable:`XACRO_OPTIONS`.
 #
 MACRO(RUN_XACRO INPUT OUTPUT)
+  MESSAGE(WARNING "DEPRECATED. Please use \"xacro_add_xacro_file(${INPUT})\".")
   FIND_PACKAGE(catkin REQUIRED COMPONENTS xacro)
 
   IF(NOT DEFINED XACRO_OPTIONS)
