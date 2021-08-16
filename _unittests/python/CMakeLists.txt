@@ -1,5 +1,4 @@
-# Target-based approach should work from CMake 2.8.12 but it should fully work from 3.1
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.1)
 
 # These variables have to be defined before running SETUP_PROJECT
 set(PROJECT_NAME jrl-cmakemodules-python)
