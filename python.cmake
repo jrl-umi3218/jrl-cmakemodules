@@ -481,9 +481,9 @@ MACRO(PYTHON_INSTALL_BUILD MODULE FILE DEST)
 ENDMACRO()
 
 #.rst:
-# .. command:: FIND_NUMPY
+# .. command:: FIND_NUMPY()
 #
-#   Detect numpy module
+#   Detect numpy module and define the variable NUMPY_INCLUDE_DIRS if it is not already set.
 #
 
 MACRO(FIND_NUMPY)
