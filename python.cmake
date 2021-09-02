@@ -1,4 +1,4 @@
-# Copyright (C) 2008-2020 LAAS-CNRS, JRL AIST-CNRS, INRIA.
+# Copyright (C) 2008-2021 LAAS-CNRS, JRL AIST-CNRS, INRIA.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -481,25 +481,31 @@ MACRO(PYTHON_INSTALL_BUILD MODULE FILE DEST)
 ENDMACRO()
 
 #.rst:
-# .. command:: FIND_NUMPY
+# .. command:: FIND_NUMPY()
 #
-#   Detect numpy module
+#   Detect numpy module and define the variable NUMPY_INCLUDE_DIRS if it is not already set.
 #
 
 MACRO(FIND_NUMPY)
   # Detect numpy.
   MESSAGE (STATUS "checking for numpy")
   EXECUTE_PROCESS(
-    COMMAND "${PYTHON_EXECUTABLE}" "-c"
-    "import numpy; print (numpy.get_include())"
-    OUTPUT_VARIABLE NUMPY_INCLUDE_DIRS
+    COMMAND "${PYTHON_EXECUTABLE}" "-c" "import numpy; print (True)"
+    OUTPUT_VARIABLE IS_NUMPY
     ERROR_QUIET)
-  IF (NOT NUMPY_INCLUDE_DIRS)
+  IF (NOT IS_NUMPY)
     MESSAGE (FATAL_ERROR "Failed to detect numpy")
   ELSE ()
-    STRING(REGEX REPLACE "\n$" "" NUMPY_INCLUDE_DIRS "${NUMPY_INCLUDE_DIRS}")
-    FILE(TO_CMAKE_PATH "${NUMPY_INCLUDE_DIRS}" NUMPY_INCLUDE_DIRS)
-    MESSAGE (STATUS "  NUMPY_INCLUDE_DIRS=${NUMPY_INCLUDE_DIRS}")
+    IF(NOT NUMPY_INCLUDE_DIRS)
+      EXECUTE_PROCESS(
+        COMMAND "${PYTHON_EXECUTABLE}" "-c"
+        "import numpy; print (numpy.get_include())"
+        OUTPUT_VARIABLE NUMPY_INCLUDE_DIRS
+        ERROR_QUIET)
+      STRING(REGEX REPLACE "\n$" "" NUMPY_INCLUDE_DIRS "${NUMPY_INCLUDE_DIRS}")
+      FILE(TO_CMAKE_PATH "${NUMPY_INCLUDE_DIRS}" NUMPY_INCLUDE_DIRS)
+    ENDIF()
+    MESSAGE(STATUS "  NUMPY_INCLUDE_DIRS=${NUMPY_INCLUDE_DIRS}")
     # Retrive NUMPY_VERSION
     EXECUTE_PROCESS(
       COMMAND "${PYTHON_EXECUTABLE}" "-c"
@@ -507,6 +513,6 @@ MACRO(FIND_NUMPY)
       OUTPUT_VARIABLE NUMPY_VERSION
       ERROR_QUIET)
     STRING(REGEX REPLACE "\n$" "" NUMPY_VERSION "${NUMPY_VERSION}")
-    MESSAGE (STATUS "  NUMPY_VERSION=${NUMPY_VERSION}")  
+    MESSAGE(STATUS "  NUMPY_VERSION=${NUMPY_VERSION}")  
   ENDIF()
 ENDMACRO()
