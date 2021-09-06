@@ -86,9 +86,9 @@ FUNCTION(GENERATE_STUBS module_path module_name module_install_dir)
   ENDIF()
 
   IF($ENV{PYTHONPATH})
-    SET(PYTHONPATH=${module_path};$ENV{PYTHONPATH})
+    SET(PYTHONPATH ${module_path};$ENV{PYTHONPATH})
   ELSE()
-    SET(PYTHONPATH=${module_path})
+    SET(PYTHONPATH ${module_path})
   ENDIF($ENV{PYTHONPATH})
 
   ADD_CUSTOM_TARGET(
