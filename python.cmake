@@ -439,6 +439,42 @@ MACRO(PYTHON_BUILD MODULE FILE)
     )
 ENDMACRO()
 
+# PYTHON_BUILD_FILE(FILE)
+# --------------------------------------
+#
+# Build a Python a given file.
+#
+MACRO(PYTHON_BUILD_FILE FILE)
+  # Regex from IsValidTargetName in CMake/Source/cmGeneratorExpression.cxx
+  STRING(REGEX REPLACE "[^A-Za-z0-9_.+-]" "_" compile_pyc "compile_pyc_${CMAKE_CURRENT_SOURCE_DIR}")
+  IF(NOT TARGET ${compile_pyc})
+    ADD_CUSTOM_TARGET(${compile_pyc} ALL)
+  ENDIF()
+
+  ADD_CUSTOM_COMMAND(
+    TARGET ${compile_pyc}
+    PRE_BUILD
+    COMMAND
+    "${PYTHON_EXECUTABLE}"
+    -c "import py_compile; py_compile.compile(\"${FILE}\",\"${FILE}c\")"
+    VERBATIM
+  )
+
+  # Tag pyc file as generated.
+  SET_SOURCE_FILES_PROPERTIES(
+    "${FILE}c"
+    PROPERTIES GENERATED TRUE)
+
+  # Clean generated files.
+  SET_PROPERTY(
+    DIRECTORY APPEND PROPERTY
+    ADDITIONAL_MAKE_CLEAN_FILES
+    "${FILE}c"
+    )
+ENDMACRO()
+
+
+
 # PYTHON_INSTALL_BUILD(MODULE FILE DEST)
 # --------------------------------------
 #
@@ -513,6 +549,6 @@ MACRO(FIND_NUMPY)
       OUTPUT_VARIABLE NUMPY_VERSION
       ERROR_QUIET)
     STRING(REGEX REPLACE "\n$" "" NUMPY_VERSION "${NUMPY_VERSION}")
-    MESSAGE(STATUS "  NUMPY_VERSION=${NUMPY_VERSION}")  
+    MESSAGE(STATUS "  NUMPY_VERSION=${NUMPY_VERSION}")
   ENDIF()
 ENDMACRO()
