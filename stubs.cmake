@@ -52,7 +52,7 @@ MACRO(LOAD_STUBGEN)
 ENDMACRO(LOAD_STUBGEN)
 
 #.rst:
-# .. command:: LOAD_STUBGEN(module_path module_name)
+# .. command:: LOAD_STUBGEN(module_path module_name module_install_dir)
 #
 #    Generate the stubs associated to a given project.
 #    If the TARGET python exists, then the stubs generation will be performed after python target.
@@ -61,16 +61,16 @@ ENDMACRO(LOAD_STUBGEN)
 # .. variable:: module_path
 #
 #  Path pointing to the module
-# 
+#
 #.rst:
 # .. variable:: module_name
-# 
-#  Name of the module 
+#
+#  Name of the module
 #
 #.rst:
 # .. variable:: module_install_dir
-# 
-#  Where the module is installed 
+#
+#  Where the module is installed
 #
 FUNCTION(GENERATE_STUBS module_path module_name module_install_dir)
 
@@ -85,25 +85,35 @@ FUNCTION(GENERATE_STUBS module_path module_name module_install_dir)
     STRING(REGEX REPLACE "[^A-Za-z0-9_.+-]" "_" target_name "generate_stubs_${module_path}_${module_name}")
   ENDIF()
 
+  IF($ENV{PYTHONPATH})
+    SET(PYTHONPATH=${module_path};$ENV{PYTHONPATH})
+  ELSE()
+    SET(PYTHONPATH=${module_path})
+  ENDIF($ENV{PYTHONPATH})
+
   ADD_CUSTOM_TARGET(
     ${target_name}
     ALL
     COMMAND
-    ${CMAKE_COMMAND} -E env PYTHONPATH=${module_path};$ENV{PYTHONPATH}
+    ${CMAKE_COMMAND} -E env PYTHONPATH=${PYTHONPATH}
     "${PYTHON_EXECUTABLE}"
     "${STUBGEN_MAIN_FILE}"
     "-o"
     "${module_path}"
     "${module_name}"
     "--boost-python"
+    --ignore-invalid signature
     "--no-setup-py"
+    "--root-module-suffix"
+    ""
+    VERBATIM
   )
   IF(TARGET python)
     ADD_DEPENDENCIES(${target_name} python)
   ENDIF(TARGET python)
 
   INSTALL(
-    DIRECTORY ${module_path}/${module_name}-stubs/${module_name}
+    DIRECTORY ${module_path}/${module_name}
     DESTINATION ${module_install_dir}
     FILES_MATCHING PATTERN "*.pyi"
   )
