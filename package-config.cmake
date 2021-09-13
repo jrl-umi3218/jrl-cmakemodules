@@ -49,11 +49,12 @@ set(namespace "${PROJECT_NAME}::")
 set(_PACKAGE_CONFIG_DEPENDENCIES_PROJECTS "" CACHE INTERNAL "")
 set(_PACKAGE_CONFIG_DEPENDENCIES_FIND_PACKAGE "" CACHE INTERNAL "")
 set(_PACKAGE_CONFIG_DEPENDENCIES_FIND_DEPENDENCY "" CACHE INTERNAL "")
+set(_PACKAGE_CONFIG_DEPENDENCIES_FIND_EXTERNAL "" CACHE INTERNAL "")
 set(PACKAGE_EXTRA_MACROS "" CACHE INTERNAL "")
 ENDMACRO(_SETUP_PROJECT_PACKAGE_INIT)
 
 #.rst:
-# .. command:: ADD_PROJECT_DEPENDENCY(ARGS [PKG_CONFIG_REQUIRES pkg] [FOR_COMPONENT component])
+# .. command:: ADD_PROJECT_DEPENDENCY(ARGS [PKG_CONFIG_REQUIRES pkg] [FOR_COMPONENT component] [FIND_EXTERNAL pkg])
 #
 #   This is a wrapper around find_package to add correct find_dependency calls in
 #   the generated config script. All arguments are passed to find_package.
@@ -65,10 +66,13 @@ ENDMACRO(_SETUP_PROJECT_PACKAGE_INIT)
 #   If PKG_CONFIG_REQUIRES is provided, it will also add pkg to the Requires
 #   section of the generated .pc file
 #
+#   If FIND_EXTERNAL is provided, a custom dependency finder will be added in $CMAKE_MODULE_PATH
+#   and installed with the project
+#
 MACRO(ADD_PROJECT_DEPENDENCY)
   # add dependency to the generated .pc
   # ref https://github.com/jrl-umi3218/jrl-cmakemodules/pull/335
-  cmake_parse_arguments(PARSED_ARGN "" "PKG_CONFIG_REQUIRES;FOR_COMPONENT" "" ${ARGN})
+  cmake_parse_arguments(PARSED_ARGN "" "PKG_CONFIG_REQUIRES;FOR_COMPONENT;FIND_EXTERNAL" "" ${ARGN})
   IF(PARSED_ARGN_PKG_CONFIG_REQUIRES)
     _ADD_TO_LIST_IF_NOT_PRESENT(_PKG_CONFIG_REQUIRES "${PARSED_ARGN_PKG_CONFIG_REQUIRES}")
     _ADD_TO_LIST_IF_NOT_PRESENT(_PKG_CONFIG_DEP_NOT_FOR_CONFIG_CMAKE "${PARSED_ARGN_PKG_CONFIG_REQUIRES}")
@@ -76,6 +80,15 @@ MACRO(ADD_PROJECT_DEPENDENCY)
   if(PARSED_ARGN_FOR_COMPONENT)
     set(component "_${PARSED_ARGN_FOR_COMPONENT}")
   endif(PARSED_ARGN_FOR_COMPONENT)
+  if(PARSED_ARGN_FIND_EXTERNAL)
+    set(_ext "find-external/${PARSED_ARGN_FIND_EXTERNAL}")
+    set(CMAKE_MODULE_PATH "${PROJECT_JRL_CMAKE_MODULE_DIR}/${_ext}"
+      ${CMAKE_MODULE_PATH})
+    set(_PACKAGE_CONFIG_DEPENDENCIES_FIND_EXTERNAL
+      "${_PACKAGE_CONFIG_DEPENDENCIES_FIND_EXTERNAL}\n \${PACKAGE_PREFIX_DIR}/${CONFIG_INSTALL_DIR}/${_ext}")
+    install(DIRECTORY "${PROJECT_JRL_CMAKE_MODULE_DIR}/${_ext}"
+      DESTINATION "${CONFIG_INSTALL_DIR}/find-external")
+  endif()
   _ADD_TO_LIST_IF_NOT_PRESENT(_PACKAGE_CONFIG${component}_DEPENDENCIES_PROJECTS "${ARGV0}")
 
   string(REPLACE ";" " " PACKAGE_ARGS "${PARSED_ARGN_UNPARSED_ARGUMENTS}")
