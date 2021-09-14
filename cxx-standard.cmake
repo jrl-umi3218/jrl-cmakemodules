@@ -26,9 +26,6 @@ option(ENFORCE_MINIMAL_CXX_STANDARD "Set CMAKE_CXX_STANDARD if a dependency requ
 #
 #      Supported values are 98, 11, 14, 17, and 20.
 #
-#      Note on cross-compilation: Please manually fill the `_COMPILER_DEFAULT_CXX_STANDARD`
-#      variable for your target. Supported values are: 199711, 201103, 201402, 201703, and 202002.
-#
 macro(CHECK_MINIMAL_CXX_STANDARD STANDARD)
   set(options ENFORCE)
   set(oneValueArgs)
@@ -36,7 +33,7 @@ macro(CHECK_MINIMAL_CXX_STANDARD STANDARD)
   cmake_parse_arguments(MINIMAL_CXX_STANDARD "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
   # Get compiler default cxx standard, by printing "__cplusplus" (only once)
-  if(NOT DEFINED _COMPILER_DEFAULT_CXX_STANDARD)
+  if(NOT DEFINED _COMPILER_DEFAULT_CXX_STANDARD AND NOT CMAKE_CROSSCOMPILING)
     if(MSVC)
       # See https://devblogs.microsoft.com/cppblog/msvc-now-correctly-reports-__cplusplus/
       string(APPEND CMAKE_CXX_FLAGS " /Zc:__cplusplus")
