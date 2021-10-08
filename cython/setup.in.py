@@ -14,6 +14,7 @@ from Cython.Build import cythonize
 import hashlib
 import os
 import re
+import sys
 
 try:
     from numpy import get_include as numpy_get_include
@@ -22,6 +23,7 @@ except ImportError:
         return ""
 
 win32_build = os.name == 'nt'
+linux_build = sys.platform.startswith('linux')
 
 sha512 = hashlib.sha512()
 src_files = filter(len, '@CYTHON_BINDINGS_SOURCES@;@CYTHON_BINDINGS_GENERATE_SOURCES@'.split(';'))
@@ -42,6 +44,13 @@ for f in src_files:
                 break
 version_hash = sha512.hexdigest()[:7]
 
+def get_lib_name(path):
+    ret = os.path.basename(path)
+    dot_idx = ret.find('.')
+    if dot_idx == -1:
+        return ret
+    return ret[0:dot_idx]
+
 class pkg_config(object):
     def __init__(self):
         compile_args = "@CYTHON_BINDINGS_COMPILE_DEFINITIONS@"
@@ -54,11 +63,19 @@ class pkg_config(object):
         self.include_dirs = list(set(self.include_dirs))
         library_dirs = "@CYTHON_BINDINGS_LINK_FLAGS@"
         self.library_dirs = [ x for x in library_dirs.split(';') if len(x) ]
-        self.libraries = [ re.sub("^lib", "", os.path.splitext(os.path.basename(l))[0]) for l in "@CYTHON_BINDINGS_LIBRARIES@".split(";") if len(l) ]
+        self.libraries = [ re.sub("^lib", "", get_lib_name(l)) for l in "@CYTHON_BINDINGS_LIBRARIES@".split(";") if len(l) ]
         self.libraries = list(set(self.libraries))
         self.library_dirs += [os.path.dirname(l) for l in "@CYTHON_BINDINGS_TARGET_FILES@".split(';') if len(l) ]
         self.library_dirs = list(set(self.library_dirs))
         self.link_args = []
+        if linux_build:
+            for l in self.libraries:
+                self.link_args += ['-Wl,--no-as-needed', '-l{}'.format(l)]
+            self.libraries = []
+        if not win32_build:
+            self.extra_objects = [l for l in '@CYTHON_BINDINGS_STATIC_LIBRARIES@'.split(';') if len(l)]
+        else:
+            self.extra_objects = []
 
 config = pkg_config()
 
@@ -95,7 +112,7 @@ def GenExtension(name):
     pyx_src = name.replace('.', '/')
     pyx_src = pyx_src + '.pyx'
     ext_src = pyx_src
-    return Extension(name, [ext_src], extra_compile_args = config.compile_args, include_dirs = config.include_dirs, library_dirs = config.library_dirs, libraries = config.libraries, extra_link_args = config.link_args)
+    return Extension(name, [ext_src], extra_compile_args = config.compile_args, include_dirs = config.include_dirs, library_dirs = config.library_dirs, libraries = config.libraries, extra_link_args = config.link_args, extra_objects = config.extra_objects)
 
 extensions = [ GenExtension(x) for x in '@CYTHON_BINDINGS_MODULES@'.split(';') ]
 
