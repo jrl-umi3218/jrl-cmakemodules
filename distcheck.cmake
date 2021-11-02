@@ -44,7 +44,7 @@ MACRO(DISTCHECK_SETUP)
     SET(INSTDIR ${SRCDIR}/_inst)
     SET(TEST_RESULTS_DIR ${BUILDDIR}/test_results)
     SET(DISTCHECK_MAKEFLAGS "" CACHE PATH "MAKEFLAGS used for distcheck's make")
-      
+
     # The -i argument of sed command differs according on APPLE systems
     IF(APPLE)
       SET(SED_I_OPTION "-i'.old' ")
@@ -54,10 +54,12 @@ MACRO(DISTCHECK_SETUP)
 
     #Set LD_LIBRARY_PATH
     IF(APPLE)
-      SET(LD_LIBRARY_PATH_VARIABLE_NAME "DYLD_LIBRARY_PATH") 
+      SET(LD_LIBRARY_PATH_VARIABLE_NAME "DYLD_LIBRARY_PATH")
     ELSE(APPLE)
-      SET(LD_LIBRARY_PATH_VARIABLE_NAME "LD_LIBRARY_PATH") 
+      SET(LD_LIBRARY_PATH_VARIABLE_NAME "LD_LIBRARY_PATH")
     ENDIF(APPLE)
+
+    STRING(REPLACE "${CMAKE_SOURCE_DIR}" "${SRCDIR}" NEW_CMAKE_BINARY_DIR "${CMAKE_BINARY_DIR}")
 
     ADD_CUSTOM_TARGET(distcheck
       COMMAND
@@ -68,10 +70,10 @@ MACRO(DISTCHECK_SETUP)
       && chmod u+w . && rm -rf _build _inst && mkdir -p _build && mkdir -p _inst
       && chmod u+rwx _build _inst && chmod a-w .
       && cp ${CMAKE_BINARY_DIR}/CMakeCache.txt _build/
-      && ${SED} ${SED_I_OPTION} -e "'s|${CMAKE_BINARY_DIR}|${BUILDDIR}|g'" 
-                                _build/CMakeCache.txt # Change previous binary dir by the current _build one 
-      && ${SED} ${SED_I_OPTION} -e "'s|${CMAKE_SOURCE_DIR}|${SRCDIR}|g'" 
-                                _build/CMakeCache.txt # Change previous source dir to the source one 
+      && ${SED} ${SED_I_OPTION} -e "'s|${CMAKE_SOURCE_DIR}|${SRCDIR}|g'"
+                                _build/CMakeCache.txt # Change previous source dir to the source one
+      && ${SED} ${SED_I_OPTION} -e "'s|${NEW_CMAKE_BINARY_DIR}|${BUILDDIR}|g'"
+                                _build/CMakeCache.txt # Change previous binary dir by the current _build one
       && ${SED} ${SED_I_OPTION} -e "'s|CMAKE_CXX_COMPILER:FILEPATH=.\\+||g'"
                                 -e "'s|CMAKE_CXX_FLAGS:STRING=.\\+||g'"
                                 -e "'s|CMAKE_CXX_FLAGS_DEBUG:STRING=.\\+||g'"
@@ -126,6 +128,10 @@ MACRO(DISTCHECK_SETUP)
       COMMENT "Checking generated tarball..."
       )
     ADD_DEPENDENCIES(distcheck distdir)
+
+    UNSET(NEW_CMAKE_BINARY_DIR)
+    UNSET(SRCDIR)
+    UNSET(BUILDIR)
   ELSE()
     #FIXME: what to do here?
   ENDIF()
