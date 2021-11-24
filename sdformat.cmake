@@ -1,0 +1,40 @@
+#
+#   Copyright 2021 INRIA
+#
+#   Author: Rohan Budhiraja
+#
+# Try to quietly find SDFormat, and when found, add dependency.
+
+MACRO(SEARCH_FOR_SDFORMAT)
+  FIND_PACKAGE(SDFormat QUIET)
+  IF (NOT SDFormat_FOUND)
+    FIND_PACKAGE(SDFormat9 QUIET)
+    IF (NOT SDFormat9_FOUND)
+      FIND_PACKAGE(SDFormat10 QUIET)
+      IF (NOT SDFormat10_FOUND)
+        FIND_PACKAGE(SDFormat11 QUIET)
+        IF (NOT SDFormat11_FOUND)
+          FIND_PACKAGE(SDFormat12 QUIET)
+          IF (NOT SDFormat12_FOUND)
+            MESSAGE(STATUS "SDFormat not installed")
+          ELSE()
+            ADD_PROJECT_DEPENDENCY(SDFormat12)
+            MESSAGE(STATUS "SDFormat12 Found")
+          ENDIF()
+        ELSE()
+          ADD_PROJECT_DEPENDENCY(SDFormat11)
+          MESSAGE(STATUS "SDFormat11 Found")
+        ENDIF()
+      ELSE()
+        ADD_PROJECT_DEPENDENCY(SDFormat10)
+        MESSAGE(STATUS "SDFormat10 Found")
+      ENDIF()
+    ELSE()
+      ADD_PROJECT_DEPENDENCY(SDFormat9)
+      MESSAGE(STATUS "SDFormat9 Found")
+    ENDIF()
+  ELSE()
+    ADD_PROJECT_DEPENDENCY(SDFormat)
+    MESSAGE(STATUS "SDFormat Found")
+  ENDIF()  
+ENDMACRO(SEARCH_FOR_SDFORMAT)
