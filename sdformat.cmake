@@ -3,9 +3,14 @@
 #
 #   Author: Rohan Budhiraja
 #
+#
+
+# SEARCH_FOR_SDFORMAT
+# ----------------------------------
 # Try to quietly find SDFormat, and when found, add dependency.
-
-
+# REQUIRED (Optional):  if REQUIRED is given as argument, and SDFormat is not found,
+#                       FATAL_ERROR is generated.
+#
 MACRO(SEARCH_FOR_SDFORMAT)
   SET(SDF_VERSIONS "12" "11" "10" "9")
   LIST(APPEND SDF_VERSIONS "")
