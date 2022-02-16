@@ -13,13 +13,15 @@
 # define @LIBRARY_NAME@_MINOR_VERSION @PROJECT_VERSION_MINOR_CONFIG@
 # define @LIBRARY_NAME@_PATCH_VERSION @PROJECT_VERSION_PATCH_CONFIG@
 
-#define @LIBRARY_NAME@_VERSION_AT_LEAST(major, minor, patch) (@LIBRARY_NAME@_MAJOR_VERSION>major || (@LIBRARY_NAME@_MAJOR_VERSION>=major && \
-                                                             (@LIBRARY_NAME@_MINOR_VERSION>minor || (@LIBRARY_NAME@_MINOR_VERSION>=minor && \
-                                                                                                     @LIBRARY_NAME@_PATCH_VERSION>=patch))))
+// Since i <= 0 is always true, we'll get a compiler warning if major, minor or patch versions are equal to 0.
+// To avoid throwing an error on otherwise valid code, we explicitly perform a signed <= comparison
+#define @LIBRARY_NAME@_VERSION_AT_LEAST(major, minor, patch) (@LIBRARY_NAME@_MAJOR_VERSION>major || ((int)@LIBRARY_NAME@_MAJOR_VERSION>=(int)major && \
+                                                             (@LIBRARY_NAME@_MINOR_VERSION>minor || ((int)@LIBRARY_NAME@_MINOR_VERSION>=(int)minor && \
+                                                                                                     (int)@LIBRARY_NAME@_PATCH_VERSION>=(int)patch))))
 
-#define @LIBRARY_NAME@_VERSION_AT_MOST(major, minor, patch) (@LIBRARY_NAME@_MAJOR_VERSION<major || (@LIBRARY_NAME@_MAJOR_VERSION<=major && \
-                                                            (@LIBRARY_NAME@_MINOR_VERSION<minor || (@LIBRARY_NAME@_MINOR_VERSION<=minor && \
-                                                                                                     @LIBRARY_NAME@_PATCH_VERSION<=patch))))
+#define @LIBRARY_NAME@_VERSION_AT_MOST(major, minor, patch) (@LIBRARY_NAME@_MAJOR_VERSION<major || ((int)@LIBRARY_NAME@_MAJOR_VERSION<=(int)major && \
+                                                            (@LIBRARY_NAME@_MINOR_VERSION<minor || ((int)@LIBRARY_NAME@_MINOR_VERSION<=(int)minor && \
+                                                                                                    (int)@LIBRARY_NAME@_PATCH_VERSION<=(int)patch))))
 
 // Handle portable symbol export.
 // Defining manually which symbol should be exported is required
