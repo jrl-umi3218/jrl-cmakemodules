@@ -42,7 +42,12 @@ macro(CHECK_MINIMAL_CXX_STANDARD STANDARD)
     try_run(_cxx_standard_run_status _cxx_standard_build_status
       ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR}/cmake/tmp-cxx-standard.cpp
       RUN_OUTPUT_VARIABLE _COMPILER_DEFAULT_CXX_STANDARD)
+    if(_cxx_standard_run_status EQUAL FAILED_TO_RUN OR _cxx_standard_build_status EQUAL FAILED_TO_RUN)
+      MESSAGE(WARNING "Impossible to build or run the script to retrive the _COMPILER_DEFAULT_CXX_STANDARD quantity from current compiler. Setting _COMPILER_DEFAULT_CXX_STANDARD to 199711")
+      SET(_COMPILER_DEFAULT_CXX_STANDARD "199711")
+    endif()
     message(STATUS "Default C++ standard: ${_COMPILER_DEFAULT_CXX_STANDARD}")
+
   endif()
 
   # Check if we need to upgrade the current minimum
