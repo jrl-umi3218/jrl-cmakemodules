@@ -42,6 +42,6 @@ macro(_SETUP_COVERAGE_FINALIZE)
               -o ${_COVERAGE_DIR} cpp.lcov python.lcov
       BYPRODUCTS .coverage cpp.lcov python.lcov ${_COVERAGE_DIR}
       WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
-      COMMENT "generating code coverage data")
+      COMMENT "Generating code coverage data")
   endif()
 endmacro()
