@@ -12,7 +12,7 @@
 #
 #      When this is ON, coverage compiler flags are enabled
 
-option(ENABLE_COVERAGE "enable C++ and python code coverage" OFF)
+option(ENABLE_COVERAGE "Enable C++ and Python code coverage" OFF)
 
 macro(_SETUP_COVERAGE)
   if(ENABLE_COVERAGE)
