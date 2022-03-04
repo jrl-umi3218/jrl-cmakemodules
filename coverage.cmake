@@ -24,8 +24,6 @@ macro(_SETUP_COVERAGE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
     message(STATUS "Appending code coverage compiler flags: --coverage")
-    #add_custom_target(py_coverage
-      #COMMAND ${PYTHON_EXECUTABLE} -m coverage report)
   endif()
 endmacro()
 
