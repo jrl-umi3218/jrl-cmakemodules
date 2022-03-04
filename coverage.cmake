@@ -10,9 +10,13 @@
 #
 #   .. variable:: ENABLE_COVERAGE
 #
-#      When this is ON, coverage compiler flags are enabled
+#      When this is ON, coverage compiler flags are enabled. Disabled for MSVC.
 
-option(ENABLE_COVERAGE "Enable C++ and Python code coverage" OFF)
+if(NOT MSVC)
+  option(ENABLE_COVERAGE "Enable C++ and Python code coverage" OFF)
+else()
+  set(ENABLE_COVERAGE OFF)
+endif()
 
 macro(_SETUP_COVERAGE)
   if(ENABLE_COVERAGE)
