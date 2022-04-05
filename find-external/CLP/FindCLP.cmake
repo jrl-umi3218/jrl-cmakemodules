@@ -30,7 +30,7 @@ FIND_PATH(CLP_INCLUDE_DIR
   PATHS ${CLP_PREFIX}
   )
 FIND_LIBRARY(CLP_LIBRARY
-  NAMES libclp.so
+  NAMES libclp.so libClp.so
   PATHS ${CLP_PREFIX}
   )
 
