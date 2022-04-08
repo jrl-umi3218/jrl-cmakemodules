@@ -1,4 +1,4 @@
-# Copyright (C) 2008-2019 LAAS-CNRS, JRL AIST-CNRS, INRIA.
+# Copyright (C) 2008-2022 LAAS-CNRS, JRL AIST-CNRS, INRIA.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -86,6 +86,12 @@
 #   .. variable:: PROJECT_JRL_CMAKE_MODULE_DIR
 #
 #     This variable provides the full path pointing to the JRL cmake module.
+#
+#   .. variable:: PROJECT_COMPATIBILITY_VERSION
+#
+#     If set, this variable defines COMPATIBILITY version of the project (AnyNewerVersion|SameMajorVersion|SameMinorVersion|ExactVersion).
+#     The default value is SameMajorVersion.
+#     See https://cmake.org/cmake/help/latest/module/CMakePackageConfigHelpers.html#generating-a-package-version-file for further details.
 #
 #   Macros
 #   ------
