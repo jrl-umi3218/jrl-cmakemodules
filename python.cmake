@@ -48,6 +48,11 @@
 #
 #  Portable suffix of C++ Python modules.
 
+#.rst:
+# .. variable:: PYTHON_COMPONENTS
+#
+#  Required components for python. Default: "Interpreter Development"
+
 IF(CMAKE_VERSION VERSION_LESS "3.2")
     SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/python ${CMAKE_MODULE_PATH})
     MESSAGE(STATUS "CMake versions older than 3.2 do not properly find Python. Custom macros are used to find it.")
@@ -58,6 +63,9 @@ MACRO(FINDPYTHON)
     MESSAGE(AUTHOR_WARNING "Macro FINDPYTHON has already been called. Several call to FINDPYTHON may not find the same Python version (for a yet unknown reason).")
   ENDIF()
   SET(FINDPYTHON_ALREADY_CALLED TRUE)
+  IF(NOT PYTHON_COMPONENTS)
+    SET(PYTHON_COMPONENTS Interpreter Development)
+  ENDIF()
   IF(NOT CMAKE_VERSION VERSION_LESS "3.12" AND NOT WIN32)
 
     IF(DEFINED PYTHON_EXECUTABLE OR DEFINED Python_EXECUTABLE)
@@ -96,12 +104,12 @@ MACRO(FINDPYTHON)
       SET(Python_EXECUTABLE ${PYTHON_EXECUTABLE})
       SET(Python${_PYTHON_VERSION_MAJOR}_EXECUTABLE ${PYTHON_EXECUTABLE})
 
-      FIND_PACKAGE("Python${_PYTHON_VERSION_MAJOR}" REQUIRED COMPONENTS Interpreter Development)
+      FIND_PACKAGE("Python${_PYTHON_VERSION_MAJOR}" REQUIRED COMPONENTS ${PYTHON_COMPONENTS})
     ELSE()
       # No hind was provided. We can then check for first Python 2, then Python 3
-      FIND_PACKAGE(Python2 QUIET COMPONENTS Interpreter Development)
+      FIND_PACKAGE(Python2 QUIET COMPONENTS ${PYTHON_COMPONENTS})
       IF(NOT Python2_FOUND)
-        FIND_PACKAGE(Python3 QUIET COMPONENTS Interpreter Development)
+        FIND_PACKAGE(Python3 QUIET COMPONENTS ${PYTHON_COMPONENTS})
         IF(NOT Python3_FOUND)
           MESSAGE(FATAL_ERROR "Python executable has not been found.")
         ELSE()
