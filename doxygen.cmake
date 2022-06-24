@@ -56,7 +56,7 @@ MACRO(_SETUP_DOXYGEN_CONFIG_FILE configfile)
        # awk -f doxyfile.awk doxygen
 
        # Doxyfile 1.8.18
-       
+
        #---------------------------------------------------------------------------
        # Project related configuration options
        #---------------------------------------------------------------------------
@@ -419,7 +419,7 @@ MACRO(_SETUP_DOXYGEN_DEFAULT_OPTIONS)
   # Configuration options related to the input files
   #---------------------------------------------------------------------------
   _set_if_undefined(DOXYGEN_IMAGE_PATH           "${PROJECT_SOURCE_DIR}/doc")
-  _set_if_undefined(DOXYGEN_FILE_PATTERNS        "*.cc *.cpp *.h *.hh *.hxx *.idl")
+  _set_if_undefined(DOXYGEN_FILE_PATTERNS        "*.cc *.cpp *.h *.hh *.hpp *.hxx *.idl")
   _set_if_undefined(DOXYGEN_RECURSIVE            YES)
   #---------------------------------------------------------------------------
   # Configuration options related to source browsing
