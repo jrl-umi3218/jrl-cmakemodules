@@ -80,7 +80,6 @@ MACRO(FINDPYTHON)
       IF(NOT ${_npindex} EQUAL -1)
         MESSAGE(WARNING "For CMake < 3.14, NumPy is not available. Falling back to custom FIND_NUMPY()")
         LIST(REMOVE_ITEM PYTHON_COMPONENTS NumPy)
-        FIND_NUMPY()
       ENDIF()
     ENDIF()
   ENDIF()
@@ -268,6 +267,15 @@ MACRO(FINDPYTHON)
       SET(PYTHON_EXT_SUFFIX ".pyd")
     ELSE()
       SET(PYTHON_EXT_SUFFIX ".so")
+    ENDIF()
+  ENDIF()
+
+  # Call FIND_NUMPY if necessary
+  IF(CMAKE_VERSION VERSION_LESS "3.14")
+    #IF("NumPy" IN_LIST PYTHON_COMPONENTS) -- require CMake 3.3
+    LIST(FIND PYTHON_COMPONENTS "NumPy" _npindex)
+    IF(NOT ${_npindex} EQUAL -1)
+      FIND_NUMPY()
     ENDIF()
   ENDIF()
 
