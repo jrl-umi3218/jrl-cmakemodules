@@ -15,14 +15,14 @@
 #
 #
 
-macro(MODERNIZE_LINK TARGET)
+macro(MODERNIZE_LINK target)
   set(options)
   set(oneValueArgs SCOPE)
   set(multiValueArgs TARGETS LIBRARIES INCLUDE_DIRS)
   cmake_parse_arguments(MODERNIZE_LINK "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
   set(_targets_available TRUE)
-  foreach(_tgt MODERNIZE_LINK_TARGETS)
+  foreach(_tgt ${MODERNIZE_LINK_TARGETS})
     if(NOT TARGET ${_tgt})
       message(VERBOSE "${_tgt} is not available. Falling back to old-school links to libraries / include_dirs")
       set(_targets_available FALSE)
