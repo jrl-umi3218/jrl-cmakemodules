@@ -7,15 +7,17 @@
 #.rst:
 # .. ifmode:: user
 #
-#   .. command:: MODERNIZE_LINK(target SCOPE <INTERFACE|PUBLIC|PRIVATE> TARGETS [targets...] LIBRARIES [libraries...]
-#   INCLUDE_DIRS [include_dirs...])
+#   .. command:: MODERNIZE_TARGET_LINK_LIBRARIES(target SCOPE <INTERFACE|PUBLIC|PRIVATE>
+#                 TARGETS [targets...]
+#                 LIBRARIES [libraries...]
+#                 INCLUDE_DIRS [include_dirs...])
 #
 #      link "target" to modern "targets" if they are already defined, or fall back to old-school
 #      "libraries" and "include_dirs"
 #
 #
 
-macro(MODERNIZE_LINK target)
+macro(MODERNIZE_TARGET_LINK_LIBRARIES target)
   set(options)
   set(oneValueArgs SCOPE)
   set(multiValueArgs TARGETS LIBRARIES INCLUDE_DIRS)
