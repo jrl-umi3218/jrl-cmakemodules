@@ -116,6 +116,17 @@ MACRO(FINDPYTHON)
         ERROR_STRIP_TRAILING_WHITESPACE
         )
 
+      # Provide some hints according to the current PYTHON_EXECUTABLE
+      if(NOT DEFINED PYTHON_INCLUDE_DIR)
+        EXECUTE_PROCESS(
+          COMMAND "${PYTHON_EXECUTABLE}" "-c"
+          "import distutils.sysconfig as sysconfig; print(sysconfig.get_python_inc())"
+          OUTPUT_VARIABLE PYTHON_INCLUDE_DIR
+          ERROR_QUIET)
+        STRING(STRIP "${PYTHON_INCLUDE_DIR}" PYTHON_INCLUDE_DIR)
+        FILE(TO_CMAKE_PATH "${PYTHON_INCLUDE_DIR}" PYTHON_INCLUDE_DIR)
+      endif()
+
       IF(NOT "${_PYTHON_VERSION_RESULT_VARIABLE}" STREQUAL "0")
         MESSAGE(FATAL_ERROR "${PYTHON_EXECUTABLE} --version did not succeed.")
       ENDIF(NOT "${_PYTHON_VERSION_RESULT_VARIABLE}" STREQUAL "0")
@@ -126,6 +137,7 @@ MACRO(FINDPYTHON)
       # Hint for finding the right Python version
       SET(Python_EXECUTABLE ${PYTHON_EXECUTABLE})
       SET(Python${_PYTHON_VERSION_MAJOR}_EXECUTABLE ${PYTHON_EXECUTABLE})
+      SET(Python${_PYTHON_VERSION_MAJOR}_INCLUDE_DIR ${PYTHON_INCLUDE_DIR})
 
       FIND_PACKAGE("Python${_PYTHON_VERSION_MAJOR}" REQUIRED COMPONENTS ${PYTHON_COMPONENTS})
     ELSE()
@@ -189,8 +201,6 @@ MACRO(FINDPYTHON)
       ENDIF(NOT DEFINED PYTHON_INCLUDE_DIR)
       SET(PYTHON_INCLUDE_DIRS ${PYTHON_INCLUDE_DIR})
 
-      MESSAGE(STATUS "PYTHON_INCLUDE_DIRS:${PYTHON_INCLUDE_DIRS}")
-      MESSAGE(STATUS "PYTHON_INCLUDE_DIR:${PYTHON_INCLUDE_DIR}")
     ENDIF(DEFINED PYTHON_EXECUTABLE)
 
     # Inform PythonLibs of the required version of PythonInterp
@@ -252,6 +262,7 @@ MACRO(FINDPYTHON)
   ENDIF(PYTHON_SITELIB)
 
   MESSAGE(STATUS "Python site lib: ${PYTHON_SITELIB}")
+  MESSAGE(STATUS "Python include dirs: ${PYTHON_INCLUDE_DIRS}")
 
   # Get PYTHON_SOABI
   # We should be in favor of using PYTHON_EXT_SUFFIX in future for better portability.
