@@ -125,7 +125,7 @@ MACRO(FINDPYTHON)
 
       FIND_PACKAGE("Python${_PYTHON_VERSION_MAJOR}" REQUIRED COMPONENTS ${PYTHON_COMPONENTS})
     ELSE()
-      # No hind was provided. We can then check for first Python 2, then Python 3
+      # No hint was provided. We can then check for first Python 2, then Python 3
       FIND_PACKAGE(Python2 QUIET COMPONENTS ${PYTHON_COMPONENTS})
       IF(NOT Python2_FOUND)
         FIND_PACKAGE(Python3 QUIET COMPONENTS ${PYTHON_COMPONENTS})
