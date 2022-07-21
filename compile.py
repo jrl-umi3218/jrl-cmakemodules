@@ -15,7 +15,8 @@
 # received a copy of the GNU Lesser General Public License along with
 # jrl-cmakemodules. If not, see <http://www.gnu.org/licenses/>.
 
-import sys, os, py_compile
+import sys
+import py_compile
 
 srcdir = sys.argv[1]
 builddir = sys.argv[2]
@@ -38,7 +39,4 @@ try:
 except Exception as e:
     print("Failed to compile python script: {0}".format(repr(src)))
     print("Exception raised: {0}".format(str(e)))
-    sys.exit(1)
-except:
-    print("Failed to compile python script: {0}".format(repr(src)))
     sys.exit(1)

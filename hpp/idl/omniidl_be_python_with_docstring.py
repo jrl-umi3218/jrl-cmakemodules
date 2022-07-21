@@ -24,7 +24,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-from omniidl_be.python import *
+from omniidl_be.python import comment, output_inline
 from omniidl_be.python import run as run_parent
 from omniidl import idlvisitor, idlast, idltype
 
@@ -74,7 +74,7 @@ class CommentToConstVisitor(idlvisitor.AstVisitor):
                             break
                         line = fp.readline()
                         texts.append("           \t" + line)
-        except:
+        except Exception:
             pass
         if len(texts) == 0:
             return None

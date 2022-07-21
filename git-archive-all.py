@@ -223,7 +223,7 @@ class GitArchiver(object):
                 "git config --get core.attributesfile", repo_abspath
             ).rstrip()
             exclude_patterns[()] = read_attributes(global_attributes_abspath)
-        except:
+        except Exception:
             # And it's valid to not have them.
             pass
 
@@ -364,8 +364,8 @@ class GitArchiver(object):
             with open(repo_gitmodules_abspath) as f:
                 lines = f.readlines()
 
-            for l in lines:
-                m = re.match("^\s*path\s*=\s*(.*)\s*$", l)
+            for line in lines:
+                m = re.match(r"^\s*path\s*=\s*(.*)\s*$", line)
 
                 if m:
                     submodule_path = m.group(1)
@@ -546,7 +546,7 @@ def main():
         output_name = path.basename(output_file_path)
         output_name = (
             re.sub(
-                "(\.zip|\.tar|\.tgz|\.txz|\.gz|\.bz2|\.xz|\.tar\.gz|\.tar\.bz2|\.tar\.xz)$",
+                r"(\.zip|\.tar|\.tgz|\.txz|\.gz|\.bz2|\.xz|\.tar\.gz|\.tar\.bz2|\.tar\.xz)$",
                 "",
                 output_name,
             )

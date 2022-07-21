@@ -74,25 +74,27 @@ class pkg_config(object):
         library_dirs = "@CYTHON_BINDINGS_LINK_FLAGS@"
         self.library_dirs = [x for x in library_dirs.split(";") if len(x)]
         self.libraries = [
-            re.sub("^lib", "", get_lib_name(l))
-            for l in "@CYTHON_BINDINGS_LIBRARIES@".split(";")
-            if len(l)
+            re.sub("^lib", "", get_lib_name(lib))
+            for lib in "@CYTHON_BINDINGS_LIBRARIES@".split(";")
+            if len(lib)
         ]
         self.libraries = list(set(self.libraries))
         self.library_dirs += [
-            os.path.dirname(l)
-            for l in "@CYTHON_BINDINGS_TARGET_FILES@".split(";")
-            if len(l)
+            os.path.dirname(lib)
+            for lib in "@CYTHON_BINDINGS_TARGET_FILES@".split(";")
+            if len(lib)
         ]
         self.library_dirs = list(set(self.library_dirs))
         self.link_args = []
         if linux_build:
-            for l in self.libraries:
-                self.link_args += ["-Wl,--no-as-needed", "-l{}".format(l)]
+            for lib in self.libraries:
+                self.link_args += ["-Wl,--no-as-needed", "-l{}".format(lib)]
             self.libraries = []
         if not win32_build:
             self.extra_objects = [
-                l for l in "@CYTHON_BINDINGS_STATIC_LIBRARIES@".split(";") if len(l)
+                lib
+                for lib in "@CYTHON_BINDINGS_STATIC_LIBRARIES@".split(";")
+                if len(lib)
             ]
         else:
             self.extra_objects = []
@@ -104,7 +106,7 @@ config = pkg_config()
 def cxx_standard(value):
     try:
         return int(value)
-    except:
+    except Exception:
         return 0
 
 
@@ -121,7 +123,8 @@ cxx_standard = max(
 if cxx_standard != 0:
     if not win32_build:
         config.compile_args.append("-std=c++{}".format(cxx_standard))
-        # In C++17 the register keyword is unused and reserved, GCC still accepts it with a warning but clang errors by default
+        # In C++17 the register keyword is unused and reserved,
+        # GCC still accepts it with a warning but clang errors by default
         # It is used in Python 2.7 header file and so we need this flag
         if cxx_standard >= 17:
             config.compile_args.append("-Wno-register")

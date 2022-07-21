@@ -160,7 +160,7 @@ try:
         "display_version": False,
         "navigation_depth": 3,
     }
-except:
+except Exception:
     html_theme_path = []
 
 # The name for this set of Sphinx documents.  If None, it defaults to
@@ -238,11 +238,11 @@ htmlhelp_basename = "SharedCMakesubmoduledoc"
 
 latex_elements = {
     # The paper size ('letterpaper' or 'a4paper').
-    #'papersize': 'letterpaper',
+    # 'papersize': 'letterpaper',
     # The font size ('10pt', '11pt' or '12pt').
-    #'pointsize': '10pt',
+    # 'pointsize': '10pt',
     # Additional stuff for the LaTeX preamble.
-    #'preamble': '',
+    # 'preamble': '',
 }
 
 # Grouping the document tree into LaTeX files. List of tuples
