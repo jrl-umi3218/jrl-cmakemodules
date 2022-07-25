@@ -264,5 +264,5 @@ endmacro()
 macro(INSTALL_JRL_CMAKEMODULES_FILE filename)
   install(FILES "${filename}"
       DESTINATION "${CONFIG_INSTALL_DIR}")
-  set(PACKAGE_EXTRA_MACROS "${PACKAGE_EXTRA_MACROS}\ninclude(\"\${CMAKE_CURRENT_LIST_DIR}/${filename}\")"
+  set(PACKAGE_EXTRA_MACROS "${PACKAGE_EXTRA_MACROS}\ninclude(\"\${CMAKE_CURRENT_LIST_DIR}/${filename}\")")
 endmacro()
