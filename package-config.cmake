@@ -257,3 +257,13 @@ macro(PROJECT_INSTALL_COMPONENT COMPONENT)
   install(FILES "${COMPONENT_CONFIG}"
       DESTINATION "${CONFIG_INSTALL_DIR}")
 endmacro()
+
+#.rst:
+# .. command:: INSTALL_JRL_CMAKEMODULES_FILE (filename)
+#
+#   install jrl-cmakemodules/$filename along CMake package exports
+#
+macro(INSTALL_JRL_CMAKEMODULES_FILE filename)
+  install(FILES "${filename}"
+      DESTINATION "${CONFIG_INSTALL_DIR}")
+endmacro()
