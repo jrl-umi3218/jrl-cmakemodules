@@ -9,5 +9,4 @@ include(cmake/base.cmake)
 
 project(${PROJECT_NAME} CXX)
 
-# Configure the build of your project here
-# add_subdirectory(src)
+# Configure the build of your project here add_subdirectory(src)

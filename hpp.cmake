@@ -1,15 +1,14 @@
-# Copyright (C) 2018 LAAS-CNRS
-# Authors: Joseph Mirabel
+# Copyright (C) 2018 LAAS-CNRS Authors: Joseph Mirabel
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
-# 
-# 1. Redistributions of source code must retain the above copyright notice, this
-#    list of conditions and the following disclaimer.
 #
-# 2. Redistributions in binary form must reproduce the above copyright notice,
-#    this list of conditions and the following disclaimer in the documentation
-#    and/or other materials provided with the distribution.
+# 1. Redistributions of source code must retain the above copyright notice, this
+#   list of conditions and the following disclaimer.
+#
+# 1. Redistributions in binary form must reproduce the above copyright notice,
+#   this list of conditions and the following disclaimer in the documentation
+#   and/or other materials provided with the distribution.
 #
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 # AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -54,24 +53,28 @@ The varible :cmake:variable:`PROJECT_URL` is set to
 
 #]=============================================================================]
 
-IF (NOT DEFINED PROJECT_ORG)
-  SET(PROJECT_ORG "humanoid-path-planner")
-ENDIF (NOT DEFINED PROJECT_ORG)
+if(NOT DEFINED PROJECT_ORG)
+  set(PROJECT_ORG "humanoid-path-planner")
+endif(NOT DEFINED PROJECT_ORG)
 
-IF (NOT DEFINED PROJECT_URL)
-  SET(PROJECT_URL "https://github.com/${PROJECT_ORG}/${PROJECT_NAME}")
-ENDIF (NOT DEFINED PROJECT_URL)
+if(NOT DEFINED PROJECT_URL)
+  set(PROJECT_URL "https://github.com/${PROJECT_ORG}/${PROJECT_NAME}")
+endif(NOT DEFINED PROJECT_URL)
 
-INCLUDE(${CMAKE_CURRENT_LIST_DIR}/base.cmake)
-INCLUDE(${CMAKE_CURRENT_LIST_DIR}/hpp/doc.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/base.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/hpp/doc.cmake)
 
 # Activate hpp-util logging if requested
-SET (HPP_DEBUG FALSE CACHE BOOL "trigger hpp-util debug output")
-IF (HPP_DEBUG)
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHPP_DEBUG")
-ENDIF()
+set(HPP_DEBUG
+    FALSE
+    CACHE BOOL "trigger hpp-util debug output")
+if(HPP_DEBUG)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHPP_DEBUG")
+endif()
 # Activate hpp-util logging if requested
-SET (HPP_BENCHMARK FALSE CACHE BOOL "trigger hpp-util benchmark output")
-IF (HPP_BENCHMARK)
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHPP_ENABLE_BENCHMARK")
-ENDIF()
+set(HPP_BENCHMARK
+    FALSE
+    CACHE BOOL "trigger hpp-util benchmark output")
+if(HPP_BENCHMARK)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHPP_ENABLE_BENCHMARK")
+endif()

@@ -15,30 +15,28 @@
 # received a copy of the GNU Lesser General Public License along with
 # jrl-cmakemodules. If not, see <http://www.gnu.org/licenses/>.
 
-import sys, os, py_compile
+import sys
+import py_compile
 
 srcdir = sys.argv[1]
 builddir = sys.argv[2]
 name = sys.argv[3]
 
-if srcdir[-1] != '/':
-    srcdir = srcdir + '/'
-if builddir[-1] != '/':
-    builddir = builddir + '/'
+if srcdir[-1] != "/":
+    srcdir = srcdir + "/"
+if builddir[-1] != "/":
+    builddir = builddir + "/"
 
 src = srcdir + name
-comp = builddir + name + (__debug__ and 'c' or 'o')
+comp = builddir + name + (__debug__ and "c" or "o")
 
-#print("compiling " + src + " into " + comp)
+# print("compiling " + src + " into " + comp)
 
-#os.mkdir(os.path.splittext(comp)[0])
+# os.mkdir(os.path.splittext(comp)[0])
 
 try:
     py_compile.compile(src, comp, doraise=True)
 except Exception as e:
-    print ("Failed to compile python script: {0}".format (repr (src)))
-    print ("Exception raised: {0}".format (str(e)))
-    sys.exit(1)
-except:
-    print ("Failed to compile python script: {0}".format (repr (src)))
+    print("Failed to compile python script: {0}".format(repr(src)))
+    print("Exception raised: {0}".format(str(e)))
     sys.exit(1)

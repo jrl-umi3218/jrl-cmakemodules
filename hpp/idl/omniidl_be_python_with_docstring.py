@@ -24,22 +24,26 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-from omniidl_be.python import *
+from omniidl_be.python import comment, output_inline
 from omniidl_be.python import run as run_parent
 from omniidl import idlvisitor, idlast, idltype
+
 
 def _rreplace(s, old, new, occurrence):
     li = s.rsplit(old, occurrence)
     return new.join(li)
 
-class CommentToConstVisitor (idlvisitor.AstVisitor):
+
+class CommentToConstVisitor(idlvisitor.AstVisitor):
     def __init__(self):
         import re
-        self.commentStart  = re.compile (r"^//+ ?")
 
-    def _commentToConst (self, node, comments):
+        self.commentStart = re.compile(r"^//+ ?")
+
+    def _commentToConst(self, node, comments):
         import re
-        texts =  []
+
+        texts = []
         line = node.line()
         # TODO here, we only use the comments before.
         comment = node
@@ -49,50 +53,57 @@ class CommentToConstVisitor (idlvisitor.AstVisitor):
             line = c.line()
             comment = c
             text = c.text()
-            texts.append (re.sub(self.commentStart, "", text))
-        if len(texts)==0:
+            texts.append(re.sub(self.commentStart, "", text))
+        if len(texts) == 0:
             if isinstance(node, idlast.Attribute):
                 for i in node.identifiers():
-                    print (i + " documentation may be ill-formed.")
+                    print(i + " documentation may be ill-formed.")
             else:
-                print (node.identifier() + " documentation may be ill-formed.")
+                print(node.identifier() + " documentation may be ill-formed.")
         texts.reverse()
         # Extract the prototype of the function
         try:
             if isinstance(node, idlast.Operation):
                 with open(node.file()) as fp:
-                    for _ in range(node.line()-1): fp.readline()
+                    for _ in range(node.line() - 1):
+                        fp.readline()
                     line = fp.readline()
-                    texts.append("\nPrototype:\t"+ line)
+                    texts.append("\nPrototype:\t" + line)
                     while line != "":
-                        if ';' in line:
+                        if ";" in line:
                             break
                         line = fp.readline()
-                        texts.append("           \t"+ line)
-        except:
+                        texts.append("           \t" + line)
+        except Exception:
             pass
-        if len(texts)==0: return None
-        text = ''.join (texts)
+        if len(texts) == 0:
+            return None
+        text = "".join(texts)
         id = node.identifier() + "__doc__"
-        return idlast.Const (
-                comment.file(),
-                comment.line(),
-                node.mainFile(),
-                node.pragmas(),
-                [], # comments
-                id, #identifier
-                node.scopedName()[:-1] + [ id, ], #scopedName
-                _rreplace (node.repoId(), node.identifier(), id, 1), # repoId
-                idltype.String (0), # constType, 0 means unbounded
-                idltype.tk_string, # constKind
-                text # value
-                )
-    def _addDoc (self, parent, node):
-        #Commented in order to add the prototype to the documentation.
-        #if len(node.comments()) > 0:
+        return idlast.Const(
+            comment.file(),
+            comment.line(),
+            node.mainFile(),
+            node.pragmas(),
+            [],  # comments
+            id,  # identifier
+            node.scopedName()[:-1]
+            + [
+                id,
+            ],  # scopedName
+            _rreplace(node.repoId(), node.identifier(), id, 1),  # repoId
+            idltype.String(0),  # constType, 0 means unbounded
+            idltype.tk_string,  # constKind
+            text,  # value
+        )
+
+    def _addDoc(self, parent, node):
+        # Commented in order to add the prototype to the documentation.
+        # if len(node.comments()) > 0:
         if True:
-            const = self._commentToConst (node, node.comments())
-            if const is None: return
+            const = self._commentToConst(node, node.comments())
+            if const is None:
+                return
             if isinstance(parent, idlast.Module):
                 parent._Module__definitions.append(const)
             elif isinstance(parent, idlast.Interface):
@@ -101,31 +112,33 @@ class CommentToConstVisitor (idlvisitor.AstVisitor):
             elif isinstance(parent, idlast.AST):
                 parent._AST__declarations.append(const)
             else:
-                print ("Doc ignored: " + comment.text())
-
+                print("Doc ignored: " + comment.text())
 
     def visitAST(self, node):
         for n in node.declarations():
-            if not output_inline and not n.mainFile(): continue
+            if not output_inline and not n.mainFile():
+                continue
 
             if isinstance(n, idlast.Module) or isinstance(n, idlast.Interface):
-                self._addDoc (node, n)
+                self._addDoc(node, n)
                 n.accept(self)
 
     def visitModule(self, node):
         for n in node.definitions():
-            if not output_inline and not n.mainFile(): continue
+            if not output_inline and not n.mainFile():
+                continue
 
             if isinstance(n, idlast.Module) or isinstance(n, idlast.Interface):
-                self._addDoc (node, n)
+                self._addDoc(node, n)
                 n.accept(self)
 
     def visitInterface(self, node):
         for c in node.callables():
-            self._addDoc (node, c)
+            self._addDoc(node, c)
+
 
 def run(tree, args):
-    ccv = CommentToConstVisitor ()
+    ccv = CommentToConstVisitor()
     tree.accept(ccv)
 
-    run_parent (tree, args)
+    run_parent(tree, args)
