@@ -1,15 +1,14 @@
-# Copyright (C) 2018 LAAS-CNRS
-# Authors: Joseph Mirabel
+# Copyright (C) 2018 LAAS-CNRS Authors: Joseph Mirabel
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
-# 
-# 1. Redistributions of source code must retain the above copyright notice, this
-#    list of conditions and the following disclaimer.
 #
-# 2. Redistributions in binary form must reproduce the above copyright notice,
-#    this list of conditions and the following disclaimer in the documentation
-#    and/or other materials provided with the distribution.
+# 1. Redistributions of source code must retain the above copyright notice, this
+#   list of conditions and the following disclaimer.
+#
+# 1. Redistributions in binary form must reproduce the above copyright notice,
+#   this list of conditions and the following disclaimer in the documentation
+#   and/or other materials provided with the distribution.
 #
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 # AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -22,9 +21,9 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-IF(NOT DEFINED DOXYGEN_LAYOUT_FILE)
-  SET(DOXYGEN_LAYOUT_FILE "${CMAKE_CURRENT_LIST_DIR}/doc/layout.xml")
-ENDIF()
-IF(NOT DEFINED DOXYGEN_USE_TEMPLATE_CSS)
-  SET(DOXYGEN_USE_TEMPLATE_CSS TRUE)
-ENDIF()
+if(NOT DEFINED DOXYGEN_LAYOUT_FILE)
+  set(DOXYGEN_LAYOUT_FILE "${CMAKE_CURRENT_LIST_DIR}/doc/layout.xml")
+endif()
+if(NOT DEFINED DOXYGEN_USE_TEMPLATE_CSS)
+  set(DOXYGEN_USE_TEMPLATE_CSS TRUE)
+endif()

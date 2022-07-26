@@ -46,7 +46,7 @@ To document a macro or a variable in a ``.cmake`` file, use
   #   Related to :cmake:command:`HOW_TO_DOCUMENT_A_COMMAND`.
   #
   #   A code block::
-  #   
+  #
   #     notice the double : and the indention
   #
   #   or the more verbose, but supports other language
@@ -74,7 +74,7 @@ gives
   Related to :cmake:command:`HOW_TO_DOCUMENT_A_COMMAND`.
 
   A cmake code block::
-  
+
     set(foo "notice the double : and the indention")
 
   or the more verbose, but supports other language
