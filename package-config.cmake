@@ -262,7 +262,7 @@ endmacro()
 #   install jrl-cmakemodules/$filename along CMake package exports
 #
 macro(INSTALL_JRL_CMAKEMODULES_FILE filename)
-  install(FILES "${filename}"
+  install(FILES "${PROJECT_JRL_CMAKE_MODULE_DIR}/${filename}"
       DESTINATION "${CONFIG_INSTALL_DIR}")
   set(PACKAGE_EXTRA_MACROS "${PACKAGE_EXTRA_MACROS}\ninclude(\"\${CMAKE_CURRENT_LIST_DIR}/${filename}\")")
 endmacro()
