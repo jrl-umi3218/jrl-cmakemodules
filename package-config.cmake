@@ -149,9 +149,7 @@ string(REPLACE ";" "\n  " PACKAGE_DEPENDENCIES_FIND_PACKAGE "${_PACKAGE_CONFIG_D
 string(REPLACE ";" "\n  " PACKAGE_DEPENDENCIES_FIND_DEPENDENCY "${_PACKAGE_CONFIG_DEPENDENCIES_FIND_DEPENDENCY}")
 
 if(DEFINED _MINIMAL_CXX_STANDARD)
-  # Read macro file and append
-  file(READ ${PROJECT_JRL_CMAKE_MODULE_DIR}/cxx-standard.cmake CXX_STANDARD_MACRO_CONTENT)
-  set(PACKAGE_EXTRA_MACROS "${PACKAGE_EXTRA_MACROS}\n# C++ standard compatibility check/enforcement\nset(_MINIMAL_CXX_STANDARD ${_MINIMAL_CXX_STANDARD})\n\n${CXX_STANDARD_MACRO_CONTENT}")
+  INSTALL_JRL_CMAKEMODULES_FILE("cxx-standard.cmake")
 
   # Add check for standard - enforce if required
   if(${MINIMAL_CXX_STANDARD_ENFORCE})
@@ -256,4 +254,15 @@ macro(PROJECT_INSTALL_COMPONENT COMPONENT)
       NO_SET_AND_CHECK_MACRO)
   install(FILES "${COMPONENT_CONFIG}"
       DESTINATION "${CONFIG_INSTALL_DIR}")
+endmacro()
+
+#.rst:
+# .. command:: INSTALL_JRL_CMAKEMODULES_FILE (filename)
+#
+#   install jrl-cmakemodules/$filename along CMake package exports
+#
+macro(INSTALL_JRL_CMAKEMODULES_FILE filename)
+  install(FILES "${filename}"
+      DESTINATION "${CONFIG_INSTALL_DIR}")
+  set(PACKAGE_EXTRA_MACROS "${PACKAGE_EXTRA_MACROS}\ninclude(\"\${CMAKE_CURRENT_LIST_DIR}/${filename}\")")
 endmacro()
