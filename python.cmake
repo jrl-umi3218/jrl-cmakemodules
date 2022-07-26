@@ -120,7 +120,7 @@ MACRO(FINDPYTHON)
       ENDIF()
 
       IF(NOT DEFINED Python_EXCUTABLE)
-        SET(Python_EXCUTABLE ${PYTHON_EXECUTABLE})
+        SET(Python_EXECUTABLE ${PYTHON_EXECUTABLE})
       ENDIF()
     ELSE()
       # Search for the default python of the system, if exists
