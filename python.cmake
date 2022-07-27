@@ -50,11 +50,10 @@
 
 # .rst: .. variable:: PYTHON_EXPORT_DEPENDENCY
 #
-# Define this to forward the final `find_package` to the exported CMake config.
-# This is mainly useful for PUBLIC links to Python::Targets, so this setting
-# change nothing for CMake < 3.12 which doesn't have those. This also export: -
-# PYTHON_SITELIB - PYTHON_SOABI - PYTHON_EXT_SUFFIX - PYTHON_EXECUTABLE
-# (dynamic) - Boost Python if `SEARCH_FOR_BOOST_PYTHON` is called
+# Define this to forward `FINDPYTHON` to the exported CMake config. This is
+# mainly useful for PUBLIC links to Python::Targets, so this setting change
+# nothing for CMake < 3.12 which doesn't have those. This also export: -
+# `FIND_NUMPY` and/or `SEARCH_FOR_BOOST_PYTHON` if necessary.
 
 if(CMAKE_VERSION VERSION_LESS "3.2")
   set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/python ${CMAKE_MODULE_PATH})
@@ -356,34 +355,6 @@ macro(FINDPYTHON)
   if(SEARCH_FOR_NUMPY)
     message(STATUS "NumPy include dir: ${NUMPY_INCLUDE_DIRS}")
     list(APPEND NUMPY_INCLUDE_DIRS)
-  endif()
-
-  # Export required variables
-  if(PYTHON_EXPORT_DEPENDENCY)
-    set(PACKAGE_EXTRA_MACROS
-        "${PACKAGE_EXTRA_MACROS}\nset(PYTHON_SITELIB ${PYTHON_SITELIB})")
-    set(PACKAGE_EXTRA_MACROS
-        "${PACKAGE_EXTRA_MACROS}\nset(PYTHON_SOABI ${PYTHON_SOABI})")
-    set(PACKAGE_EXTRA_MACROS
-        "${PACKAGE_EXTRA_MACROS}\nset(PYTHON_EXT_SUFFIX ${PYTHON_EXT_SUFFIX})")
-    set(PACKAGE_EXTRA_MACROS
-        "${PACKAGE_EXTRA_MACROS}\nif(NOT PYTHON_EXECUTABLE)")
-    set(PACKAGE_EXTRA_MACROS "${PACKAGE_EXTRA_MACROS}\n  if(Python_EXECUTABLE)")
-    set(PACKAGE_EXTRA_MACROS
-        "${PACKAGE_EXTRA_MACROS}\n    set(PYTHON_EXECUTABLE \${Python_EXECUTABLE})"
-    )
-    set(PACKAGE_EXTRA_MACROS
-        "${PACKAGE_EXTRA_MACROS}\n  elseif(Python3_EXECUTABLE)")
-    set(PACKAGE_EXTRA_MACROS
-        "${PACKAGE_EXTRA_MACROS}\n    set(PYTHON_EXECUTABLE \${Python3_EXECUTABLE})"
-    )
-    set(PACKAGE_EXTRA_MACROS
-        "${PACKAGE_EXTRA_MACROS}\n  elseif(Python2_EXECUTABLE)")
-    set(PACKAGE_EXTRA_MACROS
-        "${PACKAGE_EXTRA_MACROS}\n    set(PYTHON_EXECUTABLE \${Python2_EXECUTABLE})"
-    )
-    set(PACKAGE_EXTRA_MACROS "${PACKAGE_EXTRA_MACROS}\n  endif()")
-    set(PACKAGE_EXTRA_MACROS "${PACKAGE_EXTRA_MACROS}\nendif()")
   endif()
 
   # Log Python variables
