@@ -73,11 +73,6 @@ macro(FINDPYTHON)
   endif()
   set(FINDPYTHON_ALREADY_CALLED TRUE)
 
-  if(PYTHON_EXPORT_DEPENDENCY)
-    install_jrl_cmakemodules_file("python.cmake")
-    set(PYTHON_EXPORT_DEPENDENCY_MACROS "FINDPYTHON()")
-  endif()
-
   if(NOT PYTHON_COMPONENTS)
     set(PYTHON_COMPONENTS Interpreter Development)
   endif()
@@ -341,6 +336,13 @@ macro(FINDPYTHON)
     else()
       set(PYTHON_EXT_SUFFIX ".so")
     endif()
+  endif()
+
+  if(PYTHON_EXPORT_DEPENDENCY)
+    install_jrl_cmakemodules_file("python.cmake")
+    string(CONCAT PYTHON_EXPORT_DEPENDENCY_MACROS "if(NOT PYTHON_COMPONENTS)\n"
+                  "  set(PYTHON_COMPONENTS ${PYTHON_COMPONENTS})\n" "endif()\n"
+                  "FINDPYTHON()")
   endif()
 
   if(SEARCH_FOR_NUMPY)
