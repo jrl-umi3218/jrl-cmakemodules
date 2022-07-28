@@ -437,18 +437,16 @@ macro(DYNAMIC_GRAPH_PYTHON_MODULE SUBMODULENAME LIBRARYNAME TARGETNAME)
   )
 
   if(UNIX AND NOT APPLE)
-    target_link_libraries(${PYTHON_MODULE} ${PUBLIC_KEYWORD}
-                          "-Wl,--no-as-needed")
+    target_link_libraries(${PYTHON_MODULE} PUBLIC "-Wl,--no-as-needed")
   endif(UNIX AND NOT APPLE)
-  target_link_libraries(${PYTHON_MODULE} ${PUBLIC_KEYWORD} ${LIBRARYNAME}
-                        dynamic-graph::dynamic-graph)
-  target_link_boost_python(${PYTHON_MODULE} ${PUBLIC_KEYWORD})
+  target_link_libraries(${PYTHON_MODULE} PUBLIC ${LIBRARYNAME}
+                                                dynamic-graph::dynamic-graph)
+  target_link_boost_python(${PYTHON_MODULE} PUBLIC)
   if(PROJECT_NAME STREQUAL "dynamic-graph-python")
-    target_link_libraries(${PYTHON_MODULE} ${PUBLIC_KEYWORD}
-                          dynamic-graph-python)
+    target_link_libraries(${PYTHON_MODULE} PUBLIC dynamic-graph-python)
   else()
-    target_link_libraries(${PYTHON_MODULE} ${PUBLIC_KEYWORD}
-                          dynamic-graph-python::dynamic-graph-python)
+    target_link_libraries(${PYTHON_MODULE}
+                          PUBLIC dynamic-graph-python::dynamic-graph-python)
   endif()
 
   target_include_directories(${PYTHON_MODULE} SYSTEM
