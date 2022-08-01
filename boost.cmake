@@ -287,9 +287,10 @@ macro(TARGET_LINK_BOOST_PYTHON target)
     target_include_directories(${target} SYSTEM ${PUBLIC_KEYWORD}
                                ${Boost_INCLUDE_DIR})
   else(APPLE)
-    if(TARGET Boost::python3${Python3_VERSION_MINOR})
-      target_link_libraries(${target} ${PUBLIC_KEYWORD}
-                            Boost::python3${Python3_VERSION_MINOR})
+    if(TARGET Boost::python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR})
+      target_link_libraries(
+        ${target} ${PUBLIC_KEYWORD}
+        Boost::python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR})
     else()
       target_link_libraries(${target} ${PUBLIC_KEYWORD}
                             ${Boost_PYTHON_LIBRARIES})
