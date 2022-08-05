@@ -619,7 +619,7 @@ endmacro()
 
 macro(FIND_NUMPY)
   # Detect numpy.
-  message(STATUS "checking for numpy")
+  message(STATUS "Checking for NumPy")
   execute_process(
     COMMAND "${PYTHON_EXECUTABLE}" "-c" "import numpy; print (True)"
     OUTPUT_VARIABLE IS_NUMPY
