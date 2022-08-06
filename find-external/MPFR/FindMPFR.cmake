@@ -11,8 +11,8 @@
 
 # Copyright (c) 2006, 2007 Montel Laurent, <montel@kde.org> Copyright (c) 2008,
 # 2009 Gael Guennebaud, <g.gael@free.fr> Copyright (c) 2010 Jitse Niesen,
-# <jitse@maths.leeds.ac.uk> Redistribution and use is allowed according to the
-# terms of the BSD license.
+# <jitse@maths.leeds.ac.uk> Copyright (c) 2022 Justin Carpentier Redistribution
+# and use is allowed according to the terms of the BSD license.
 
 # Set MPFR_INCLUDES
 
