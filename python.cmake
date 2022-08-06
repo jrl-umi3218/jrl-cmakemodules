@@ -339,8 +339,9 @@ macro(FINDPYTHON)
 
   if(PYTHON_EXPORT_DEPENDENCY)
     install_jrl_cmakemodules_file("python.cmake")
-    string(CONCAT PYTHON_EXPORT_DEPENDENCY_MACROS "if(NOT PYTHON_COMPONENTS)\n"
-                  "  set(PYTHON_COMPONENTS ${PYTHON_COMPONENTS})\n" "endif()\n"
+    string(CONCAT PYTHON_EXPORT_DEPENDENCY_MACROS
+                  "list(APPEND PYTHON_COMPONENTS ${PYTHON_COMPONENTS})\n"
+                  "list(REMOVE_DUPLICATES PYTHON_COMPONENTS)\n"
                   "FINDPYTHON()")
   endif()
 
