@@ -346,10 +346,6 @@ macro(FINDPYTHON)
 
   if(SEARCH_FOR_NUMPY)
     find_numpy()
-    if(PYTHON_EXPORT_DEPENDENCY)
-      set(PYTHON_EXPORT_DEPENDENCY_MACROS
-          "${PYTHON_EXPORT_DEPENDENCY_MACROS}\nFIND_NUMPY()")
-    endif()
   endif()
 
   if(SEARCH_FOR_NUMPY)
