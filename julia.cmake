@@ -3,17 +3,12 @@
 # Test if package PKG_NAME is installed in Julia.
 #
 macro(JULIA_CHECK_PACKAGE PKG_NAME)
-  set(text
-      "try\n@eval import ${PKG_NAME}\nprintln(\"1\")\ncatch\nprintln(\"0\")\nend"
+  set(file_content
+      "try\n@eval import ${PKG_NAME}\nprintln(1)\ncatch\nprintln(0)\nend"
   )
-  file(WRITE ${PROJECT_SOURCE_DIR}/_tmp/test_julia_package.jl ${text})
+  file(WRITE ${PROJECT_SOURCE_DIR}/_tmp_cmake_julia/test_julia_package.jl ${file_content})
   execute_process(
-    COMMAND ${Julia_EXECUTABLE} ${PROJECT_SOURCE_DIR}/_tmp/test_julia_package.jl
-    OUTPUT_VARIABLE found_pkg)
-  if(found_pkg)
-    set(${PKG_NAME}_found 1)
-  else()
-    set(${PKG_NAME}_found 0)
-  endif()
-  file(REMOVE_RECURSE ${PROJECT_SOURCE_DIR}/_tmp/)
+    COMMAND ${Julia_EXECUTABLE} ${PROJECT_SOURCE_DIR}/_tmp_cmake_julia/test_julia_package.jl
+    OUTPUT_VARIABLE ${PKG_NAME}_found)
+  file(REMOVE_RECURSE ${PROJECT_SOURCE_DIR}/_tmp_cmake_julia/)
 endmacro(JULIA_CHECK_PACKAGE PKG_NAME)
