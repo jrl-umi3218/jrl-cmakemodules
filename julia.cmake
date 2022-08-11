@@ -1,10 +1,10 @@
 # .rst: .. command:: JULIA_CHECK_PACKAGE (PKG_NAME)
 #
-# Test if package PKG_NAME is installed in Julia. This will
-# define Julia_${PKG_NAME}_found.
+# Test if package PKG_NAME is installed in Julia. This will define
+# Julia_${PKG_NAME}_found.
 #
-# :param PKG_NAME: the package to check :param
-# :return Julia_${PKG_NAME}_found :return:
+# :param PKG_NAME: the package to check :param :return Julia_${PKG_NAME}_found
+# :return:
 macro(JULIA_CHECK_PACKAGE PKG_NAME)
   set(file_content
       "try\n@eval import ${PKG_NAME}\nprintln(1)\ncatch\nprintln(0)\nend")
