@@ -179,7 +179,6 @@ endmacro(
 # Add a test called `NAME` that runs an equivalent of ``julia ${SOURCE}``.
 #
 macro(ADD_JULIA_UNIT_TEST NAME SOURCE)
-  message(STATUS "${Julia_EXECUTABLE} ${PROJECT_SOURCE_DIR}/${SOURCE}")
   add_test(NAME ${NAME} COMMAND ${Julia_EXECUTABLE}
                                 "${PROJECT_SOURCE_DIR}/${SOURCE}")
 endmacro(
