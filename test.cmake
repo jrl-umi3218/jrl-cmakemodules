@@ -174,6 +174,18 @@ endmacro(
   NAME
   SOURCE)
 
+# .rst: .. command:: ADD_JULIA_UNIT_TEST (NAME SOURCE [MODULES...])
+#
+# Add a test called `NAME` that runs an equivalent of ``julia ${SOURCE}``.
+#
+macro(ADD_JULIA_UNIT_TEST NAME SOURCE)
+  add_test(NAME ${NAME} COMMAND ${Julia_EXECUTABLE}
+                                "${PROJECT_SOURCE_DIR}/${SOURCE}")
+endmacro(
+  ADD_JULIA_UNIT_TEST
+  NAME
+  SOURCE)
+
 # DEFINE_UNIT_TEST(NAME LIB)
 # ----------------------
 #
