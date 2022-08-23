@@ -281,3 +281,15 @@ macro(INSTALL_JRL_CMAKEMODULES_FILE filename)
       "${INCLUDE_INSTALLED_JRL_FILES}\ninclude(\"\${CMAKE_CURRENT_LIST_DIR}/${filename}\")"
   )
 endmacro()
+
+# .rst: .. command:: INSTALL_JRL_CMAKEMODULES_DIR (dirname)
+#
+# install jrl-cmakemodules/$dirname along CMake package exports
+#
+macro(INSTALL_JRL_CMAKEMODULES_DIR dirname)
+  install(DIRECTORY "${PROJECT_JRL_CMAKE_MODULE_DIR}/${dirname}"
+          DESTINATION "${CONFIG_INSTALL_DIR}")
+  set(INCLUDE_INSTALLED_JRL_FILES
+      "${INCLUDE_INSTALLED_JRL_FILES}\nset(CMAKE_MODULE_PATH \${CMAKE_CURRENT_LIST_DIR}/${dirname} \${CMAKE_MODULE_PATH})"
+  )
+endmacro()
