@@ -209,9 +209,12 @@ macro(SETUP_PROJECT_PACKAGE_FINALIZE)
     set(INCLUDE_TARGETS_FILE "# Package with no targets")
   endif()
 
+  set(INSTALL_FULL_INCLUDEDIR ${CMAKE_INSTALL_FULL_INCLUDEDIR})
   configure_package_config_file(
     "${PROJECT_JRL_CMAKE_MODULE_DIR}/Config.cmake.in" "${PROJECT_CONFIG}"
-    INSTALL_DESTINATION "${CONFIG_INSTALL_DIR}")
+    INSTALL_DESTINATION "${CONFIG_INSTALL_DIR}"
+    PATH_VARS INSTALL_FULL_INCLUDEDIR)
+  unset(INSTALL_FULL_INCLUDEDIR)
 
   # Config * <prefix>/lib/cmake/Foo/FooConfig.cmake *
   # <prefix>/lib/cmake/Foo/FooConfigVersion.cmake
