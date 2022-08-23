@@ -125,8 +125,11 @@ macro(SEARCH_FOR_BOOST_PYTHON)
   endif(NOT BOOST_PYTHON_FOUND)
 
   if(PYTHON_EXPORT_DEPENDENCY)
-    add_project_dependency(Boost ${BOOST_PYTHON_REQUIRED} COMPONENTS
-                           ${BOOST_PYTHON_NAME})
+    install_jrl_cmakemodules_dir("boost")
+    install_jrl_cmakemodules_file("boost.cmake")
+    set(PYTHON_EXPORT_DEPENDENCY_MACROS
+        "${PYTHON_EXPORT_DEPENDENCY_MACROS}\nSEARCH_FOR_BOOST_PYTHON(${BOOST_PYTHON_REQUIRED})"
+    )
   else()
     find_package(Boost ${BOOST_PYTHON_REQUIRED} COMPONENTS ${BOOST_PYTHON_NAME})
   endif()
