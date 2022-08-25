@@ -279,14 +279,15 @@ macro(TARGET_LINK_BOOST_PYTHON target)
     target_link_libraries(
       ${target} ${PUBLIC_KEYWORD}
       Boost::python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR})
-    
+
   else()
 
     if(APPLE)
       get_target_property(TARGET_TYPE ${target} TYPE)
 
       if(${TARGET_TYPE} MATCHES EXECUTABLE)
-        target_link_libraries(${target} ${PUBLIC_KEYWORD} ${Boost_PYTHON_LIBRARY})
+        target_link_libraries(${target} ${PUBLIC_KEYWORD}
+                              ${Boost_PYTHON_LIBRARY})
       else(${TARGET_TYPE} MATCHES EXECUTABLE)
         target_link_libraries(
           ${target} ${PUBLIC_KEYWORD}
@@ -294,13 +295,13 @@ macro(TARGET_LINK_BOOST_PYTHON target)
       endif(${TARGET_TYPE} MATCHES EXECUTABLE)
 
       target_include_directories(${target} SYSTEM ${PUBLIC_KEYWORD}
-                                ${Boost_INCLUDE_DIR})
+                                 ${Boost_INCLUDE_DIR})
     else(APPLE)
-      
+
       target_link_libraries(${target} ${PUBLIC_KEYWORD}
                             ${Boost_PYTHON_LIBRARIES})
       target_include_directories(${target} SYSTEM ${PUBLIC_KEYWORD}
-                                ${Boost_INCLUDE_DIR} ${PYTHON_INCLUDE_DIR})
+                                 ${Boost_INCLUDE_DIR} ${PYTHON_INCLUDE_DIR})
     endif(APPLE)
     list(APPEND LOGGING_WATCHED_VARIABLES Boost_PYTHON_LIBRARIES)
 
