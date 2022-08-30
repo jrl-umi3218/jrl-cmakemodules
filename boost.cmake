@@ -275,32 +275,37 @@ macro(TARGET_LINK_BOOST_PYTHON target)
     set(PUBLIC_KEYWORD ${ARGV1})
   endif()
 
-  if(APPLE)
-    get_target_property(TARGET_TYPE ${target} TYPE)
+  if(TARGET Boost::python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR})
+    target_link_libraries(
+      ${target} ${PUBLIC_KEYWORD}
+      Boost::python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR})
 
-    if(${TARGET_TYPE} MATCHES EXECUTABLE)
-      target_link_libraries(${target} ${PUBLIC_KEYWORD} ${Boost_PYTHON_LIBRARY})
-    else(${TARGET_TYPE} MATCHES EXECUTABLE)
-      target_link_libraries(
-        ${target} ${PUBLIC_KEYWORD}
-        -Wl,-undefined,dynamic_lookup,${Boost_PYTHON_LIBRARIES})
-    endif(${TARGET_TYPE} MATCHES EXECUTABLE)
+  else()
 
-    target_include_directories(${target} SYSTEM ${PUBLIC_KEYWORD}
-                               ${Boost_INCLUDE_DIR})
-  else(APPLE)
-    if(TARGET Boost::python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR})
-      target_link_libraries(
-        ${target} ${PUBLIC_KEYWORD}
-        Boost::python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR})
-    else()
+    if(APPLE)
+      get_target_property(TARGET_TYPE ${target} TYPE)
+
+      if(${TARGET_TYPE} MATCHES EXECUTABLE)
+        target_link_libraries(${target} ${PUBLIC_KEYWORD}
+                              ${Boost_PYTHON_LIBRARY})
+      else(${TARGET_TYPE} MATCHES EXECUTABLE)
+        target_link_libraries(
+          ${target} ${PUBLIC_KEYWORD}
+          -Wl,-undefined,dynamic_lookup,${Boost_PYTHON_LIBRARIES})
+      endif(${TARGET_TYPE} MATCHES EXECUTABLE)
+
+      target_include_directories(${target} SYSTEM ${PUBLIC_KEYWORD}
+                                 ${Boost_INCLUDE_DIR})
+    else(APPLE)
+
       target_link_libraries(${target} ${PUBLIC_KEYWORD}
                             ${Boost_PYTHON_LIBRARIES})
       target_include_directories(${target} SYSTEM ${PUBLIC_KEYWORD}
                                  ${Boost_INCLUDE_DIR} ${PYTHON_INCLUDE_DIR})
-    endif()
-  endif(APPLE)
-  list(APPEND LOGGING_WATCHED_VARIABLES Boost_PYTHON_LIBRARIES)
+    endif(APPLE)
+    list(APPEND LOGGING_WATCHED_VARIABLES Boost_PYTHON_LIBRARIES)
+
+  endif()
 endmacro(TARGET_LINK_BOOST_PYTHON)
 
 # .rst: .. command:: PKG_CONFIG_APPEND_BOOST_LIBS
