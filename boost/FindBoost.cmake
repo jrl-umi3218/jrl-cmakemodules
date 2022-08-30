@@ -844,7 +844,7 @@ function(_Boost_COMPONENT_DEPENDENCIES component _ret)
       set(_Boost_WSERIALIZATION_DEPENDENCIES serialization)
     endif()
     if(NOT Boost_VERSION VERSION_LESS 106900)
-      message(WARNING "New Boost version may have incorrect or missing dependencies and imported targets")
+      message(STATUS "New Boost version may have incorrect or missing dependencies and imported targets")
     endif()
   endif()
 
