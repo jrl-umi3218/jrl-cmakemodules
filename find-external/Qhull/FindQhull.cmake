@@ -1,4 +1,5 @@
 #.rst:
+# from https://github.com/PointCloudLibrary/pcl/blob/master/cmake/Modules/FindQhull.cmake, BSD licenced
 # FindQhull
 # --------
 #
@@ -48,12 +49,12 @@ if(Qhull_FOUND)
   unset(Qhull_FOUND)
   set(QHULL_FOUND ON)
   set(HAVE_QHULL ON)
-  
+
   message(STATUS "Found Qhull version ${Qhull_VERSION}")
-  
+
   # Create interface library that effectively becomes an alias for the appropriate (static/dynamic) imported QHULL target
   add_library(QHULL::QHULL INTERFACE IMPORTED)
-  
+
   if(TARGET Qhull::qhull_r AND TARGET Qhull::qhullstatic_r)
     if(PCL_QHULL_REQUIRED_TYPE MATCHES "SHARED")
       set_property(TARGET QHULL::QHULL APPEND PROPERTY INTERFACE_LINK_LIBRARIES Qhull::qhull_r)
@@ -75,9 +76,9 @@ if(Qhull_FOUND)
     set(QHULL_LIBRARY_TYPE STATIC)
   else()
     set_property(TARGET QHULL::QHULL APPEND PROPERTY INTERFACE_LINK_LIBRARIES Qhull::qhull_r)
-    set(QHULL_LIBRARY_TYPE SHARED)  
+    set(QHULL_LIBRARY_TYPE SHARED)
   endif()
-  
+
   return()
 endif()
 
