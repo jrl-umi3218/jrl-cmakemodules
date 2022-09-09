@@ -88,7 +88,31 @@ macro(RELEASE_SETUP)
          "release: Update package.xml version to $$VERSION"
          &&
          echo
-         "Updated package.xml and committed") ; fi && ${GIT} tag -s v$$VERSION
+         "Updated package.xml and committed") ; fi
+        # Update version in pyproject.toml if it exists
+        && if [ -f "pyproject.toml" ]; then
+        (echo
+         "Updating pyproject.toml to $$VERSION"
+         &&
+         sed
+         -i.back
+         \'s|version = \".*\"|version = \"$$VERSION\"|g\'
+         pyproject.toml
+         &&
+         rm
+         pyproject.toml.back
+         &&
+         ${GIT}
+         add
+         pyproject.toml
+         &&
+         ${GIT}
+         commit
+         -m
+         "release: Update pyproject.toml version to $$VERSION"
+         &&
+         echo
+         "Updated pyproject.toml and committed") ; fi && ${GIT} tag -s v$$VERSION
         -m "Release of version $$VERSION." && cd ${CMAKE_BINARY_DIR} && cmake
         ${PROJECT_SOURCE_DIR} && make distcheck || (
                                                    echo
