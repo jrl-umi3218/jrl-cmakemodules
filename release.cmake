@@ -94,13 +94,7 @@ macro(RELEASE_SETUP)
         (echo
          "Updating pyproject.toml to $$VERSION"
          &&
-         sed
-         -i.back
-         \'s|version = \".*\"|version = \"$$VERSION\"|g\'
-         pyproject.toml
-         &&
-         rm
-         pyproject.toml.back
+         ${PYTHON_EXECUTABLE} ${PROJECT_JRL_CMAKE_MODULE_DIR}/pyproject.py $$VERSION
          &&
          ${GIT}
          add
