@@ -5,7 +5,8 @@ try:
     import tomlkit
 except ImportError as e:
     print(
-        "tomlkit not found. Please make sure to install the package. If it is already installed, make sure that it is included in the search path."
+        "tomlkit not found. Please make sure to install the package.\n"
+        "If it is already installed, make sure that it is included in the search path."
     )
     raise e
 
