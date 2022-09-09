@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 import sys
+
 try:
     import tomlkit
 except ImportError as e:
-    print('tomlkit not found. Please make sure to install the package. If it is already installed, make sure that it is included in the search path.')
+    print(
+        "tomlkit not found. Please make sure to install the package. If it is already installed, make sure that it is included in the search path."
+    )
     raise e
 
 

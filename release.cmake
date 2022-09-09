@@ -94,7 +94,9 @@ macro(RELEASE_SETUP)
         (echo
          "Updating pyproject.toml to $$VERSION"
          &&
-         ${PYTHON_EXECUTABLE} ${PROJECT_JRL_CMAKE_MODULE_DIR}/pyproject.py $$VERSION
+         ${PYTHON_EXECUTABLE}
+         ${PROJECT_JRL_CMAKE_MODULE_DIR}/pyproject.py
+         $$VERSION
          &&
          ${GIT}
          add
@@ -106,28 +108,27 @@ macro(RELEASE_SETUP)
          "release: Update pyproject.toml version to $$VERSION"
          &&
          echo
-         "Updated pyproject.toml and committed") ; fi && ${GIT} tag -s v$$VERSION
-        -m "Release of version $$VERSION." && cd ${CMAKE_BINARY_DIR} && cmake
-        ${PROJECT_SOURCE_DIR} && make distcheck || (
-                                                   echo
-                                                   "Please fix distcheck first."
-                                                   &&
-                                                   cd
-                                                   ${PROJECT_SOURCE_DIR}
-                                                   &&
-                                                   ${GIT}
-                                                   tag
-                                                   -d
-                                                   v$$VERSION
-                                                   &&
-                                                   cd
-                                                   ${CMAKE_BINARY_DIR}
-                                                   &&
-                                                   cmake
-                                                   ${PROJECT_SOURCE_DIR}
-                                                   &&
-                                                   false) && make dist && make
-        distclean && echo
+         "Updated pyproject.toml and committed") ; fi && ${GIT} tag -s
+        v$$VERSION -m "Release of version $$VERSION." && cd ${CMAKE_BINARY_DIR}
+        && cmake ${PROJECT_SOURCE_DIR} && make distcheck ||
+        (echo
+         "Please fix distcheck first."
+         &&
+         cd
+         ${PROJECT_SOURCE_DIR}
+         &&
+         ${GIT}
+         tag
+         -d
+         v$$VERSION
+         &&
+         cd
+         ${CMAKE_BINARY_DIR}
+         &&
+         cmake
+         ${PROJECT_SOURCE_DIR}
+         &&
+         false) && make dist && make distclean && echo
         "Please, run 'git push --tags' and upload the tarball to github to finalize this release."
     )
   endif()
