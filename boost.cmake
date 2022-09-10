@@ -104,8 +104,8 @@ macro(SEARCH_FOR_BOOST_PYTHON)
 
   # Test: pythonX, pythonXY and python-pyXY
   set(BOOST_PYTHON_COMPONENT_LIST
-      "python${PYTHON_VERSION_MAJOR}"
       "python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}"
+      "python${PYTHON_VERSION_MAJOR}"
       "python-py${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}")
 
   set(BOOST_PYTHON_FOUND FALSE)
