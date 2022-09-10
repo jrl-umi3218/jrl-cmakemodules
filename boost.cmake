@@ -89,8 +89,8 @@ macro(SEARCH_FOR_BOOST_PYTHON)
   set(options REQUIRED)
   set(oneValueArgs NAME)
   set(multiValueArgs)
-  cmake_parse_arguments(SEARCH_FOR_BOOST_PYTHON_ARGS "${options}" "${oneValueArgs}"
-                          "${multiValueArgs}" ${ARGN} )
+  cmake_parse_arguments(SEARCH_FOR_BOOST_PYTHON_ARGS "${options}"
+                        "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
   cmake_parse_arguments(_BOOST_PYTHON_REQUIRED "REQUIRED" "" "" ${ARGN})
   set(BOOST_PYTHON_NAME "python")
   set(BOOST_PYTHON_REQUIRED "")
@@ -128,10 +128,11 @@ macro(SEARCH_FOR_BOOST_PYTHON)
     # "python"
     if(NOT BOOST_PYTHON_FOUND)
       message(
-        WARNING "Impossible to check Boost.Python version. Trying with 'python'.")
+        WARNING
+          "Impossible to check Boost.Python version. Trying with 'python'.")
     endif(NOT BOOST_PYTHON_FOUND)
 
-   endif()
+  endif()
 
   if(PYTHON_EXPORT_DEPENDENCY)
     install_jrl_cmakemodules_dir("boost")
