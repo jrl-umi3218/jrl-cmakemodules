@@ -86,12 +86,17 @@ endmacro(EXPORT_BOOST_DEFAULT_OPTIONS)
 
 macro(SEARCH_FOR_BOOST_PYTHON)
 
+  set(options REQUIRED)
+  set(oneValueArgs NAME)
+  set(multiValueArgs)
+  cmake_parse_arguments(SEARCH_FOR_BOOST_PYTHON_ARGS "${options}"
+                        "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
   cmake_parse_arguments(_BOOST_PYTHON_REQUIRED "REQUIRED" "" "" ${ARGN})
   set(BOOST_PYTHON_NAME "python")
   set(BOOST_PYTHON_REQUIRED "")
-  if(_BOOST_PYTHON_REQUIRED)
+  if(SEARCH_FOR_BOOST_PYTHON_ARGS_REQUIRED)
     set(BOOST_PYTHON_REQUIRED REQUIRED)
-  endif(_BOOST_PYTHON_REQUIRED)
+  endif(SEARCH_FOR_BOOST_PYTHON_ARGS_REQUIRED)
 
   set_boost_default_options()
 
@@ -102,33 +107,38 @@ macro(SEARCH_FOR_BOOST_PYTHON)
     )
   endif(NOT PYTHON_EXECUTABLE)
 
-  # Test: pythonX, pythonXY and python-pyXY
-  set(BOOST_PYTHON_COMPONENT_LIST
-      "python${PYTHON_VERSION_MAJOR}"
-      "python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}"
-      "python-py${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}")
+  if(SEARCH_FOR_BOOST_PYTHON_ARGS_NAME)
+    set(BOOST_PYTHON_NAME ${SEARCH_FOR_BOOST_PYTHON_ARGS_NAME})
+  else()
+    # Test: pythonX, pythonXY and python-pyXY
+    set(BOOST_PYTHON_COMPONENT_LIST
+        "python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}"
+        "python${PYTHON_VERSION_MAJOR}"
+        "python-py${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}")
+    set(BOOST_PYTHON_FOUND FALSE)
+    foreach(BOOST_PYTHON_COMPONENT ${BOOST_PYTHON_COMPONENT_LIST})
+      search_for_boost_component(${BOOST_PYTHON_COMPONENT} BOOST_PYTHON_FOUND)
+      if(BOOST_PYTHON_FOUND)
+        set(BOOST_PYTHON_NAME ${BOOST_PYTHON_COMPONENT})
+        break()
+      endif(BOOST_PYTHON_FOUND)
+    endforeach(BOOST_PYTHON_COMPONENT ${BOOST_PYTHON_COMPONENT_LIST})
 
-  set(BOOST_PYTHON_FOUND FALSE)
-  foreach(BOOST_PYTHON_COMPONENT ${BOOST_PYTHON_COMPONENT_LIST})
-    search_for_boost_component(${BOOST_PYTHON_COMPONENT} BOOST_PYTHON_FOUND)
-    if(BOOST_PYTHON_FOUND)
-      set(BOOST_PYTHON_NAME ${BOOST_PYTHON_COMPONENT})
-      break()
-    endif(BOOST_PYTHON_FOUND)
-  endforeach(BOOST_PYTHON_COMPONENT ${BOOST_PYTHON_COMPONENT_LIST})
+    # If boost-python has not been found, warn the user, and look for just
+    # "python"
+    if(NOT BOOST_PYTHON_FOUND)
+      message(
+        WARNING
+          "Impossible to check Boost.Python version. Trying with 'python'.")
+    endif(NOT BOOST_PYTHON_FOUND)
 
-  # If boost-python has not been found, warn the user, and look for just
-  # "python"
-  if(NOT BOOST_PYTHON_FOUND)
-    message(
-      WARNING "Impossible to check Boost.Python version. Trying with 'python'.")
-  endif(NOT BOOST_PYTHON_FOUND)
+  endif()
 
   if(PYTHON_EXPORT_DEPENDENCY)
     install_jrl_cmakemodules_dir("boost")
     install_jrl_cmakemodules_file("boost.cmake")
     set(PYTHON_EXPORT_DEPENDENCY_MACROS
-        "${PYTHON_EXPORT_DEPENDENCY_MACROS}\nSEARCH_FOR_BOOST_PYTHON(${BOOST_PYTHON_REQUIRED})"
+        "${PYTHON_EXPORT_DEPENDENCY_MACROS}\nSEARCH_FOR_BOOST_PYTHON(${BOOST_PYTHON_REQUIRED} NAME ${BOOST_PYTHON_NAME})"
     )
   endif()
   find_package(Boost ${BOOST_PYTHON_REQUIRED} COMPONENTS ${BOOST_PYTHON_NAME})
