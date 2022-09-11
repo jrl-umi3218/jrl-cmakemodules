@@ -16,7 +16,7 @@
 # This files comes from the CMake FAQ: http://www.cmake.org/Wiki/CMake_FAQ
 cmake_policy(SET CMP0007 NEW)
 IF(NOT EXISTS "@CMAKE_CURRENT_BINARY_DIR@/install_manifest.txt")
-  MESSAGE(FATAL_ERROR "Cannot find install manifest:\"@CMAKE_CURRENT_BINARY_DIR@/install_manifest.txt\"")
+  RETURN()
 ENDIF(NOT EXISTS "@CMAKE_CURRENT_BINARY_DIR@/install_manifest.txt")
 
 MESSAGE(STATUS "catkin path: @CMAKE_INSTALL_PREFIX@/.catkin")
@@ -30,7 +30,9 @@ IF(EXISTS "@CMAKE_INSTALL_PREFIX@/.catkin")
        )
 ENDIF(EXISTS "@CMAKE_INSTALL_PREFIX@/.catkin")
 
-
+IF(EXISTS "@CMAKE_CURRRENT_BINARY_DIR@/install_manifest.txt")
+  return()
+ENDIF()
 FILE(READ "@CMAKE_CURRENT_BINARY_DIR@/install_manifest.txt" files)
 STRING(REGEX REPLACE "\n" ";" files "${files}")
 LIST(REMOVE_ITEM files "")
