@@ -72,6 +72,21 @@
 # Allows to define a custom extension for C/C++ header files (e.g. .h, .hh,
 # .hpp). The default value is set to .hh.
 #
+# .. variable: PROJECT_GENERATED_HEADERS_SKIP_DEPRECATED
+#
+# If true, does not generate the
+# ``deprecated.${PROJECT_CUSTOM_HEADER_EXTENSION}`` file. Defaults to false
+#
+# .. variable: PROJECT_GENERATED_HEADERS_SKIP_CONFIG
+#
+# If true, does not generate the ``config.${PROJECT_CUSTOM_HEADER_EXTENSION}``
+# file. Defaults to false
+#
+# .. variable: PROJECT_GENERATED_HEADERS_SKIP_WARNING
+#
+# If true, does not generate the ``warning.${PROJECT_CUSTOM_HEADER_EXTENSION}``
+# file. Defaults to false
+#
 # .. variable:: PROJECT_USE_CMAKE_EXPORT
 #
 # This tells jrl-cmakemodules that you are using export functionalities so it
