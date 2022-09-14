@@ -60,9 +60,32 @@
 # If set to true, the jrl-cmakemodules will use the PUBLIC keyword in
 # ``target_link_libraries``. Defaults to false.
 #
-# .. variable: PROJECT_CUSTOM_HEADER_EXTENSION Allows to define a custome
-# extension for C/C++ header files (e.g. .h, .hh, .hpp). The default value is
-# set to .hh.
+# .. variable: PROJECT_CUSTOM_HEADER_DIR
+#
+# Allows to define a custom directory for the installation of C/C++ header
+# files. The default value is derived from ``${PROJECT_NAME}`` where non
+# alpha-numeric characters are replaced with a ``/``, creating a folder
+# hierarchy.
+#
+# .. variable: PROJECT_CUSTOM_HEADER_EXTENSION
+#
+# Allows to define a custom extension for C/C++ header files (e.g. .h, .hh,
+# .hpp). The default value is set to .hh.
+#
+# .. variable: PROJECT_GENERATED_HEADERS_SKIP_DEPRECATED
+#
+# If true, does not generate the
+# ``deprecated.${PROJECT_CUSTOM_HEADER_EXTENSION}`` file. Defaults to false
+#
+# .. variable: PROJECT_GENERATED_HEADERS_SKIP_CONFIG
+#
+# If true, does not generate the ``config.${PROJECT_CUSTOM_HEADER_EXTENSION}``
+# file. Defaults to false
+#
+# .. variable: PROJECT_GENERATED_HEADERS_SKIP_WARNING
+#
+# If true, does not generate the ``warning.${PROJECT_CUSTOM_HEADER_EXTENSION}``
+# file. Defaults to false
 #
 # .. variable:: PROJECT_USE_CMAKE_EXPORT
 #
