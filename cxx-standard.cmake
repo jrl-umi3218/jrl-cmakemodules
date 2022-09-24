@@ -132,7 +132,7 @@ macro(CHECK_MINIMAL_CXX_STANDARD STANDARD)
         if(ENFORCE_MINIMAL_CXX_STANDARD OR MINIMAL_CXX_STANDARD_ENFORCE)
           set(CMAKE_CXX_STANDARD ${_MINIMAL_CXX_STANDARD})
           message(
-            AUTHOR_WARNING
+            STATUS
               "CMAKE_CXX_STANDARD automatically upgraded from ${_CURRENT_STANDARD} to ${CMAKE_CXX_STANDARD}"
           )
         else()
