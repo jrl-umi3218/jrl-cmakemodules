@@ -58,47 +58,23 @@ macro(RELEASE_SETUP)
     endif(APPLE)
 
     add_custom_target(
-      release
+      release_package_xml
+      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
       COMMAND
-        export LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH} && export
-        ${LD_LIBRARY_PATH_VARIABLE_NAME}=$ENV{${LD_LIBRARY_PATH_VARIABLE_NAME}}
-        && export PYTHONPATH=$ENV{PYTHONPATH} && ! test x$$VERSION = x ||
-        (echo "Please set a version for this release" && false) && cd
-        ${PROJECT_SOURCE_DIR}
-        # Update version in package.xml if it exists
-        && if [ -f "package.xml" ]; then
-        (echo
-         "Updating package.xml to $$VERSION"
-         &&
-         sed
-         -i.back
-         \"s|<version>.*</version>|<version>$$VERSION</version>|g\"
-         package.xml
-         &&
-         rm
-         package.xml.back
-         &&
-         ${GIT}
-         add
-         package.xml
-         &&
-         ${GIT}
-         commit
-         -m
-         "release: Update package.xml version to $$VERSION"
-         &&
-         echo
-         "Updated package.xml and committed") ; fi
-        # Update version in pyproject.toml if it exists
-        && if [ -f "pyproject.toml" ]; then
-        (echo
-         "Updating pyproject.toml to $$VERSION"
-         &&
-         ${PYTHON_EXECUTABLE}
-         ${PROJECT_JRL_CMAKE_MODULE_DIR}/pyproject.py
-         $$VERSION
-         &&
-         ${GIT}
+        echo "Updating package.xml to $$VERSION" && sed -i.back
+        \"s|<version>.*</version>|<version>$$VERSION</version>|g\" package.xml
+        && rm package.xml.back && ${GIT} add package.xml && ${GIT} commit -m
+        "release: Update package.xml version to $$VERSION" && echo
+        "Updated package.xml and committed")
+
+    add_custom_target(
+      release_pyproject_toml
+      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+      COMMAND
+        echo "Updating pyproject.toml to $$VERSION" && ${PYTHON_EXECUTABLE}
+        ${PROJECT_JRL_CMAKE_MODULE_DIR}/pyproject.py $$VERSION && if !
+        (git diff --quiet pyproject.toml) ; then
+        (${GIT}
          add
          pyproject.toml
          &&
@@ -108,9 +84,25 @@ macro(RELEASE_SETUP)
          "release: Update pyproject.toml version to $$VERSION"
          &&
          echo
-         "Updated pyproject.toml and committed") ; fi && ${GIT} tag -s
-        v$$VERSION -m "Release of version $$VERSION." && cd ${CMAKE_BINARY_DIR}
-        && cmake ${PROJECT_SOURCE_DIR} && make distcheck ||
+         "Updated pyproject.toml and committed") ; fi)
+
+    add_custom_target(
+      release
+      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+      COMMAND
+        export LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH} && export
+        ${LD_LIBRARY_PATH_VARIABLE_NAME}=$ENV{${LD_LIBRARY_PATH_VARIABLE_NAME}}
+        && export PYTHONPATH=$ENV{PYTHONPATH} && ! test x$$VERSION = x ||
+        (echo "Please set a version for this release" && false) # Update version
+                                                                # in package.xml
+                                                                # if it exists
+        && if [ -f "package.xml" ]; then (make -C ${CMAKE_BINARY_DIR}
+                                          release_package_xml) ; fi
+        # Update version in pyproject.toml if it exists
+        && if [ -f "pyproject.toml" ]; then (make -C ${CMAKE_BINARY_DIR}
+                                             release_pyproject_toml) ; fi &&
+        ${GIT} tag -s v$$VERSION -m "Release of version $$VERSION." && cd
+        ${CMAKE_BINARY_DIR} && cmake ${PROJECT_SOURCE_DIR} && make distcheck ||
         (echo
          "Please fix distcheck first."
          &&
