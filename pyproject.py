@@ -14,6 +14,9 @@ except ImportError as e:
 def update_pyproject_version(version):
     with open("pyproject.toml") as f:
         doc = tomlkit.load(f)
+    if "project" not in doc or "version" not in doc["project"]:
+        print("pyproject.toml doesn't contain project / version")
+        return
     doc["project"]["version"] = version
     with open("pyproject.toml", "w") as f:
         tomlkit.dump(doc, f)
