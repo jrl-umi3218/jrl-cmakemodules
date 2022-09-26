@@ -40,7 +40,9 @@
 # endif // __cplusplus
 
 # if defined(__GNUC__) || defined(__clang__)
-#  define @PACKAGE_CPPNAME@_PRAGMA(X) _Pragma(#X)
+#  ifndef @PACKAGE_CPPNAME@_PRAGMA
+#   define @PACKAGE_CPPNAME@_PRAGMA(X) _Pragma(#X)
+#  endif
 #  define @PACKAGE_CPPNAME@_DEPRECATED_HEADER(MSG) @PACKAGE_CPPNAME@_PRAGMA(GCC warning MSG)
 # elif defined(_MSC_VER) && !defined(__INTEL_COMPILER)
 #  define @PACKAGE_CPPNAME@_STRINGIZE_(MSG) #MSG
