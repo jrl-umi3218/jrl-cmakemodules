@@ -112,7 +112,7 @@ class CommentToConstVisitor(idlvisitor.AstVisitor):
             elif isinstance(parent, idlast.AST):
                 parent._AST__declarations.append(const)
             else:
-                print("Doc ignored: " + comment.text())
+                print("%s:%s: warning: doc ignored" % (node.file(), node.line()))
 
     def visitAST(self, node):
         for n in node.declarations():
