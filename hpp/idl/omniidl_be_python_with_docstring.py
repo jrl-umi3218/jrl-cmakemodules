@@ -24,7 +24,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-from omniidl_be.python import comment, output_inline
+from omniidl_be.python import output_inline
 from omniidl_be.python import run as run_parent
 from omniidl import idlvisitor, idlast, idltype
 
