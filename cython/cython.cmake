@@ -33,8 +33,6 @@ option(PYTHON_BINDING_BUILD_PYTHON2_AND_PYTHON3
 if(${PYTHON_BINDING_FORCE_PYTHON2} AND ${PYTHON_BINDING_FORCE_PYTHON3})
   message(FATAL_ERROR "Cannot enforce Python 2 and Python 3 at the same time")
 endif()
-option(PYTHON_BINDING_USE_PYTEST "Use pytest as a test driver" OFF)
-mark_as_advanced(FORCE PYTHON_BINDING_USE_PYTEST)
 set(CYTHON_SETUP_IN_PY_LOCATION "${CMAKE_CURRENT_LIST_DIR}/setup.in.py")
 set(CYTHON_DUMMY_CPP_LOCATION "${CMAKE_CURRENT_LIST_DIR}/dummy.cpp")
 set(PYTHON_EXTRA_CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/python")
@@ -184,19 +182,12 @@ macro(
       endif()
     endforeach()
     if(${WITH_TESTS})
-      if(PYTHON_BINDING_USE_PYTEST)
-        set(PYTHON_BINDING_TEST_COMMAND -m pytest)
-      else()
-        set(PYTHON_BINDING_TEST_COMMAND
-            -c "import nose, sys$<SEMICOLON> sys.exit(not nose.run())")
-      endif()
       add_test(
         NAME test-${TARGET_NAME}
         COMMAND
           ${CMAKE_COMMAND} -E env "${ENV_VAR}=${EXTRA_LD_PATH}$ENV{${ENV_VAR}}"
           ${CMAKE_COMMAND} -E env "PYTHONPATH=.${PATH_SEP}$ENV{PYTHONPATH}"
-          ${CMAKE_COMMAND} -E chdir "${SETUP_LOCATION}" ${PYTHON}
-          ${PYTHON_BINDING_TEST_COMMAND})
+          ${CMAKE_COMMAND} -E chdir "${SETUP_LOCATION}" ${PYTHON} -m pytest)
     endif()
   endif()
   # Install targets
