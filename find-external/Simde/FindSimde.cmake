@@ -19,7 +19,8 @@ else()
   find_package_handle_standard_args(
     Simde
     FOUND_VAR Simde_FOUND
-    REQUIRED_VARS Simde_INCLUDE_DIR REASON_FAILURE_MESSAGE ${SIMDE_HINT_FAILURE})
+    REQUIRED_VARS Simde_INCLUDE_DIR REASON_FAILURE_MESSAGE
+                  ${SIMDE_HINT_FAILURE})
 endif()
 
 if(Simde_FOUND)
