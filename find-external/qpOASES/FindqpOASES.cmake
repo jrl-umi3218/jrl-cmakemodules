@@ -28,7 +28,7 @@ find_path(
   PATHS ${qpOASES_PREFIX} ${qpOASES_PREFIX}/include)
 find_library(
   qpOASES_LIBRARY
-  NAMES libqpOASES.so
+  NAMES qpOASES
   PATHS ${qpOASES_PREFIX} ${qpOASES_PREFIX}/lib)
 
 set(qpOASES_LIBRARIES ${qpOASES_LIBRARY})
