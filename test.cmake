@@ -159,8 +159,8 @@ macro(ADD_PYTHON_UNIT_TEST NAME SOURCE)
     OUTPUT_STRIP_TRAILING_WHITESPACE)
 
   if(WIN32)
-    # ensure that severals paths stay together as ENV variable PYTHONPATH
-    # when passed to python test via PROPERTIES
+    # ensure that severals paths stay together as ENV variable PYTHONPATH when
+    # passed to python test via PROPERTIES
     string(REPLACE ";" "\;" PYTHONPATH_STR "${PYTHONPATH}")
   else(WIN32)
     string(REPLACE ";" "${PATHSEP}" PYTHONPATH_STR "${PYTHONPATH}")
