@@ -142,7 +142,7 @@ macro(ADD_PYTHON_UNIT_TEST NAME SOURCE)
 
   set(MODULES "${ARGN}") # ARGN is not a variable
   foreach(MODULE_PATH IN LISTS MODULES)
-    cmake_path(APPEND PYTHONPATH "${CMAKE_BINARY_DIR}/${MODULE_PATH}")
+    list(APPEND PYTHONPATH "${CMAKE_BINARY_DIR}/${MODULE_PATH}")
     if(CMAKE_GENERATOR MATCHES "Visual Studio")
       list(APPEND PYTHONPATH "${CMAKE_BINARY_DIR}/${MODULE_PATH}/$<CONFIG>")
     endif(CMAKE_GENERATOR MATCHES "Visual Studio")
@@ -159,7 +159,9 @@ macro(ADD_PYTHON_UNIT_TEST NAME SOURCE)
     OUTPUT_STRIP_TRAILING_WHITESPACE)
 
   if(WIN32)
-    string(REPLACE ";" ":" PYTHONPATH_STR "${PYTHONPATH}")
+    # ensure that severals paths stay together as ENV variable PYTHONPATH
+    # when passed to python test via PROPERTIES
+    string(REPLACE ";" "\;" PYTHONPATH_STR "${PYTHONPATH}")
   else(WIN32)
     string(REPLACE ";" "${PATHSEP}" PYTHONPATH_STR "${PYTHONPATH}")
   endif(WIN32)
