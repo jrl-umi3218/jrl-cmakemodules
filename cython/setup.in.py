@@ -177,7 +177,7 @@ package_data = {
 
 setup(
     name="@CYTHON_BINDINGS_PACKAGE_NAME@",
-    version="@CYTHON_BINDINGS_VERSION@-{}".format(version_hash),
+    version="@CYTHON_BINDINGS_VERSION@+{}".format(version_hash),
     ext_modules=extensions,
     packages=packages,
     package_data=package_data,
