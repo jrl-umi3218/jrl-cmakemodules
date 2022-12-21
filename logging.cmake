@@ -24,6 +24,7 @@
 
 # Logging file.
 set(JRL_CMAKEMODULE_LOGGING_FILENAME "${CMAKE_CURRENT_BINARY_DIR}/config.log")
+set(JRL_CMAKEMODULE_LOGGING_FILENAME ${JRL_CMAKEMODULE_LOGGING_FILENAME} PARENT_SCOPE)
 
 # Watched variables list. All watched variables final value will be displayed in
 # the logging file.
