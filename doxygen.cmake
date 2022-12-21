@@ -494,6 +494,18 @@ macro(_SETUP_PROJECT_DOCUMENTATION)
     message(
       WARNING "Failed to find Doxygen, documentation will not be generated.")
   else(NOT DOXYGEN_FOUND)
+    get_directory_property(has_parent_scope PARENT_DIRECTORY)
+    set(JRL_CMAKEMODULE_DOXYFILE_PATH "${PROJECT_BINARY_DIR}/doc/Doxyfile")
+    if(has_parent_scope)
+      set(DOXYGEN_FOUND
+          ${DOXYGEN_FOUND}
+          PARENT_SCOPE)
+      set(JRL_CMAKEMODULE_DOXYFILE_PATH
+          ${JRL_CMAKEMODULE_DOXYFILE_PATH}
+          PARENT_SCOPE)
+    endif(has_parent_scope)
+    unset(has_parent_scope)
+
     _setup_doxygen_default_options()
     # Generate variable to be substitued in Doxyfile.in for dot use.
     if(DOXYGEN_DOT_FOUND)
@@ -506,13 +518,13 @@ macro(_SETUP_PROJECT_DOCUMENTATION)
       # install, so put the target in ALL instead.
       add_custom_target(
         doc ALL
-        COMMAND ${DOXYGEN_EXECUTABLE} "${PROJECT_BINARY_DIR}/doc/Doxyfile"
+        COMMAND ${DOXYGEN_EXECUTABLE} ${JRL_CMAKEMODULE_DOXYFILE_PATH}
         WORKING_DIRECTORY doc
         COMMENT "Generating Doxygen documentation")
     else(MSVC)
       add_custom_target(
         doc
-        COMMAND ${DOXYGEN_EXECUTABLE} "${PROJECT_BINARY_DIR}/doc/Doxyfile"
+        COMMAND ${DOXYGEN_EXECUTABLE} ${JRL_CMAKEMODULE_DOXYFILE_PATH}
         WORKING_DIRECTORY doc
         COMMENT "Generating Doxygen documentation")
 
@@ -548,7 +560,7 @@ macro(_SETUP_PROJECT_DOCUMENTATION)
     add_custom_command(
       OUTPUT ${PROJECT_BINARY_DIR}/doc/${PROJECT_NAME}.doxytag
              ${PROJECT_BINARY_DIR}/doc/doxygen-html
-      COMMAND ${DOXYGEN_EXECUTABLE} Doxyfile
+      COMMAND ${DOXYGEN_EXECUTABLE} ${JRL_CMAKEMODULE_DOXYFILE_PATH}
       WORKING_DIRECTORY doc
       COMMENT "Generating Doxygen documentation")
 
@@ -700,17 +712,17 @@ macro(_SETUP_PROJECT_DOCUMENTATION_FINALIZE)
       configure_file(${PROJECT_SOURCE_DIR}/doc/Doxyfile.extra.in
                      ${PROJECT_BINARY_DIR}/doc/Doxyfile.extra @ONLY)
       # Generate Doxyfile.
-      _setup_doxygen_config_file("${PROJECT_BINARY_DIR}/doc/Doxyfile")
+      _setup_doxygen_config_file(${JRL_CMAKEMODULE_DOXYFILE_PATH})
       file(STRINGS ${PROJECT_BINARY_DIR}/doc/Doxyfile.extra doxyfile_extra)
       foreach(x ${doxyfile_extra})
-        file(APPEND ${PROJECT_BINARY_DIR}/doc/Doxyfile ${x} "\n")
+        file(APPEND ${JRL_CMAKEMODULE_DOXYFILE_PATH} ${x} "\n")
       endforeach(x in doxyfile_extra)
     else()
       # This is kept for bacward compatibility. It was the only thing left in
       # doxygen/Doxyfile.extra.in
       set(DOXYGEN_IMAGE_PATH "${PROJECT_SOURCE_DIR}/doc/pictures")
       # Generate Doxyfile.
-      _setup_doxygen_config_file("${PROJECT_BINARY_DIR}/doc/Doxyfile")
+      _setup_doxygen_config_file(${JRL_CMAKEMODULE_DOXYFILE_PATH})
     endif()
   endif(DOXYGEN_FOUND)
 endmacro(_SETUP_PROJECT_DOCUMENTATION_FINALIZE)
