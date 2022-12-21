@@ -23,7 +23,7 @@
 #
 
 # Logging file.
-set(LOGGING_FILENAME "${CMAKE_BINARY_DIR}/config.log")
+set(LOGGING_FILENAME "${CMAKE_CURRENT_BINARY_DIR}/config.log")
 
 # Watched variables list. All watched variables final value will be displayed in
 # the logging file.
