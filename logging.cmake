@@ -24,7 +24,9 @@
 
 # Logging file.
 set(JRL_CMAKEMODULE_LOGGING_FILENAME "${CMAKE_CURRENT_BINARY_DIR}/config.log")
-set(JRL_CMAKEMODULE_LOGGING_FILENAME ${JRL_CMAKEMODULE_LOGGING_FILENAME} PARENT_SCOPE)
+set(JRL_CMAKEMODULE_LOGGING_FILENAME
+    ${JRL_CMAKEMODULE_LOGGING_FILENAME}
+    PARENT_SCOPE)
 
 # Watched variables list. All watched variables final value will be displayed in
 # the logging file.
@@ -106,7 +108,8 @@ function(LOGGING_INITIALIZE)
   else()
     set(PKG_CONFIG_PATH "undefined")
   endif()
-  file(APPEND ${JRL_CMAKEMODULE_LOGGING_FILENAME} "PKG_CONFIG_PATH " ${PKG_CONFIG_PATH} "\n\n")
+  file(APPEND ${JRL_CMAKEMODULE_LOGGING_FILENAME} "PKG_CONFIG_PATH "
+                                                  ${PKG_CONFIG_PATH} "\n\n")
 
 endfunction(LOGGING_INITIALIZE)
 
@@ -181,7 +184,8 @@ function(LOGGING_FINALIZE)
   foreach(TARGET ${LOGGING_WATCHED_TARGETS})
     foreach(PROPERTY ${LOGGING_WATCHED_TARGETS_PROPERTIES})
       get_target_property(VALUE ${TARGET} ${PROPERTY})
-      file(APPEND ${JRL_CMAKEMODULE_LOGGING_FILENAME} "${TARGET}_${PROPERTY} = ${VALUE}\n")
+      file(APPEND ${JRL_CMAKEMODULE_LOGGING_FILENAME}
+           "${TARGET}_${PROPERTY} = ${VALUE}\n")
     endforeach()
     file(APPEND ${JRL_CMAKEMODULE_LOGGING_FILENAME} "\n")
   endforeach()
