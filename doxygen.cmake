@@ -525,8 +525,7 @@ macro(_SETUP_PROJECT_DOCUMENTATION)
       add_custom_target(
         generate-template-css
         COMMAND
-          ${DOXYGEN_EXECUTABLE} -w html
-          ${PROJECT_BINARY_DIR}/doc/header.html
+          ${DOXYGEN_EXECUTABLE} -w html ${PROJECT_BINARY_DIR}/doc/header.html
           ${PROJECT_BINARY_DIR}/doc/footer.html
           ${PROJECT_BINARY_DIR}/doc/doxygen.css
         BYPRODUCTS ${PROJECT_BINARY_DIR}/doc/header.html
@@ -702,8 +701,7 @@ macro(_SETUP_PROJECT_DOCUMENTATION_FINALIZE)
                      ${PROJECT_BINARY_DIR}/doc/Doxyfile.extra @ONLY)
       # Generate Doxyfile.
       _setup_doxygen_config_file("${PROJECT_BINARY_DIR}/doc/Doxyfile")
-      file(STRINGS ${PROJECT_BINARY_DIR}/doc/Doxyfile.extra
-           doxyfile_extra)
+      file(STRINGS ${PROJECT_BINARY_DIR}/doc/Doxyfile.extra doxyfile_extra)
       foreach(x ${doxyfile_extra})
         file(APPEND ${PROJECT_BINARY_DIR}/doc/Doxyfile ${x} "\n")
       endforeach(x in doxyfile_extra)
