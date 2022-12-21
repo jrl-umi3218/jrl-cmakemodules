@@ -506,13 +506,13 @@ macro(_SETUP_PROJECT_DOCUMENTATION)
       # install, so put the target in ALL instead.
       add_custom_target(
         doc ALL
-        COMMAND "${DOXYGEN_EXECUTABLE} ${PROJECT_BINARY_DIR}/doc/Doxyfile"
+        COMMAND ${DOXYGEN_EXECUTABLE} "${PROJECT_BINARY_DIR}/doc/Doxyfile"
         WORKING_DIRECTORY doc
         COMMENT "Generating Doxygen documentation")
     else(MSVC)
       add_custom_target(
         doc
-        COMMAND "${DOXYGEN_EXECUTABLE} ${PROJECT_BINARY_DIR}/doc/Doxyfile"
+        COMMAND ${DOXYGEN_EXECUTABLE} "${PROJECT_BINARY_DIR}/doc/Doxyfile"
         WORKING_DIRECTORY doc
         COMMENT "Generating Doxygen documentation")
 
