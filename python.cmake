@@ -343,9 +343,9 @@ macro(FINDPYTHON)
       CONCAT PYTHON_EXPORT_DEPENDENCY_MACROS
              "list(APPEND PYTHON_COMPONENTS ${PYTHON_COMPONENTS})\n"
              "list(REMOVE_DUPLICATES PYTHON_COMPONENTS)\n"
-             "if(NOT FINDPYTHON_ALREADY_CALLED)"
-             "FINDPYTHON()"
-             "endif()")
+             "if(NOT FINDPYTHON_ALREADY_CALLED)\n"
+             "FINDPYTHON()\n"
+             "endif()\n")
   endif()
 
   if(SEARCH_FOR_NUMPY)
