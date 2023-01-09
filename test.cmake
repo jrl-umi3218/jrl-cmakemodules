@@ -158,6 +158,7 @@ macro(ADD_PYTHON_UNIT_TEST NAME SOURCE)
     OUTPUT_VARIABLE PATHSEP
     OUTPUT_STRIP_TRAILING_WHITESPACE)
 
+  list(REMOVE_DUPLICATES PYTHONPATH)
   if(WIN32)
     # ensure that severals paths stay together as ENV variable PYTHONPATH when
     # passed to python test via PROPERTIES
