@@ -164,6 +164,8 @@ foreach(VARIABLE ${REQUIRED_VARIABLES})
   endif(NOT DEFINED ${VARIABLE})
 endforeach(VARIABLE)
 
+message(STATUS "Configuring \"${PROJECT_NAME}\" (${PROJECT_URL})")
+
 # If the project version number is not set, compute it automatically.
 if(NOT DEFINED PROJECT_VERSION)
   version_compute()
