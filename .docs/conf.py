@@ -49,7 +49,6 @@ currentmode = "user"
 
 
 class IfMode(Directive):
-
     has_content = True
     required_arguments = 1
     optional_arguments = 0
