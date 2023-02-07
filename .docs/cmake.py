@@ -188,7 +188,6 @@ def _cmake_object_inventory(env, document, line, objtype, targetid):
 
 
 class CMakeTransform(Transform):
-
     # Run this transform early since we insert nodes we want
     # treated as if they were written in the documents.
     default_priority = 210
@@ -281,7 +280,6 @@ class CMakeObject(ObjectDescription):
 
 
 class CMakeXRefRole(XRefRole):
-
     # See sphinx.util.nodes.explicit_title_re; \x00 escapes '<'.
     _re = re.compile(r"^(.+?)(\s*)(?<!\x00)<(.*?)>$", re.DOTALL)
     _re_sub = re.compile(r"^([^()\s]+)\s*\(([^()]*)\)$", re.DOTALL)
@@ -318,7 +316,6 @@ class CMakeXRefRole(XRefRole):
 
 
 class CMakeXRefTransform(Transform):
-
     # Run this transform early since we insert nodes we want
     # treated as if they were written in the documents, but
     # after the sphinx (210) and docutils (220) substitutions.
