@@ -14,7 +14,9 @@ find_library(
   GMP_LIBRARIES
   NAMES gmp
   PATHS $ENV{GMPDIR} ${LIB_INSTALL_DIR})
-find_package_handle_standard_args(gmp DEFAULT_MSG GMP_INCLUDES GMP_LIBRARIES)
+
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(GMP DEFAULT_MSG GMP_INCLUDES GMP_LIBRARIES)
 
 # Set gmp target
 if(GMP_FOUND)
@@ -24,5 +26,4 @@ if(GMP_FOUND)
                         INTERFACE_INCLUDE_DIRECTORIES "${GMP_INCLUDE_DIR}")
 endif()
 
-include(FindPackageHandleStandardArgs)
 mark_as_advanced(GMP_INCLUDES GMP_LIBRARIES)
