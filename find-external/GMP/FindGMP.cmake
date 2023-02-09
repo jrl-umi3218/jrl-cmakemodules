@@ -20,10 +20,10 @@ find_package_handle_standard_args(GMP DEFAULT_MSG GMP_INCLUDES GMP_LIBRARIES)
 
 # Set gmp target
 if(GMP_FOUND)
-  add_library(gmp::gmp SHARED IMPORTED)
+  add_library(gmp SHARED IMPORTED)
   set_target_properties(
-    gmp::gmp PROPERTIES IMPORTED_LOCATION ${GMP_LIBRARIES}
-                        INTERFACE_INCLUDE_DIRECTORIES "${GMP_INCLUDE_DIR}")
+    gmp PROPERTIES IMPORTED_LOCATION ${GMP_LIBRARIES}
+                   INTERFACE_INCLUDE_DIRECTORIES "${GMP_INCLUDE_DIR}")
 endif()
 
 mark_as_advanced(GMP_INCLUDES GMP_LIBRARIES)

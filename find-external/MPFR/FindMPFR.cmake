@@ -75,15 +75,15 @@ endif(MPFR_INCLUDES)
 find_library(MPFR_LIBRARIES mpfr PATHS $ENV{GMPDIR} ${LIB_INSTALL_DIR})
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(MPFR MPFR_FIND_VERSION_MAJOR DEFAULT_MSG
-                                  MPFR_INCLUDES MPFR_LIBRARIES MPFR_VERSION_OK)
+find_package_handle_standard_args(MPFR DEFAULT_MSG MPFR_INCLUDES MPFR_LIBRARIES
+                                  MPFR_VERSION_OK)
 
 # Set mpfr target
 if(MPFR_FOUND)
-  add_library(mpfr::mpfr SHARED IMPORTED)
+  add_library(mpfr SHARED IMPORTED)
   set_target_properties(
-    mpfr::mpfr PROPERTIES IMPORTED_LOCATION ${MPFR_LIBRARIES}
-                          INTERFACE_INCLUDE_DIRECTORIES "${MPFR_INCLUDE_DIR}")
+    mpfr PROPERTIES IMPORTED_LOCATION ${MPFR_LIBRARIES}
+                    INTERFACE_INCLUDE_DIRECTORIES "${MPFR_INCLUDE_DIR}")
 endif()
 
 # Epilogue
