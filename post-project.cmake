@@ -38,8 +38,7 @@ else(${ARGC})
   set(CMAKE_VERBOSE_MAKEFILE TRUE)
 endif(${ARGC})
 
-option(BUILD_DOCUMENTATION "Search for doxygen and generate the documentation."
-       ON)
+option(BUILD_DOCUMENTATION "Build the documentation." ON)
 option(INSTALL_DOCUMENTATION "Install the documentation." ON)
 option(INSTALL_GENERATED_HEADERS "Generate and install standard headers" ON)
 option(INSTALL_PKG_CONFIG_FILE "Generate and install standard .pc file" ON)
