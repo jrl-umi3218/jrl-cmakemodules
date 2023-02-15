@@ -37,8 +37,8 @@
 #
 # .. variable:: BUILD_DOCUMENTATION
 #
-# This variable controls cmake searches for Doxygen and if the documentation
-# is be generated.
+# This variable controls cmake searches for Doxygen and if the documentation is
+# be generated.
 #
 # .. _Doxygen: http://www.doxygen.nl
 
