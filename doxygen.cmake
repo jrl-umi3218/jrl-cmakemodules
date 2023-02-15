@@ -35,6 +35,11 @@
 # whether the documentation should be installed. Turning this to OFF does not
 # prevent the documentation generation.
 #
+# .. variable:: BUILD_DOCUMENTATION
+#
+# This variable controls cmake searches for Doxygen and if the documentation
+# is be generated.
+#
 # .. _Doxygen: http://www.doxygen.nl
 
 # .rst: .. ifmode:: internal
