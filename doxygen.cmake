@@ -497,7 +497,7 @@ macro(_SETUP_PROJECT_DOCUMENTATION)
 
   if(NOT DOXYGEN_FOUND)
     message(
-      WARNING "Failed to find Doxygen, documentation will not be generated.")
+      STATUS "Failed to find Doxygen, documentation will not be generated.")
   else(NOT DOXYGEN_FOUND)
     get_directory_property(has_parent_scope PARENT_DIRECTORY)
     set(JRL_CMAKEMODULE_DOXYFILE_PATH "${PROJECT_BINARY_DIR}/doc/Doxyfile")
