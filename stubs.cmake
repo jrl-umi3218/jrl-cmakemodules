@@ -58,8 +58,9 @@ endmacro(LOAD_STUBGEN)
 
 # .rst: .. command:: LOAD_STUBGEN(module_path module_name module_install_dir)
 #
-# Generate the stubs associated to a given project. If optional arguments (which should
-# be CMake targets) are supplied, then the stubs will only be generated after every specified target is built.
+# Generate the stubs associated to a given project. If optional arguments (which
+# should be CMake targets) are supplied, then the stubs will only be generated
+# after every specified target is built.
 #
 # .rst: .. variable:: module_path
 #
@@ -106,7 +107,10 @@ function(GENERATE_STUBS module_path module_name module_install_dir)
   set(optional_args ${ARGN})
   foreach(py_target IN LISTS optional_args)
     if(TARGET ${py_target})
-      message(STATUS "generate_stubs: adding dependency on ${py_target}. Stubs will be generated after it is built.")
+      message(
+        STATUS
+          "generate_stubs: adding dependency on ${py_target}. Stubs will be generated after it is built."
+      )
       add_dependencies(${target_name} ${py_target})
     else(TARGET ${py_target})
       message(WARNING "generate_stubs: target ${py_target} not known.")
