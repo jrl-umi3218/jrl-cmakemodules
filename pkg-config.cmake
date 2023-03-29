@@ -53,8 +53,15 @@ set(PKG_CONFIG_ADDITIONAL_VARIABLES bindir pkglibdir datarootdir pkgdatarootdir
 #
 macro(_SETUP_PROJECT_PKG_CONFIG)
   # Pkg-config related commands.
+  if(IS_ABSOLUTE ${CMAKE_INSTALL_LIBDIR})
+    file(RELATIVE_PATH _PKG_CONFIG_RELATIVE_INSTALL_DIR
+         "${CMAKE_INSTALL_LIBDIR}/pkgconfig" ${CMAKE_INSTALL_PREFIX})
+  else()
+    string(REGEX REPLACE "[^/]+" ".." _PKG_CONFIG_RELATIVE_INSTALL_DIR
+                         "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
+  endif()
   set(_PKG_CONFIG_PREFIX
-      "\${pcfiledir}/../.."
+      "\${pcfiledir}/${_PKG_CONFIG_RELATIVE_INSTALL_DIR}"
       CACHE INTERNAL "")
   set(_PKG_CONFIG_EXEC_PREFIX
       "${_PKG_CONFIG_PREFIX}"
