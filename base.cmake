@@ -142,6 +142,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/oscheck.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/cxx-standard.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/coverage.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/modernize-links.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/relpath.cmake)
 
 # --------- # Constants # --------- #
 
