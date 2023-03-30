@@ -53,10 +53,9 @@ set(PKG_CONFIG_ADDITIONAL_VARIABLES bindir pkglibdir datarootdir pkgdatarootdir
 #
 macro(_SETUP_PROJECT_PKG_CONFIG)
   # Pkg-config related commands.
-  rel_inv_install_path("${CMAKE_INSTALL_LIBDIR}/pkgconfig"
-                       _PC_REL_INV_INSTALL_PATH)
+  rel_install_path("${CMAKE_INSTALL_LIBDIR}/pkgconfig" _PC_REL_INSTALL_PATH)
   set(_PKG_CONFIG_PREFIX
-      "\${pcfiledir}/${_PC_REL_INV_INSTALL_PATH}"
+      "\${pcfiledir}/${_PC_REL_INSTALL_PATH}"
       CACHE INTERNAL "")
   set(_PKG_CONFIG_EXEC_PREFIX
       "${_PKG_CONFIG_PREFIX}"
