@@ -23,14 +23,14 @@ endmacro()
 
 # .rst: .. ifmode:: user
 #
-# .. command:: REL_RPATH(TARGET_INSTALL_DIR VARIABLE)
+# .. command:: GET_RELATIVE_RPATH(TARGET_INSTALL_DIR VARIABLE)
 #
 # Provide INSTALL_RPATH from TARGET_INSTALL_DIR to CMAKE_INSTALL_LIBDIR as
 # relative to $ORIGIN / @loader_path. Works for relative and absolute
 # TARGET_INSTALL_DIR and CMAKE_INSTALL_LIBDIR, except for absolute paths outside
 # of CMAKE_INSTALL_PREFIX. Only on UNIX systems (including APPLE).
 #
-macro(REL_RPATH TARGET_INSTALL_DIR VARIABLE)
+macro(GET_RELATIVE_RPATH TARGET_INSTALL_DIR VARIABLE)
   if(UNIX)
     if(APPLE)
       set(ORIGIN "@loader_path")
