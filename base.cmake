@@ -103,6 +103,10 @@
 #
 # This variable provides the full path pointing to the JRL cmake module.
 #
+# .. variable:: PROJECT_JRL_CMAKE_BINARY_DIR
+#
+# This variable provides the full path pointing to the JRL cmake binary dir.
+#
 # .. variable:: PROJECT_COMPATIBILITY_VERSION
 #
 # If set, this variable defines COMPATIBILITY version of the project
@@ -117,6 +121,10 @@
 
 set(PROJECT_JRL_CMAKE_MODULE_DIR
     ${CMAKE_CURRENT_LIST_DIR}
+    CACHE INTERNAL "")
+
+set(PROJECT_JRL_CMAKE_BINARY_DIR
+    ${CMAKE_CURRENT_BINARY_DIR}
     CACHE INTERNAL "")
 
 # Please note that functions starting with an underscore are internal functions
@@ -207,11 +215,13 @@ variable_watch(CMAKE_CURRENT_LIST_DIR SETUP_PROJECT_FINALIZE_HOOK)
 function(SETUP_PROJECT_FINALIZE_HOOK VARIABLE ACCESS)
   if("${${VARIABLE}}" STREQUAL "")
     set(CMAKE_CURRENT_LIST_DIR ${PROJECT_JRL_CMAKE_MODULE_DIR})
+    set(JRL_CMAKEMODULE_LOGGING_FILENAME "${PROJECT_JRL_CMAKE_BINARY_DIR}/config.log")
     setup_project_finalize()
     if(PROJECT_USE_CMAKE_EXPORT)
       setup_project_package_finalize()
     endif()
     set(CMAKE_CURRENT_LIST_DIR "") # restore value
+    set(JRL_CMAKEMODULE_LOGGING_FILENAME "") # restore value
   endif()
 endfunction()
 
