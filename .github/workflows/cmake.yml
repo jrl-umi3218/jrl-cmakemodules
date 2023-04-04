@@ -32,6 +32,9 @@ jobs:
         name="cmake-3.2.2-Linux-x86_64"
         wget --quiet "https://cmake.org/files/v3.2/${name}.tar.gz"
         tar xf "${name}.tar.gz"
+        cd cmake-3.2.2
+        ./configure
+        make
 
         CMAKE_BIN="${name}/bin/cmake"
         $CMAKE_BIN --version
