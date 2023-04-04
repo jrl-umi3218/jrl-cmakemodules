@@ -392,11 +392,13 @@ macro(SET_DEFAULT_CMAKE_BUILD_TYPE build_type)
     )
   endif()
 
-  if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  if(NOT CMAKE_BUILD_TYPE
+     AND NOT CMAKE_CONFIGURATION_TYPES
+     AND NOT $ENV{CMAKE_BUILD_TYPE})
     set(CMAKE_BUILD_TYPE
         ${build_type}
         CACHE STRING "Choose the build type value." FORCE)
     set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release"
                                                  "RelWithDebInfo" "MinSizeRel")
-  endif(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  endif()
 endmacro(SET_DEFAULT_CMAKE_BUILD_TYPE)
