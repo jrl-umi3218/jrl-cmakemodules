@@ -372,3 +372,31 @@ macro(COMPUTE_PROJECT_ARGS _project_VARIABLE)
     set(${_project_VARIABLE} ${_project_LANGUAGES})
   endif(CMAKE_VERSION VERSION_GREATER "3.0.0")
 endmacro(COMPUTE_PROJECT_ARGS)
+
+# .rst: .. ifmode:: user
+#
+# .. command:: SET_DEFAULT_CMAKE_BUILD_TYPE
+# (Release|Debug|RelWithDebInfo|MinSizeRel)
+#
+# Set the default value of CMAKE_BUILD_TYPE if it is not already defined by the
+# user.
+#
+macro(SET_DEFAULT_CMAKE_BUILD_TYPE build_type)
+  string(TOLOWER "${build_type}" build_type_lower)
+
+  if(NOT "${build_type_lower}" MATCHES
+     "(debug)|(release)|(relwithdebinfo)|(minsizerel)")
+    message(
+      FATAL_ERROR
+        "${build_type} value does not match with Debug, Release, RelWithDebInfo or MinSizeRel"
+    )
+  endif()
+
+  if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+    set(CMAKE_BUILD_TYPE
+        ${build_type}
+        CACHE STRING "Choose the build type value." FORCE)
+    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release"
+                                                 "RelWithDebInfo" "MinSizeRel")
+  endif(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+endmacro(SET_DEFAULT_CMAKE_BUILD_TYPE)
