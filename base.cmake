@@ -400,5 +400,7 @@ macro(SET_DEFAULT_CMAKE_BUILD_TYPE build_type)
         CACHE STRING "Choose the build type value." FORCE)
     set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release"
                                                  "RelWithDebInfo" "MinSizeRel")
+    message(
+      STATUS "CMAKE_BUILD_TYPE has automatically been set to ${build_type}")
   endif()
 endmacro(SET_DEFAULT_CMAKE_BUILD_TYPE)
