@@ -4,6 +4,7 @@ set(PROJECT_VERSION_MAJOR "${SAVED_PROJECT_VERSION_MAJOR}")
 set(PROJECT_VERSION_MINOR "${SAVED_PROJECT_VERSION_MINOR}")
 set(PROJECT_VERSION_PATCH "${SAVED_PROJECT_VERSION_PATCH}")
 
+include(CMakeDependentOption)
 include(${CMAKE_CURRENT_LIST_DIR}/GNUInstallDirs.cmake)
 set(CMAKE_INSTALL_FULL_PKGLIBDIR ${CMAKE_INSTALL_FULL_LIBDIR}/${PROJECT_NAME})
 set(CMAKE_INSTALL_PKGLIBDIR ${CMAKE_INSTALL_LIBDIR}/${PROJECT_NAME})
@@ -39,7 +40,8 @@ else(${ARGC})
 endif(${ARGC})
 
 option(BUILD_DOCUMENTATION "Build the documentation." ON)
-option(INSTALL_DOCUMENTATION "Install the documentation." ON)
+cmake_dependent_option(INSTALL_DOCUMENTATION "Install the documentation." ON
+                       BUILD_DOCUMENTATION OFF)
 option(INSTALL_GENERATED_HEADERS "Generate and install standard headers" ON)
 option(INSTALL_PKG_CONFIG_FILE "Generate and install standard .pc file" ON)
 
