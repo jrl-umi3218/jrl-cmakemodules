@@ -38,29 +38,31 @@ set(CYTHON_DUMMY_CPP_LOCATION "${CMAKE_CURRENT_LIST_DIR}/dummy.cpp")
 set(PYTHON_EXTRA_CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/python")
 
 # Find the Python packages required depending on binding options
-set(PYTHON_BINDING_VERSIONS)
-if(PYTHON_BINDING)
-  if(PYTHON_BINDING_FORCE_PYTHON2 OR PYTHON_BINDING_BUILD_PYTHON2_AND_PYTHON3)
-    list(APPEND PYTHON_BINDING_VERSIONS Python2)
-  endif()
-  if(PYTHON_BINDING_FORCE_PYTHON3 OR PYTHON_BINDING_BUILD_PYTHON2_AND_PYTHON3)
-    list(APPEND PYTHON_BINDING_VERSIONS Python3)
-  endif()
-  list(LENGTH PYTHON_BINDING_VERSIONS N_PYTHON_BINDING_VERSIONS)
-  if(N_PYTHON_BINDING_VERSIONS EQUAL 0)
-    list(APPEND PYTHON_BINDING_VERSIONS Python)
-    # Recent CMake always favor Python 3 but we really want the system's default
-    # Python in that case
-    find_program(DEFAULT_PYTHON_EXECUTABLE python)
-    if(DEFAULT_PYTHON_EXECUTABLE)
-      set(Python_EXECUTABLE ${DEFAULT_PYTHON_EXECUTABLE})
+macro(_setup_python_for_cython)
+  set(PYTHON_BINDING_VERSIONS)
+  if(PYTHON_BINDING)
+    if(PYTHON_BINDING_FORCE_PYTHON2 OR PYTHON_BINDING_BUILD_PYTHON2_AND_PYTHON3)
+      list(APPEND PYTHON_BINDING_VERSIONS Python2)
     endif()
+    if(PYTHON_BINDING_FORCE_PYTHON3 OR PYTHON_BINDING_BUILD_PYTHON2_AND_PYTHON3)
+      list(APPEND PYTHON_BINDING_VERSIONS Python3)
+    endif()
+    list(LENGTH PYTHON_BINDING_VERSIONS N_PYTHON_BINDING_VERSIONS)
+    if(N_PYTHON_BINDING_VERSIONS EQUAL 0)
+      list(APPEND PYTHON_BINDING_VERSIONS Python)
+      # Recent CMake always favor Python 3 but we really want the system's default
+      # Python in that case
+      find_program(DEFAULT_PYTHON_EXECUTABLE python)
+      if(DEFAULT_PYTHON_EXECUTABLE)
+        set(Python_EXECUTABLE ${DEFAULT_PYTHON_EXECUTABLE})
+      endif()
+    endif()
+    foreach(PYTHON_VERSION ${PYTHON_BINDING_VERSIONS})
+      find_package(${PYTHON_VERSION} REQUIRED COMPONENTS Interpreter Development
+                                                         NumPy)
+    endforeach()
   endif()
-  foreach(PYTHON_VERSION ${PYTHON_BINDING_VERSIONS})
-    find_package(${PYTHON_VERSION} REQUIRED COMPONENTS Interpreter Development
-                                                       NumPy)
-  endforeach()
-endif()
+endmacro()
 
 # This macro adds a dummy shared library target to extract compilation flags
 # from an interface library
