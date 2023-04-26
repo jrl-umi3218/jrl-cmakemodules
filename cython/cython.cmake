@@ -623,8 +623,10 @@ function(MAKE_CYTHON_BINDINGS PACKAGE)
     install(
       DIRECTORY ${PACKAGE_OUTPUT_DIRECTORY}/
       DESTINATION ${PYTHON_INSTALL_DESTINATION}
-      # We can't use PACKAGE_OUTPUT_DIRECTORY because it contains a generator-expression
-      REGEX "^${CMAKE_CURRENT_BINARY_DIR}/${PYTHON}/[A-z]*/${PACKAGE}/tests.*" EXCLUDE
+      # We can't use PACKAGE_OUTPUT_DIRECTORY because it contains a
+      # generator-expression
+      REGEX "^${CMAKE_CURRENT_BINARY_DIR}/${PYTHON}/[A-z]*/${PACKAGE}/tests.*"
+            EXCLUDE
       PATTERN ".pytest_cache/*" EXCLUDE
       PATTERN "__pycache__/*" EXCLUDE)
     if(WITH_TESTS AND BUILD_TESTING)
@@ -685,6 +687,10 @@ function(MAKE_CYTHON_BINDINGS PACKAGE)
         python3_add_library(${TARGET_NAME} SHARED ${CPP_OUT})
       else()
         message(FATAL_ERROR "Unknown Python value: ${PYTHON}")
+      endif()
+      # Cython is likely to generate code that won't compile without warnings
+      if(UNIX AND NOT DEFINED CXX_DISABLE_WERROR)
+        target_compile_options(${TARGET_NAME} PRIVATE -Wno-error)
       endif()
       target_include_directories(${TARGET_NAME}
                                  PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
