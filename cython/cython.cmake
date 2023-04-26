@@ -623,7 +623,8 @@ function(MAKE_CYTHON_BINDINGS PACKAGE)
     install(
       DIRECTORY ${PACKAGE_OUTPUT_DIRECTORY}/
       DESTINATION ${PYTHON_INSTALL_DESTINATION}
-      PATTERN "tests/*" EXCLUDE
+      # We can't use PACKAGE_OUTPUT_DIRECTORY because it contains a generator-expression
+      REGEX "^${CMAKE_CURRENT_BINARY_DIR}/${PYTHON}/[A-z]*/${PACKAGE}/tests.*" EXCLUDE
       PATTERN ".pytest_cache/*" EXCLUDE
       PATTERN "__pycache__/*" EXCLUDE)
     if(WITH_TESTS AND BUILD_TESTING)
