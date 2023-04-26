@@ -37,6 +37,31 @@ set(CYTHON_SETUP_IN_PY_LOCATION "${CMAKE_CURRENT_LIST_DIR}/setup.in.py")
 set(CYTHON_DUMMY_CPP_LOCATION "${CMAKE_CURRENT_LIST_DIR}/dummy.cpp")
 set(PYTHON_EXTRA_CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/python")
 
+# Find the Python packages required depending on binding options
+set(PYTHON_BINDING_VERSIONS)
+if(PYTHON_BINDING)
+  if(PYTHON_BINDING_FORCE_PYTHON2 OR PYTHON_BINDING_BUILD_PYTHON2_AND_PYTHON3)
+    list(APPEND PYTHON_BINDING_VERSIONS Python2)
+  endif()
+  if(PYTHON_BINDING_FORCE_PYTHON3 OR PYTHON_BINDING_BUILD_PYTHON2_AND_PYTHON3)
+    list(APPEND PYTHON_BINDING_VERSIONS Python3)
+  endif()
+  list(LENGTH PYTHON_BINDING_VERSIONS N_PYTHON_BINDING_VERSIONS)
+  if(N_PYTHON_BINDING_VERSIONS EQUAL 0)
+    list(APPEND PYTHON_BINDING_VERSIONS Python)
+    # Recent CMake always favor Python 3 but we really want the system's default
+    # Python in that case
+    find_program(DEFAULT_PYTHON_EXECUTABLE python)
+    if(DEFAULT_PYTHON_EXECUTABLE)
+      set(Python_EXECUTABLE ${DEFAULT_PYTHON_EXECUTABLE})
+    endif()
+  endif()
+  foreach(PYTHON_VERSION ${PYTHON_BINDING_VERSIONS})
+    find_package(${PYTHON_VERSION} REQUIRED COMPONENTS Interpreter Development
+                                                       NumPy)
+  endforeach()
+endif()
+
 # This macro adds a dummy shared library target to extract compilation flags
 # from an interface library
 macro(_CYTHON_DUMMY_TARGET TARGET)
@@ -476,3 +501,205 @@ macro(GET_PYTHON_NAMES VAR)
     list(APPEND ${VAR} Python)
   endif()
 endmacro()
+
+# .rst: .. command:: MAKE_CYTHON_BINDINGS(PACKAGE TARGETS targets... [VERSION
+# version] [MODULES modules...] [EXPORT_SOURCES sources...] [PRIVATE_SOURCES
+# ...] [GENERATE_SOURCES ...])
+#
+# This function adds cython bindings using one or more libraries built by the
+# project. It is similar to ADD_CYTHON_BINDINGS but the process is entirely
+# handled by CMake which gives us better incremental builds.
+#
+# For each module ``a.b.c`` it creates a target name ``c_${PYTHON_VERSION}`` for
+# each ``PYTHON_VERSION`` in ``PYTHON_BINDING_VERSIONS``
+#
+# :PACKAGE:          Name of the Python package
+#
+# :TARGETS:          Name of the targets that the bindings should link to
+#
+# :VERSION:          Version of the bindings, defaults to ``PROJECT_VERSION``
+#
+# :MODULES:          Python modules built by this macro call. Defaults to
+# ``PACKAGE.PACKAGE``
+#
+# :EXPORT_SOURCES:   Sources that will be installed along with the package
+# (typically, public pxd files and __init__.py)
+#
+# :PRIVATE_SOURCES:  Sources that are needed to built the package but will not
+# be installed
+#
+# :GENERATE_SOURCES: Sources that will be configured and then generated in the
+# correct location, the generated files are installed unless they are test files
+#
+# The macro will generate a setup.py script in
+# ``$CMAKE_CURRENT_BINARY_DIR/$PACKAGE/$PYTHON/$<CONFIGURATION>`` and copy the
+# provided sources in this location. Relative paths are preferred to provide
+# sources but one can use absolute paths if and only if the absolute path starts
+# with ``$CMAKE_CURRENT_BINARY_DIR``
+#
+function(MAKE_CYTHON_BINDINGS PACKAGE)
+  set(options)
+  set(oneValueArgs VERSION)
+  set(multiValueArgs MODULES TARGETS EXPORT_SOURCES PRIVATE_SOURCES
+                     GENERATE_SOURCES)
+  cmake_parse_arguments(CYTHON_BINDINGS "${options}" "${oneValueArgs}"
+                        "${multiValueArgs}" ${ARGN})
+  if(NOT DEFINED CYTHON_BINDINGS_VERSION)
+    set(CYTHON_BINDINGS_VERSION ${PROJECT_VERSION})
+  endif()
+  if(NOT DEFINED CYTHON_BINDINGS_EXPORT_SOURCES)
+    set(CYTHON_BINDINGS_EXPORT_SOURCES)
+  endif()
+  if(NOT DEFINED CYTHON_BINDINGS_PRIVATE_SOURCES)
+    set(CYTHON_BINDINGS_PRIVATE_SOURCES)
+  endif()
+  if(NOT DEFINED CYTHON_BINDINGS_GENERATE_SOURCES)
+    set(CYTHON_BINDINGS_GENERATE_SOURCES)
+  endif()
+  if(NOT DEFINED CYTHON_BINDINGS_MODULES)
+    set(CYTHON_BINDINGS_MODULES "${PACKAGE}.${PACKAGE}")
+  endif()
+  if(NOT DEFINED CYTHON_BINDINGS_TARGETS)
+    message(
+      FATAL_ERROR
+        "Error in ADD_CYTHON_BINDINGS, bindings should depend on at least one target"
+    )
+  endif()
+  set(CYTHON_BINDINGS_SOURCES)
+  list(APPEND CYTHON_BINDINGS_SOURCES ${CYTHON_BINDINGS_EXPORT_SOURCES})
+  list(APPEND CYTHON_BINDINGS_SOURCES ${CYTHON_BINDINGS_PRIVATE_SOURCES})
+  list(APPEND CYTHON_BINDINGS_SOURCES ${CYTHON_BINDINGS_GENERATE_SOURCES})
+  set(CYTHON_BINDINGS_COMPILE_SOURCES)
+  set(WITH_TESTS False)
+  foreach(SRC ${CYTHON_BINDINGS_SOURCES})
+    if(${SRC} MATCHES "^tests/")
+      set(WITH_TESTS True)
+    endif()
+    if(${SRC} MATCHES ".pyx$")
+      list(APPEND CYTHON_BINDINGS_COMPILE_SOURCES ${SRC})
+    endif()
+  endforeach()
+  add_library(_cython_dummy_${PACKAGE} SHARED EXCLUDE_FROM_ALL
+              "${CYTHON_DUMMY_CPP_LOCATION}")
+  target_link_libraries(_cython_dummy_${PACKAGE}
+                        INTERFACE ${CYTHON_BINDINGS_TARGETS})
+  set_target_properties(_cython_dummy_${PACKAGE} PROPERTIES FOLDER
+                                                            "bindings/details")
+  foreach(PYTHON ${PYTHON_BINDING_VERSIONS})
+    set(PACKAGE_OUTPUT_DIRECTORY
+        ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON}/$<CONFIG>/${PACKAGE})
+    if(DEFINED PYTHON_DEB_ROOT)
+      set(PYTHON_INSTALL_DESTINATION ${${PYTHON}_SITEARCH})
+    else()
+      execute_process(
+        COMMAND
+          ${${PYTHON}_EXECUTABLE} -c
+          "from distutils import sysconfig; print(sysconfig.get_python_lib(prefix = '${CMAKE_INSTALL_PREFIX}', plat_specific = True))"
+        RESULT_VARIABLE PYTHON_INSTALL_DESTINATION_FOUND
+        OUTPUT_VARIABLE PYTHON_INSTALL_DESTINATION
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+    endif()
+    foreach(F ${CYTHON_BINDINGS_GENERATE_SOURCES})
+      configure_file(${F} ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON}/cmake/${F})
+      file(
+        GENERATE
+        OUTPUT ${PACKAGE_OUTPUT_DIRECTORY}/${F}
+        INPUT ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON}/cmake/${F})
+    endforeach()
+    foreach(F ${CYTHON_BINDINGS_EXPORT_SOURCES})
+      file(
+        GENERATE
+        OUTPUT ${PACKAGE_OUTPUT_DIRECTORY}/${F}
+        INPUT ${CMAKE_CURRENT_SOURCE_DIR}/${F})
+    endforeach()
+    foreach(F ${CYTHON_BINDINGS_PRIVATE_SOURCES})
+      if(${F} MATCHES "^tests/")
+        file(
+          GENERATE
+          OUTPUT ${PACKAGE_OUTPUT_DIRECTORY}/${F}
+          INPUT ${CMAKE_CURRENT_SOURCE_DIR}/${F})
+      endif()
+    endforeach()
+    install(
+      DIRECTORY ${PACKAGE_OUTPUT_DIRECTORY}/
+      DESTINATION ${PYTHON_INSTALL_DESTINATION}
+      PATTERN "tests/*" EXCLUDE
+      PATTERN ".pytest_cache/*" EXCLUDE
+      PATTERN "__pycache__/*" EXCLUDE)
+    if(WITH_TESTS AND BUILD_TESTING)
+      if(WIN32)
+        set(ENV_VAR "PATH")
+        set(PATH_SEP ";")
+      else()
+        set(ENV_VAR "LD_LIBRARY_PATH")
+        set(PATH_SEP ":")
+      endif()
+      set(EXTRA_LD_PATH "")
+      foreach(TGT ${CYTHON_BINDINGS_TARGETS})
+        _is_interface_library(${TGT} IS_INTERFACE)
+        if(NOT ${IS_INTERFACE})
+          set(EXTRA_LD_PATH
+              "$<TARGET_FILE_DIR:${TGT}>${PATH_SEP}${EXTRA_LD_PATH}")
+        endif()
+      endforeach()
+      add_test(
+        NAME test-${PACKAGE}-${PYTHON}-bindings
+        COMMAND
+          ${CMAKE_COMMAND} -E env "${ENV_VAR}=${EXTRA_LD_PATH}$ENV{${ENV_VAR}}"
+          ${CMAKE_COMMAND} -E env "PYTHONPATH=.${PATH_SEP}$ENV{PYTHONPATH}"
+          ${CMAKE_COMMAND} -E chdir "${PACKAGE_OUTPUT_DIRECTORY}"
+          ${${PYTHON}_EXECUTABLE} -m pytest)
+    endif()
+    foreach(MOD ${CYTHON_BINDINGS_MODULES})
+      string(REPLACE "." "/" SRC ${MOD})
+      set(SRC "${SRC}.pyx")
+      if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${SRC}")
+        message(
+          FATAL_ERROR "Expected to find ${CMAKE_CURRENT_SOURCE_DIR}/${SRC}")
+      endif()
+      string(REGEX REPLACE ".pyx$" ".cpp" SRC_CPP ${SRC})
+      string(REGEX REPLACE "/[^/]*$" "" SRC_DIR ${SRC})
+      string(REGEX REPLACE "^(.*)\\..*$" "\\1" LIB_NAME ${MOD})
+      string(REGEX REPLACE "\\." "_" LIB_NAME ${LIB_NAME})
+      string(REGEX REPLACE "^.*\\.(.*)$" "\\1" LIB_OUTPUT_NAME ${MOD})
+      set(MOD_OUTPUT_DIRECTORY ${PACKAGE_OUTPUT_DIRECTORY}/${SRC_DIR})
+      set(CPP_OUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON}/${SRC_DIR})
+      set(CPP_OUT ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON}/${SRC_CPP})
+      file(MAKE_DIRECTORY ${CPP_OUT_DIR})
+      add_custom_command(
+        OUTPUT ${CPP_OUT}
+        COMMAND
+          ${${PYTHON}_EXECUTABLE} -m cython --cplus -o ${CPP_OUT}
+          "-I$<JOIN:$<REMOVE_DUPLICATES:$<TARGET_PROPERTY:_cython_dummy_${PACKAGE},INCLUDE_DIRECTORIES>>,;-I>"
+          -I${CMAKE_CURRENT_SOURCE_DIR}/include
+          ${CMAKE_CURRENT_SOURCE_DIR}/${SRC}
+        DEPENDS ${CYTHON_BINDINGS_SOURCES} ${CYTHON_BINDINGS_TARGETS}
+        COMMAND_EXPAND_LISTS)
+      set(TARGET_NAME ${LIB_NAME}_${PYTHON})
+      if(${PYTHON} STREQUAL "Python")
+        python_add_library(${TARGET_NAME} SHARED ${CPP_OUT})
+      elseif(${PYTHON} STREQUAL "Python2")
+        python2_add_library(${TARGET_NAME} SHARED ${CPP_OUT})
+      elseif(${PYTHON} STREQUAL "Python3")
+        python3_add_library(${TARGET_NAME} SHARED ${CPP_OUT})
+      else()
+        message(FATAL_ERROR "Unknown Python value: ${PYTHON}")
+      endif()
+      target_include_directories(${TARGET_NAME}
+                                 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+      target_include_directories(
+        ${TARGET_NAME} INTERFACE ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON})
+      target_link_libraries(
+        ${TARGET_NAME} PUBLIC ${CYTHON_BINDINGS_TARGETS} ${PYTHON}::Python
+                              ${PYTHON}::NumPy)
+      set_target_properties(
+        ${TARGET_NAME}
+        PROPERTIES CXX_VISIBILITY_PRESET default
+                   PREFIX ""
+                   DEBUG_POSTFIX ""
+                   OUTPUT_NAME ${LIB_OUTPUT_NAME}
+                   LIBRARY_OUTPUT_DIRECTORY ${MOD_OUTPUT_DIRECTORY}
+                   RUNTIME_OUTPUT_DIRECTORY ${MOD_OUTPUT_DIRECTORY})
+    endforeach()
+  endforeach()
+endfunction()
