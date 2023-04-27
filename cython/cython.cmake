@@ -600,6 +600,17 @@ function(MAKE_CYTHON_BINDINGS PACKAGE)
         RESULT_VARIABLE PYTHON_INSTALL_DESTINATION_FOUND
         OUTPUT_VARIABLE PYTHON_INSTALL_DESTINATION
         OUTPUT_STRIP_TRAILING_WHITESPACE)
+      # Debian/Ubuntu has a specific problem here
+      # See https://github.com/mesonbuild/meson/issues/8739 for an overview of the problem
+      if(EXISTS /etc/debian_version)
+        execute_process(
+          COMMAND
+            ${${PYTHON}_EXECUTABLE} -c
+            "import sys; print(\"python{}.{}\".format(sys.version_info.major, sys.version_info.minor));"
+          OUTPUT_VARIABLE PYTHON_VERSION
+          OUTPUT_STRIP_TRAILING_WHITESPACE)
+        string(REPLACE "python3/" "${PYTHON_VERSION}/" PYTHON_INSTALL_DESTINATION "${PYTHON_INSTALL_DESTINATION}")
+      endif()
     endif()
     foreach(F ${CYTHON_BINDINGS_GENERATE_SOURCES})
       configure_file(${F} ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON}/cmake/${F})
