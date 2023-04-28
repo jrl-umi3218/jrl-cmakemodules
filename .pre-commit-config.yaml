@@ -28,10 +28,18 @@ repos:
     rev: 23.3.0
     hooks:
     -   id: black
+        exclude: |
+          (?x)^(
+              .cmake-format.py
+          )$
 -   repo: https://github.com/PyCQA/flake8
     rev: 6.0.0
     hooks:
     -   id: flake8
+        exclude: |
+          (?x)^(
+              .cmake-format.py
+          )$
 -   repo: https://github.com/cheshirekow/cmake-format-precommit
     rev: v0.6.13
     hooks:
