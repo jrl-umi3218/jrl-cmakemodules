@@ -50,16 +50,16 @@ macro(_setup_python_for_cython)
     list(LENGTH PYTHON_BINDING_VERSIONS N_PYTHON_BINDING_VERSIONS)
     if(N_PYTHON_BINDING_VERSIONS EQUAL 0)
       list(APPEND PYTHON_BINDING_VERSIONS Python)
-      # Recent CMake always favor Python 3 but we really want the system's default
-      # Python in that case
+      # Recent CMake always favor Python 3 but we really want the system's
+      # default Python in that case
       find_program(DEFAULT_PYTHON_EXECUTABLE python)
       if(DEFAULT_PYTHON_EXECUTABLE)
         set(Python_EXECUTABLE ${DEFAULT_PYTHON_EXECUTABLE})
       endif()
     endif()
     foreach(PYTHON_VERSION ${PYTHON_BINDING_VERSIONS})
-      find_package(${PYTHON_VERSION} REQUIRED COMPONENTS Interpreter Development
-                                                         NumPy)
+      find_package(${PYTHON_VERSION} REQUIRED COMPONENTS Interpreter
+                                                         Development NumPy)
     endforeach()
   endif()
 endmacro()
@@ -600,8 +600,9 @@ function(MAKE_CYTHON_BINDINGS PACKAGE)
         RESULT_VARIABLE PYTHON_INSTALL_DESTINATION_FOUND
         OUTPUT_VARIABLE PYTHON_INSTALL_DESTINATION
         OUTPUT_STRIP_TRAILING_WHITESPACE)
-      # Debian/Ubuntu has a specific problem here
-      # See https://github.com/mesonbuild/meson/issues/8739 for an overview of the problem
+      # Debian/Ubuntu has a specific problem here See
+      # https://github.com/mesonbuild/meson/issues/8739 for an overview of the
+      # problem
       if(EXISTS /etc/debian_version)
         execute_process(
           COMMAND
@@ -609,7 +610,9 @@ function(MAKE_CYTHON_BINDINGS PACKAGE)
             "import sys; print(\"python{}.{}\".format(sys.version_info.major, sys.version_info.minor));"
           OUTPUT_VARIABLE PYTHON_VERSION
           OUTPUT_STRIP_TRAILING_WHITESPACE)
-        string(REPLACE "python3/" "${PYTHON_VERSION}/" PYTHON_INSTALL_DESTINATION "${PYTHON_INSTALL_DESTINATION}")
+        string(REPLACE "python3/" "${PYTHON_VERSION}/"
+                       PYTHON_INSTALL_DESTINATION
+                       "${PYTHON_INSTALL_DESTINATION}")
       endif()
     endif()
     foreach(F ${CYTHON_BINDINGS_GENERATE_SOURCES})
@@ -642,6 +645,17 @@ function(MAKE_CYTHON_BINDINGS PACKAGE)
             EXCLUDE
       PATTERN ".pytest_cache/*" EXCLUDE
       PATTERN "__pycache__/*" EXCLUDE)
+    # Make an uninstall rule that:
+    #
+    # * Remove the installed module fully (including the empty directory)
+    # * Remove trace of bindings that could have been installed by
+    #   add_cython_bindings in the past
+    set(UNINSTALL_TARGET_NAME uninstall-${PACKAGE}-${PYTHON}-bindings)
+    add_custom_target(
+      ${UNINSTALL_TARGET_NAME}
+      COMMAND ${CMAKE_COMMAND} -E rm -rf
+              ${PYTHON_INSTALL_DESTINATION}/${PACKAGE}*.dist-info)
+    add_dependencies(uninstall ${UNINSTALL_TARGET_NAME})
     if(WITH_TESTS AND BUILD_TESTING)
       if(WIN32)
         set(ENV_VAR "PATH")
@@ -678,6 +692,7 @@ function(MAKE_CYTHON_BINDINGS PACKAGE)
       string(REGEX REPLACE "^(.*)\\..*$" "\\1" LIB_NAME ${MOD})
       string(REGEX REPLACE "\\." "_" LIB_NAME ${LIB_NAME})
       string(REGEX REPLACE "^.*\\.(.*)$" "\\1" LIB_OUTPUT_NAME ${MOD})
+      string(REGEX REPLACE "^([^/]*)/.*$" "\\1" MOD_FOLDER ${SRC})
       set(MOD_OUTPUT_DIRECTORY ${PACKAGE_OUTPUT_DIRECTORY}/${SRC_DIR})
       set(CPP_OUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON}/${SRC_DIR})
       set(CPP_OUT ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON}/${SRC_CPP})
@@ -720,6 +735,14 @@ function(MAKE_CYTHON_BINDINGS PACKAGE)
                    OUTPUT_NAME ${LIB_OUTPUT_NAME}
                    LIBRARY_OUTPUT_DIRECTORY ${MOD_OUTPUT_DIRECTORY}
                    RUNTIME_OUTPUT_DIRECTORY ${MOD_OUTPUT_DIRECTORY})
+      if(NOT TARGET ${UNINSTALL_TARGET_NAME}-${MOD_FOLDER})
+        add_custom_target(
+          ${UNINSTALL_TARGET_NAME}-${MOD_FOLDER}
+          COMMAND ${CMAKE_COMMAND} -E rm -rf
+                  ${PYTHON_INSTALL_DESTINATION}/${MOD_FOLDER})
+        add_dependencies(${UNINSTALL_TARGET_NAME}
+                         ${UNINSTALL_TARGET_NAME}-${MOD_FOLDER})
+      endif()
     endforeach()
   endforeach()
 endfunction()
