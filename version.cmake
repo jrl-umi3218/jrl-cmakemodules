@@ -119,14 +119,12 @@ endfunction()
 
 function(_COMPUTE_VERSION_FROM_ROS_PACKAGE_XML_FILE)
   if(EXISTS ${PROJECT_SOURCE_DIR}/package.xml)
-    file(READ "${PROJECT_SOURCE_DIR}/package.xml" PACKAGE_XML)
     execute_process(
-      COMMAND cat "${PROJECT_SOURCE_DIR}/package.xml"
-      COMMAND grep <version
-      COMMAND cut -f2 -d >
-      COMMAND cut -f1 -d <
+      COMMAND
+        ${PYTHON_EXECUTABLE} "-c"
+        "import xml.etree.ElementTree as ET; \
+      print(ET.parse('${PROJECT_SOURCE_DIR}/package.xml').getroot().find('version').text)"
       OUTPUT_STRIP_TRAILING_WHITESPACE
-      # COMMAND_ECHO STDOUT
       OUTPUT_VARIABLE PACKAGE_XML_VERSION)
     if(NOT "${PACKAGE_XML_VERSION}" STREQUAL "")
       set(PROJECT_VERSION
@@ -134,7 +132,7 @@ function(_COMPUTE_VERSION_FROM_ROS_PACKAGE_XML_FILE)
           PARENT_SCOPE)
     endif(NOT "${PACKAGE_XML_VERSION}" STREQUAL "")
     message(STATUS "Package version (ROS package.xml): ${PACKAGE_XML_VERSION}")
-  endif(EXISTS ${PROJECT_SOURCE_DIR}/package.xml)
+  endif()
 endfunction()
 
 # .rst: .. ifmode:: user
