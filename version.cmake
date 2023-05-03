@@ -120,14 +120,9 @@ endfunction()
 function(_COMPUTE_VERSION_FROM_ROS_PACKAGE_XML_FILE)
   if(EXISTS ${PROJECT_SOURCE_DIR}/package.xml)
     file(READ "${PROJECT_SOURCE_DIR}/package.xml" PACKAGE_XML)
-    execute_process(
-      COMMAND cat "${PROJECT_SOURCE_DIR}/package.xml"
-      COMMAND grep <version
-      COMMAND cut -f2 -d >
-      COMMAND cut -f1 -d <
-      OUTPUT_STRIP_TRAILING_WHITESPACE
-      # COMMAND_ECHO STDOUT
-      OUTPUT_VARIABLE PACKAGE_XML_VERSION)
+    string(REGEX REPLACE "^.*<version>(.*)</version>.*$" "\\1"
+                         _PACKAGE_XML_VERSION ${PACKAGE_XML})
+    string(STRIP ${_PACKAGE_XML_VERSION} PACKAGE_XML_VERSION)
     if(NOT "${PACKAGE_XML_VERSION}" STREQUAL "")
       set(PROJECT_VERSION
           ${PACKAGE_XML_VERSION}
