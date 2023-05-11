@@ -394,7 +394,7 @@ macro(SET_DEFAULT_CMAKE_BUILD_TYPE build_type)
 
   if(NOT CMAKE_BUILD_TYPE
      AND NOT CMAKE_CONFIGURATION_TYPES
-     AND NOT $ENV{CMAKE_BUILD_TYPE})
+     AND NOT DEFINED $ENV{CMAKE_BUILD_TYPE})
     set(CMAKE_BUILD_TYPE
         ${build_type}
         CACHE STRING "Choose the build type value." FORCE)
