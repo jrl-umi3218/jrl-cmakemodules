@@ -39,6 +39,10 @@ set(PYTHON_EXTRA_CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/python")
 
 # Find the Python packages required depending on binding options
 macro(_setup_python_for_cython)
+  # FindPython(2|3).cmake only exists from CMake 3.12
+  if(${CMAKE_VERSION} VERSION_LESS "3.12.0")
+    list(APPEND CMAKE_MODULE_PATH ${PYTHON_EXTRA_CMAKE_MODULE_PATH})
+  endif()
   set(PYTHON_BINDING_VERSIONS)
   if(PYTHON_BINDING)
     if(PYTHON_BINDING_FORCE_PYTHON2 OR PYTHON_BINDING_BUILD_PYTHON2_AND_PYTHON3)
