@@ -58,6 +58,21 @@ macro(_setup_python_for_cython)
       endif()
     endif()
     foreach(PYTHON_VERSION ${PYTHON_BINDING_VERSIONS})
+      # CMake favors the most recent version it can find on the system but we
+      # really mean to pick the default "python3" if availble
+      if(PYTHON_VERSION STREQUAL "Python3")
+        find_program(DEFAULT_PYTHON3_EXECUTABLE python3)
+        if(DEFAULT_PYTHON3_EXECUTABLE)
+          set(Python3_EXECUTABLE ${DEFAULT_PYTHON3_EXECUTABLE})
+        endif()
+      endif()
+      # Same for python2
+      if(PYTHON_VERSION STREQUAL "Python2")
+        find_program(DEFAULT_PYTHON2_EXECUTABLE python2)
+        if(DEFAULT_PYTHON2_EXECUTABLE)
+          set(Python2_EXECUTABLE ${DEFAULT_PYTHON2_EXECUTABLE})
+        endif()
+      endif()
       find_package(${PYTHON_VERSION} REQUIRED COMPONENTS Interpreter
                                                          Development NumPy)
     endforeach()
