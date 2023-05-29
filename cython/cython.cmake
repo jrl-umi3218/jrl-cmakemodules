@@ -735,6 +735,12 @@ function(MAKE_CYTHON_BINDINGS PACKAGE)
       if(UNIX AND NOT DEFINED CXX_DISABLE_WERROR)
         target_compile_options(${TARGET_NAME} PRIVATE -Wno-error)
       endif()
+      if(UNIX)
+        # Cython does a lot of casts that remove the const qualifier
+        target_compile_options(${TARGET_NAME} PRIVATE -Wno-cast-qual)
+        # Cython usually includes the deprecated NumPy API
+        target_compile_options(${TARGET_NAME} PRIVATE -Wno-cpp)
+      endif()
       target_include_directories(${TARGET_NAME}
                                  PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
       target_include_directories(
