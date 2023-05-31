@@ -499,13 +499,7 @@ endmacro()
 # Compile and install a Python file in :cmake:variable:`PYTHON_SITELIB`.
 #
 macro(PYTHON_INSTALL_ON_SITE MODULE FILE)
-
-  if(NOT PYTHON_EXECUTABLE)
-    findpython()
-  endif()
-
   python_install("${MODULE}" "${FILE}" ${PYTHON_SITELIB})
-
 endmacro()
 
 # PYTHON_BUILD(MODULE FILE DEST)
