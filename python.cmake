@@ -572,49 +572,6 @@ macro(PYTHON_BUILD_FILE FILE)
     PROPERTY ADDITIONAL_MAKE_CLEAN_FILES "${FILE}c")
 endmacro()
 
-# PYTHON_INSTALL_BUILD(MODULE FILE DEST)
-# --------------------------------------
-#
-# Install a Python file residing in the build directory and its associated
-# compiled version.
-#
-macro(PYTHON_INSTALL_BUILD MODULE FILE DEST)
-
-  message(
-    AUTHOR_WARNING
-      "PYTHON_INSTALL_BUILD is deprecated and will be removed in the future")
-  message(AUTHOR_WARNING "Please use PYTHON_INSTALL_ON_SITE")
-  message(
-    AUTHOR_WARNING
-      "ref https://github.com/jrl-umi3218/jrl-cmakemodules/issues/136")
-
-  file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${MODULE}")
-
-  install(
-    CODE "EXECUTE_PROCESS(COMMAND
-    \"${PYTHON_EXECUTABLE}\"
-    \"${PROJECT_JRL_CMAKE_MODULE_DIR}/compile.py\"
-    \"${CMAKE_CURRENT_BINARY_DIR}\"
-    \"${CMAKE_CURRENT_BINARY_DIR}\"
-    \"${MODULE}/${FILE}\")
-    ")
-
-  # Tag pyc file as generated.
-  set_source_files_properties("${CMAKE_CURRENT_BINARY_DIR}/${MODULE}/${FILE}c"
-                              PROPERTIES GENERATED TRUE)
-
-  # Clean generated files.
-  set_property(
-    DIRECTORY
-    APPEND
-    PROPERTY ADDITIONAL_MAKE_CLEAN_FILES
-             "${CMAKE_CURRENT_BINARY_DIR}/${MODULE}/${FILE}c")
-
-  install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${MODULE}/${FILE}"
-                "${CMAKE_CURRENT_BINARY_DIR}/${MODULE}/${FILE}c"
-          DESTINATION "${DEST}/${MODULE}")
-endmacro()
-
 # .rst: .. command:: FIND_NUMPY()
 #
 # Detect numpy module and define the variable NUMPY_INCLUDE_DIRS if it is not
