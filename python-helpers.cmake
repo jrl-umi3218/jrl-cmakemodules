@@ -39,39 +39,17 @@ endmacro()
 # Build a Python file from the source directory in the build directory.
 #
 macro(PYTHON_BUILD MODULE FILE)
-  # Regex from IsValidTargetName in CMake/Source/cmGeneratorExpression.cxx
-  string(REGEX REPLACE "[^A-Za-z0-9_.+-]" "_" compile_pyc
-                       "compile_pyc_${CMAKE_CURRENT_SOURCE_DIR}")
-  if(NOT TARGET ${compile_pyc})
-    add_custom_target(${compile_pyc} ALL)
-  endif()
-
   set(INPUT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/${MODULE}/${FILE}")
   if(CMAKE_GENERATOR MATCHES "Visual Studio")
-    SET(OUTPUT_FILE_DIR "${CMAKE_CURRENT_BINARY_DIR}/${MODULE}/$<CONFIG>") 
+    set(OUTPUT_FILE_DIR "${CMAKE_CURRENT_BINARY_DIR}/${MODULE}/$<CONFIG>")
   else()
-    SET(OUTPUT_FILE_DIR "${CMAKE_CURRENT_BINARY_DIR}/${MODULE}") 
+    set(OUTPUT_FILE_DIR "${CMAKE_CURRENT_BINARY_DIR}/${MODULE}")
   endif(CMAKE_GENERATOR MATCHES "Visual Studio")
   set(OUTPUT_FILE "${OUTPUT_FILE_DIR}/${FILE}c")
 
   file(MAKE_DIRECTORY ${OUTPUT_FILE_DIR})
 
-  add_custom_command(
-    TARGET ${compile_pyc}
-    PRE_BUILD
-    COMMAND
-    ${PYTHON_EXECUTABLE} -c "import py_compile; py_compile.compile(\"${INPUT_FILE}\",\"${OUTPUT_FILE}\", doraise=True)"
-    VERBATIM)
-
-  # Tag pyc file as generated.
-  set_source_files_properties(${OUTPUT_FILE}
-    PROPERTIES GENERATED TRUE)
-
-  # Clean generated files.
-  set_property(
-    DIRECTORY
-    APPEND
-    PROPERTY ADDITIONAL_MAKE_CLEAN_FILES ${OUTPUT_FILE})
+  python_build_file(${INPUT_FILE} ${OUTPUT_FILE})
 endmacro()
 
 # PYTHON_BUILD_FILE(FILE)
@@ -81,25 +59,32 @@ endmacro()
 #
 macro(PYTHON_BUILD_FILE FILE)
   # Regex from IsValidTargetName in CMake/Source/cmGeneratorExpression.cxx
-  string(REGEX REPLACE " [^A-Za-z0-9_.+-]" "_ " compile_pyc
-                       " compile_pyc_${CMAKE_CURRENT_SOURCE_DIR} ")
+  string(REGEX REPLACE "[^A-Za-z0-9_.+-]" "_" compile_pyc
+                       "compile_pyc_${CMAKE_CURRENT_SOURCE_DIR}")
   if(NOT TARGET ${compile_pyc})
     add_custom_target(${compile_pyc} ALL)
+  endif()
+
+  if(ARGV1)
+    set(OUTPUT_FILE "${ARGV1}")
+  else()
+    set(OUTPUT_FILE "${FILE}c")
   endif()
 
   add_custom_command(
     TARGET ${compile_pyc}
     PRE_BUILD
-    COMMAND " ${PYTHON_EXECUTABLE} " -c
-            " import py_compile; py_compile.compile(\"${FILE}\",\"${FILE}c\") "
+    COMMAND
+      "${PYTHON_EXECUTABLE}" -c
+      "import py_compile; py_compile.compile(\"${FILE}\",\"${OUTPUT_FILE}\")"
     VERBATIM)
 
   # Tag pyc file as generated.
-  set_source_files_properties(" ${FILE}c " PROPERTIES GENERATED TRUE)
+  set_source_files_properties("${OUTPUT_FILE}" PROPERTIES GENERATED TRUE)
 
   # Clean generated files.
   set_property(
     DIRECTORY
     APPEND
-    PROPERTY ADDITIONAL_MAKE_CLEAN_FILES " ${FILE}c ")
+    PROPERTY ADDITIONAL_MAKE_CLEAN_FILES "${OUTPUT_FILE}")
 endmacro()
