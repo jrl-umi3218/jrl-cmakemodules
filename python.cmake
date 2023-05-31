@@ -520,26 +520,38 @@ macro(PYTHON_BUILD MODULE FILE)
   if(NOT TARGET ${compile_pyc})
     add_custom_target(${compile_pyc} ALL)
   endif()
-  file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${MODULE}")
+
+  set(INPUT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/${MODULE}/${FILE}")
+  if(CMAKE_GENERATOR MATCHES "Visual Studio")
+    SET(OUTPUT_FILE_DIR "${CMAKE_CURRENT_BINARY_DIR}/${MODULE}/$<CONFIG>") 
+  else()
+    SET(OUTPUT_FILE_DIR "${CMAKE_CURRENT_BINARY_DIR}/${MODULE}") 
+  endif(CMAKE_GENERATOR MATCHES "Visual Studio")
+  set(OUTPUT_FILE "${OUTPUT_FILE_DIR}/${FILE}c")
+
+  file(MAKE_DIRECTORY ${OUTPUT_FILE_DIR})
 
   add_custom_command(
     TARGET ${compile_pyc}
     PRE_BUILD
-    COMMAND
-      "${PYTHON_EXECUTABLE}" "${PROJECT_JRL_CMAKE_MODULE_DIR}/compile.py"
-      "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}"
-      "${MODULE}/${FILE}")
+    COMMAND " ${PYTHON_EXECUTABLE} " -c
+    " import py_compile "
+    " try: "
+    "   py_compile.compile(\"${INPUT_FILE}\",\"${OUTPUT_FILE}\", doraise=True) "
+    " except Exception as e: "
+    "   print(\" Failed to compile python script: {0} \".format(repr(src)))"
+    "   print(\" Exception raised: {0} \".format(str(e)))"
+    VERBATIM)
 
   # Tag pyc file as generated.
-  set_source_files_properties("${CMAKE_CURRENT_BINARY_DIR}/${MODULE}/${FILE}c"
-                              PROPERTIES GENERATED TRUE)
+  set_source_files_properties(${OUTPUT_FILE}
+    PROPERTIES GENERATED TRUE)
 
   # Clean generated files.
   set_property(
     DIRECTORY
     APPEND
-    PROPERTY ADDITIONAL_MAKE_CLEAN_FILES
-             "${CMAKE_CURRENT_BINARY_DIR}/${MODULE}/${FILE}c")
+    PROPERTY ADDITIONAL_MAKE_CLEAN_FILES ${OUTPUT_FILE})
 endmacro()
 
 # PYTHON_BUILD_FILE(FILE)
