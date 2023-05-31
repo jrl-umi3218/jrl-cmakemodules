@@ -49,7 +49,7 @@ if(NOT TARGET build_tests)
 endif()
 
 # Add new target 'run_tests' to improve integration with build tooling
-if(NOT CMAKE_GENERATOR MATCHES "Visual Studio" AND NOT TARGET run_tests)
+if(NOT CMAKE_GENERATOR MATCHES "Visual Studio|Xcode" AND NOT TARGET run_tests)
   add_custom_target(
     run_tests
     COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure -V
