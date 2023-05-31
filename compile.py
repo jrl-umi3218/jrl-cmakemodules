@@ -16,23 +16,20 @@
 # jrl-cmakemodules. If not, see <http://www.gnu.org/licenses/>.
 
 import sys
+import os
 import py_compile
 
 srcdir = sys.argv[1]
 builddir = sys.argv[2]
 name = sys.argv[3]
 
-if srcdir[-1] != "/":
-    srcdir = srcdir + "/"
-if builddir[-1] != "/":
-    builddir = builddir + "/"
+if len(sys.argv) >= 4:
+    config = sys.argv[4]
+else:
+    config = ""
 
-src = srcdir + name
-comp = builddir + name + (__debug__ and "c" or "o")
-
-# print("compiling " + src + " into " + comp)
-
-# os.mkdir(os.path.splittext(comp)[0])
+src = os.join.path(srcdir,name)
+comp = os.join.path(builddir,config, name + (__debug__ and "c" or "o"))
 
 try:
     py_compile.compile(src, comp, doraise=True)
