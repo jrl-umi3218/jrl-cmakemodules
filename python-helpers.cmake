@@ -39,7 +39,6 @@ endmacro()
 # Build a Python file from the source directory in the build directory.
 #
 macro(PYTHON_BUILD MODULE FILE)
-message(STATUS "PYTHON_BUILD")
   # Regex from IsValidTargetName in CMake/Source/cmGeneratorExpression.cxx
   string(REGEX REPLACE "[^A-Za-z0-9_.+-]" "_" compile_pyc
                        "compile_pyc_${CMAKE_CURRENT_SOURCE_DIR}")
@@ -48,14 +47,12 @@ message(STATUS "PYTHON_BUILD")
   endif()
 
   set(INPUT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/${MODULE}/${FILE}")
-  message(STATUS "INPUT_FILE: ${INPUT_FILE}")
   if(CMAKE_GENERATOR MATCHES "Visual Studio")
     SET(OUTPUT_FILE_DIR "${CMAKE_CURRENT_BINARY_DIR}/${MODULE}/$<CONFIG>") 
   else()
     SET(OUTPUT_FILE_DIR "${CMAKE_CURRENT_BINARY_DIR}/${MODULE}") 
   endif(CMAKE_GENERATOR MATCHES "Visual Studio")
   set(OUTPUT_FILE "${OUTPUT_FILE_DIR}/${FILE}c")
-  message(STATUS "OUTPUT_FILE: ${OUTPUT_FILE}")
 
   file(MAKE_DIRECTORY ${OUTPUT_FILE_DIR})
 
