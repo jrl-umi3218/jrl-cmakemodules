@@ -56,14 +56,12 @@ macro(PYTHON_BUILD MODULE FILE)
 
   set(OUTPUT_FILE "${OUTPUT_FILE_DIR}/${FILE}c")
 
-  file(MAKE_DIRECTORY ${OUTPUT_FILE_DIR})
-
   # Create directory accounting for the generator expression contained in
   # ${OUTPUT_FILE_DIR}
   add_custom_command(
     TARGET ${compile_pyc}
     PRE_BUILD
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${OUTPUT_FILE_DIR})
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${OUTPUT_FILE_DIR}")
 
   python_build_file(${INPUT_FILE} ${OUTPUT_FILE})
 endmacro()
