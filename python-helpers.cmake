@@ -18,7 +18,6 @@
 # Compile and install a Python file.
 #
 macro(PYTHON_INSTALL MODULE FILE DEST)
-
   python_build("${MODULE}" "${FILE}")
 
   install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/${MODULE}/${FILE}"
@@ -39,15 +38,32 @@ endmacro()
 # Build a Python file from the source directory in the build directory.
 #
 macro(PYTHON_BUILD MODULE FILE)
+  # Regex from IsValidTargetName in CMake/Source/cmGeneratorExpression.cxx
+  string(REGEX REPLACE "[^A-Za-z0-9_.+-]" "_" compile_pyc
+                       "compile_pyc_${CMAKE_CURRENT_SOURCE_DIR}")
+
+  if(NOT TARGET ${compile_pyc})
+    add_custom_target(${compile_pyc} ALL)
+  endif()
+
   set(INPUT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/${MODULE}/${FILE}")
+
   if(CMAKE_GENERATOR MATCHES "Visual Studio|Xcode")
     set(OUTPUT_FILE_DIR "${CMAKE_CURRENT_BINARY_DIR}/${MODULE}/$<CONFIG>")
   else()
     set(OUTPUT_FILE_DIR "${CMAKE_CURRENT_BINARY_DIR}/${MODULE}")
   endif()
+
   set(OUTPUT_FILE "${OUTPUT_FILE_DIR}/${FILE}c")
 
   file(MAKE_DIRECTORY ${OUTPUT_FILE_DIR})
+
+  # Create directory accounting for the generator expression contained in
+  # ${OUTPUT_FILE_DIR}
+  add_custom_command(
+    TARGET ${compile_pyc}
+    PRE_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${OUTPUT_FILE_DIR})
 
   python_build_file(${INPUT_FILE} ${OUTPUT_FILE})
 endmacro()
@@ -61,6 +77,7 @@ macro(PYTHON_BUILD_FILE FILE)
   # Regex from IsValidTargetName in CMake/Source/cmGeneratorExpression.cxx
   string(REGEX REPLACE "[^A-Za-z0-9_.+-]" "_" compile_pyc
                        "compile_pyc_${CMAKE_CURRENT_SOURCE_DIR}")
+
   if(NOT TARGET ${compile_pyc})
     add_custom_target(${compile_pyc} ALL)
   endif()
