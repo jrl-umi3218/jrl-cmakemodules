@@ -339,6 +339,7 @@ macro(FINDPYTHON)
 
   if(PYTHON_EXPORT_DEPENDENCY)
     install_jrl_cmakemodules_file("python.cmake")
+    install_jrl_cmakemodules_file("python-helpers.cmake")
     string(
       CONCAT PYTHON_EXPORT_DEPENDENCY_MACROS
              "list(APPEND PYTHON_COMPONENTS ${PYTHON_COMPONENTS})\n"
@@ -518,3 +519,5 @@ macro(FIND_NUMPY)
     message(STATUS "  NUMPY_VERSION=${NUMPY_VERSION}")
   endif()
 endmacro()
+
+include(${CMAKE_CURRENT_LIST_DIR}/python-helpers.cmake)
