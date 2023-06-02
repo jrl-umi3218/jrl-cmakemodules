@@ -339,6 +339,7 @@ macro(FINDPYTHON)
 
   if(PYTHON_EXPORT_DEPENDENCY)
     install_jrl_cmakemodules_file("python.cmake")
+    install_jrl_cmakemodules_file("python-helpers.cmake")
     string(
       CONCAT PYTHON_EXPORT_DEPENDENCY_MACROS
              "list(APPEND PYTHON_COMPONENTS ${PYTHON_COMPONENTS})\n"
