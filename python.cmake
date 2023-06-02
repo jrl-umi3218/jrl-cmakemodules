@@ -518,3 +518,5 @@ macro(FIND_NUMPY)
     message(STATUS "  NUMPY_VERSION=${NUMPY_VERSION}")
   endif()
 endmacro()
+
+include(${CMAKE_CURRENT_LIST_DIR}/python-helpers.cmake)
