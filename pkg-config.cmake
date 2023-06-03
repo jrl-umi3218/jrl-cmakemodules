@@ -822,33 +822,55 @@ macro(PKG_CONFIG_APPEND_LIBS LIBS)
     if(LIB)
       # Check if this project is building this library
       if(TARGET ${LIB})
+        get_target_property(TARGET_TYPE ${LIB} TYPE)
+
+        message(STATUS "target_type: ${TARGET_TYPE}")
+        # CMake 3.16 until 3.19 do not properly handle the properties for
+        # INTERFACE.
+        if(${TARGET_TYPE} STREQUAL "INTERFACE_LIBRARY")
+          set(TARGET_LIB_IS_AN_INTERFACE TRUE)
+        else()
+          set(TARGET_LIB_IS_AN_INTERFACE FALSE)
+        endif(${TARGET_TYPE} STREQUAL "INTERFACE_LIBRARY")
         set(LIB_COMPLETE_NAME ${LIB})
+
+        if(TARGET_LIB_IS_AN_INTERFACE)
+          set(OUTPUT_NAME_FIX INTERFACE_OUTPUT_NAME)
+          set(SUFFIX_FIX INTERFACE_SUFFIX)
+          set(PREFIX_FIX INTERFACE_PREFIX)
+        else()
+          set(OUTPUT_NAME_FIX OUTPUT_NAME)
+          set(SUFFIX_FIX SUFFIX)
+          set(PREFIX_FIX PREFIX)
+        endif()
+
         # If OUTPUT_NAME property is defined, use this for the library name.
         get_property(
           OUTPUT_NAME_SET
           TARGET ${LIB}
-          PROPERTY OUTPUT_NAME
+          PROPERTY ${OUTPUT_NAME_FIX}
           SET)
         if(OUTPUT_NAME_SET)
-          get_target_property(OUTPUT_LIB_NAME ${LIB} OUTPUT_NAME)
+          get_target_property(OUTPUT_LIB_NAME ${LIB} ${OUTPUT_NAME_FIX})
         endif(OUTPUT_NAME_SET)
+
         # If SUFFIX property is defined, use it for defining the library name.
         get_property(
           SUFFIX_SET
           TARGET ${LIB}
-          PROPERTY SUFFIX
+          PROPERTY ${SUFFIX_FIX}
           SET)
         if(SUFFIX_SET)
-          get_target_property(LIB_SUFFIX ${LIB} SUFFIX)
+          get_target_property(LIB_SUFFIX ${LIB} ${SUFFIX_FIX})
         endif(SUFFIX_SET)
 
         get_property(
           PREFIX_SET
           TARGET ${LIB}
-          PROPERTY PREFIX
+          PROPERTY ${PREFIX_FIX}
           SET)
         if(PREFIX_SET)
-          get_target_property(LIB_PREFIX ${LIB} PREFIX)
+          get_target_property(LIB_PREFIX ${LIB} ${PREFIX_FIX})
         endif(PREFIX_SET)
         if(OUTPUT_NAME_SET)
           set(LIB_COMPLETE_NAME ${OUTPUT_LIB_NAME})
