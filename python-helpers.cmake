@@ -40,13 +40,15 @@ endmacro()
 function(PYTHON_BUILD_GET_TARGET python_build_target)
   # Regex from IsValidTargetName in CMake/Source/cmGeneratorExpression.cxx
   string(REGEX REPLACE "[^A-Za-z0-9_.+-]" "_" compile_pyc
-    "compile_pyc_${CMAKE_CURRENT_SOURCE_DIR}")
+                       "compile_pyc_${CMAKE_CURRENT_SOURCE_DIR}")
 
   if(NOT TARGET ${compile_pyc})
     add_custom_target(${compile_pyc} ALL)
   endif()
 
-  set(${python_build_target} ${compile_pyc} PARENT_SCOPE)
+  set(${python_build_target}
+      ${compile_pyc}
+      PARENT_SCOPE)
 endfunction(PYTHON_BUILD_GET_TARGET NAME)
 
 # PYTHON_BUILD(MODULE FILE DEST)
@@ -56,7 +58,7 @@ endfunction(PYTHON_BUILD_GET_TARGET NAME)
 #
 macro(PYTHON_BUILD MODULE FILE)
   set(python_build_target "")
-  PYTHON_BUILD_GET_TARGET(python_build_target)
+  python_build_get_target(python_build_target)
 
   set(INPUT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/${MODULE}/${FILE}")
 
@@ -85,7 +87,7 @@ endmacro()
 #
 macro(PYTHON_BUILD_FILE FILE)
   set(python_build_target "")
-  PYTHON_BUILD_GET_TARGET(python_build_target)
+  python_build_get_target(python_build_target)
 
   set(extra_var "${ARGV1}")
   if(NOT extra_var STREQUAL "")
@@ -98,8 +100,8 @@ macro(PYTHON_BUILD_FILE FILE)
     TARGET ${python_build_target}
     PRE_BUILD
     COMMAND
-    "${PYTHON_EXECUTABLE}" -c
-    "import py_compile; py_compile.compile(\"${FILE}\",\"${OUTPUT_FILE}\")"
+      "${PYTHON_EXECUTABLE}" -c
+      "import py_compile; py_compile.compile(\"${FILE}\",\"${OUTPUT_FILE}\")"
     VERBATIM)
 
   # Tag pyc file as generated.
