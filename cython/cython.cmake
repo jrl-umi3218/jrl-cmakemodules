@@ -746,6 +746,12 @@ function(MAKE_CYTHON_BINDINGS PACKAGE)
         target_compile_options(${TARGET_NAME} PRIVATE -Wno-cast-qual)
         # Cython usually includes the deprecated NumPy API
         target_compile_options(${TARGET_NAME} PRIVATE -Wno-cpp)
+        # Cython does some fishy conversions
+        target_compile_options(${TARGET_NAME} PRIVATE -Wno-conversion
+                                                      -Wno-overflow)
+        # Generating API might look like unusued variables
+        target_compile_options(${TARGET_NAME} PRIVATE -Wno-unused-variable
+                                                      -Wno-unused-function)
       endif()
       target_include_directories(${TARGET_NAME}
                                  PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
