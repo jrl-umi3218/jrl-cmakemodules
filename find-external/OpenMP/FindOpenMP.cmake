@@ -197,7 +197,7 @@ macro(_OPENMP_PREPARE_SOURCE LANG CONTENT_ID NAME_PREFIX FULLNAME_VAR
   endif()
 endmacro()
 
-include(${CMAKE_CURRENT_LIST_DIR}/CMakeParseImplicitLinkInfo.cmake)
+include(CMakeParseImplicitLinkInfo)
 
 function(_OPENMP_GET_FLAGS LANG FLAG_MODE OPENMP_FLAG_VAR OPENMP_LIB_NAMES_VAR)
   _openmp_flag_candidates("${LANG}")
@@ -649,7 +649,7 @@ endif()
 
 unset(_OpenMP_MIN_VERSION)
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 
 foreach(LANG IN LISTS OpenMP_FINDLIST)
   if(CMAKE_${LANG}_COMPILER_LOADED)
