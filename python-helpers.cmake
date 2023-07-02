@@ -80,7 +80,7 @@ macro(PYTHON_BUILD MODULE FILE)
   python_build_file(${INPUT_FILE} ${OUTPUT_FILE})
 endmacro()
 
-# PYTHON_BUILD_FILE(FILE)
+# PYTHON_BUILD_FILE(FILE [OUTPUT_FILE])
 # --------------------------------------
 #
 # Build a Python a given file.
