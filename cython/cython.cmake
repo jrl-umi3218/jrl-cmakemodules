@@ -612,7 +612,13 @@ function(MAKE_CYTHON_BINDINGS PACKAGE)
     set(PACKAGE_OUTPUT_DIRECTORY
         ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON}/$<CONFIG>/${PACKAGE})
     if(DEFINED PYTHON_DEB_ROOT)
-      set(PYTHON_INSTALL_DESTINATION ${${PYTHON}_SITEARCH})
+      execute_process(
+        COMMAND
+          ${${PYTHON}_EXECUTABLE} -c
+          "from distutils import sysconfig; print(sysconfig.get_python_lib(plat_specific = True, standard_lib = False))"
+        RESULT_VARIABLE PYTHON_INSTALL_DESTINATION_FOUND
+        OUTPUT_VARIABLE PYTHON_INSTALL_DESTINATION
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
     else()
       execute_process(
         COMMAND
