@@ -57,4 +57,3 @@ endif()
 install(
   CODE "execute_process(COMMAND \"${CMAKE_COMMAND}\" --build \"${PROJECT_BINARY_DIR}\" ${UNINSTALL_CONFIG_ARG} --target uninstall)"
 )
-
