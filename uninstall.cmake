@@ -51,6 +51,9 @@ endmacro(_SETUP_PROJECT_UNINSTALL)
 # We setup the auto-uninstall target here, it is early enough that we can ensure
 # it is going to be called first See the first paragraph here
 # https://cmake.org/cmake/help/latest/command/install.html#introduction
+if(DEFINED CMAKE_CONFIGURATION_TYPES)
+  set(UNINSTALL_CONFIG_ARG "--config \${CMAKE_INSTALL_CONFIG_NAME}")
+endif()
 install(
-  CODE "execute_process(COMMAND \"${CMAKE_COMMAND}\" --build \"${PROJECT_BINARY_DIR}\" --config \${CMAKE_INSTALL_CONFIG_NAME} --target uninstall)"
+  CODE "execute_process(COMMAND \"${CMAKE_COMMAND}\" --build \"${PROJECT_BINARY_DIR}\" ${UNINSTALL_CONFIG_ARG} --target uninstall)"
 )
