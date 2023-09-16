@@ -55,14 +55,6 @@
 # nothing for CMake < 3.12 which doesn't have those. This also export: -
 # `FIND_NUMPY` and/or `SEARCH_FOR_BOOST_PYTHON` if necessary.
 
-if(CMAKE_VERSION VERSION_LESS "3.2")
-  set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/python ${CMAKE_MODULE_PATH})
-  message(
-    STATUS
-      "CMake versions older than 3.2 do not properly find Python. Custom macros are used to find it."
-  )
-endif(CMAKE_VERSION VERSION_LESS "3.2")
-
 macro(FINDPYTHON)
   if(DEFINED FINDPYTHON_ALREADY_CALLED)
     message(

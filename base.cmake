@@ -257,20 +257,13 @@ endmacro(
 # LIST            : the list. VALUE           : the value to be appended.
 #
 macro(_ADD_TO_LIST_IF_NOT_PRESENT LIST VALUE)
-  if(CMAKE_VERSION VERSION_GREATER "3.3.0")
-    cmake_policy(PUSH)
-    cmake_policy(SET CMP0057 NEW)
-    # To be more robust, value should be stripped
-    if(NOT "${VALUE}" IN_LIST ${LIST})
-      list(APPEND ${LIST} "${VALUE}")
-    endif()
-    cmake_policy(POP)
-  else()
-    list(FIND LIST "${VALUE}" _index)
-    if(${_index} EQUAL -1)
-      list(APPEND LIST "${VALUE}")
-    endif()
+  cmake_policy(PUSH)
+  cmake_policy(SET CMP0057 NEW)
+  # To be more robust, value should be stripped
+  if(NOT "${VALUE}" IN_LIST ${LIST})
+    list(APPEND ${LIST} "${VALUE}")
   endif()
+  cmake_policy(POP)
 endmacro(
   _ADD_TO_LIST_IF_NOT_PRESENT
   LIST
@@ -355,22 +348,14 @@ macro(COMPUTE_PROJECT_ARGS _project_VARIABLE)
     set(_project_LANGUAGES "CXX")
   endif()
 
-  if(CMAKE_VERSION VERSION_GREATER "3.0.0")
-    # CMake >= 3.0
-    cmake_policy(SET CMP0048 NEW)
-    set(${_project_VARIABLE} VERSION ${PROJECT_VERSION_FULL} LANGUAGES
-                             ${_project_LANGUAGES})
+  # CMake >= 3.0
+  cmake_policy(SET CMP0048 NEW)
+  set(${_project_VARIABLE} VERSION ${PROJECT_VERSION_FULL} LANGUAGES
+                           ${_project_LANGUAGES})
 
-    # Append description for CMake >= 3.9
-    if(CMAKE_VERSION VERSION_GREATER "3.9.0")
-      set(${_project_VARIABLE} ${${_project_VARIABLE}} DESCRIPTION
-                               ${PROJECT_DESCRIPTION})
-    endif(CMAKE_VERSION VERSION_GREATER "3.9.0")
-  else(CMAKE_VERSION VERSION_GREATER "3.0.0")
-
-    # CMake < 3.0
-    set(${_project_VARIABLE} ${_project_LANGUAGES})
-  endif(CMAKE_VERSION VERSION_GREATER "3.0.0")
+  # Append description for CMake >= 3.9
+  set(${_project_VARIABLE} ${${_project_VARIABLE}} DESCRIPTION
+                           ${PROJECT_DESCRIPTION})
 endmacro(COMPUTE_PROJECT_ARGS)
 
 # .rst: .. ifmode:: user

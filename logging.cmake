@@ -67,11 +67,7 @@ endif(UNIX)
 #
 function(LOGGING_INITIALIZE)
   # Retrieve interesting information.
-  if(${CMAKE_VERSION} VERSION_LESS 2.8)
-    set(HOSTNAME "unknown (CMake >= 2.8 required)")
-  else()
-    site_name(HOSTNAME)
-  endif()
+  site_name(HOSTNAME)
 
   # Write logging file.
   file(REMOVE ${JRL_CMAKEMODULE_LOGGING_FILENAME})
