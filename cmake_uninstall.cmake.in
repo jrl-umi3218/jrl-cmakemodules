@@ -14,7 +14,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # This files comes from the CMake FAQ: http://www.cmake.org/Wiki/CMake_FAQ
-cmake_policy(SET CMP0007 NEW)
 IF(NOT EXISTS "@CMAKE_CURRENT_BINARY_DIR@/install_manifest.txt")
   RETURN()
 ENDIF(NOT EXISTS "@CMAKE_CURRENT_BINARY_DIR@/install_manifest.txt")

@@ -92,11 +92,6 @@ should use the ``OpenMP_<lang>_INCLUDE_DIRS`` _output_ variable if it needs
 to know what include directories are needed.
 #]=======================================================================]
 
-cmake_policy(PUSH)
-cmake_policy(SET CMP0012 NEW) # if() recognizes numbers and booleans
-cmake_policy(SET CMP0054 NEW) # if() quoted variables not dereferenced
-cmake_policy(SET CMP0057 NEW) # if IN_LIST
-
 function(_OPENMP_FLAG_CANDIDATES LANG)
   if(NOT OpenMP_${LANG}_FLAG)
     unset(OpenMP_FLAG_CANDIDATES)
@@ -775,5 +770,3 @@ unset(OpenMP_Fortran_TEST_SOURCE)
 unset(OpenMP_C_CXX_CHECK_VERSION_SOURCE)
 unset(OpenMP_Fortran_CHECK_VERSION_SOURCE)
 unset(OpenMP_Fortran_INCLUDE_LINE)
-
-cmake_policy(POP)

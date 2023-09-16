@@ -257,13 +257,10 @@ endmacro(
 # LIST            : the list. VALUE           : the value to be appended.
 #
 macro(_ADD_TO_LIST_IF_NOT_PRESENT LIST VALUE)
-  cmake_policy(PUSH)
-  cmake_policy(SET CMP0057 NEW)
   # To be more robust, value should be stripped
   if(NOT "${VALUE}" IN_LIST ${LIST})
     list(APPEND ${LIST} "${VALUE}")
   endif()
-  cmake_policy(POP)
 endmacro(
   _ADD_TO_LIST_IF_NOT_PRESENT
   LIST
@@ -348,12 +345,9 @@ macro(COMPUTE_PROJECT_ARGS _project_VARIABLE)
     set(_project_LANGUAGES "CXX")
   endif()
 
-  # CMake >= 3.0
-  cmake_policy(SET CMP0048 NEW)
   set(${_project_VARIABLE} VERSION ${PROJECT_VERSION_FULL} LANGUAGES
                            ${_project_LANGUAGES})
 
-  # Append description for CMake >= 3.9
   set(${_project_VARIABLE} ${${_project_VARIABLE}} DESCRIPTION
                            ${PROJECT_DESCRIPTION})
 endmacro(COMPUTE_PROJECT_ARGS)
