@@ -18,10 +18,7 @@ include(CheckCCompilerFlag)
 if(${CMAKE_VERSION} VERSION_LESS 3.18.0)
   # Do nothing
 else()
-  cmake_policy(PUSH)
-  cmake_policy(SET CMP0057 NEW) # if IN_LIST
   include(CheckLinkerFlag)
-  cmake_policy(POP)
 endif()
 
 # _CHECK_VERSION_SCRIPT_SUPPORT

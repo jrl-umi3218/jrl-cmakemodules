@@ -1,6 +1,5 @@
 include(cmake/pkg-config.cmake)
 
-cmake_policy(SET CMP0054 NEW)
 # cmake -P
 macro(EXPECT_STREQUAL _lhs _rhs)
   if(NOT "${_lhs}" STREQUAL ${_rhs})

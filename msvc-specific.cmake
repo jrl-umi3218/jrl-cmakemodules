@@ -146,10 +146,6 @@ macro(REQUIRE_MINIMUM_MSVC_VERSION VERSION)
   endif(${MSVC_TOOLS_VERSION})
 endmacro(REQUIRE_MINIMUM_MSVC_VERSION)
 
-if(${CMAKE_VERSION} VERSION_LESS "3.5.0")
-  include(CMakeParseArguments)
-endif()
-
 # GENERATE_MSVC_DOT_USER_FILE(<name> [<additional_path>])
 # GENERATE_MSVC_DOT_USER_FILE(NAME <name> [COMMAND <command>] [COMMAND_ARGS
 # <args>] [WORKING_DIRECTORY <dir>] [ADDITIONAL_PATH <additional_path>])

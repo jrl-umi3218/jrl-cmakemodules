@@ -384,8 +384,6 @@ Set ``Boost_NO_BOOST_CMAKE`` to ``ON``, to disable the search for boost-cmake.
 include(FindPackageHandleStandardArgs)
 
 # Save project's policies
-cmake_policy(PUSH)
-cmake_policy(SET CMP0057 NEW) # if IN_LIST
 if(POLICY CMP0102)
   cmake_policy(SET CMP0102 NEW) # if mark_as_advanced(non_cache_var)
 endif()
@@ -628,8 +626,6 @@ if (NOT Boost_NO_BOOST_CMAKE)
     find_package_handle_standard_args(Boost HANDLE_COMPONENTS CONFIG_MODE)
     _boost_set_legacy_variables_from_config()
 
-    # Restore project's policies
-    cmake_policy(POP)
     return()
   endif()
 endif()

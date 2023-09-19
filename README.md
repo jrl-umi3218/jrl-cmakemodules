@@ -1,9 +1,9 @@
-Shared CMake submodule
-======================
+# Shared CMake submodule
 
 [![Documentation Status](https://readthedocs.org/projects/jrl-cmakemodules/badge/?version=master)](https://jrl-cmakemodules.readthedocs.io/en/master/?badge=master)
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/jrl-umi3218/jrl-cmakemodules/master.svg)](https://results.pre-commit.ci/latest/github/jrl-umi3218/jrl-cmakemodules/master)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
 
 This repository is meant to be used as a submodule for any project
 from CNRS LAAS/HPP or JRL.
@@ -20,7 +20,11 @@ You can also checkout the more complete [documentation] of the modules.
 
 [documentation]: http://jrl-cmakemodules.readthedocs.io/en/master/
 
-# pre-commit
+## Supported CMake versions
+
+We currently support CMake >= 3.10
+
+## pre-commit
 
 This project use [pre-commit](https://pre-commit.com) and [pre-commit.ci](https://pre-commit.ci).
 
