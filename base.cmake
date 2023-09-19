@@ -349,11 +349,9 @@ macro(COMPUTE_PROJECT_ARGS _project_VARIABLE)
     set(_project_LANGUAGES "CXX")
   endif()
 
-  set(${_project_VARIABLE} VERSION ${PROJECT_VERSION_FULL} LANGUAGES
-                           ${_project_LANGUAGES})
-
-  set(${_project_VARIABLE} ${${_project_VARIABLE}} DESCRIPTION
-                           ${PROJECT_DESCRIPTION})
+  set(${_project_VARIABLE}
+      VERSION ${PROJECT_VERSION_FULL} LANGUAGES ${_project_LANGUAGES}
+      DESCRIPTION ${PROJECT_DESCRIPTION})
 endmacro(COMPUTE_PROJECT_ARGS)
 
 # .rst: .. ifmode:: user
