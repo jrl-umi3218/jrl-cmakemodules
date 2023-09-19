@@ -119,7 +119,9 @@
 # ------
 #
 
-cmake_minimum_required(VERSION 3.10)
+if(CMAKE_MINIMUM_REQUIRED_VERSION VERSION_LESS 3.10)
+  cmake_minimum_required(VERSION 3.10)
+endif()
 
 set(PROJECT_JRL_CMAKE_MODULE_DIR
     ${CMAKE_CURRENT_LIST_DIR}
