@@ -119,9 +119,7 @@
 # ------
 #
 
-if(${CMAKE_VERSION} VERSION_LESS 3.10)
-  message(FATAL_ERROR "JRL-CMakemodules require CMake >= 3.10")
-endif()
+cmake_minimum_required(VERSION 3.10)
 
 set(PROJECT_JRL_CMAKE_MODULE_DIR
     ${CMAKE_CURRENT_LIST_DIR}
