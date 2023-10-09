@@ -137,9 +137,8 @@ macro(FINDPYTHON)
       # Provide some hints according to the current PYTHON_EXECUTABLE
       if(NOT DEFINED PYTHON_INCLUDE_DIR)
         execute_process(
-          COMMAND
-            "${PYTHON_EXECUTABLE}" "-c"
-            "import distutils.sysconfig as sysconfig; print(sysconfig.get_python_inc())"
+          COMMAND "${PYTHON_EXECUTABLE}" "-c"
+                  "import sysconfig; print(sysconfig.get_path('include'))"
           OUTPUT_VARIABLE PYTHON_INCLUDE_DIR
           ERROR_QUIET)
         string(STRIP "${PYTHON_INCLUDE_DIR}" PYTHON_INCLUDE_DIR)
@@ -217,9 +216,8 @@ macro(FINDPYTHON)
       # defined
       if(NOT DEFINED PYTHON_INCLUDE_DIR)
         execute_process(
-          COMMAND
-            "${PYTHON_EXECUTABLE}" "-c"
-            "import distutils.sysconfig as sysconfig; print(sysconfig.get_python_inc())"
+          COMMAND "${PYTHON_EXECUTABLE}" "-c"
+                  "import sysconfig; print(sysconfig.get_path('include'))"
           OUTPUT_VARIABLE PYTHON_INCLUDE_DIR
           ERROR_QUIET)
         string(STRIP "${PYTHON_INCLUDE_DIR}" PYTHON_INCLUDE_DIR)
@@ -272,7 +270,7 @@ macro(FINDPYTHON)
       )
     else(PYTHON_STANDARD_LAYOUT)
       set(PYTHON_SITELIB_CMD
-          "from distutils import sysconfig; print(sysconfig.get_python_lib(prefix='', plat_specific=False))"
+          "import sysconfig; from pathlib import Path; print(Path(sysconfig.get_path('purelib')).relative_to(sysconfig.get_path('data')))"
       )
     endif(PYTHON_STANDARD_LAYOUT)
 
@@ -306,7 +304,7 @@ macro(FINDPYTHON)
     execute_process(
       COMMAND
         "${PYTHON_EXECUTABLE}" "-c"
-        "from distutils.sysconfig import get_config_var; print('.' + get_config_var('SOABI'))"
+        "from sysconfig import get_config_var; print('.' + get_config_var('SOABI'))"
       OUTPUT_VARIABLE PYTHON_SOABI)
     string(STRIP ${PYTHON_SOABI} PYTHON_SOABI)
   endif(PYTHON_VERSION_MAJOR EQUAL 3 AND NOT WIN32)
@@ -317,7 +315,7 @@ macro(FINDPYTHON)
     execute_process(
       COMMAND
         "${PYTHON_EXECUTABLE}" "-c"
-        "from distutils.sysconfig import get_config_var; print(get_config_var('EXT_SUFFIX'))"
+        "from sysconfig import get_config_var; print(get_config_var('EXT_SUFFIX'))"
       OUTPUT_VARIABLE PYTHON_EXT_SUFFIX)
     string(STRIP ${PYTHON_EXT_SUFFIX} PYTHON_EXT_SUFFIX)
   endif(PYTHON_VERSION_MAJOR EQUAL 3)
