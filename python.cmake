@@ -134,6 +134,14 @@ macro(FINDPYTHON)
         ERROR_VARIABLE _PYTHON_VERSION_OUTPUT
         OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_STRIP_TRAILING_WHITESPACE)
 
+      if(NOT "${_PYTHON_VERSION_RESULT_VARIABLE}" STREQUAL "0")
+        message(FATAL_ERROR "${PYTHON_EXECUTABLE} --version did not succeed.")
+      endif(NOT "${_PYTHON_VERSION_RESULT_VARIABLE}" STREQUAL "0")
+      string(REGEX REPLACE "Python " "" _PYTHON_VERSION
+                           ${_PYTHON_VERSION_OUTPUT})
+      string(REGEX REPLACE "\\." ";" _PYTHON_VERSION ${_PYTHON_VERSION})
+      list(GET _PYTHON_VERSION 0 _PYTHON_VERSION_MAJOR)
+
       # Provide some hints according to the current PYTHON_EXECUTABLE
       if(NOT DEFINED PYTHON_INCLUDE_DIR)
         execute_process(
@@ -144,14 +152,6 @@ macro(FINDPYTHON)
         string(STRIP "${PYTHON_INCLUDE_DIR}" PYTHON_INCLUDE_DIR)
         file(TO_CMAKE_PATH "${PYTHON_INCLUDE_DIR}" PYTHON_INCLUDE_DIR)
       endif()
-
-      if(NOT "${_PYTHON_VERSION_RESULT_VARIABLE}" STREQUAL "0")
-        message(FATAL_ERROR "${PYTHON_EXECUTABLE} --version did not succeed.")
-      endif(NOT "${_PYTHON_VERSION_RESULT_VARIABLE}" STREQUAL "0")
-      string(REGEX REPLACE "Python " "" _PYTHON_VERSION
-                           ${_PYTHON_VERSION_OUTPUT})
-      string(REGEX REPLACE "\\." ";" _PYTHON_VERSION ${_PYTHON_VERSION})
-      list(GET _PYTHON_VERSION 0 _PYTHON_VERSION_MAJOR)
 
       # Hint for finding the right Python version
       set(Python_EXECUTABLE ${PYTHON_EXECUTABLE})
