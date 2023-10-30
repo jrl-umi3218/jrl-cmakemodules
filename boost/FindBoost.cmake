@@ -626,6 +626,8 @@ if (NOT Boost_NO_BOOST_CMAKE)
     find_package_handle_standard_args(Boost HANDLE_COMPONENTS CONFIG_MODE)
     _boost_set_legacy_variables_from_config()
 
+    # Restore project's policies
+    cmake_policy(POP)
     return()
   endif()
 endif()
@@ -2588,6 +2590,3 @@ list(REMOVE_DUPLICATES _Boost_COMPONENTS_SEARCHED)
 list(SORT _Boost_COMPONENTS_SEARCHED)
 set(_Boost_COMPONENTS_SEARCHED "${_Boost_COMPONENTS_SEARCHED}"
   CACHE INTERNAL "Components requested for this build tree.")
-
-# Restore project's policies
-cmake_policy(POP)
