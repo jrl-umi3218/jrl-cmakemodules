@@ -136,7 +136,7 @@ macro(FINDPYTHON)
 
       if(NOT "${_PYTHON_VERSION_RESULT_VARIABLE}" STREQUAL "0")
         message(FATAL_ERROR "${PYTHON_EXECUTABLE} --version did not succeed.")
-      endif(NOT "${_PYTHON_VERSION_RESULT_VARIABLE}" STREQUAL "0")
+      endif()
       string(REGEX REPLACE "Python " "" _PYTHON_VERSION
                            ${_PYTHON_VERSION_OUTPUT})
       string(REGEX REPLACE "\\." ";" _PYTHON_VERSION ${_PYTHON_VERSION})
@@ -177,11 +177,11 @@ macro(FINDPYTHON)
           message(FATAL_ERROR "Python executable has not been found.")
         else()
           set(_PYTHON_VERSION_MAJOR 3)
-        endif(NOT Python3_FOUND)
+        endif()
       else()
         set(_PYTHON_VERSION_MAJOR 2)
-      endif(NOT Python2_FOUND)
-    endif(PYTHON_EXECUTABLE)
+      endif()
+    endif()
 
     set(_PYTHON_PREFIX "Python${_PYTHON_VERSION_MAJOR}")
 
@@ -209,12 +209,12 @@ macro(FINDPYTHON)
       file(TO_CMAKE_PATH "${NUMPY_INCLUDE_DIRS}" NUMPY_INCLUDE_DIRS)
     endif()
 
-  else(NOT CMAKE_VERSION VERSION_LESS "3.12")
+  else()
 
     find_package(PythonInterp ${ARGN})
     if(NOT ${PYTHONINTERP_FOUND} STREQUAL TRUE)
       message(FATAL_ERROR "Python executable has not been found.")
-    endif(NOT ${PYTHONINTERP_FOUND} STREQUAL TRUE)
+    endif()
     message(STATUS "PythonInterp: ${PYTHON_EXECUTABLE}")
 
     # Set PYTHON_INCLUDE_DIR variables if it is not defined by the user
@@ -235,10 +235,10 @@ macro(FINDPYTHON)
           OUTPUT_VARIABLE PYTHON_INCLUDE_DIR
           ERROR_QUIET)
         string(STRIP "${PYTHON_INCLUDE_DIR}" PYTHON_INCLUDE_DIR)
-      endif(NOT DEFINED PYTHON_INCLUDE_DIR)
+      endif()
       set(PYTHON_INCLUDE_DIRS ${PYTHON_INCLUDE_DIR})
 
-    endif(DEFINED PYTHON_EXECUTABLE)
+    endif()
 
     # Inform PythonLibs of the required version of PythonInterp
     set(PYTHONLIBS_VERSION_STRING ${PYTHON_VERSION_STRING})
@@ -247,7 +247,7 @@ macro(FINDPYTHON)
     message(STATUS "PythonLibraries: ${PYTHON_LIBRARIES}")
     if(NOT ${PYTHONLIBS_FOUND} STREQUAL TRUE)
       message(FATAL_ERROR "Python has not been found.")
-    endif(NOT ${PYTHONLIBS_FOUND} STREQUAL TRUE)
+    endif()
 
     string(REPLACE "." ";" _PYTHONLIBS_VERSION ${PYTHONLIBS_VERSION_STRING})
     list(GET _PYTHONLIBS_VERSION 0 PYTHONLIBS_VERSION_MAJOR)
@@ -259,10 +259,9 @@ macro(FINDPYTHON)
         FATAL_ERROR
           "Python interpreter and libraries are in different version: ${PYTHON_VERSION_STRING} vs ${PYTHONLIBS_VERSION_STRING}"
       )
-    endif(NOT ${PYTHON_VERSION_MAJOR} EQUAL ${PYTHONLIBS_VERSION_MAJOR}
-          OR NOT ${PYTHON_VERSION_MINOR} EQUAL ${PYTHONLIBS_VERSION_MINOR})
+    endif()
 
-  endif(NOT CMAKE_VERSION VERSION_LESS "3.12")
+  endif()
 
   # Find PYTHON_LIBRARY_DIRS
   get_filename_component(PYTHON_LIBRARY_DIRS "${PYTHON_LIBRARIES}" PATH)
@@ -271,7 +270,7 @@ macro(FINDPYTHON)
 
   if(PYTHON_SITELIB)
     file(TO_CMAKE_PATH "${PYTHON_SITELIB}" PYTHON_SITELIB)
-  else(PYTHON_SITELIB)
+  else()
     # Use either site-packages (default) or dist-packages (Debian packages)
     # directory
     option(PYTHON_DEB_LAYOUT "Enable Debian-style Python package layout" OFF)
@@ -282,7 +281,7 @@ macro(FINDPYTHON)
       set(_PYTHON_SITELIB_CMD
           "import sys, os; print(os.sep.join(['lib', 'python' + '.'.join(sys.version.split('.')[:2]), 'site-packages']))"
       )
-    else(PYTHON_STANDARD_LAYOUT)
+    else()
       if(_PYTHON_VERSION_MAJOR EQUAL "2")
         set(_PYTHON_SITELIB_CMD
             "from distutils import sysconfig; print(sysconfig.get_python_lib(prefix='', plat_specific=False))"
@@ -292,7 +291,7 @@ macro(FINDPYTHON)
             "import sysconfig; from pathlib import Path; print(Path(sysconfig.get_path('purelib')).relative_to(sysconfig.get_path('data')))"
         )
       endif()
-    endif(PYTHON_STANDARD_LAYOUT)
+    endif()
 
     execute_process(
       COMMAND "${PYTHON_EXECUTABLE}" "-c" "${_PYTHON_SITELIB_CMD}"
@@ -303,7 +302,7 @@ macro(FINDPYTHON)
     if(PYTHON_DEB_LAYOUT)
       string(REPLACE "site-packages" "dist-packages" PYTHON_SITELIB
                      "${PYTHON_SITELIB}")
-    endif(PYTHON_DEB_LAYOUT)
+    endif()
 
     # If PYTHON_PACKAGES_DIR is defined, then force the Python packages
     # directory name
@@ -311,8 +310,8 @@ macro(FINDPYTHON)
       string(REGEX
              REPLACE "(site-packages|dist-packages)" "${PYTHON_PACKAGES_DIR}"
                      PYTHON_SITELIB "${PYTHON_SITELIB}")
-    endif(PYTHON_PACKAGES_DIR)
-  endif(PYTHON_SITELIB)
+    endif()
+  endif()
 
   message(STATUS "Python site lib: ${PYTHON_SITELIB}")
   message(STATUS "Python include dirs: ${PYTHON_INCLUDE_DIRS}")
@@ -327,7 +326,7 @@ macro(FINDPYTHON)
         "from sysconfig import get_config_var; print('.' + get_config_var('SOABI'))"
       OUTPUT_VARIABLE PYTHON_SOABI)
     string(STRIP ${PYTHON_SOABI} PYTHON_SOABI)
-  endif(PYTHON_VERSION_MAJOR EQUAL 3 AND NOT WIN32)
+  endif()
 
   # Get PYTHON_EXT_SUFFIX
   set(PYTHON_EXT_SUFFIX "")
@@ -338,7 +337,7 @@ macro(FINDPYTHON)
         "from sysconfig import get_config_var; print(get_config_var('EXT_SUFFIX'))"
       OUTPUT_VARIABLE PYTHON_EXT_SUFFIX)
     string(STRIP ${PYTHON_EXT_SUFFIX} PYTHON_EXT_SUFFIX)
-  endif(PYTHON_VERSION_MAJOR EQUAL 3)
+  endif()
   if("${PYTHON_EXT_SUFFIX}" STREQUAL "")
     if(WIN32)
       set(PYTHON_EXT_SUFFIX ".pyd")
@@ -453,7 +452,7 @@ macro(DYNAMIC_GRAPH_PYTHON_MODULE SUBMODULENAME LIBRARYNAME TARGETNAME)
 
   if(UNIX AND NOT APPLE)
     target_link_libraries(${PYTHON_MODULE} PUBLIC "-Wl,--no-as-needed")
-  endif(UNIX AND NOT APPLE)
+  endif()
   target_link_libraries(${PYTHON_MODULE} PUBLIC ${LIBRARYNAME}
                                                 dynamic-graph::dynamic-graph)
   target_link_boost_python(${PYTHON_MODULE} PUBLIC)
