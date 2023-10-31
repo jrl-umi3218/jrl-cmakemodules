@@ -145,15 +145,15 @@ macro(FINDPYTHON)
       # Provide some hints according to the current PYTHON_EXECUTABLE
       if(NOT DEFINED PYTHON_INCLUDE_DIR)
         if(_PYTHON_VERSION_MAJOR EQUAL "2")
-          set(PYTHON_INCLUDE_DIR_CMD
+          set(_PYTHON_INCLUDE_DIR_CMD
               "import distutils.sysconfig as sysconfig; print(sysconfig.get_python_inc())"
           )
         else()
-          set(PYTHON_INCLUDE_DIR_CMD
+          set(_PYTHON_INCLUDE_DIR_CMD
               "import sysconfig; print(sysconfig.get_path('include'))")
         endif()
         execute_process(
-          COMMAND "${PYTHON_EXECUTABLE}" "-c" ${PYTHON_INCLUDE_DIR_CMD}
+          COMMAND "${PYTHON_EXECUTABLE}" "-c" ${_PYTHON_INCLUDE_DIR_CMD}
           OUTPUT_VARIABLE PYTHON_INCLUDE_DIR
           ERROR_QUIET)
         string(STRIP "${PYTHON_INCLUDE_DIR}" PYTHON_INCLUDE_DIR)
@@ -223,15 +223,15 @@ macro(FINDPYTHON)
       # defined
       if(NOT DEFINED PYTHON_INCLUDE_DIR)
         if(_PYTHON_VERSION_MAJOR EQUAL "2")
-          set(PYTHON_INCLUDE_DIR_CMD
+          set(_PYTHON_INCLUDE_DIR_CMD
               "import distutils.sysconfig as sysconfig; print(sysconfig.get_python_inc())"
           )
         else()
-          set(PYTHON_INCLUDE_DIR_CMD
+          set(_PYTHON_INCLUDE_DIR_CMD
               "import sysconfig; print(sysconfig.get_path('include'))")
         endif()
         execute_process(
-          COMMAND "${PYTHON_EXECUTABLE}" "-c" ${PYTHON_INCLUDE_DIR_CMD}
+          COMMAND "${PYTHON_EXECUTABLE}" "-c" ${_PYTHON_INCLUDE_DIR_CMD}
           OUTPUT_VARIABLE PYTHON_INCLUDE_DIR
           ERROR_QUIET)
         string(STRIP "${PYTHON_INCLUDE_DIR}" PYTHON_INCLUDE_DIR)
@@ -279,23 +279,23 @@ macro(FINDPYTHON)
     option(PYTHON_STANDARD_LAYOUT "Enable standard Python package layout" OFF)
 
     if(PYTHON_STANDARD_LAYOUT)
-      set(PYTHON_SITELIB_CMD
+      set(_PYTHON_SITELIB_CMD
           "import sys, os; print(os.sep.join(['lib', 'python' + '.'.join(sys.version.split('.')[:2]), 'site-packages']))"
       )
     else(PYTHON_STANDARD_LAYOUT)
       if(_PYTHON_VERSION_MAJOR EQUAL "2")
-        set(PYTHON_SITELIB_CMD
+        set(_PYTHON_SITELIB_CMD
             "from distutils import sysconfig; print(sysconfig.get_python_lib(prefix='', plat_specific=False))"
         )
       else()
-        set(PYTHON_SITELIB_CMD
+        set(_PYTHON_SITELIB_CMD
             "import sysconfig; from pathlib import Path; print(Path(sysconfig.get_path('purelib')).relative_to(sysconfig.get_path('data')))"
         )
       endif()
     endif(PYTHON_STANDARD_LAYOUT)
 
     execute_process(
-      COMMAND "${PYTHON_EXECUTABLE}" "-c" "${PYTHON_SITELIB_CMD}"
+      COMMAND "${PYTHON_EXECUTABLE}" "-c" "${_PYTHON_SITELIB_CMD}"
       OUTPUT_VARIABLE PYTHON_SITELIB
       OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET)
 
