@@ -153,7 +153,7 @@ macro(FINDPYTHON)
               "import sysconfig; print(sysconfig.get_path('include'))")
         endif()
         execute_process(
-          COMMAND "${PYTHON_EXECUTABLE}" "-c" ${_PYTHON_INCLUDE_DIR_CMD}
+          COMMAND "${PYTHON_EXECUTABLE}" "-c" "${_PYTHON_INCLUDE_DIR_CMD}"
           OUTPUT_VARIABLE PYTHON_INCLUDE_DIR
           ERROR_QUIET)
         string(STRIP "${PYTHON_INCLUDE_DIR}" PYTHON_INCLUDE_DIR)
@@ -234,7 +234,7 @@ macro(FINDPYTHON)
         endif()
         message(STATUS "_PYTHON_INCLUDE_DIR_CMD ${_PYTHON_INCLUDE_DIR_CMD}")
         execute_process(
-          COMMAND "${PYTHON_EXECUTABLE}" "-c" ${_PYTHON_INCLUDE_DIR_CMD}
+          COMMAND "${PYTHON_EXECUTABLE}" "-c" "${_PYTHON_INCLUDE_DIR_CMD}"
           OUTPUT_VARIABLE PYTHON_INCLUDE_DIR
           ERROR_QUIET)
         message(STATUS "PYTHON_INCLUDE_DIR ${PYTHON_INCLUDE_DIR}")
