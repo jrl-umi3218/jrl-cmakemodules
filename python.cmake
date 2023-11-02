@@ -222,7 +222,7 @@ macro(FINDPYTHON)
       # Retrieve the corresponding value of PYTHON_INCLUDE_DIR if it is not
       # defined
       if(NOT DEFINED PYTHON_INCLUDE_DIR)
-        if(_PYTHON_VERSION_MAJOR EQUAL "2")
+        if(PYTHON_VERSION_MAJOR EQUAL "2")
           set(_PYTHON_INCLUDE_DIR_CMD
               "import distutils.sysconfig as sysconfig; print(sysconfig.get_python_inc())"
           )
@@ -282,7 +282,7 @@ macro(FINDPYTHON)
           "import sys, os; print(os.sep.join(['lib', 'python' + '.'.join(sys.version.split('.')[:2]), 'site-packages']))"
       )
     else()
-      if(_PYTHON_VERSION_MAJOR EQUAL "2")
+      if(PYTHON_VERSION_MAJOR EQUAL "2")
         set(_PYTHON_SITELIB_CMD
             "from distutils import sysconfig; print(sysconfig.get_python_lib(prefix='', plat_specific=False))"
         )
