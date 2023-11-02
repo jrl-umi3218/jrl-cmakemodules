@@ -218,11 +218,9 @@ macro(FINDPYTHON)
     message(STATUS "PythonInterp: ${PYTHON_EXECUTABLE}")
 
     # Set PYTHON_INCLUDE_DIR variables if it is not defined by the user
-    message(STATUS "PYTHON_EXECUTABLE ${PYTHON_EXECUTABLE}")
     if(DEFINED PYTHON_EXECUTABLE)
       # Retrieve the corresponding value of PYTHON_INCLUDE_DIR if it is not
       # defined
-      message(STATUS "PYTHON_INCLUDE_DIR ${PYTHON_INCLUDE_DIR}")
       if(NOT DEFINED PYTHON_INCLUDE_DIR)
         if(PYTHON_VERSION_MAJOR EQUAL "2")
           set(_PYTHON_INCLUDE_DIR_CMD
@@ -232,12 +230,10 @@ macro(FINDPYTHON)
           set(_PYTHON_INCLUDE_DIR_CMD
               "import sysconfig; print(sysconfig.get_path('include'))")
         endif()
-        message(STATUS "_PYTHON_INCLUDE_DIR_CMD ${_PYTHON_INCLUDE_DIR_CMD}")
         execute_process(
           COMMAND "${PYTHON_EXECUTABLE}" "-c" "${_PYTHON_INCLUDE_DIR_CMD}"
           OUTPUT_VARIABLE PYTHON_INCLUDE_DIR
           ERROR_QUIET)
-        message(STATUS "PYTHON_INCLUDE_DIR ${PYTHON_INCLUDE_DIR}")
         string(STRIP "${PYTHON_INCLUDE_DIR}" PYTHON_INCLUDE_DIR)
       endif()
       set(PYTHON_INCLUDE_DIRS ${PYTHON_INCLUDE_DIR})
