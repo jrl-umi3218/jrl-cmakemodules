@@ -49,6 +49,7 @@
 macro(RELEASE_SETUP)
   if(UNIX)
     find_program(GIT git)
+    string(TIMESTAMP TODAY "%Y-%m-%d")
 
     # Set LD_LIBRARY_PATH
     if(APPLE)
@@ -87,6 +88,28 @@ macro(RELEASE_SETUP)
          "Updated pyproject.toml and committed") ; fi)
 
     add_custom_target(
+      release_changelog
+      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+      COMMENT "Update CHANGELOG.md for $$VERSION on ${TODAY}"
+      COMMAND
+        echo "Updating CHANGELOG.md to $$VERSION" && sed -i.back
+        "\"s|\#\# \\[Unreleased\\]|\#\# [Unreleased]\\n\\n\#\# [$$VERSION] - ${TODAY}|\""
+        CHANGELOG.md && sed -i.back
+        "\"s|^\\[Unreleased]: \\(https://.*compare/\\)\\(v.*\\)...HEAD|[Unreleased]: \\1v$$VERSION...HEAD\\n[$$VERSION]: \\1\\2...v$$VERSION|\""
+        CHANGELOG.md && if ! (git diff --quiet CHANGELOG.md) ; then
+        (${GIT}
+         add
+         CHANGELOG.md
+         &&
+         ${GIT}
+         commit
+         -m
+         "release: Update CHANGELOG.md for $$VERSION"
+         &&
+         echo
+         "Updated CHANGELOG.md and committed") ; fi)
+
+    add_custom_target(
       release
       WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
       COMMAND
@@ -100,8 +123,11 @@ macro(RELEASE_SETUP)
                                           release_package_xml) ; fi
         # Update version in pyproject.toml if it exists
         && if [ -f "pyproject.toml" ]; then (make -C ${CMAKE_BINARY_DIR}
-                                             release_pyproject_toml) ; fi &&
-        ${GIT} tag -s v$$VERSION -m "Release of version $$VERSION." && cd
+                                             release_pyproject_toml) ; fi
+        # Update CHANGELOG.md if it exists
+        && if [ -f "CHANGELOG.md" ]; then (make -C ${CMAKE_BINARY_DIR}
+                                           release_changelog) ; fi && ${GIT}
+        tag -s v$$VERSION -m "Release of version $$VERSION." && cd
         ${CMAKE_BINARY_DIR} && cmake ${PROJECT_SOURCE_DIR} && make distcheck ||
         (echo
          "Please fix distcheck first."
