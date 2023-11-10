@@ -61,20 +61,20 @@ macro(RELEASE_SETUP)
     add_custom_target(
       release_package_xml
       WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+      COMMENT "Update package.xml"
       COMMAND
-        echo "Updating package.xml to $$VERSION" && sed -i.back
-        \"s|<version>.*</version>|<version>$$VERSION</version>|g\" package.xml
-        && rm package.xml.back && ${GIT} add package.xml && ${GIT} commit -m
-        "release: Update package.xml version to $$VERSION" && echo
+        sed -i.back \"s|<version>.*</version>|<version>$$VERSION</version>|g\"
+        package.xml && rm package.xml.back && ${GIT} add package.xml && ${GIT}
+        commit -m "release: Update package.xml version to $$VERSION" && echo
         "Updated package.xml and committed")
 
     add_custom_target(
       release_pyproject_toml
       WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+      COMMENT "Update pyproject.toml"
       COMMAND
-        echo "Updating pyproject.toml to $$VERSION" && ${PYTHON_EXECUTABLE}
-        ${PROJECT_JRL_CMAKE_MODULE_DIR}/pyproject.py $$VERSION && if !
-        (git diff --quiet pyproject.toml) ; then
+        ${PYTHON_EXECUTABLE} ${PROJECT_JRL_CMAKE_MODULE_DIR}/pyproject.py
+        $$VERSION && if ! (git diff --quiet pyproject.toml) ; then
         (${GIT}
          add
          pyproject.toml
@@ -90,9 +90,9 @@ macro(RELEASE_SETUP)
     add_custom_target(
       release_changelog
       WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-      COMMENT "Update CHANGELOG.md for $$VERSION on ${TODAY}"
+      COMMENT "Update CHANGELOG.md"
       COMMAND
-        echo "Updating CHANGELOG.md to $$VERSION" && sed -i.back
+        sed -i.back
         "\"s|\#\# \\[Unreleased\\]|\#\# [Unreleased]\\n\\n\#\# [$$VERSION] - ${TODAY}|\""
         CHANGELOG.md && sed -i.back
         "\"s|^\\[Unreleased]: \\(https://.*compare/\\)\\(v.*\\)...HEAD|[Unreleased]: \\1v$$VERSION...HEAD\\n[$$VERSION]: \\1\\2...v$$VERSION|\""
@@ -112,6 +112,7 @@ macro(RELEASE_SETUP)
     add_custom_target(
       release
       WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+      COMMENT "Create a new release"
       COMMAND
         export LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH} && export
         ${LD_LIBRARY_PATH_VARIABLE_NAME}=$ENV{${LD_LIBRARY_PATH_VARIABLE_NAME}}
