@@ -44,6 +44,8 @@ if(qpOASES_FOUND AND NOT TARGET qpOASES::qpOASES)
   set_target_properties(
     qpOASES::qpOASES PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
                                 "${qpOASES_INCLUDE_DIR}")
+  set_target_properties(qpOASES::qpOASES PROPERTIES IMPORTED_LOCATION_RELEASE
+                                                    "${qpOASES_LIBRARY}")
   set_property(
     TARGET qpOASES::qpOASES
     APPEND

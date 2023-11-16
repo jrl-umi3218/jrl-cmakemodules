@@ -38,3 +38,16 @@ set(CDD_INCLUDE_DIRS ${CDD_INCLUDE_DIR})
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(CDD DEFAULT_MSG CDD_LIBRARY CDD_INCLUDE_DIR)
 mark_as_advanced(CDD_INCLUDE_DIR CDD_LIBRARY)
+
+if(CDD_FOUND AND NOT TARGET CDD::CDD)
+  add_library(CDD::CDD SHARED IMPORTED)
+  set_target_properties(CDD::CDD PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
+                                            "${CDD_INCLUDE_DIR}")
+  set_target_properties(CDD::CDD PROPERTIES IMPORTED_LOCATION_RELEASE
+                                            "${CDD_LIBRARY}")
+  set_property(
+    TARGET CDD::CDD
+    APPEND
+    PROPERTY IMPORTED_CONFIGURATIONS "RELEASE")
+  message(STATUS "CDD found (include: ${CDD_INCLUDE_DIR}, lib: ${CDD_LIBRARY})")
+endif()
