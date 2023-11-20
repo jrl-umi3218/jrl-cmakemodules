@@ -117,29 +117,14 @@ endmacro(
   NAME
   SOURCE)
 
-# .rst: .. command:: ADD_PYTHON_UNIT_TEST (NAME SOURCE [MODULES...])
+# .rst: .. command:: COMPUTE_PYTHONPATH (result [MODULES...])
 #
-# Add a test called `NAME` that runs an equivalent of ``python ${SOURCE}``,
-# optionnaly with a `PYTHONPATH` set to `CMAKE_BINARY_DIR/MODULE_PATH` for each
-# MODULES `SOURCE` is relative to `PROJECT_SOURCE_DIR`
+# Get the `PYTHONPATH` environment variable with each `MODULES`
+# appended to it as: `CMAKE_BINARY_DIR/MODULE_PATH`
 #
 # .. note:: :command:`FINDPYTHON` should have been called first.
 #
-macro(ADD_PYTHON_UNIT_TEST NAME SOURCE)
-  if(ENABLE_COVERAGE)
-    set_property(GLOBAL PROPERTY JRL_CMAKEMODULES_HAS_PYTHON_COVERAGE ON)
-    set(PYTHONPATH "${CMAKE_INSTALL_PREFIX}/${PYTHON_SITELIB}")
-    add_test(
-      NAME ${NAME}
-      COMMAND ${PYTHON_EXECUTABLE} -m coverage run --branch -p
-              --source=${PYTHONPATH} "${PROJECT_SOURCE_DIR}/${SOURCE}"
-      WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
-  else()
-    add_test(NAME ${NAME} COMMAND ${PYTHON_EXECUTABLE}
-                                  "${PROJECT_SOURCE_DIR}/${SOURCE}")
-    set(PYTHONPATH)
-  endif()
-
+function(COMPUTE_PYTHONPATH result)
   set(MODULES "${ARGN}") # ARGN is not a variable
   foreach(MODULE_PATH IN LISTS MODULES)
     if(CMAKE_GENERATOR MATCHES "Visual Studio|Xcode")
@@ -172,11 +157,64 @@ macro(ADD_PYTHON_UNIT_TEST NAME SOURCE)
     list(APPEND ENV_VARIABLES "LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}")
     list(APPEND ENV_VARIABLES "DYLD_LIBRARY_PATH=$ENV{DYLD_LIBRARY_PATH}")
   endif(APPLE)
+
+  set(${result} ${PYTHONPATH} PARENT_SCOPE)
+endfunction()
+
+# .rst: .. command:: ADD_PYTHON_UNIT_TEST (NAME SOURCE [MODULES...])
+#
+# Add a test called `NAME` that runs an equivalent of ``python ${SOURCE}``,
+# optionnaly with a `PYTHONPATH` set to `CMAKE_BINARY_DIR/MODULE_PATH` for each
+# MODULES `SOURCE` is relative to `PROJECT_SOURCE_DIR`
+#
+# .. note:: :command:`FINDPYTHON` should have been called first.
+#
+macro(ADD_PYTHON_UNIT_TEST NAME SOURCE)
+  if(ENABLE_COVERAGE)
+    set_property(GLOBAL PROPERTY JRL_CMAKEMODULES_HAS_PYTHON_COVERAGE ON)
+    set(PYTHONPATH "${CMAKE_INSTALL_PREFIX}/${PYTHON_SITELIB}")
+    add_test(
+      NAME ${NAME}
+      COMMAND ${PYTHON_EXECUTABLE} -m coverage run --branch -p
+              --source=${PYTHONPATH} "${PROJECT_SOURCE_DIR}/${SOURCE}"
+      WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
+  else()
+    add_test(NAME ${NAME} COMMAND ${PYTHON_EXECUTABLE}
+                                  "${PROJECT_SOURCE_DIR}/${SOURCE}")
+    set(PYTHONPATH)
+  endif()
+
+  set(MODULES "${ARGN}") # ARGN is not a variable
+  compute_pythonpath(PYTHONPATH ${MODULES})
   set_tests_properties(${NAME} PROPERTIES ENVIRONMENT "${ENV_VARIABLES}")
 endmacro(
   ADD_PYTHON_UNIT_TEST
   NAME
   SOURCE)
+
+# .rst: .. command:: ADD_PYTHON_MEMORYCHECK_UNIT_TEST (NAME SOURCE [MODULES...])
+#
+# Add a test called `NAME` that runs an equivalent of
+# ``valgrind -- python ${SOURCE}``, optionnaly with a `PYTHONPATH` set to
+# `CMAKE_BINARY_DIR/MODULE_PATH` for each MODULES `SOURCE` is relative to
+# `PROJECT_SOURCE_DIR`
+#
+# .. note:: :command:`FINDPYTHON` should have been called first.
+# .. note:: Only work if valgrind is installed
+#
+macro(ADD_PYTHON_MEMORYCHECK_UNIT_TEST NAME SOURCE)
+  if(MEMORYCHECK_COMMAND AND MEMORYCHECK_COMMAND MATCHES ".*valgrind$")
+    set(TEST_FILE_NAME memorycheck_unit_test_${NAME}.cmake)
+    set(PYTHON_TEST_SCRIPT "${PROJECT_SOURCE_DIR}/${SOURCE}")
+    configure_file(memorycheck_unit_test.cmake.in ${TEST_FILE_NAME} @ONLY)
+
+    add_test(NAME ${NAME} COMMAND ${CMAKE_COMMAND} -P ${TEST_FILE_NAME})
+
+    set(MODULES "${ARGN}") # ARGN is not a variable
+    compute_pythonpath(PYTHONPATH ${MODULES})
+    set_tests_properties(${NAME} PROPERTIES ENVIRONMENT "${ENV_VARIABLES}")
+  endif()
+endmacro()
 
 # .rst: .. command:: ADD_JULIA_UNIT_TEST (NAME SOURCE [MODULES...])
 #
