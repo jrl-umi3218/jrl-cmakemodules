@@ -208,7 +208,9 @@ macro(ADD_PYTHON_MEMORYCHECK_UNIT_TEST NAME SOURCE)
   if(MEMORYCHECK_COMMAND AND MEMORYCHECK_COMMAND MATCHES ".*valgrind$")
     set(TEST_FILE_NAME memorycheck_unit_test_${NAME}.cmake)
     set(PYTHON_TEST_SCRIPT "${PROJECT_SOURCE_DIR}/${SOURCE}")
-    configure_file(memorycheck_unit_test.cmake.in ${TEST_FILE_NAME} @ONLY)
+    configure_file(
+      ${PROJECT_JRL_CMAKE_MODULE_DIR}/memorycheck_unit_test.cmake.in
+      ${TEST_FILE_NAME} @ONLY)
 
     add_test(NAME ${NAME} COMMAND ${CMAKE_COMMAND} -P ${TEST_FILE_NAME})
 
