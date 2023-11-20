@@ -119,8 +119,8 @@ endmacro(
 
 # .rst: .. command:: COMPUTE_PYTHONPATH (result [MODULES...])
 #
-# Get the `PYTHONPATH` environment variable with each `MODULES`
-# appended to it as: `CMAKE_BINARY_DIR/MODULE_PATH`
+# Get the `PYTHONPATH` environment variable with each `MODULES` appended to it
+# as: `CMAKE_BINARY_DIR/MODULE_PATH`
 #
 # .. note:: :command:`FINDPYTHON` should have been called first.
 #
@@ -158,7 +158,9 @@ function(COMPUTE_PYTHONPATH result)
     list(APPEND ENV_VARIABLES "DYLD_LIBRARY_PATH=$ENV{DYLD_LIBRARY_PATH}")
   endif(APPLE)
 
-  set(${result} ${PYTHONPATH} PARENT_SCOPE)
+  set(${result}
+      ${PYTHONPATH}
+      PARENT_SCOPE)
 endfunction()
 
 # .rst: .. command:: ADD_PYTHON_UNIT_TEST (NAME SOURCE [MODULES...])
@@ -194,13 +196,13 @@ endmacro(
 
 # .rst: .. command:: ADD_PYTHON_MEMORYCHECK_UNIT_TEST (NAME SOURCE [MODULES...])
 #
-# Add a test called `NAME` that runs an equivalent of
-# ``valgrind -- python ${SOURCE}``, optionnaly with a `PYTHONPATH` set to
+# Add a test called `NAME` that runs an equivalent of ``valgrind -- python
+# ${SOURCE}``, optionnaly with a `PYTHONPATH` set to
 # `CMAKE_BINARY_DIR/MODULE_PATH` for each MODULES `SOURCE` is relative to
 # `PROJECT_SOURCE_DIR`
 #
-# .. note:: :command:`FINDPYTHON` should have been called first.
-# .. note:: Only work if valgrind is installed
+# .. note:: :command:`FINDPYTHON` should have been called first. .. note:: Only
+# work if valgrind is installed
 #
 macro(ADD_PYTHON_MEMORYCHECK_UNIT_TEST NAME SOURCE)
   if(MEMORYCHECK_COMMAND AND MEMORYCHECK_COMMAND MATCHES ".*valgrind$")
