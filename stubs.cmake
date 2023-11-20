@@ -60,7 +60,8 @@ endmacro(LOAD_STUBGEN)
 #
 # Generate the stubs associated to a given project. If optional arguments (which
 # should be CMake targets) are supplied, then the stubs will only be generated
-# after every specified target is built.
+# after every specified target is built. On windows, the PATH will also be
+# modified to find the provided targets.
 #
 # .rst: .. variable:: module_path
 #
@@ -96,15 +97,35 @@ function(GENERATE_STUBS module_path module_name module_install_dir)
     set(PYTHONPATH ${module_path})
   endif($ENV{PYTHONPATH})
 
+  # On windows, modify the PATH to find dependencies This avoid linking issue
+  # (there is no RPATH on windows)
+  set(ENV_PATH)
+  set(optional_args ${ARGN})
+  if(WIN32)
+    foreach(py_target IN LISTS optional_args)
+      if(TARGET ${py_target})
+        set(_is_lib
+            "$<STREQUAL:$<TARGET_PROPERTY:${py_target},TYPE>,SHARED_LIBRARY>")
+        set(_target_dir "$<TARGET_FILE_DIR:${py_target}>")
+        set(_target_path $<${_is_lib}:${_target_dir}> ${_target_path})
+      endif()
+    endforeach()
+    set(_path_native $ENV{PATH})
+    file(TO_CMAKE_PATH "${_path_native}" _path_cmake)
+    set(_path_cmake ${_target_path} ${_path_cmake})
+    # TODO in cmake 3.12 :(
+    list(JOIN _path_cmake "\\\;" _path_cmake)
+    set(ENV_PATH PATH=${_path_cmake})
+  endif()
+
   add_custom_target(
     ${target_name} ALL
     COMMAND
-      ${CMAKE_COMMAND} -E env PYTHONPATH=${PYTHONPATH} "${PYTHON_EXECUTABLE}"
-      "${STUBGEN_MAIN_FILE}" "-o" "${module_path}" "${module_name}"
-      "--boost-python" --ignore-invalid signature "--no-setup-py"
-      "--root-module-suffix" ""
+      ${CMAKE_COMMAND} -E env ${ENV_PATH} ${CMAKE_COMMAND} -E env
+      PYTHONPATH=${PYTHONPATH} "${PYTHON_EXECUTABLE}" "${STUBGEN_MAIN_FILE}"
+      "-o" "${module_path}" "${module_name}" "--boost-python" --ignore-invalid
+      signature "--no-setup-py" "--root-module-suffix" ""
     VERBATIM)
-  set(optional_args ${ARGN})
   foreach(py_target IN LISTS optional_args)
     if(TARGET ${py_target})
       message(
