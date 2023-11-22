@@ -113,8 +113,9 @@ function(GENERATE_STUBS module_path module_name module_install_dir)
     set(_path_native $ENV{PATH})
     file(TO_CMAKE_PATH "${_path_native}" _path_cmake)
     set(_path_cmake ${_target_path} ${_path_cmake})
-    # TODO in cmake 3.12 :(
-    list(JOIN _path_cmake "\\\;" _path_cmake)
+    # Join the list with escaped semicolon to keep the environment path format
+    # when giving it to `add_custom_target`
+    string(REPLACE ";" "\\\;" _path_cmake "${_path_cmake}")
     set(ENV_PATH PATH=${_path_cmake})
   endif()
 
