@@ -117,14 +117,14 @@ endmacro(
   NAME
   SOURCE)
 
-# .rst: .. command:: COMPUTE_PYTHONPATH (result [MODULES...])
+# .rst: .. command:: COMPUTE_PYTHONPATH ([MODULES...])
 #
 # Get the `PYTHONPATH` environment variable with each `MODULES` appended to it
 # as: `CMAKE_BINARY_DIR/MODULE_PATH`
 #
 # .. note:: :command:`FINDPYTHON` should have been called first.
 #
-function(COMPUTE_PYTHONPATH result)
+macro(COMPUTE_PYTHONPATH)
   set(MODULES "${ARGN}") # ARGN is not a variable
   foreach(MODULE_PATH IN LISTS MODULES)
     if(CMAKE_GENERATOR MATCHES "Visual Studio|Xcode")
@@ -157,11 +157,7 @@ function(COMPUTE_PYTHONPATH result)
     list(APPEND ENV_VARIABLES "LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}")
     list(APPEND ENV_VARIABLES "DYLD_LIBRARY_PATH=$ENV{DYLD_LIBRARY_PATH}")
   endif(APPLE)
-
-  set(${result}
-      ${PYTHONPATH}
-      PARENT_SCOPE)
-endfunction()
+endmacro()
 
 # .rst: .. command:: ADD_PYTHON_UNIT_TEST (NAME SOURCE [MODULES...])
 #
@@ -187,7 +183,7 @@ macro(ADD_PYTHON_UNIT_TEST NAME SOURCE)
   endif()
 
   set(MODULES "${ARGN}") # ARGN is not a variable
-  compute_pythonpath(PYTHONPATH ${MODULES})
+  compute_pythonpath(${MODULES})
   set_tests_properties(${NAME} PROPERTIES ENVIRONMENT "${ENV_VARIABLES}")
 endmacro(
   ADD_PYTHON_UNIT_TEST
@@ -215,7 +211,7 @@ macro(ADD_PYTHON_MEMORYCHECK_UNIT_TEST NAME SOURCE)
     add_test(NAME ${NAME} COMMAND ${CMAKE_COMMAND} -P ${TEST_FILE_NAME})
 
     set(MODULES "${ARGN}") # ARGN is not a variable
-    compute_pythonpath(PYTHONPATH ${MODULES})
+    compute_pythonpath(${MODULES})
     set_tests_properties(${NAME} PROPERTIES ENVIRONMENT "${ENV_VARIABLES}")
   endif()
 endmacro()
