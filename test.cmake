@@ -120,7 +120,9 @@ endmacro(
 # .rst: .. command:: COMPUTE_PYTHONPATH ([MODULES...])
 #
 # Get the `PYTHONPATH` environment variable with each `MODULES` appended to it
-# as: `CMAKE_BINARY_DIR/MODULE_PATH`
+# as: `CMAKE_BINARY_DIR/MODULE_PATH`. This also define `ENV_VARIABLES` with
+# `PYTHONPATH=${PYTHONPATH}` and updated `LD_LIBRARY_PATH` & `DYLD_LIBRARY_PATH`
+# on APPLE systems.
 #
 # .. note:: :command:`FINDPYTHON` should have been called first.
 #
