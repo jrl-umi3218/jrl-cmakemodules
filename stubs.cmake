@@ -60,7 +60,8 @@ endmacro(LOAD_STUBGEN)
 #
 # Generate the stubs associated to a given project. If optional arguments (which
 # should be CMake targets) are supplied, then the stubs will only be generated
-# after every specified target is built.
+# after every specified target is built. On windows, the PATH will also be
+# modified to find the provided targets.
 #
 # .rst: .. variable:: module_path
 #
@@ -96,15 +97,38 @@ function(GENERATE_STUBS module_path module_name module_install_dir)
     set(PYTHONPATH ${module_path})
   endif($ENV{PYTHONPATH})
 
+  # On Windows with Python 3.8+, Python doesn't search DLL in PATH anymore.
+  #
+  # DLL are build in a different directory than the module, we must then specify
+  # to pybind11_stubgen where to find it with the
+  # PYBIND11_STUBGEN_ADD_DLL_DIRECTORY environment variable.
+  #
+  # See https://github.com/python/cpython/issues/87339#issuecomment-1093902060
+  set(ENV_DLL_PATH)
+  set(optional_args ${ARGN})
+  if(WIN32)
+    foreach(py_target IN LISTS optional_args)
+      if(TARGET ${py_target})
+        set(_is_lib
+            "$<STREQUAL:$<TARGET_PROPERTY:${py_target},TYPE>,SHARED_LIBRARY>")
+        set(_target_dir "$<TARGET_FILE_DIR:${py_target}>")
+        set(_target_path $<${_is_lib}:${_target_dir}> ${_target_path})
+      endif()
+    endforeach()
+    # Join the list with escaped semicolon to keep the environment path format
+    # when giving it to `add_custom_target`
+    string(REPLACE ";" "\\\;" _join_target_path "${_target_path}")
+    set(ENV_DLL_PATH PYBIND11_STUBGEN_ADD_DLL_DIRECTORY=${_join_target_path})
+  endif()
+
   add_custom_target(
     ${target_name} ALL
     COMMAND
-      ${CMAKE_COMMAND} -E env PYTHONPATH=${PYTHONPATH} "${PYTHON_EXECUTABLE}"
-      "${STUBGEN_MAIN_FILE}" "-o" "${module_path}" "${module_name}"
-      "--boost-python" --ignore-invalid signature "--no-setup-py"
-      "--root-module-suffix" ""
+      ${CMAKE_COMMAND} -E env ${ENV_DLL_PATH} ${CMAKE_COMMAND} -E env
+      PYTHONPATH=${PYTHONPATH} "${PYTHON_EXECUTABLE}" "${STUBGEN_MAIN_FILE}"
+      "-o" "${module_path}" "${module_name}" "--boost-python" --ignore-invalid
+      signature "--no-setup-py" "--root-module-suffix" ""
     VERBATIM)
-  set(optional_args ${ARGN})
   foreach(py_target IN LISTS optional_args)
     if(TARGET ${py_target})
       message(
