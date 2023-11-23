@@ -97,9 +97,14 @@ function(GENERATE_STUBS module_path module_name module_install_dir)
     set(PYTHONPATH ${module_path})
   endif($ENV{PYTHONPATH})
 
-  # On windows, modify the PATH to find dependencies This avoid linking issue
-  # (there is no RPATH on windows)
-  set(ENV_PATH)
+  # On Windows with Python 3.8+, Python doesn't search DLL in PATH anymore.
+  #
+  # DLL are build in a different directory than the module, we must then specify
+  # to pybind11_stubgen where to find it with the
+  # PYBIND11_STUBGEN_ADD_DLL_DIRECTORY environment variable.
+  #
+  # See https://github.com/python/cpython/issues/87339#issuecomment-1093902060
+  set(ENV_DLL_PATH)
   set(optional_args ${ARGN})
   if(WIN32)
     foreach(py_target IN LISTS optional_args)
@@ -110,19 +115,16 @@ function(GENERATE_STUBS module_path module_name module_install_dir)
         set(_target_path $<${_is_lib}:${_target_dir}> ${_target_path})
       endif()
     endforeach()
-    set(_path_native $ENV{PATH})
-    file(TO_CMAKE_PATH "${_path_native}" _path_cmake)
-    set(_path_cmake ${_target_path} ${_path_cmake})
     # Join the list with escaped semicolon to keep the environment path format
     # when giving it to `add_custom_target`
-    string(REPLACE ";" "\\\;" _path_cmake "${_path_cmake}")
-    set(ENV_PATH PATH=${_path_cmake})
+    string(REPLACE ";" "\\\;" _join_target_path "${_target_path}")
+    set(ENV_DLL_PATH PYBIND11_STUBGEN_ADD_DLL_DIRECTORY=${_join_target_path})
   endif()
 
   add_custom_target(
     ${target_name} ALL
     COMMAND
-      ${CMAKE_COMMAND} -E env ${ENV_PATH} ${CMAKE_COMMAND} -E env
+      ${CMAKE_COMMAND} -E env ${ENV_DLL_PATH} ${CMAKE_COMMAND} -E env
       PYTHONPATH=${PYTHONPATH} "${PYTHON_EXECUTABLE}" "${STUBGEN_MAIN_FILE}"
       "-o" "${module_path}" "${module_name}" "--boost-python" --ignore-invalid
       signature "--no-setup-py" "--root-module-suffix" ""
