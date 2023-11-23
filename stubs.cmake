@@ -26,7 +26,7 @@ set(CURRENT_FILE_PATH
 #
 macro(LOAD_STUBGEN)
   # Handle optional argument
-  set(GIT_TAG "master")
+  set(GIT_TAG "topic/add_dll_directory")
   set(extra_macro_args ${ARGN})
   list(LENGTH extra_macro_args num_extra_args)
   if(${num_extra_args} GREATER 0)
