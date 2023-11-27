@@ -149,7 +149,7 @@ function(COMPUTE_PYTHONPATH result)
   if(WIN32)
     # ensure that severals paths stay together as ENV variable PYTHONPATH when
     # passed to python test via PROPERTIES
-    string(REPLACE ";" "\;" PYTHONPATH_STR "${PYTHONPATH}")
+    string(REPLACE ";" "\\\;" PYTHONPATH_STR "${PYTHONPATH}")
   else(WIN32)
     string(REPLACE ";" "${PATHSEP}" PYTHONPATH_STR "${PYTHONPATH}")
   endif(WIN32)
