@@ -147,6 +147,15 @@ macro(CHECK_MINIMAL_CXX_STANDARD STANDARD)
         STATUS
           "C++ standard sufficient: Minimal required ${_MINIMAL_CXX_STANDARD}, currently defined: ${_CURRENT_STANDARD}"
       )
+      # current C++ standard was not set in CMake but we enforce it
+      if(NOT DEFINED CMAKE_CXX_STANDARD AND (ENFORCE_MINIMAL_CXX_STANDARD
+                                             OR MINIMAL_CXX_STANDARD_ENFORCE))
+        message(
+          STATUS
+            "CMAKE_CXX_STANDARD was not set: automatically set to currently defined standard ${_CURRENT_STANDARD}"
+        )
+        set(CMAKE_CXX_STANDARD ${_CURRENT_STANDARD})
+      endif()
     endif() # requested minimum is higher than the currently selected
   endif()
 endmacro()
