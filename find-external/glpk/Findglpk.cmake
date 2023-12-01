@@ -39,3 +39,17 @@ include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(glpk DEFAULT_MSG glpk_LIBRARY
                                   glpk_INCLUDE_DIR)
 mark_as_advanced(glpk_INCLUDE_DIR glpk_LIBRARY)
+
+if(glpk_FOUND AND NOT TARGET glpk::glpk)
+  add_library(glpk::glpk SHARED IMPORTED)
+  set_target_properties(glpk::glpk PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
+                                              "${glpk_INCLUDE_DIR}")
+  set_target_properties(glpk::glpk PROPERTIES IMPORTED_LOCATION_RELEASE
+                                              "${glpk_LIBRARY}")
+  set_property(
+    TARGET glpk::glpk
+    APPEND
+    PROPERTY IMPORTED_CONFIGURATIONS "RELEASE")
+  message(
+    STATUS "glpk found (include: ${glpk_INCLUDE_DIR}, lib: ${glpk_LIBRARY})")
+endif()

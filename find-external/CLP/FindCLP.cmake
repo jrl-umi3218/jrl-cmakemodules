@@ -37,3 +37,16 @@ set(CLP_INCLUDE_DIRS ${CLP_INCLUDE_DIR})
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(CLP DEFAULT_MSG CLP_LIBRARY CLP_INCLUDE_DIR)
 mark_as_advanced(CLP_INCLUDE_DIR CLP_LIBRARY)
+
+if(CLP_FOUND AND NOT TARGET CLP::CLP)
+  add_library(CLP::CLP SHARED IMPORTED)
+  set_target_properties(CLP::CLP PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
+                                            "${CLP_INCLUDE_DIR}")
+  set_target_properties(CLP::CLP PROPERTIES IMPORTED_LOCATION_RELEASE
+                                            "${CLP_LIBRARY}")
+  set_property(
+    TARGET CLP::CLP
+    APPEND
+    PROPERTY IMPORTED_CONFIGURATIONS "RELEASE")
+  message(STATUS "CLP found (include: ${CLP_INCLUDE_DIR}, lib: ${CLP_LIBRARY})")
+endif()

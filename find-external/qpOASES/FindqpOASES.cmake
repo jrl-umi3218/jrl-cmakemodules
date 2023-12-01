@@ -38,3 +38,22 @@ include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(qpOASES DEFAULT_MSG qpOASES_LIBRARY
                                   qpOASES_INCLUDE_DIR)
 mark_as_advanced(qpOASES_INCLUDE_DIR qpOASES_LIBRARY)
+
+if(qpOASES_FOUND AND NOT TARGET qpOASES::qpOASES)
+  add_library(qpOASES::qpOASES SHARED IMPORTED)
+  set_target_properties(
+    qpOASES::qpOASES PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
+                                "${qpOASES_INCLUDE_DIR}")
+  set_target_properties(qpOASES::qpOASES PROPERTIES IMPORTED_LOCATION_RELEASE
+                                                    "${qpOASES_LIBRARY}")
+  set_property(
+    TARGET qpOASES::qpOASES
+    APPEND
+    PROPERTY IMPORTED_CONFIGURATIONS "RELEASE")
+  set_target_properties(qpOASES::qpOASES
+                        PROPERTIES IMPORTED_LINK_INTERFACE_LANGUAGES "CXX")
+  message(
+    STATUS
+      "qpOASES found (include: ${qpOASES_INCLUDE_DIR}, lib: ${qpOASES_LIBRARY})"
+  )
+endif()
