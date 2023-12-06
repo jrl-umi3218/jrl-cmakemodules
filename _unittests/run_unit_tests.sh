@@ -1,6 +1,9 @@
 #!/bin/bash
 
-unittests="python cpp dependency"
+set -e
+set -x
+
+unittests="python cpp dependency catkin"
 
 # Code for running a specific unit test
 # For unit test foo, function `run_foo` is executed if defined.
@@ -21,6 +24,33 @@ function run_default()
 function run_cpp()
 {
   run_default $here/cpp
+}
+
+function run_catkin()
+{
+  $CMAKE_BIN ${cmake_options} -DFORCE_DOT_CATKIN_CREATION=ON "${here}/catkin"
+  make install
+  if [[ ! -f ${here}/install/.catkin ]]; then
+    echo ".catkin file should have been created"
+    exit 1
+  fi
+  make uninstall
+  if [[ -f ${here}/install/.catkin ]]; then
+    echo ".catkin file should have been removed"
+    exit 1
+  fi
+  cd ${here}/build/
+  rm -rf ${here}/build/catkin/
+  mkdir -p ${here}/build/catkin/
+  cd catkin
+  touch ${here}/install/.catkin
+  $CMAKE_BIN ${cmake_options} -DFORCE_DOT_CATKIN_CREATION=OFF "${here}/catkin"
+  make install
+  make uninstall
+  if [[ ! -f ${here}/install/.catkin ]]; then
+    echo ".catkin file should NOT have been removed"
+    exit 1
+  fi
 }
 
 # The code below run all the unit tests
