@@ -1,5 +1,8 @@
 #!/bin/bash
 
+set -e
+set -x
+
 unittests="python cpp dependency catkin"
 
 # Code for running a specific unit test
