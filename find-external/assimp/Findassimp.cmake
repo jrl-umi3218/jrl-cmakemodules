@@ -2,12 +2,12 @@
 find_package(assimp NO_MODULE QUIET)
 
 if(assimp_FOUND)
-  # On Ubuntu 20.04, the Assimp finder is broken
-  #  - INTERFACE_LINK_LIBRARIES is not defined
-  #  - INTERFACE_INCLUDE_DIRECTORIES is set to a wrong path
-  # ASSIMP_INCLUDE_DIRS and IMPORTED_LOCATION_RELEASE are well computed,
-  # so we can redefine some target properties with them
-  get_target_property(_ASSIMP_INC_DIR assimp::assimp INTERFACE_INCLUDE_DIRECTORIES)
+  # On Ubuntu 20.04, the Assimp finder is broken - INTERFACE_LINK_LIBRARIES is
+  # not defined - INTERFACE_INCLUDE_DIRECTORIES is set to a wrong path
+  # ASSIMP_INCLUDE_DIRS and IMPORTED_LOCATION_RELEASE are well computed, so we
+  # can redefine some target properties with them
+  get_target_property(_ASSIMP_INC_DIR assimp::assimp
+                      INTERFACE_INCLUDE_DIRECTORIES)
   set(_ASSIMP_TARGET_OK TRUE)
   foreach(v ${_ASSIMP_INC_DIR})
     if(NOT EXISTS ${v})
@@ -15,10 +15,12 @@ if(assimp_FOUND)
     endif()
   endforeach()
   if(NOT _ASSIMP_TARGET_OK)
-    get_target_property(_ASSIMP_IMP_LOC_RELEASE assimp::assimp IMPORTED_LOCATION_RELEASE)
-    set_target_properties(assimp::assimp PROPERTIES
-      INTERFACE_INCLUDE_DIRECTORIES "${ASSIMP_INCLUDE_DIRS}"
-      IMPORTED_LOCATION "${_ASSIMP_IMP_LOC_RELEASE}")
+    get_target_property(_ASSIMP_IMP_LOC_RELEASE assimp::assimp
+                        IMPORTED_LOCATION_RELEASE)
+    set_target_properties(
+      assimp::assimp
+      PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${ASSIMP_INCLUDE_DIRS}"
+                 IMPORTED_LOCATION "${_ASSIMP_IMP_LOC_RELEASE}")
   endif()
 else()
   if(CMAKE_SIZEOF_VOID_P EQUAL 8)
