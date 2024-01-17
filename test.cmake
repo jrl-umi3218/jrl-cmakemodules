@@ -98,7 +98,7 @@ macro(ADD_UNIT_TEST NAME)
 
   add_dependencies(build_tests ${NAME})
 
-  add_test(${NAME} ${RUNTIME_OUTPUT_DIRECTORY}/${NAME})
+  add_test(NAME ${NAME} COMMAND ${NAME})
   # Support definition of DYLD_LIBRARY_PATH for OSX systems
   if(APPLE)
     set_tests_properties(
