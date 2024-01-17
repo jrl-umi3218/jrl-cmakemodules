@@ -33,15 +33,15 @@
 // is handled by the compiler, see: http://gcc.gnu.org/wiki/Visibility
 //
 // Also define explicit template instantiation keyword
-// This keyword should be inline template but when mixed with
+// This keyword should be extern template but when mixed with
 // dllexport on Windows this generate a warning.
-// The inline keyword is then remove when mixed with dllexport.
+// The extern keyword is then remove when mixed with dllexport.
 # if defined _WIN32 || defined __CYGWIN__
 // On Microsoft Windows, use dllimport and dllexport to tag symbols.
 #  define @LIBRARY_NAME@_DLLIMPORT __declspec(dllimport)
 #  define @LIBRARY_NAME@_DLLEXPORT __declspec(dllexport)
 #  define @LIBRARY_NAME@_DLLLOCAL
-#  define @LIBRARY_NAME@_EXP_INST_DECL_IMPORT inline template
+#  define @LIBRARY_NAME@_EXP_INST_DECL_IMPORT extern template
 #  define @LIBRARY_NAME@_EXP_INST_DECL_EXPORT template
 # else
 // On Linux, for GCC >= 4, tag symbols using GCC extension.
@@ -49,15 +49,15 @@
 #   define @LIBRARY_NAME@_DLLIMPORT __attribute__ ((visibility("default")))
 #   define @LIBRARY_NAME@_DLLEXPORT __attribute__ ((visibility("default")))
 #   define @LIBRARY_NAME@_DLLLOCAL  __attribute__ ((visibility("hidden")))
-#   define @LIBRARY_NAME@_EXP_INST_DECL_IMPORT inline template
-#   define @LIBRARY_NAME@_EXP_INST_DECL_EXPORT inline template
+#   define @LIBRARY_NAME@_EXP_INST_DECL_IMPORT extern template
+#   define @LIBRARY_NAME@_EXP_INST_DECL_EXPORT extern template
 #  else
 // Otherwise (GCC < 4 or another compiler is used), export everything.
 #   define @LIBRARY_NAME@_DLLIMPORT
 #   define @LIBRARY_NAME@_DLLEXPORT
 #   define @LIBRARY_NAME@_DLLLOCAL
-#   define @LIBRARY_NAME@_EXP_INST_DECL_IMPORT inline template
-#   define @LIBRARY_NAME@_EXP_INST_DECL_EXPORT inline template
+#   define @LIBRARY_NAME@_EXP_INST_DECL_IMPORT extern template
+#   define @LIBRARY_NAME@_EXP_INST_DECL_EXPORT extern template
 #  endif // __GNUC__ >= 4
 # endif // defined _WIN32 || defined __CYGWIN__
 
@@ -67,7 +67,7 @@
 // instantiation keyword.
 #  define @LIBRARY_NAME@_DLLAPI
 #  define @LIBRARY_NAME@_LOCAL
-#  define @LIBRARY_NAME@_EXP_INST_DECL inline template
+#  define @LIBRARY_NAME@_EXP_INST_DECL extern template
 # else
 // Depending on whether one is building or using the
 // library define DLLAPI to import or export and
