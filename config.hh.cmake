@@ -31,37 +31,53 @@
 //
 // On Linux, set the visibility accordingly. If C++ symbol visibility
 // is handled by the compiler, see: http://gcc.gnu.org/wiki/Visibility
+//
+// Also define explicit template instantiation keyword
+// This keyword should be extern template but when mixed with
+// dllexport on Windows this generate a warning.
+// The extern keyword is then remove when mixed with dllexport.
 # if defined _WIN32 || defined __CYGWIN__
 // On Microsoft Windows, use dllimport and dllexport to tag symbols.
 #  define @LIBRARY_NAME@_DLLIMPORT __declspec(dllimport)
 #  define @LIBRARY_NAME@_DLLEXPORT __declspec(dllexport)
 #  define @LIBRARY_NAME@_DLLLOCAL
+#  define @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DECLARATION_IMPORT extern template
+#  define @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DECLARATION_EXPORT template
 # else
 // On Linux, for GCC >= 4, tag symbols using GCC extension.
 #  if __GNUC__ >= 4
 #   define @LIBRARY_NAME@_DLLIMPORT __attribute__ ((visibility("default")))
 #   define @LIBRARY_NAME@_DLLEXPORT __attribute__ ((visibility("default")))
 #   define @LIBRARY_NAME@_DLLLOCAL  __attribute__ ((visibility("hidden")))
+#   define @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DECLARATION_IMPORT extern template
+#   define @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DECLARATION_EXPORT extern template
 #  else
 // Otherwise (GCC < 4 or another compiler is used), export everything.
 #   define @LIBRARY_NAME@_DLLIMPORT
 #   define @LIBRARY_NAME@_DLLEXPORT
 #   define @LIBRARY_NAME@_DLLLOCAL
+#   define @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DECLARATION_IMPORT extern template
+#   define @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DECLARATION_EXPORT extern template
 #  endif // __GNUC__ >= 4
 # endif // defined _WIN32 || defined __CYGWIN__
 
 # ifdef @LIBRARY_NAME@_STATIC
 // If one is using the library statically, get rid of
-// extra information.
+// extra information and use standard explicit template
+// instantiation keyword.
 #  define @LIBRARY_NAME@_DLLAPI
 #  define @LIBRARY_NAME@_LOCAL
+#  define @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DECLARATION extern template
 # else
 // Depending on whether one is building or using the
-// library define DLLAPI to import or export.
+// library define DLLAPI to import or export and
+// define the right explicit template instantiation keyword.
 #  ifdef @EXPORT_SYMBOL@
 #   define @LIBRARY_NAME@_DLLAPI @LIBRARY_NAME@_DLLEXPORT
+#   define @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DECLARATION @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DECLARATION_EXPORT
 #  else
 #   define @LIBRARY_NAME@_DLLAPI @LIBRARY_NAME@_DLLIMPORT
+#   define @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DECLARATION @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DECLARATION_IMPORT
 #  endif // @LIBRARY_NAME@_EXPORTS
 #  define @LIBRARY_NAME@_LOCAL @LIBRARY_NAME@_DLLLOCAL
 # endif // @LIBRARY_NAME@_STATIC
