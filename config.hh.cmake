@@ -32,32 +32,40 @@
 // On Linux, set the visibility accordingly. If C++ symbol visibility
 // is handled by the compiler, see: http://gcc.gnu.org/wiki/Visibility
 //
-// Also define explicit template instantiation keyword
-// This keyword should be extern template but when mixed with
-// dllexport on Windows this generate a warning.
-// The extern keyword is then remove when mixed with dllexport.
+// Explicit template instantiation on Windows need to add
+// dllexport on the definition and dllimport on the declaration.
+// The XXX_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI macro
+// should be set on the declaration while
+// the XXX_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI macro
+// should be set on the definition.
 # if defined _WIN32 || defined __CYGWIN__
 // On Microsoft Windows, use dllimport and dllexport to tag symbols.
 #  define @LIBRARY_NAME@_DLLIMPORT __declspec(dllimport)
 #  define @LIBRARY_NAME@_DLLEXPORT __declspec(dllexport)
 #  define @LIBRARY_NAME@_DLLLOCAL
-#  define @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DECLARATION_IMPORT extern template
-#  define @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DECLARATION_EXPORT template
+#  define @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DECLARATION_DLLIMPORT __declspec(dllimport)
+#  define @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DECLARATION_DLLEXPORT
+#  define @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DEFINITION_DLLIMPORT __declspec(dllimport)
+#  define @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DEFINITION_DLLEXPORT __declspec(dllexport)
 # else
 // On Linux, for GCC >= 4, tag symbols using GCC extension.
 #  if __GNUC__ >= 4
 #   define @LIBRARY_NAME@_DLLIMPORT __attribute__ ((visibility("default")))
 #   define @LIBRARY_NAME@_DLLEXPORT __attribute__ ((visibility("default")))
 #   define @LIBRARY_NAME@_DLLLOCAL  __attribute__ ((visibility("hidden")))
-#   define @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DECLARATION_IMPORT extern template
-#   define @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DECLARATION_EXPORT extern template
+#   define @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DECLARATION_DLLIMPORT __attribute__ ((visibility("default")))
+#   define @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DECLARATION_DLLEXPORT __attribute__ ((visibility("default")))
+#   define @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DEFINITION_DLLIMPORT
+#   define @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DEFINITION_DLLEXPORT
 #  else
 // Otherwise (GCC < 4 or another compiler is used), export everything.
 #   define @LIBRARY_NAME@_DLLIMPORT
 #   define @LIBRARY_NAME@_DLLEXPORT
 #   define @LIBRARY_NAME@_DLLLOCAL
-#   define @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DECLARATION_IMPORT extern template
-#   define @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DECLARATION_EXPORT extern template
+#   define @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DECLARATION_DLLIMPORT
+#   define @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DECLARATION_DLLEXPORT
+#   define @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DEFINITION_DLLIMPORT
+#   define @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DEFINITION_DLLEXPORT
 #  endif // __GNUC__ >= 4
 # endif // defined _WIN32 || defined __CYGWIN__
 
@@ -74,10 +82,12 @@
 // define the right explicit template instantiation keyword.
 #  ifdef @EXPORT_SYMBOL@
 #   define @LIBRARY_NAME@_DLLAPI @LIBRARY_NAME@_DLLEXPORT
-#   define @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DECLARATION @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DECLARATION_EXPORT
+#   define @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DECLARATION_DLLEXPORT
+#   define @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DEFINITION_DLLEXPORT
 #  else
 #   define @LIBRARY_NAME@_DLLAPI @LIBRARY_NAME@_DLLIMPORT
-#   define @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DECLARATION @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DECLARATION_IMPORT
+#   define @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DECLARATION_DLLIMPORT
+#   define @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DEFINITION_DLLIMPORT
 #  endif // @LIBRARY_NAME@_EXPORTS
 #  define @LIBRARY_NAME@_LOCAL @LIBRARY_NAME@_DLLLOCAL
 # endif // @LIBRARY_NAME@_STATIC
