@@ -547,7 +547,7 @@ macro(FIND_SCIPY)
     # Retrive SCIPY_VERSION
     execute_process(
       COMMAND "${PYTHON_EXECUTABLE}" "-c"
-      "import scipy; print (scipy.__version__)"
+              "import scipy; print (scipy.__version__)"
       OUTPUT_VARIABLE SCIPY_VERSION
       ERROR_QUIET)
     string(REGEX REPLACE "\n$" "" SCIPY_VERSION "${SCIPY_VERSION}")
