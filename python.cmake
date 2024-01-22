@@ -1,4 +1,4 @@
-# Copyright (C) 2008-2021 LAAS-CNRS, JRL AIST-CNRS, INRIA.
+# Copyright (C) 2008-2024 LAAS-CNRS, JRL AIST-CNRS, INRIA.
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -526,6 +526,31 @@ macro(FIND_NUMPY)
       ERROR_QUIET)
     string(REGEX REPLACE "\n$" "" NUMPY_VERSION "${NUMPY_VERSION}")
     message(STATUS "  NUMPY_VERSION=${NUMPY_VERSION}")
+  endif()
+endmacro()
+
+# .rst: .. command:: FIND_SCIPY()
+#
+# Detect scipy module.
+#
+macro(FIND_SCIPY)
+  message(STATUS "Checking for SciPy")
+  execute_process(
+    COMMAND "${PYTHON_EXECUTABLE}" "-c" "import scipy; print (True)"
+    OUTPUT_VARIABLE IS_SCIPY
+    ERROR_QUIET)
+
+  if(NOT IS_SCIPY)
+    message(FATAL_ERROR "Failed to detect scipy")
+  else()
+    # Retrive SCIPY_VERSION
+    execute_process(
+      COMMAND "${PYTHON_EXECUTABLE}" "-c"
+              "import scipy; print (scipy.__version__)"
+      OUTPUT_VARIABLE SCIPY_VERSION
+      ERROR_QUIET)
+    string(REGEX REPLACE "\n$" "" SCIPY_VERSION "${SCIPY_VERSION}")
+    message(STATUS "  SCIPY_VERSION=${SCIPY_VERSION}")
   endif()
 endmacro()
 
