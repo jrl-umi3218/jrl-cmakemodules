@@ -534,7 +534,6 @@ endmacro()
 # Detect scipy module.
 #
 macro(FIND_SCIPY)
-  # Detect numpy.
   message(STATUS "Checking for SciPy")
   execute_process(
     COMMAND "${PYTHON_EXECUTABLE}" "-c" "import scipy; print (True)"
