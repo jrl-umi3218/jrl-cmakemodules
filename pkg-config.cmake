@@ -824,7 +824,6 @@ macro(PKG_CONFIG_APPEND_LIBS LIBS)
       if(TARGET ${LIB})
         get_target_property(TARGET_TYPE ${LIB} TYPE)
 
-        message(STATUS "target_type: ${TARGET_TYPE}")
         # CMake 3.16 until 3.19 do not properly handle the properties for
         # INTERFACE.
         if(${TARGET_TYPE} STREQUAL "INTERFACE_LIBRARY")
