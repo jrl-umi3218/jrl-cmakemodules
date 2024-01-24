@@ -1,3 +1,8 @@
+# Skip if assimp::assimp is already defined
+if(TARGET assimp::assimp)
+  return()
+endif()
+
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
   set(ASSIMP_ARCHITECTURE "64")
 elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
