@@ -19,8 +19,7 @@ macro(_SETUP_PROJECT_WARNINGS)
   # -Wmissing-declarations is disabled for now as older GCC version does not
   # support it but CMake doest not check for the flag acceptance correctly.
 
-  if(UNIX)
-    set(FLAGS
+  set(GNU_FLAGS
         -pedantic
         -Wno-long-long
         -Wall
@@ -30,38 +29,38 @@ macro(_SETUP_PROJECT_WARNINGS)
         -Wformat
         -Wwrite-strings
         -Wconversion)
-    foreach(FLAG ${FLAGS})
-      check_cxx_compiler_flag(${FLAG} R${FLAG})
-      if(${R${FLAG}})
-        set(WARNING_CXX_FLAGS "${WARNING_CXX_FLAGS} ${FLAG}")
-      endif(${R${FLAG}})
-    endforeach(FLAG ${FLAGS})
-
-    if(NOT DEFINED CXX_DISABLE_WERROR)
-      set(WARNING_CXX_FLAGS "-Werror ${WARNING_CXX_FLAGS}")
-    endif(NOT DEFINED CXX_DISABLE_WERROR)
-  endif(UNIX)
+  if(NOT DEFINED CXX_DISABLE_WERROR)
+    list(APPEND GNU_FLAGS -Werror)
+  endif(NOT DEFINED CXX_DISABLE_WERROR)
 
   # For win32 systems, it is impossible to use Wall, especially with boost,
   # which is way too verbose The default levels (W3/W4) are enough The next
   # macro remove warnings on deprecations due to stl.
-  if(MSVC)
-    set(WARNING_CXX_FLAGS "-D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS")
-    set(WARNING_CXX_FLAGS "${WARNING_CXX_FLAGS} -D_CRT_SECURE_NO_DEPRECATE")
+  set(MSVC_FLAGS
+    -D_SCL_SECURE_NO_WARNINGS
+    -D_CRT_SECURE_NO_WARNINGS
+    -D_CRT_SECURE_NO_DEPRECATE
     # -- The following warnings are removed to highlight the output C4101 The
     # local variable is never used removed since happens frequently in headers.
-    set(WARNING_CXX_FLAGS "${WARNING_CXX_FLAGS} /wd4101")
+    /wd4101
     # C4250 'class1' : inherits 'class2::member' via dominance
-    set(WARNING_CXX_FLAGS "${WARNING_CXX_FLAGS} /wd4250")
+    /wd4250
     # C4251 class 'type' needs to have dll-interface to be used by clients of
     # class 'type2' ~ in practice, raised by the classes that have non-dll
     # attribute (such as std::vector)
-    set(WARNING_CXX_FLAGS "${WARNING_CXX_FLAGS} /wd4251")
+    /wd4251
     # C4275 non - DLL-interface used as base for DLL-interface
-    set(WARNING_CXX_FLAGS "${WARNING_CXX_FLAGS} /wd4275")
+    /wd4275
     # C4355 "this" used in base member initializer list
-    set(WARNING_CXX_FLAGS "${WARNING_CXX_FLAGS} /wd4355")
-  endif()
+    /wd4355
+    )
+
+  CXX_FLAGS_BY_COMPILER_FRONTEND(
+    GNU ${GNU_FLAGS}
+    MSVC ${MSVC_FLAGS}
+    OUTPUT WARNING_CXX_FLAGS_LIST
+    FILTER)
+  string(REPLACE ";" " " WARNING_CXX_FLAGS "${WARNING_CXX_FLAGS_LIST}")
 
   set(CMAKE_CXX_FLAGS "${WARNING_CXX_FLAGS} ${CMAKE_CXX_FLAGS}")
 
