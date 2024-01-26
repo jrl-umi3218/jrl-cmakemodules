@@ -72,7 +72,8 @@ endmacro(_SETUP_PROJECT_WARNINGS)
 .. command:: CXX_FLAGS_BY_COMPILER_FRONTEND(<CLANG [<flags1>...]>
                                             <GCC   [<flags1>...]>
                                             <MSVC  [<flags1>...]>
-                                            OUTPUT flags)
+                                            OUTPUT flags
+                                            <FILTER>)
 
 Detect the compiler frontend (the command line interface) and output the
 corresponding ``CXX_FLAGS``.
@@ -87,6 +88,8 @@ Lst of flags for MSVC compiler frontend (MSVC, ClangCl)
 Detected compiler frontend flags are then outputed in the ``OUTPUT``
 parameter.
 
+Optional ``FILTER`` parameter filter outputed flags with check_cxx_compiler_flag.
+
 Example
 ^^^^^^^
 
@@ -95,11 +98,12 @@ Example
     GNU -Wno-conversion -Wno-comment
     CLANG -Wno-conversion -Wno-comment -Wno-self-assign-overloaded
     MSVC  "/bigobj"
-    OUTPUT COMPLIE_OPTIONS)
+    OUTPUT COMPLIE_OPTIONS
+    FILTER)
 #]=======================================================================]
 
 function(CXX_FLAGS_BY_COMPILER_FRONTEND)
-  set(options)
+  set(options FILTER)
   set(oneValueArgs OUTPUT)
   set(multiValueArgs GNU CLANG MSVC)
   cmake_parse_arguments(ARGS "${options}" "${oneValueArgs}" "${multiValueArgs}"
@@ -122,7 +126,18 @@ function(CXX_FLAGS_BY_COMPILER_FRONTEND)
                     "No flags outputed")
   endif()
 
+  if(ARGS_FILTER)
+    foreach(FLAG ${FLAGS})
+      check_cxx_compiler_flag(${FLAG} res_${FLAG})
+      if(${res_${FLAG}})
+        list(APPEND FILTERED_FLAGS ${FLAG})
+      endif()
+    endforeach()
+  else()
+    set(FILTERED_FLAGS ${FLAGS})
+  endif()
+
   set(${ARGS_OUTPUT}
-      ${FLAGS}
+      ${FILTERED_FLAGS}
       PARENT_SCOPE)
 endfunction()
