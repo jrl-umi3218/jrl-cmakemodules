@@ -20,15 +20,15 @@ macro(_SETUP_PROJECT_WARNINGS)
   # support it but CMake doest not check for the flag acceptance correctly.
 
   set(GNU_FLAGS
-        -pedantic
-        -Wno-long-long
-        -Wall
-        -Wextra
-        -Wcast-align
-        -Wcast-qual
-        -Wformat
-        -Wwrite-strings
-        -Wconversion)
+      -pedantic
+      -Wno-long-long
+      -Wall
+      -Wextra
+      -Wcast-align
+      -Wcast-qual
+      -Wformat
+      -Wwrite-strings
+      -Wconversion)
   if(NOT DEFINED CXX_DISABLE_WERROR)
     list(APPEND GNU_FLAGS -Werror)
   endif(NOT DEFINED CXX_DISABLE_WERROR)
@@ -37,28 +37,31 @@ macro(_SETUP_PROJECT_WARNINGS)
   # which is way too verbose The default levels (W3/W4) are enough The next
   # macro remove warnings on deprecations due to stl.
   set(MSVC_FLAGS
-    -D_SCL_SECURE_NO_WARNINGS
-    -D_CRT_SECURE_NO_WARNINGS
-    -D_CRT_SECURE_NO_DEPRECATE
-    # -- The following warnings are removed to highlight the output C4101 The
-    # local variable is never used removed since happens frequently in headers.
-    /wd4101
-    # C4250 'class1' : inherits 'class2::member' via dominance
-    /wd4250
-    # C4251 class 'type' needs to have dll-interface to be used by clients of
-    # class 'type2' ~ in practice, raised by the classes that have non-dll
-    # attribute (such as std::vector)
-    /wd4251
-    # C4275 non - DLL-interface used as base for DLL-interface
-    /wd4275
-    # C4355 "this" used in base member initializer list
-    /wd4355
-    )
+      -D_SCL_SECURE_NO_WARNINGS
+      -D_CRT_SECURE_NO_WARNINGS
+      -D_CRT_SECURE_NO_DEPRECATE
+      # -- The following warnings are removed to highlight the output C4101 The
+      # local variable is never used removed since happens frequently in
+      # headers.
+      /wd4101
+      # C4250 'class1' : inherits 'class2::member' via dominance
+      /wd4250
+      # C4251 class 'type' needs to have dll-interface to be used by clients of
+      # class 'type2' ~ in practice, raised by the classes that have non-dll
+      # attribute (such as std::vector)
+      /wd4251
+      # C4275 non - DLL-interface used as base for DLL-interface
+      /wd4275
+      # C4355 "this" used in base member initializer list
+      /wd4355)
 
-  CXX_FLAGS_BY_COMPILER_FRONTEND(
-    GNU ${GNU_FLAGS}
-    MSVC ${MSVC_FLAGS}
-    OUTPUT WARNING_CXX_FLAGS_LIST
+  cxx_flags_by_compiler_frontend(
+    GNU
+    ${GNU_FLAGS}
+    MSVC
+    ${MSVC_FLAGS}
+    OUTPUT
+    WARNING_CXX_FLAGS_LIST
     FILTER)
   string(REPLACE ";" " " WARNING_CXX_FLAGS "${WARNING_CXX_FLAGS_LIST}")
 
@@ -117,9 +120,10 @@ function(CXX_FLAGS_BY_COMPILER_FRONTEND)
     elseif(CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
       set(FLAGS ${ARGS_MSVC})
     else()
-      message(WARNING "Unknown compiler frontend for '${CMAKE_CXX_COMPILER_ID}' "
-                      "with frontend '${CMAKE_CXX_COMPILER_FRONTEND_VARIANT}'\n"
-                      "No flags outputed")
+      message(
+        WARNING "Unknown compiler frontend for '${CMAKE_CXX_COMPILER_ID}' "
+                "with frontend '${CMAKE_CXX_COMPILER_FRONTEND_VARIANT}'\n"
+                "No flags outputed")
     endif()
   else()
     if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND CMAKE_CXX_SIMULATE_ID MATCHES
@@ -130,9 +134,10 @@ function(CXX_FLAGS_BY_COMPILER_FRONTEND)
     elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
       set(FLAGS ${ARGS_GNU})
     else()
-      message(WARNING "Unknown compiler frontend for '${CMAKE_CXX_COMPILER_ID}' "
-                      "with simulated ID '${CMAKE_CXX_SIMULATED_ID}'\n"
-                      "No flags outputed")
+      message(
+        WARNING "Unknown compiler frontend for '${CMAKE_CXX_COMPILER_ID}' "
+                "with simulated ID '${CMAKE_CXX_SIMULATED_ID}'\n"
+                "No flags outputed")
     endif()
   endif()
 
