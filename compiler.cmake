@@ -69,8 +69,7 @@ macro(_SETUP_PROJECT_WARNINGS)
 endmacro(_SETUP_PROJECT_WARNINGS)
 
 #[=======================================================================[.rst:
-.. command:: CXX_FLAGS_BY_COMPILER_FRONTEND(<CLANG [<flags1>...]>
-                                            <GCC   [<flags1>...]>
+.. command:: CXX_FLAGS_BY_COMPILER_FRONTEND(<GCC   [<flags1>...]>
                                             <MSVC  [<flags1>...]>
                                             OUTPUT flags
                                             <FILTER>)
@@ -81,9 +80,8 @@ corresponding ``CXX_FLAGS``.
 The following arguments allow to specify ``CXX_FLAGS`` for a compiler
 frontend:
 
-:param CLANG: List of flags for Clang compiler frontend (Clang, AppleClang)
-:param GNU: List of flags for GNU compiler frontend (Gcc, G++) :param MSVC:
-Lst of flags for MSVC compiler frontend (MSVC, ClangCl)
+:param GNU: List of flags for GNU compiler frontend (Gcc, G++)
+:param MSVC: List of flags for MSVC compiler frontend (MSVC, ClangCl)
 
 Detected compiler frontend flags are then outputed in the ``OUTPUT``
 parameter.
@@ -98,8 +96,7 @@ Example
 
 .. code-block:: cmake
   CXX_FLAGS_BY_COMPILER_FRONTEND(
-    GNU -Wno-conversion -Wno-comment
-    CLANG -Wno-conversion -Wno-comment -Wno-self-assign-overloaded
+    GNU -Wno-conversion -Wno-comment -Wno-self-assign-overloaded
     MSVC  "/bigobj"
     OUTPUT COMPLIE_OPTIONS
     FILTER)
@@ -108,25 +105,36 @@ Example
 function(CXX_FLAGS_BY_COMPILER_FRONTEND)
   set(options FILTER)
   set(oneValueArgs OUTPUT)
-  set(multiValueArgs GNU CLANG MSVC)
+  set(multiValueArgs GNU MSVC)
   cmake_parse_arguments(ARGS "${options}" "${oneValueArgs}" "${multiValueArgs}"
                         ${ARGN})
 
-  # We should use CMAKE_CXX_COMPILER_FRONTEND_VARIANT, but it's introduced in
-  # CMake 3.14
-  if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND CMAKE_CXX_SIMULATE_ID MATCHES
-                                               "MSVC")
-    set(FLAGS ${ARGS_MSVC})
-  elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    set(FLAGS ${ARGS_MSVC})
-  elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    set(FLAGS ${ARGS_GNU})
-  elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    set(FLAGS ${ARGS_CLANG})
+  # Before CMake 3.14, the CMAKE_CXX_COMPILER_FRONTEND_VARIANT doesn't exists.
+  # Before CMake 3.26, the CMAKE_CXX_COMPILER_FRONTEND_VARIANT doesn't exists
+  # when CMAKE_CXX_COMPILER_ID is set to GNU, MSVC or AppleClang
+  if(CMAKE_CXX_COMPILER_FRONTEND_VARIANT)
+    if(CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "GNU")
+      set(FLAGS ${ARGS_GNU})
+    elseif(CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
+      set(FLAGS ${ARGS_MSVC})
+    else()
+      message(WARNING "Unknown compiler frontend for '${CMAKE_CXX_COMPILER_ID}' "
+                      "with frontend '${CMAKE_CXX_COMPILER_FRONTEND_VARIANT}'\n"
+                      "No flags outputed")
+    endif()
   else()
-    message(WARNING "Unknown compiler frontend for '${CMAKE_CXX_COMPILER_ID}' "
-                    "with simulated ID '${CMAKE_CXX_SIMULATED_ID}'\n"
-                    "No flags outputed")
+    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND CMAKE_CXX_SIMULATE_ID MATCHES
+                                                 "MSVC")
+      set(FLAGS ${ARGS_MSVC})
+    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+      set(FLAGS ${ARGS_MSVC})
+    elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+      set(FLAGS ${ARGS_GNU})
+    else()
+      message(WARNING "Unknown compiler frontend for '${CMAKE_CXX_COMPILER_ID}' "
+                      "with simulated ID '${CMAKE_CXX_SIMULATED_ID}'\n"
+                      "No flags outputed")
+    endif()
   endif()
 
   if(ARGS_FILTER)
