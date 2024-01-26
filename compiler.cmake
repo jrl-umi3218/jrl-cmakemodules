@@ -90,6 +90,9 @@ parameter.
 
 Optional ``FILTER`` parameter filter outputed flags with check_cxx_compiler_flag.
 
+.. warning:: When ``FILTER`` option is activated, definition should by passed with
+-D prefix to be valid compiler parameter.
+
 Example
 ^^^^^^^
 
