@@ -112,8 +112,8 @@ function(CXX_FLAGS_BY_COMPILER_FRONTEND)
                         ${ARGN})
 
   # Before CMake 3.14, the CMAKE_CXX_COMPILER_FRONTEND_VARIANT doesn't exists.
-  # Before CMake 3.26, the CMAKE_CXX_COMPILER_FRONTEND_VARIANT doesn't exists
-  # when CMAKE_CXX_COMPILER_ID is set to GNU, MSVC or AppleClang
+  # Before CMake 3.26, when CMAKE_CXX_COMPILER_ID is set to GNU, MSVC or
+  # AppleClang, CMAKE_CXX_COMPILER_FRONTEND_VARIANT doesn't exists either
   if(CMAKE_CXX_COMPILER_FRONTEND_VARIANT)
     if(CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "GNU")
       set(FLAGS ${ARGS_GNU})
