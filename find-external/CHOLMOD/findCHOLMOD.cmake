@@ -89,17 +89,17 @@ if(CHOLMOD_LIBRARIES)
 
 endif()
 
-if(CHOLMOD_LIBRARIES)
-  add_library(SuiteSparse::CHOLMOD SHARED IMPORTED)
-  set_target_properties(
-    SuiteSparse::CHOLMOD
-    PROPERTIES IMPORTED_LOCATION ${CHOLMOD_LIBRARIES}
-               INTERFACE_INCLUDE_DIRECTORIES "${CHOLMOD_INCLUDES}")
-endif(CHOLMOD_LIBRARIES)
-
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(CHOLMOD DEFAULT_MSG CHOLMOD_INCLUDES
                                   CHOLMOD_LIBRARIES)
+
+if(CHOLMOD_LIBRARIES)
+  add_library(CHOLMOD::CHOLMOD SHARED IMPORTED)
+  set_target_properties(
+    CHOLMOD::CHOLMOD
+    PROPERTIES IMPORTED_LOCATION ${CHOLMOD_LIBRARIES}
+               INTERFACE_INCLUDE_DIRECTORIES "${CHOLMOD_INCLUDES}")
+endif(CHOLMOD_LIBRARIES)
 
 mark_as_advanced(
   CHOLMOD_INCLUDES
