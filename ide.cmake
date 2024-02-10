@@ -45,9 +45,9 @@ function(ADD_GROUP GROUP_NAME FILENAMES)
   foreach(filename ${${FILENAMES}})
     get_filename_component(filenamePath ${filename} PATH)
     get_filename_component(filenameName ${filename} NAME)
-    string(REGEX REPLACE "${PROJECT_BINARY_DIR}" "" filenamePath
+    string(REGEX REPLACE "${PROJECT_BINARY_DIR}/" "" filenamePath
                          "${filenamePath}/")
-    string(REGEX REPLACE "${PROJECT_SOURCE_DIR}" "" filenamePath
+    string(REGEX REPLACE "${PROJECT_SOURCE_DIR}/" "" filenamePath
                          "${filenamePath}/")
     string(REGEX REPLACE "//" "/" filenamePath ${filenamePath})
     list(APPEND REDUCED_FILENAMES ${filenamePath})
