@@ -688,7 +688,7 @@ macro(_SETUP_PROJECT_DOCUMENTATION_FINALIZE)
                ${${PREFIX}_DOXYGENDOCDIR})
 
           set(DOXYGEN_TAGFILES_FROM_DEPENDENCIES
-              "${DOXYGEN_TAGFILES_FROM_DEPENDENCIES} \"${${PREFIX}_DOXYGENDOCDIR}/${LIBRARY_NAME}.doxytag\"=\"${DEP_DOCDIR}\""
+              "${DOXYGEN_TAGFILES_FROM_DEPENDENCIES} \"${${PREFIX}_DOXYGENDOCDIR}/${LIBRARY_NAME}.doxytag = ${DEP_DOCDIR}\""
           )
         endif()
       endforeach()
