@@ -622,9 +622,11 @@ function(REMOVE_DUPLICATES ARG_STR OUTPUT)
   set(ARG_LIST ${ARG_STR})
   separate_arguments(ARG_LIST)
   list(REMOVE_DUPLICATES ARG_LIST)
-  string (REGEX REPLACE "([^\\]|^);" "\\1 " _TMP_STR "${ARG_LIST}")
-  string (REGEX REPLACE "[\\](.)" "\\1" _TMP_STR "${_TMP_STR}") #fixes escaping
-  set (${OUTPUT} "${_TMP_STR}" PARENT_SCOPE)
+  string(REGEX REPLACE "([^\\]|^);" "\\1 " _TMP_STR "${ARG_LIST}")
+  string(REGEX REPLACE "[\\](.)" "\\1" _TMP_STR "${_TMP_STR}") # fixes escaping
+  set(${OUTPUT}
+      "${_TMP_STR}"
+      PARENT_SCOPE)
 endfunction()
 
 # _DOXYTAG_ENTRIES_FROM_CMAKE_DEPENDENCIES
@@ -706,10 +708,9 @@ macro(_SETUP_PROJECT_DOCUMENTATION_FINALIZE)
         endif()
       endforeach()
       _doxytag_entries_from_cmake_dependencies(
-        "${_PACKAGE_CONFIG_DEPENDENCIES_PROJECTS}"
-        _TAGFILES_FROM_DEPENDENCIES)
+        "${_PACKAGE_CONFIG_DEPENDENCIES_PROJECTS}" _TAGFILES_FROM_DEPENDENCIES)
       remove_duplicates(${_TAGFILES_FROM_DEPENDENCIES}
-        DOXYGEN_TAGFILES_FROM_DEPENDENCIES)
+                        DOXYGEN_TAGFILES_FROM_DEPENDENCIES)
     endif()
     _set_if_undefined(DOXYGEN_TAGFILES "${DOXYGEN_TAGFILES_FROM_DEPENDENCIES}")
 
