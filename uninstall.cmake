@@ -40,7 +40,7 @@ macro(_SETUP_PROJECT_UNINSTALL)
   # remember what we install ?!
   configure_file(
     "${CMAKE_CURRENT_LIST_DIR}/cmake_uninstall.cmake.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/cmake/cmake_uninstall.cmake" IMMEDIATE @ONLY)
+    "${CMAKE_CURRENT_BINARY_DIR}/cmake/cmake_uninstall.cmake" @ONLY)
 
   add_custom_target(
     uninstall
@@ -48,8 +48,9 @@ macro(_SETUP_PROJECT_UNINSTALL)
     -DPACKAGE_CREATES_DOT_CATKIN=${PACKAGE_CREATES_DOT_CATKIN} -P
     "${CMAKE_CURRENT_BINARY_DIR}/cmake/cmake_uninstall.cmake")
 
-  configure_file("${CMAKE_CURRENT_LIST_DIR}/cmake_reinstall.cmake.in"
-                 "${PROJECT_BINARY_DIR}/cmake/cmake_reinstall.cmake.configured")
+  configure_file(
+    "${CMAKE_CURRENT_LIST_DIR}/cmake_reinstall.cmake.in"
+    "${PROJECT_BINARY_DIR}/cmake/cmake_reinstall.cmake.configured" @ONLY)
   if(DEFINED CMAKE_BUILD_TYPE)
     file(MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/cmake/${CMAKE_BUILD_TYPE}")
   else(DEFINED CMAKE_BUILD_TYPE)
