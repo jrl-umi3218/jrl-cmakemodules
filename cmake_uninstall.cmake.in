@@ -22,7 +22,7 @@ MESSAGE(STATUS "catkin path: @CMAKE_INSTALL_PREFIX@/.catkin")
 IF(EXISTS "@CMAKE_INSTALL_PREFIX@/.catkin" AND PACKAGE_CREATES_DOT_CATKIN)
   MESSAGE(STATUS "Try to remove @CMAKE_INSTALL_PREFIX@/.catkin")
   EXECUTE_PROCESS(
-      COMMAND @CMAKE_COMMAND@ -E remove "@CMAKE_INSTALL_PREFIX@/.catkin"
+      COMMAND ${CMAKE_COMMAND} -E remove "@CMAKE_INSTALL_PREFIX@/.catkin"
       RESULT_VARIABLE rm_resval
       OUTPUT_VARIABLE rm_out
       ERROR_VARIABLE rm_err
@@ -40,7 +40,7 @@ FOREACH(file ${files})
   MESSAGE(STATUS "Uninstalling \"$ENV{DESTDIR}${file}\"")
   IF(EXISTS "$ENV{DESTDIR}${file}")
     EXECUTE_PROCESS(
-      COMMAND @CMAKE_COMMAND@ -E remove "$ENV{DESTDIR}${file}"
+      COMMAND ${CMAKE_COMMAND} -E remove "$ENV{DESTDIR}${file}"
       RESULT_VARIABLE rm_resval
       OUTPUT_VARIABLE rm_out
       )
@@ -54,7 +54,7 @@ FOREACH(file ${files})
       IF(EXISTS "$ENV{DESTDIR}${pycfile}")
         MESSAGE(STATUS "Uninstalling \"$ENV{DESTDIR}${pycfile}\"")
         EXECUTE_PROCESS(
-          COMMAND @CMAKE_COMMAND@ -E remove "$ENV{DESTDIR}${pycfile}"
+          COMMAND ${CMAKE_COMMAND} -E remove "$ENV{DESTDIR}${pycfile}"
           RESULT_VARIABLE rm_resval
           OUTPUT_VARIABLE rm_out
           )
@@ -70,7 +70,7 @@ FOREACH(file ${files})
     # If file is a broken symbolic link, EXISTS returns false.
     # Workaround this bug by attempting to remove the file anyway.
     EXECUTE_PROCESS(
-      COMMAND @CMAKE_COMMAND@ -E remove "$ENV{DESTDIR}${file}"
+      COMMAND ${CMAKE_COMMAND} -E remove "$ENV{DESTDIR}${file}"
       RESULT_VARIABLE rm_resval
       OUTPUT_VARIABLE rm_out
       ERROR_QUIET
@@ -78,7 +78,7 @@ FOREACH(file ${files})
   ENDIF(EXISTS "$ENV{DESTDIR}${file}")
 ENDFOREACH(file)
 EXECUTE_PROCESS(
-  COMMAND "@CMAKE_COMMAND@" -E remove "@CMAKE_CURRENT_BINARY_DIR@/install_manifest.txt"
+  COMMAND ${CMAKE_COMMAND} -E remove "@CMAKE_CURRENT_BINARY_DIR@/install_manifest.txt"
   RESULT_VARIABLE rm_resval
   OUTPUT_VARIABLE rm_out
   ERROR_QUIET
