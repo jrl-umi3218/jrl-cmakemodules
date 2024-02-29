@@ -3,15 +3,16 @@ cmake_minimum_required(VERSION 3.10)
 set(PROJECT_NAME "jrl-cmakemodules")
 set(PROJECT_DESCRIPTION "CMake utility toolbox")
 set(PROJECT_URL "http://github.com/jrl-umi3218/${PROJECT_NAME}")
-set(PROJECT_USE_CMAKE_EXPORT ON)
 
-option(INSTALL_DOCUMENTATION "Generate and install the documentation" OFF)
+project(${PROJECT_NAME} DESCRIPTION ${PROJECT_DESCRIPTION} LANGUAGES CXX VERSION 0.0.0)
 
-set(JRL_CMAKE_MODULES "${CMAKE_CURRENT_LIST_DIR}")
-include(base.cmake)
-compute_project_args(PROJECT_ARGS)
-project(${PROJECT_NAME} ${PROJECT_ARGS})
+# Generate CMake exports
+include(GNUInstallDirs)
+include(package-config.cmake)
+set(PROJECT_JRL_CMAKE_MODULE_DIR ${CMAKE_CURRENT_LIST_DIR})
+setup_project_package_finalize()
 
+# Add a dummy library with a useful INTERFACE_INCLUDE_DIRECTORIES
 add_library(${PROJECT_NAME} INTERFACE)
 set(INSTALL_DIR "${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME}")
 target_include_directories(${PROJECT_NAME}
