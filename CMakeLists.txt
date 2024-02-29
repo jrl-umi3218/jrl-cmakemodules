@@ -4,7 +4,11 @@ set(PROJECT_NAME "jrl-cmakemodules")
 set(PROJECT_DESCRIPTION "CMake utility toolbox")
 set(PROJECT_URL "http://github.com/jrl-umi3218/${PROJECT_NAME}")
 
-project(${PROJECT_NAME} DESCRIPTION ${PROJECT_DESCRIPTION} LANGUAGES CXX VERSION 0.0.0)
+project(
+  ${PROJECT_NAME}
+  DESCRIPTION ${PROJECT_DESCRIPTION}
+  LANGUAGES CXX
+  VERSION 0.0.0)
 
 # Generate CMake exports
 include(GNUInstallDirs)
