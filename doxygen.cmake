@@ -709,8 +709,10 @@ macro(_SETUP_PROJECT_DOCUMENTATION_FINALIZE)
       endforeach()
       _doxytag_entries_from_cmake_dependencies(
         "${_PACKAGE_CONFIG_DEPENDENCIES_PROJECTS}" _TAGFILES_FROM_DEPENDENCIES)
-      remove_duplicates(${_TAGFILES_FROM_DEPENDENCIES}
-                        DOXYGEN_TAGFILES_FROM_DEPENDENCIES)
+      if(_TAGFILES_FROM_DEPENDENCIES)
+        remove_duplicates(${_TAGFILES_FROM_DEPENDENCIES}
+                          DOXYGEN_TAGFILES_FROM_DEPENDENCIES)
+      endif()
     endif()
     _set_if_undefined(DOXYGEN_TAGFILES "${DOXYGEN_TAGFILES_FROM_DEPENDENCIES}")
 
