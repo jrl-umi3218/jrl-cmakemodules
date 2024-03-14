@@ -10,116 +10,118 @@ project(
   LANGUAGES CXX
   VERSION 0.0.0)
 
-# Generate CMake exports
-include(GNUInstallDirs)
-include(package-config.cmake)
-set(PROJECT_JRL_CMAKE_MODULE_DIR ${CMAKE_CURRENT_LIST_DIR})
-setup_project_package_finalize()
+if(CMAKE_PROJECT_NAME EQUAL PROJECT_NAME)
+  # Generate CMake exports
+  include(GNUInstallDirs)
+  include(package-config.cmake)
+  set(PROJECT_JRL_CMAKE_MODULE_DIR ${CMAKE_CURRENT_LIST_DIR})
+  setup_project_package_finalize()
 
-# Add a dummy library with a useful INTERFACE_INCLUDE_DIRECTORIES
-add_library(${PROJECT_NAME} INTERFACE)
-set(INSTALL_DIR "${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME}")
-target_include_directories(${PROJECT_NAME}
-                           INTERFACE $<INSTALL_INTERFACE:${INSTALL_DIR}>)
+  # Add a dummy library with a useful INTERFACE_INCLUDE_DIRECTORIES
+  add_library(${PROJECT_NAME} INTERFACE)
+  set(INSTALL_DIR "${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME}")
+  target_include_directories(${PROJECT_NAME}
+                             INTERFACE $<INSTALL_INTERFACE:${INSTALL_DIR}>)
 
-# find . -maxdepth 1 -type d ! -path './.*' | sort
-install(
-  DIRECTORY ./boost
-            ./cython
-            ./doxygen
-            ./dynamic_graph
-            ./find-external
-            ./github
-            ./gtest
-            ./hpp
-            ./image
-            ./sphinx
-            ./stubgen
-            ./_unittests
-  DESTINATION ${INSTALL_DIR})
+  # find . -maxdepth 1 -type d ! -path './.*' | sort
+  install(
+    DIRECTORY ./boost
+              ./cython
+              ./doxygen
+              ./dynamic_graph
+              ./find-external
+              ./github
+              ./gtest
+              ./hpp
+              ./image
+              ./sphinx
+              ./stubgen
+              ./_unittests
+    DESTINATION ${INSTALL_DIR})
 
-# find . -maxdepth 1 -type f ! -path './.*' | sort
-install(
-  FILES ./announce-gen
-        ./apple.cmake
-        ./base.cmake
-        ./boost.cmake
-        ./catkin.cmake
-        ./CMakeLists.txt
-        ./cmake_reinstall.cmake.in
-        ./cmake_uninstall.cmake.in
-        ./compiler.cmake
-        ./componentConfig.cmake.in
-        ./Config.cmake.in
-        ./config.h.cmake
-        ./config.hh.cmake
-        ./coverage.cmake
-        ./cpack.cmake
-        ./createshexe.cmake
-        ./cxx11.cmake
-        ./cxx-standard.cmake
-        ./debian.cmake
-        ./deprecated.hh.cmake
-        ./distcheck.cmake
-        ./dist.cmake
-        ./doxygen.cmake
-        ./eigen.cmake
-        ./filefilter.txt
-        ./fix-license.sh
-        ./geometric-tools.cmake
-        ./git-archive-all.py
-        ./git-archive-all.sh
-        ./gitlog-to-changelog
-        ./GNUInstallDirs.cmake
-        ./gtest.cmake
-        ./header.cmake
-        ./hpp.cmake
-        ./ide.cmake
-        ./idl.cmake
-        ./idlrtc.cmake
-        ./install-data.cmake
-        ./julia.cmake
-        ./kineo.cmake
-        ./lapack.cmake
-        ./LICENSE
-        ./logging.cmake
-        ./man.cmake
-        ./memorycheck_unit_test.cmake.in
-        ./metapodfromurdf.cmake
-        ./modernize-links.cmake
-        ./msvc-specific.cmake
-        ./msvc.vcxproj.user.in
-        ./openhrp.cmake
-        ./openhrpcontroller.cmake
-        ./openrtm.cmake
-        ./oscheck.cmake
-        ./package-config.cmake
-        ./pkg-config.cmake
-        ./pkg-config.pc.cmake
-        ./portability.cmake
-        ./post-project.cmake
-        ./pthread.cmake
-        ./pyproject.py
-        ./python.cmake
-        ./python-helpers.cmake
-        ./qhull.cmake
-        ./README.md
-        ./release.cmake
-        ./relpath.cmake
-        ./ros.cmake
-        ./sdformat.cmake
-        ./setup.cfg
-        ./shared-library.cmake
-        ./sphinx.cmake
-        ./stubs.cmake
-        ./swig.cmake
-        ./test.cmake
-        ./uninstall.cmake
-        ./version.cmake
-        ./version-script.cmake
-        ./version-script-test.lds
-        ./warning.hh.cmake
-        ./xacro.cmake
-  DESTINATION ${INSTALL_DIR})
+  # find . -maxdepth 1 -type f ! -path './.*' | sort
+  install(
+    FILES ./announce-gen
+          ./apple.cmake
+          ./base.cmake
+          ./boost.cmake
+          ./catkin.cmake
+          ./CMakeLists.txt
+          ./cmake_reinstall.cmake.in
+          ./cmake_uninstall.cmake.in
+          ./compiler.cmake
+          ./componentConfig.cmake.in
+          ./Config.cmake.in
+          ./config.h.cmake
+          ./config.hh.cmake
+          ./coverage.cmake
+          ./cpack.cmake
+          ./createshexe.cmake
+          ./cxx11.cmake
+          ./cxx-standard.cmake
+          ./debian.cmake
+          ./deprecated.hh.cmake
+          ./distcheck.cmake
+          ./dist.cmake
+          ./doxygen.cmake
+          ./eigen.cmake
+          ./filefilter.txt
+          ./fix-license.sh
+          ./geometric-tools.cmake
+          ./git-archive-all.py
+          ./git-archive-all.sh
+          ./gitlog-to-changelog
+          ./GNUInstallDirs.cmake
+          ./gtest.cmake
+          ./header.cmake
+          ./hpp.cmake
+          ./ide.cmake
+          ./idl.cmake
+          ./idlrtc.cmake
+          ./install-data.cmake
+          ./julia.cmake
+          ./kineo.cmake
+          ./lapack.cmake
+          ./LICENSE
+          ./logging.cmake
+          ./man.cmake
+          ./memorycheck_unit_test.cmake.in
+          ./metapodfromurdf.cmake
+          ./modernize-links.cmake
+          ./msvc-specific.cmake
+          ./msvc.vcxproj.user.in
+          ./openhrp.cmake
+          ./openhrpcontroller.cmake
+          ./openrtm.cmake
+          ./oscheck.cmake
+          ./package-config.cmake
+          ./pkg-config.cmake
+          ./pkg-config.pc.cmake
+          ./portability.cmake
+          ./post-project.cmake
+          ./pthread.cmake
+          ./pyproject.py
+          ./python.cmake
+          ./python-helpers.cmake
+          ./qhull.cmake
+          ./README.md
+          ./release.cmake
+          ./relpath.cmake
+          ./ros.cmake
+          ./sdformat.cmake
+          ./setup.cfg
+          ./shared-library.cmake
+          ./sphinx.cmake
+          ./stubs.cmake
+          ./swig.cmake
+          ./test.cmake
+          ./uninstall.cmake
+          ./version.cmake
+          ./version-script.cmake
+          ./version-script-test.lds
+          ./warning.hh.cmake
+          ./xacro.cmake
+    DESTINATION ${INSTALL_DIR})
 
-install(TARGETS ${PROJECT_NAME} EXPORT ${TARGETS_EXPORT_NAME})
+  install(TARGETS ${PROJECT_NAME} EXPORT ${TARGETS_EXPORT_NAME})
+endif()
