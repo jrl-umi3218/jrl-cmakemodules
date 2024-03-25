@@ -43,8 +43,9 @@ mark_as_advanced(CoinUtils_INCLUDE_DIR CoinUtils_LIBRARY)
 if(CoinUtils_FOUND AND NOT TARGET CoinUtils::CoinUtils)
   add_library(CoinUtils::CoinUtils SHARED IMPORTED)
   set_target_properties(
-    CoinUtils::CoinUtils PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
-                                    "${CoinUtils_INCLUDE_DIR}")
+    CoinUtils::CoinUtils
+    PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
+               "${CoinUtils_INCLUDE_DIR};${CoinUtils_INCLUDE_DIR}/coin")
   set_target_properties(
     CoinUtils::CoinUtils PROPERTIES IMPORTED_LOCATION_RELEASE
                                     "${CoinUtils_LIBRARY}")
