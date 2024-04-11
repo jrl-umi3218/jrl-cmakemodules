@@ -97,9 +97,16 @@ if(CHOLMOD_LIBRARIES)
   add_library(CHOLMOD::CHOLMOD SHARED IMPORTED)
   set_target_properties(
     CHOLMOD::CHOLMOD
-    PROPERTIES IMPORTED_LOCATION "${CHOLMOD_LIBRARIES}"
-               INTERFACE_LINK_LIBRARIES "${CHOLMOD_DEPENDENCIES}"
-               INTERFACE_INCLUDE_DIRECTORIES "${CHOLMOD_INCLUDES}")
+    PROPERTIES INTERFACE_LINK_LIBRARIES "${CHOLMOD_DEPENDENCIES}"
+               INTERFACE_INCLUDE_DIRECTORIES "${CHOLMOD_INCLUDES}"
+               IMPORTED_CONFIGURATIONS "RELEASE")
+  if(WIN32)
+    set_target_properties(CHOLMOD::CHOLMOD PROPERTIES IMPORTED_IMPLIB_RELEASE
+                                                      "${CHOLMOD_LIBRARIES}")
+  else()
+    set_target_properties(CHOLMOD::CHOLMOD PROPERTIES IMPORTED_LOCATION_RELEASE
+                                                      "${CHOLMOD_LIBRARIES}")
+  endif()
 endif(CHOLMOD_LIBRARIES)
 
 mark_as_advanced(
