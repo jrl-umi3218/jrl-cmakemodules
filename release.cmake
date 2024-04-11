@@ -110,6 +110,20 @@ macro(RELEASE_SETUP)
          "Updated CHANGELOG.md and committed") ; fi)
 
     add_custom_target(
+      release_pixi_toml
+      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+      COMMENT "Update pixi.toml"
+      COMMAND
+# cmake-format: off
+        ${PYTHON_EXECUTABLE} ${PROJECT_JRL_CMAKE_MODULE_DIR}/pixi.py $$VERSION &&
+        if ! (git diff --quiet pixi.toml) ; then
+        (
+         ${GIT} add pixi.toml &&
+         ${GIT} commit -m "release: Update pixi.toml version to $$VERSION" &&
+         echo "Updated pixi.toml and committed"
+        ) ; fi
+# cmake-format: on
+    add_custom_target(
       release
       WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
       COMMENT "Create a new release"
