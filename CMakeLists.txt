@@ -10,7 +10,7 @@ project(
   LANGUAGES CXX
   VERSION 0.0.0)
 
-if(CMAKE_PROJECT_NAME EQUAL PROJECT_NAME)
+if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
   # Generate CMake exports
   include(GNUInstallDirs)
   include(package-config.cmake)
