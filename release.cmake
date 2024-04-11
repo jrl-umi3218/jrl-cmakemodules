@@ -114,7 +114,7 @@ macro(RELEASE_SETUP)
       WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
       COMMENT "Update pixi.toml"
       COMMAND
-# cmake-format: off
+        # cmake-format: off
         ${PYTHON_EXECUTABLE} ${PROJECT_JRL_CMAKE_MODULE_DIR}/pixi.py $$VERSION &&
         if ! (git diff --quiet pixi.toml) ; then
         (
@@ -123,7 +123,7 @@ macro(RELEASE_SETUP)
          echo "Updated pixi.toml and committed"
         ) ; fi
 # cmake-format: on
-         )
+    )
 
     set(BUILD_CMD ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target)
     add_custom_target(
@@ -131,7 +131,7 @@ macro(RELEASE_SETUP)
       WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
       COMMENT "Create a new release"
       COMMAND
-# cmake-format: off
+        # cmake-format: off
         export LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH} &&
         export ${LD_LIBRARY_PATH_VARIABLE_NAME}=$ENV{${LD_LIBRARY_PATH_VARIABLE_NAME}} &&
         export PYTHONPATH=$ENV{PYTHONPATH} &&
