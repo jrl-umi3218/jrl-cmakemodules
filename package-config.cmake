@@ -91,9 +91,12 @@ macro(ADD_PROJECT_DEPENDENCY)
     set(_ext "find-external/${PARSED_ARGN_FIND_EXTERNAL}")
     set(CMAKE_MODULE_PATH "${PROJECT_JRL_CMAKE_MODULE_DIR}/${_ext}"
                           ${CMAKE_MODULE_PATH})
+    set(_ext_path "${CONFIG_INSTALL_DIR}/${_ext}")
+    if(NOT IS_ABSOLUTE ${_ext_path})
+      set(_ext_path "\${PACKAGE_PREFIX_DIR}/${_ext_path}")
+    endif()
     set(_PACKAGE_CONFIG_DEPENDENCIES_FIND_EXTERNAL
-        "${_PACKAGE_CONFIG_DEPENDENCIES_FIND_EXTERNAL}\n \${PACKAGE_PREFIX_DIR}/${CONFIG_INSTALL_DIR}/${_ext}"
-    )
+        "${_PACKAGE_CONFIG_DEPENDENCIES_FIND_EXTERNAL}\n  ${_ext_path}")
     install(DIRECTORY "${PROJECT_JRL_CMAKE_MODULE_DIR}/${_ext}"
             DESTINATION "${CONFIG_INSTALL_DIR}/find-external")
   endif()
