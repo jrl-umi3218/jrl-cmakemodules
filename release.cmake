@@ -110,45 +110,56 @@ macro(RELEASE_SETUP)
          "Updated CHANGELOG.md and committed") ; fi)
 
     add_custom_target(
+      release_pixi_toml
+      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+      COMMENT "Update pixi.toml"
+      COMMAND
+        # cmake-format: off
+        ${PYTHON_EXECUTABLE} ${PROJECT_JRL_CMAKE_MODULE_DIR}/pixi.py $$VERSION &&
+        if ! (git diff --quiet pixi.toml) ; then
+        (
+         ${GIT} add pixi.toml &&
+         ${GIT} commit -m "release: Update pixi.toml version to $$VERSION" &&
+         echo "Updated pixi.toml and committed"
+        ) ; fi
+# cmake-format: on
+    )
+
+    set(BUILD_CMD ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target)
+    add_custom_target(
       release
       WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
       COMMENT "Create a new release"
       COMMAND
-        export LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH} && export
-        ${LD_LIBRARY_PATH_VARIABLE_NAME}=$ENV{${LD_LIBRARY_PATH_VARIABLE_NAME}}
-        && export PYTHONPATH=$ENV{PYTHONPATH} && ! test x$$VERSION = x ||
-        (echo "Please set a version for this release" && false) # Update version
-                                                                # in package.xml
-                                                                # if it exists
-        && if [ -f "package.xml" ]; then (make -C ${CMAKE_BINARY_DIR}
-                                          release_package_xml) ; fi
+        # cmake-format: off
+        export LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH} &&
+        export ${LD_LIBRARY_PATH_VARIABLE_NAME}=$ENV{${LD_LIBRARY_PATH_VARIABLE_NAME}} &&
+        export PYTHONPATH=$ENV{PYTHONPATH} &&
+        ! test x$$VERSION = x || (echo "Please set a version for this release" && false) &&
+        # Update version in package.xml if it exists
+        if [ -f "package.xml" ]; then (${BUILD_CMD} release_package_xml) ; fi &&
         # Update version in pyproject.toml if it exists
-        && if [ -f "pyproject.toml" ]; then (make -C ${CMAKE_BINARY_DIR}
-                                             release_pyproject_toml) ; fi
+        if [ -f "pyproject.toml" ]; then (${BUILD_CMD} release_pyproject_toml) ; fi &&
         # Update CHANGELOG.md if it exists
-        && if [ -f "CHANGELOG.md" ]; then (make -C ${CMAKE_BINARY_DIR}
-                                           release_changelog) ; fi && ${GIT}
-        tag -s v$$VERSION -m "Release of version $$VERSION." && cd
-        ${CMAKE_BINARY_DIR} && cmake ${PROJECT_SOURCE_DIR} && make distcheck ||
-        (echo
-         "Please fix distcheck first."
-         &&
-         cd
-         ${PROJECT_SOURCE_DIR}
-         &&
-         ${GIT}
-         tag
-         -d
-         v$$VERSION
-         &&
-         cd
-         ${CMAKE_BINARY_DIR}
-         &&
-         cmake
-         ${PROJECT_SOURCE_DIR}
-         &&
-         false) && make dist && make distclean && echo
-        "Please, run 'git push --tags' and upload the tarball to github to finalize this release."
+        if [ -f "CHANGELOG.md" ]; then (${BUILD_CMD} release_changelog) ; fi &&
+        # Update version in pixi.toml if it exists
+        if [ -f "pixi.toml" ]; then (${BUILD_CMD} release_pixi_toml) ; fi &&
+        ${GIT} tag -s v$$VERSION -m "Release of version $$VERSION." &&
+        cd ${CMAKE_BINARY_DIR} &&
+        cmake ${PROJECT_SOURCE_DIR} &&
+        ${BUILD_CMD} distcheck ||
+        (
+         echo "Please fix distcheck first." &&
+         cd ${PROJECT_SOURCE_DIR} &&
+         ${GIT} tag -d v$$VERSION &&
+         cd ${CMAKE_BINARY_DIR} &&
+         cmake ${PROJECT_SOURCE_DIR} &&
+         false
+        ) &&
+        ${BUILD_CMD} dist &&
+        ${BUILD_CMD} distclean &&
+        echo "Please, run 'git push --tags' and upload the tarball to github to finalize this release."
+# cmake-format: on
     )
   endif()
 endmacro()
