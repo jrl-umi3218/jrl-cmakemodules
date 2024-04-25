@@ -199,25 +199,56 @@ endmacro(
 #
 # Add a test called `NAME` that runs an equivalent of ``valgrind -- python
 # ${SOURCE}``, optionnaly with a `PYTHONPATH` set to
-# `CMAKE_BINARY_DIR/MODULE_PATH` for each MODULES `SOURCE` is relative to
-# `PROJECT_SOURCE_DIR`
+# `CMAKE_BINARY_DIR/MODULE_PATH` for each MODULES. `SOURCE` is relative to
+# `PROJECT_SOURCE_DIR`.
 #
 # .. note:: :command:`FINDPYTHON` should have been called first. .. note:: Only
 # work if valgrind is installed
 #
 macro(ADD_PYTHON_MEMORYCHECK_UNIT_TEST NAME SOURCE)
+  add_python_memorycheck_unit_test_v2(NAME ${NAME} SOURCE ${SOURCE} MODULES
+                                      ${ARGN})
+endmacro()
+
+# .rst: .. command:: ADD_PYTHON_MEMORYCHECK_UNIT_TEST_V2 ( NAME <name> SOURCE
+# <source> [SUPP <supp>] [MODULES <modules>...])
+#
+# Add a test that run a Python script through Valgrind to test if a Python
+# script leak memory.
+#
+# :param NAME: Test name.
+#
+# :param SOURCE: Test source path relative to project source dir.
+#
+# :param SUPP: optional valgrind suppressions file path relative to project
+# source dir.
+#
+# :param MODULES: Set the `PYTHONPATH` environment variable to
+# `CMAKE_BINARY_DIR/<modules>...`.
+#
+# .. note:: :command:`FINDPYTHON` should have been called first. .. note:: Only
+# work if valgrind is installed
+macro(ADD_PYTHON_MEMORYCHECK_UNIT_TEST_V2)
   if(MEMORYCHECK_COMMAND AND MEMORYCHECK_COMMAND MATCHES ".*valgrind$")
-    set(TEST_FILE_NAME memorycheck_unit_test_${NAME}.cmake)
-    set(PYTHON_TEST_SCRIPT "${PROJECT_SOURCE_DIR}/${SOURCE}")
+    set(options)
+    set(oneValueArgs NAME SOURCE SUPP)
+    set(multiValueArgs MODULES)
+    cmake_parse_arguments(ARGS "${options}" "${oneValueArgs}"
+                          "${multiValueArgs}" ${ARGN})
+
+    set(TEST_FILE_NAME memorycheck_unit_test_${ARGS_NAME}.cmake)
+    set(PYTHON_TEST_SCRIPT "${PROJECT_SOURCE_DIR}/${ARGS_SOURCE}")
+    if(ARGS_SUPP)
+      set(VALGRIND_SUPP_FILE "${PROJECT_SOURCE_DIR}/${ARGS_SUPP}")
+    endif()
     configure_file(
       ${PROJECT_JRL_CMAKE_MODULE_DIR}/memorycheck_unit_test.cmake.in
       ${TEST_FILE_NAME} @ONLY)
 
-    add_test(NAME ${NAME} COMMAND ${CMAKE_COMMAND} -P ${TEST_FILE_NAME})
+    add_test(NAME ${ARGS_NAME} COMMAND ${CMAKE_COMMAND} -P ${TEST_FILE_NAME})
 
-    set(MODULES "${ARGN}") # ARGN is not a variable
-    compute_pythonpath(ENV_VARIABLES ${MODULES})
-    set_tests_properties(${NAME} PROPERTIES ENVIRONMENT "${ENV_VARIABLES}")
+    compute_pythonpath(ENV_VARIABLES ${ARGS_MODULES})
+    set_tests_properties(${ARGS_NAME} PROPERTIES ENVIRONMENT "${ENV_VARIABLES}")
   endif()
 endmacro()
 
