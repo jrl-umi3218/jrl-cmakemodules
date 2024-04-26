@@ -82,8 +82,15 @@ find_package_handle_standard_args(MPFR DEFAULT_MSG MPFR_INCLUDES MPFR_LIBRARIES
 if(MPFR_FOUND)
   add_library(mpfr SHARED IMPORTED)
   set_target_properties(
-    mpfr PROPERTIES IMPORTED_LOCATION ${MPFR_LIBRARIES}
-                    INTERFACE_INCLUDE_DIRECTORIES "${MPFR_INCLUDE_DIR}")
+    mpfr PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${MPFR_INCLUDE_DIR}"
+                    IMPORTED_CONFIGURATIONS "RELEASE")
+  if(WIN32)
+    set_target_properties(mpfr PROPERTIES IMPORTED_IMPLIB_RELEASE
+                                          "${MPFR_LIBRARIES}")
+  else()
+    set_target_properties(mpfr PROPERTIES IMPORTED_LOCATION_RELEASE
+                                          "${MPFR_LIBRARIES}")
+  endif()
 endif()
 
 # Epilogue
