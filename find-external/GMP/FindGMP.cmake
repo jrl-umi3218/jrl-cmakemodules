@@ -22,8 +22,15 @@ find_package_handle_standard_args(GMP DEFAULT_MSG GMP_INCLUDES GMP_LIBRARIES)
 if(GMP_FOUND)
   add_library(gmp SHARED IMPORTED)
   set_target_properties(
-    gmp PROPERTIES IMPORTED_LOCATION ${GMP_LIBRARIES}
-                   INTERFACE_INCLUDE_DIRECTORIES "${GMP_INCLUDE_DIR}")
+    gmp PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${GMP_INCLUDE_DIR}"
+                   IMPORTED_CONFIGURATIONS "RELEASE")
+  if(WIN32)
+    set_target_properties(gmp PROPERTIES IMPORTED_IMPLIB_RELEASE
+                                         "${GMP_LIBRARIES}")
+  else()
+    set_target_properties(gmp PROPERTIES IMPORTED_LOCATION_RELEASE
+                                         "${GMP_LIBRARIES}")
+  endif()
 endif()
 
 mark_as_advanced(GMP_INCLUDES GMP_LIBRARIES)
