@@ -93,7 +93,7 @@ include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(CHOLMOD DEFAULT_MSG CHOLMOD_INCLUDES
                                   CHOLMOD_LIBRARIES CHOLMOD_DEPENDENCIES)
 
-if(CHOLMOD_LIBRARIES)
+if(CHOLMOD_LIBRARIES AND NOT TARGET CHOLMOD::CHOLMOD)
   add_library(CHOLMOD::CHOLMOD SHARED IMPORTED)
   set_target_properties(
     CHOLMOD::CHOLMOD
@@ -107,7 +107,7 @@ if(CHOLMOD_LIBRARIES)
     set_target_properties(CHOLMOD::CHOLMOD PROPERTIES IMPORTED_LOCATION_RELEASE
                                                       "${CHOLMOD_LIBRARIES}")
   endif()
-endif(CHOLMOD_LIBRARIES)
+endif()
 
 mark_as_advanced(
   CHOLMOD_INCLUDES
