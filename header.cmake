@@ -149,44 +149,89 @@ endmacro(_SETUP_PROJECT_HEADER)
 # This macro generates a configuration header. Macro parameters may be used to
 # customize it.
 #
-# HEADER_DIR    : where to generate the header FILENAME      : how should the
-# file named LIBRARY_NAME  : CPP symbol prefix, should match the compiled
-# library name EXPORT_SYMBOl : what symbol controls the switch between symbol
-# import/export
+# * HEADER_DIR    : where to generate the header
+# * FILENAME      : how the file should be named
+# * LIBRARY_NAME  : CPP symbol prefix, should match the compiled library name
+# * EXPORT_SYMBOL : controls the switch between symbol import/export
 function(GENERATE_CONFIGURATION_HEADER HEADER_DIR FILENAME LIBRARY_NAME
          EXPORT_SYMBOL)
+  # cmake-format: off
+  generate_configuration_header_v2(
+    INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/include
+    HEADER_DIR ${HEADER_DIR}
+    FILENAME ${FILENAME}
+    LIBRARY_NAME ${LIBRARY_NAME}
+    EXPORT_SYMBOL ${EXPORT_SYMBOL})
+  # cmake-format: on
+endfunction(GENERATE_CONFIGURATION_HEADER)
+
+# ~~~
+# .rst: .. command:: GENERATE_CONFIGURATION_HEADER_V2 (
+#   INCLUDE_DIR <include_dir>
+#   HEADER_DIR <header_dir>
+#   FILENAME <filename>
+#   LIBRARY_NAME <library_name>
+#   EXPORT_SYBMOL <export_symbol>)
+# ~~~
+#
+# This function generates a configuration header at
+# ``<include_dir>/<header_dir>/<filename>``.
+#
+# If INSTALL_GENERATED_HEADERS is ON, the configuration header will be installed
+# in
+# ``${CMAKE_INSTALL_INCLUDEDIR}/<header_dir>``.
+#
+# :param INCLUDE_DIR: Include root directory (absolute).
+#
+# :param HEADER_DIR: Include sub directory.
+#
+# :param FILENAME: Configuration header name.
+#
+# :param LIBRARY_NAME: CPP symbol prefix, should match the compiled library
+# name.
+#
+# :param EXPORT_SYMBOL: Controls the switch between symbol import/export.
+function(GENERATE_CONFIGURATION_HEADER_V2)
+  set(options)
+  set(oneValueArgs INCLUDE_DIR HEADER_DIR FILENAME LIBRARY_NAME EXPORT_SYMBOL)
+  set(multiValueArgs)
+  cmake_parse_arguments(ARGS "${options}" "${oneValueArgs}" "${multiValueArgs}"
+                        ${ARGN})
 
   if(${PROJECT_VERSION_MAJOR} MATCHES UNKNOWN)
-    set(PROJECT_VERSION_MAJOR_CONFIG ${LIBRARY_NAME}_VERSION_UNKNOWN_TAG)
+    set(PROJECT_VERSION_MAJOR_CONFIG ${ARGS_LIBRARY_NAME}_VERSION_UNKNOWN_TAG)
   else()
     set(PROJECT_VERSION_MAJOR_CONFIG ${PROJECT_VERSION_MAJOR})
   endif()
 
   if(${PROJECT_VERSION_MINOR} MATCHES UNKNOWN)
-    set(PROJECT_VERSION_MINOR_CONFIG ${LIBRARY_NAME}_VERSION_UNKNOWN_TAG)
+    set(PROJECT_VERSION_MINOR_CONFIG ${ARGS_LIBRARY_NAME}_VERSION_UNKNOWN_TAG)
   else()
     set(PROJECT_VERSION_MINOR_CONFIG ${PROJECT_VERSION_MINOR})
   endif()
 
   if(${PROJECT_VERSION_PATCH} MATCHES UNKNOWN)
-    set(PROJECT_VERSION_PATCH_CONFIG ${LIBRARY_NAME}_VERSION_UNKNOWN_TAG)
+    set(PROJECT_VERSION_PATCH_CONFIG ${ARGS_LIBRARY_NAME}_VERSION_UNKNOWN_TAG)
   else()
     set(PROJECT_VERSION_PATCH_CONFIG ${PROJECT_VERSION_PATCH})
   endif()
 
+  # Set variables for configure_file command
+  set(EXPORT_SYMBOL ${ARGS_EXPORT_SYMBOL})
+  set(LIBRARY_NAME ${ARGS_LIBRARY_NAME})
+
   # Generate the header.
-  configure_file(
-    ${PROJECT_JRL_CMAKE_MODULE_DIR}/config.hh.cmake
-    ${CMAKE_CURRENT_BINARY_DIR}/include/${HEADER_DIR}/${FILENAME} @ONLY)
+  configure_file(${PROJECT_JRL_CMAKE_MODULE_DIR}/config.hh.cmake
+                 ${ARGS_INCLUDE_DIR}/${ARGS_HEADER_DIR}/${ARGS_FILENAME} @ONLY)
 
   # Install it if requested.
   if(INSTALL_GENERATED_HEADERS)
     install(
-      FILES ${CMAKE_CURRENT_BINARY_DIR}/include/${HEADER_DIR}/${FILENAME}
-      DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${HEADER_DIR}
+      FILES ${ARGS_INCLUDE_DIR}/${ARGS_HEADER_DIR}/${ARGS_FILENAME}
+      DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${ARGS_HEADER_DIR}
       PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_WRITE)
-  endif(INSTALL_GENERATED_HEADERS)
-endfunction(GENERATE_CONFIGURATION_HEADER)
+  endif()
+endfunction(GENERATE_CONFIGURATION_HEADER_V2)
 
 # _SETUP_PROJECT_HEADER_FINALIZE
 # ------------------------------

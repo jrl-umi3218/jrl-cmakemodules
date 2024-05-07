@@ -210,8 +210,13 @@ macro(ADD_PYTHON_MEMORYCHECK_UNIT_TEST NAME SOURCE)
                                       ${ARGN})
 endmacro()
 
-# .rst: .. command:: ADD_PYTHON_MEMORYCHECK_UNIT_TEST_V2 ( NAME <name> SOURCE
-# <source> [SUPP <supp>] [MODULES <modules>...])
+# ~~~
+# .rst: .. command:: ADD_PYTHON_MEMORYCHECK_UNIT_TEST_V2(
+#   NAME <name>
+#   SOURCE <source>
+#   [SUPP <supp>]
+#   [MODULES <modules>...])
+# ~~~
 #
 # Add a test that run a Python script through Valgrind to test if a Python
 # script leak memory.
@@ -226,8 +231,9 @@ endmacro()
 # :param MODULES: Set the `PYTHONPATH` environment variable to
 # `CMAKE_BINARY_DIR/<modules>...`.
 #
-# .. note:: :command:`FINDPYTHON` should have been called first. .. note:: Only
-# work if valgrind is installed
+# .. note:: :command:`FINDPYTHON` should have been called first.
+#
+# .. note:: Only work if valgrind is installed.
 macro(ADD_PYTHON_MEMORYCHECK_UNIT_TEST_V2)
   if(MEMORYCHECK_COMMAND AND MEMORYCHECK_COMMAND MATCHES ".*valgrind$")
     set(options)
