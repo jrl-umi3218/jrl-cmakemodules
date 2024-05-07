@@ -150,9 +150,9 @@ endmacro(_SETUP_PROJECT_HEADER)
 # customize it.
 #
 # * HEADER_DIR    : where to generate the header
-# * FILENAME      : how should the file named
+# * FILENAME      : how the file should be named
 # * LIBRARY_NAME  : CPP symbol prefix, should match the compiled library name
-# * EXPORT_SYMBOl : what symbol controls the switch between symbol import/export
+# * EXPORT_SYMBOL : controls the switch between symbol import/export
 function(GENERATE_CONFIGURATION_HEADER HEADER_DIR FILENAME LIBRARY_NAME
          EXPORT_SYMBOL)
   # cmake-format: off
@@ -190,7 +190,7 @@ endfunction(GENERATE_CONFIGURATION_HEADER)
 # :param LIBRARY_NAME: CPP symbol prefix, should match the compiled library
 # name.
 #
-# :param EXPORT_SYMBOL: What symbol controls the switch between symbol
+# :param EXPORT_SYMBOL: Controls the switch between symbol
 # import/export.
 function(GENERATE_CONFIGURATION_HEADER_V2)
   set(options)
