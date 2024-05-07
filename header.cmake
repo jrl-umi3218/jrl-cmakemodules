@@ -174,9 +174,11 @@ endfunction(GENERATE_CONFIGURATION_HEADER)
 #   EXPORT_SYBMOL <export_symbol>)
 # ~~~
 #
-# This function generates a configuration header at ``<include_dir>/<header_dir>/<filename>``.
+# This function generates a configuration header at
+# ``<include_dir>/<header_dir>/<filename>``.
 #
-# If INSTALL_GENERATED_HEADERS is ON, the configuration header will be installed in
+# If INSTALL_GENERATED_HEADERS is ON, the configuration header will be installed
+# in
 # ``${CMAKE_INSTALL_INCLUDEDIR}/<header_dir>``.
 #
 # :param INCLUDE_DIR: Include root directory (absolute).
@@ -185,9 +187,11 @@ endfunction(GENERATE_CONFIGURATION_HEADER)
 #
 # :param FILENAME: Configuration header name.
 #
-# :param LIBRARY_NAME: CPP symbol prefix, should match the compiled library name.
+# :param LIBRARY_NAME: CPP symbol prefix, should match the compiled library
+# name.
 #
-# :param EXPORT_SYMBOL: What symbol controls the switch between symbol import/export.
+# :param EXPORT_SYMBOL: What symbol controls the switch between symbol
+# import/export.
 function(GENERATE_CONFIGURATION_HEADER_V2)
   set(options)
   set(oneValueArgs INCLUDE_DIR HEADER_DIR FILENAME LIBRARY_NAME EXPORT_SYMBOL)
