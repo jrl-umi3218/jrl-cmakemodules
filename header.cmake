@@ -190,8 +190,7 @@ endfunction(GENERATE_CONFIGURATION_HEADER)
 # :param LIBRARY_NAME: CPP symbol prefix, should match the compiled library
 # name.
 #
-# :param EXPORT_SYMBOL: Controls the switch between symbol
-# import/export.
+# :param EXPORT_SYMBOL: Controls the switch between symbol import/export.
 function(GENERATE_CONFIGURATION_HEADER_V2)
   set(options)
   set(oneValueArgs INCLUDE_DIR HEADER_DIR FILENAME LIBRARY_NAME EXPORT_SYMBOL)
