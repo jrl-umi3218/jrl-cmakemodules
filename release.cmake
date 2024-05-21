@@ -125,6 +125,17 @@ macro(RELEASE_SETUP)
 # cmake-format: on
     )
 
+    add_custom_target(
+      release_citation_cff
+      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+      COMMENT "Update CITATION.cff"
+      COMMAND
+        sed -i.back
+        "\"s|^version:.*|version: $$VERSION|;s|^date-released:.*|date-released: \\\"${TODAY}\\\"|\""
+        CITATION.cff && rm CITATION.cff.back && ${GIT} add CITATION.cff &&
+        ${GIT} commit -m "release: Update CITATION.cff version to $$VERSION" &&
+        echo "Updated CITATION.cff and committed")
+
     set(BUILD_CMD ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target)
     add_custom_target(
       release
@@ -144,6 +155,8 @@ macro(RELEASE_SETUP)
         if [ -f "CHANGELOG.md" ]; then (${BUILD_CMD} release_changelog) ; fi &&
         # Update version in pixi.toml if it exists
         if [ -f "pixi.toml" ]; then (${BUILD_CMD} release_pixi_toml) ; fi &&
+        # Update date and version in CITATION.cff if it exists
+        if [ -f "CITATION.cff" ]; then (${BUILD_CMD} release_citation_cff) ; fi &&
         ${GIT} tag -s v$$VERSION -m "Release of version $$VERSION." &&
         cd ${CMAKE_BINARY_DIR} &&
         cmake ${PROJECT_SOURCE_DIR} &&
