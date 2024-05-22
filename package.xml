@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>jrl-cmakemodules</name>
+  <version>0.0.0</version>
+  <description>CMake utility toolbox</description>
+
+  <maintainer email="guilhem.saurel@laas.fr">Guilhem Saurel</maintainer>
+  <author>Justin Carpentier</author>
+  <author>Pierre Gergondet</author>
+
+  <license>BSD-2</license>
+  <url type="website">https://github.com/jrl-umi3218/jrl-cmakemodules</url>
+
+  <buildtool_depend>cmake</buildtool_depend>
+
+  <!-- The export tag contains other, unspecified, tags -->
+  <export>
+    <!-- Other tools can request additional information be placed here -->
+    <build_type>cmake</build_type>
+  </export>
+</package>
