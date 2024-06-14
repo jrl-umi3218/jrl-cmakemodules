@@ -1,17 +1,17 @@
 #
-# Copyright 2021 INRIA
+# Copyright 2021-2024 INRIA
 #
 # Author: Rohan Budhiraja
 #
 
 # SEARCH_FOR_SDFORMAT
 # ----------------------------------
-# Try to quietly find SDFormat, and when found, add dependency. REQUIRED
-# (Optional):  if REQUIRED is given as argument, and SDFormat is not found,
+# Try to quietly find SDFormat, and when found, add the dependency. REQUIRED
+# (Optional):  if REQUIRED is given as an argument, and SDFormat is not found,
 # FATAL_ERROR is generated.
 #
 macro(SEARCH_FOR_SDFORMAT)
-  set(SDF_VERSIONS "12" "11" "10" "9")
+  set(SDF_VERSIONS "14" "13" "12" "11" "10" "9")
   list(APPEND SDF_VERSIONS "")
   set(P_REQUIRED False)
   set(variadic_args ${ARGN})
