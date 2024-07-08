@@ -84,11 +84,16 @@ macro(_SETUP_COVERAGE_FINALIZE)
       message(STATUS "Python coverage will be generated")
     endif()
 
+    if(NOT TARGET coverage)
+      add_custom_target(coverage
+                        COMMENT "Generating HTML report for code coverage")
+    endif()
     add_custom_target(
-      coverage
+      ${PROJECT_NAME}-coverage
       COMMAND ${_COVERAGE_HTML} -o ${_COVERAGE_DIR} ${_COVERAGE_FILES}
       DEPENDS ${_COVERAGE_FILES}
       BYPRODUCTS ${_COVERAGE_DIR}
       COMMENT "Generating HTML report for code coverage")
+    add_dependencies(coverage ${PROJECT_NAME}-coverage)
   endif()
 endmacro()

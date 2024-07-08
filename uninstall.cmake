@@ -42,11 +42,15 @@ macro(_SETUP_PROJECT_UNINSTALL)
     "${CMAKE_CURRENT_LIST_DIR}/cmake_uninstall.cmake.in"
     "${CMAKE_CURRENT_BINARY_DIR}/cmake/cmake_uninstall.cmake" @ONLY)
 
+  if(NOT TARGET uninstall)
+    add_custom_target(uninstall)
+  endif()
   add_custom_target(
-    uninstall
+    ${PROJECT_NAME}-uninstall
     "${CMAKE_COMMAND}"
     -DPACKAGE_CREATES_DOT_CATKIN=${PACKAGE_CREATES_DOT_CATKIN} -P
     "${CMAKE_CURRENT_BINARY_DIR}/cmake/cmake_uninstall.cmake")
+  add_dependencies(uninstall ${PROJECT_NAME}-uninstall)
 
   configure_file(
     "${CMAKE_CURRENT_LIST_DIR}/cmake_reinstall.cmake.in"
@@ -62,10 +66,15 @@ macro(_SETUP_PROJECT_UNINSTALL)
     GENERATE
     OUTPUT "${PROJECT_BINARY_DIR}/cmake/$<CONFIGURATION>/cmake_reinstall.cmake"
     INPUT "${PROJECT_BINARY_DIR}/cmake/cmake_reinstall.cmake.configured")
+
+  if(NOT TARGET reinstall)
+    add_custom_target(reinstall)
+  endif()
   add_custom_target(
-    reinstall
+    ${PROJECT_NAME}-reinstall
     "${CMAKE_COMMAND}" -P
     "${PROJECT_BINARY_DIR}/cmake/$<CONFIGURATION>/cmake_reinstall.cmake")
+  add_dependencies(reinstall ${PROJECT_NAME}-reinstall)
 endmacro(_SETUP_PROJECT_UNINSTALL)
 
 # We setup the auto-uninstall target here, it is early enough that we can ensure

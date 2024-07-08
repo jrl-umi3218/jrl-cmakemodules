@@ -50,10 +50,14 @@ endif()
 
 # Add new target 'run_tests' to improve integration with build tooling
 if(NOT CMAKE_GENERATOR MATCHES "Visual Studio|Xcode" AND NOT TARGET run_tests)
+  if(NOT TARGET run_tests)
+    add_custom_target(run_tests)
+  endif()
   add_custom_target(
-    run_tests
+    ${PROJECT_NAME}-run_tests
     COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure -V
     VERBATIM)
+  add_dependencies(run_tests ${PROJECT_NAME}-run_tests)
 endif()
 
 if(NOT DEFINED ctest_build_tests_exists)

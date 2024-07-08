@@ -58,8 +58,13 @@ macro(RELEASE_SETUP)
       set(LD_LIBRARY_PATH_VARIABLE_NAME "LD_LIBRARY_PATH")
     endif(APPLE)
 
+    if(NOT TARGET release_package_xml)
+      add_custom_target(
+        release_package_xml
+        COMMENT "Update package.xml")
+    endif()
     add_custom_target(
-      release_package_xml
+      ${PROJECT_NAME}-release_package_xml
       WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
       COMMENT "Update package.xml"
       COMMAND
@@ -67,9 +72,14 @@ macro(RELEASE_SETUP)
         package.xml && rm package.xml.back && ${GIT} add package.xml && ${GIT}
         commit -m "release: Update package.xml version to $$VERSION" && echo
         "Updated package.xml and committed")
+    add_dependencies(release_package_xml ${PROJECT_NAME}-release_package_xml)
 
+    if(NOT TARGET release_pyproject_toml)
+      add_custom_target(release_pyproject_toml
+        COMMENT "Update pyproject.toml")
+    endif()
     add_custom_target(
-      release_pyproject_toml
+      ${PROJECT_NAME}-release_pyproject_toml
       WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
       COMMENT "Update pyproject.toml"
       COMMAND
@@ -86,9 +96,14 @@ macro(RELEASE_SETUP)
          &&
          echo
          "Updated pyproject.toml and committed") ; fi)
+    add_dependencies(release_pyproject_toml ${PROJECT_NAME}-release_pyproject_toml)
 
+    if(NOT TARGET release_changelog)
+      add_custom_target(release_changelog
+        COMMENT "Update CHANGELOG.md")
+    endif()
     add_custom_target(
-      release_changelog
+      ${PROJECT_NAME}-release_changelog
       WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
       COMMENT "Update CHANGELOG.md"
       COMMAND
@@ -108,9 +123,15 @@ macro(RELEASE_SETUP)
          &&
          echo
          "Updated CHANGELOG.md and committed") ; fi)
+    add_dependencies(release_changelog ${PROJECT_NAME}-release_changelog)
 
+    if(NOT TARGET release_pixi_toml)
+      add_custom_target(
+        release_pixi_toml
+        COMMENT "Update pixi.toml")
+    endif()
     add_custom_target(
-      release_pixi_toml
+      ${PROJECT_NAME}-release_pixi_toml
       WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
       COMMENT "Update pixi.toml"
       COMMAND
@@ -124,9 +145,15 @@ macro(RELEASE_SETUP)
         ) ; fi
 # cmake-format: on
     )
+    add_dependencies(release_pixi_toml ${PROJECT_NAME}-release_pixi_toml)
 
+    if(NOT TARGET release_citation_cff)
+      add_custom_target(
+        release_citation_cff
+        COMMENT "Update CITATION.cff")
+    endif()
     add_custom_target(
-      release_citation_cff
+      ${PROJECT_NAME}-release_citation_cff
       WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
       COMMENT "Update CITATION.cff"
       COMMAND
@@ -135,10 +162,16 @@ macro(RELEASE_SETUP)
         CITATION.cff && rm CITATION.cff.back && ${GIT} add CITATION.cff &&
         ${GIT} commit -m "release: Update CITATION.cff version to $$VERSION" &&
         echo "Updated CITATION.cff and committed")
+    add_dependencies(release_citation_cff ${PROJECT_NAME}-release_citation_cff)
 
     set(BUILD_CMD ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target)
+    if(NOT TARGET release)
+      add_custom_target(
+        release
+        COMMENT "Create a new release")
+    endif()
     add_custom_target(
-      release
+      ${PROJECT_NAME}-release
       WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
       COMMENT "Create a new release"
       COMMAND
@@ -174,5 +207,6 @@ macro(RELEASE_SETUP)
         echo "Please, run 'git push --tags' and upload the tarball to github to finalize this release."
 # cmake-format: on
     )
+    add_dependencies(release ${PROJECT_NAME}-release)
   endif()
 endmacro()
