@@ -195,7 +195,7 @@ message(STATUS "Configuring \"${PROJECT_NAME}\" (${PROJECT_URL})")
 
 # If the project version number is not set, compute it automatically.
 if(NOT DEFINED PROJECT_VERSION)
-  version_compute()
+  version_compute(PROJECT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
 else()
   if(NOT DEFINED PROJECT_VERSION_MAJOR
      AND NOT DEFINED PROJECT_VERSION_MINOR
