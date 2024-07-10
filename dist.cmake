@@ -56,7 +56,7 @@ macro(_SETUP_PROJECT_DIST)
         ${TAR} xf ${PROJECT_SOURCE_DIR}/${PROJECT_NAME}.tar &&
         echo "${PROJECT_VERSION}" >
           ${PROJECT_BINARY_DIR}/${PROJECT_NAME}${PROJECT_SUFFIX}-${PROJECT_VERSION}/.version &&
-          ${PROJECT_JRL_CMAKE_MODULE_DIR}/gitlog-to-changelog >
+          ${PROJECT_JRL_CMAKE_MODULE_DIR}/gitlog-to-changelog --srcdir ${PROJECT_SOURCE_DIR} >
           ${PROJECT_BINARY_DIR}/${PROJECT_NAME}${PROJECT_SUFFIX}-${PROJECT_VERSION}/ChangeLog &&
         rm -f ${PROJECT_SOURCE_DIR}/${PROJECT_NAME}.tar
         # cmake-format: on
