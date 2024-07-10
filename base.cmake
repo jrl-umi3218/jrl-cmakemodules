@@ -114,13 +114,20 @@
 # value is SameMajorVersion. See
 # https://cmake.org/cmake/help/latest/module/CMakePackageConfigHelpers.html#generating-a-package-version-file
 # for further details.
-
+#
 # .. variable:: PROJECT_AUTO_RUN_FINALIZE
 #
 # If set, to true or unset SETUP_PROJECT_FINALIZE run automatically at the end
 # of the root CMakeLists.txt. If set to false, SETUP_PROJECT_FINALIZE must be
 # called manually. This is helpful when creating a CMake workspace where the
 # root CMakelists.txt don't belong to a project.
+#
+# .. variable:: PROJECT_PACKAGES_IN_WORKSPACE
+#
+# List of packages in the workspace. This must be defined in the root
+# CMakeLists. These packages will not be searched with find_package and all
+# target and variables defined in the module should be defined in project added
+# to the workspace.
 #
 # Macros
 # ------
