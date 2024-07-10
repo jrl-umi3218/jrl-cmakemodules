@@ -127,6 +127,8 @@ endmacro(
 # `LD_LIBRARY_PATH`, `DYLD_LIBRARY_PATH`) to load the `MODULES` in
 # `PROJECT_BINARY_DIR` (`PROJECT_BINARY_DIR/MODULE_PATH`)
 #
+# Path in PROJECT_PYTHON_PACKAGES_IN_WORKSPACE are added to the PYTHONPATH.
+#
 # .. note:: :command:`FINDPYTHON` should have been called first.
 #
 function(COMPUTE_PYTHONPATH result)
@@ -142,6 +144,8 @@ function(COMPUTE_PYTHONPATH result)
   if(DEFINED ENV{PYTHONPATH})
     list(APPEND PYTHONPATH "$ENV{PYTHONPATH}")
   endif(DEFINED ENV{PYTHONPATH})
+
+  list(APPEND PYTHONPATH ${PROJECT_PYTHON_PACKAGES_IN_WORKSPACE})
 
   # get path separator to join those paths
   execute_process(

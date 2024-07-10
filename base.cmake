@@ -126,8 +126,14 @@
 #
 # List of packages in the workspace. This must be defined in the root
 # CMakeLists. These packages will not be searched with find_package and all
-# target and variables defined in the module should be defined in project added
-# to the workspace.
+# target and variables defined in the module should be defined in a workspace
+# projects.
+#
+# .. variable:: PROJECT_PYTHON_PACKAGES_IN_WORKSPACE
+#
+# List of paths to Python package in the workspace. This must be defined in the
+# root CMakeLists.txt. Python package should be generated in a workspace
+# projects.
 #
 # Macros
 # ------
