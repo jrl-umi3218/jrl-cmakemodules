@@ -77,7 +77,7 @@ macro(CREATE_CTEST_BUILD_TESTS_TARGET)
         ctest_build_tests
         "${CMAKE_COMMAND}"
         --build
-        ${CMAKE_BINARY_DIR}
+        ${PROJECT_BINARY_DIR}
         --target
         build_tests
         --
@@ -125,7 +125,7 @@ endmacro(
 #
 # Fill `result` with all necessary environment variables (`PYTHONPATH`,
 # `LD_LIBRARY_PATH`, `DYLD_LIBRARY_PATH`) to load the `MODULES` in
-# `CMAKE_BINARY_DIR` (`CMAKE_BINARY_DIR/MODULE_PATH`)
+# `PROJECT_BINARY_DIR` (`PROJECT_BINARY_DIR/MODULE_PATH`)
 #
 # .. note:: :command:`FINDPYTHON` should have been called first.
 #
@@ -133,9 +133,9 @@ function(COMPUTE_PYTHONPATH result)
   set(MODULES "${ARGN}") # ARGN is not a variable
   foreach(MODULE_PATH IN LISTS MODULES)
     if(CMAKE_GENERATOR MATCHES "Visual Studio|Xcode")
-      list(APPEND PYTHONPATH "${CMAKE_BINARY_DIR}/${MODULE_PATH}/$<CONFIG>")
+      list(APPEND PYTHONPATH "${PROJECT_BINARY_DIR}/${MODULE_PATH}/$<CONFIG>")
     else()
-      list(APPEND PYTHONPATH "${CMAKE_BINARY_DIR}/${MODULE_PATH}")
+      list(APPEND PYTHONPATH "${PROJECT_BINARY_DIR}/${MODULE_PATH}")
     endif()
   endforeach(MODULE_PATH IN LISTS MODULES)
 
@@ -171,8 +171,8 @@ endfunction()
 # .rst: .. command:: ADD_PYTHON_UNIT_TEST (NAME SOURCE [MODULES...])
 #
 # Add a test called `NAME` that runs an equivalent of ``python ${SOURCE}``,
-# optionnaly with a `PYTHONPATH` set to `CMAKE_BINARY_DIR/MODULE_PATH` for each
-# MODULES `SOURCE` is relative to `PROJECT_SOURCE_DIR`
+# optionnaly with a `PYTHONPATH` set to `PROJECT_BINARY_DIR/MODULE_PATH` for
+# each MODULES `SOURCE` is relative to `PROJECT_SOURCE_DIR`
 #
 # .. note:: :command:`FINDPYTHON` should have been called first.
 #
@@ -203,7 +203,7 @@ endmacro(
 #
 # Add a test called `NAME` that runs an equivalent of ``valgrind -- python
 # ${SOURCE}``, optionnaly with a `PYTHONPATH` set to
-# `CMAKE_BINARY_DIR/MODULE_PATH` for each MODULES. `SOURCE` is relative to
+# `PROJECT_BINARY_DIR/MODULE_PATH` for each MODULES. `SOURCE` is relative to
 # `PROJECT_SOURCE_DIR`.
 #
 # .. note:: :command:`FINDPYTHON` should have been called first. .. note:: Only
@@ -233,7 +233,7 @@ endmacro()
 # source dir.
 #
 # :param MODULES: Set the `PYTHONPATH` environment variable to
-# `CMAKE_BINARY_DIR/<modules>...`.
+# `PROJECT_BINARY_DIR/<modules>...`.
 #
 # .. note:: :command:`FINDPYTHON` should have been called first.
 #

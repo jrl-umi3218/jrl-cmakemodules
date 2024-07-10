@@ -164,7 +164,7 @@ macro(RELEASE_SETUP)
         echo "Updated CITATION.cff and committed")
     add_dependencies(release_citation_cff ${PROJECT_NAME}-release_citation_cff)
 
-    set(BUILD_CMD ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target)
+    set(BUILD_CMD ${CMAKE_COMMAND} --build ${PROJECT_BINARY_DIR} --target)
     if(NOT TARGET release)
       add_custom_target(
         release
@@ -191,14 +191,14 @@ macro(RELEASE_SETUP)
         # Update date and version in CITATION.cff if it exists
         if [ -f "CITATION.cff" ]; then (${BUILD_CMD} release_citation_cff) ; fi &&
         ${GIT} tag -s v$$VERSION -m "Release of version $$VERSION." &&
-        cd ${CMAKE_BINARY_DIR} &&
+        cd ${PROJECT_BINARY_DIR} &&
         cmake ${PROJECT_SOURCE_DIR} &&
         ${BUILD_CMD} distcheck ||
         (
          echo "Please fix distcheck first." &&
          cd ${PROJECT_SOURCE_DIR} &&
          ${GIT} tag -d v$$VERSION &&
-         cd ${CMAKE_BINARY_DIR} &&
+         cd ${PROJECT_BINARY_DIR} &&
          cmake ${PROJECT_SOURCE_DIR} &&
          false
         ) &&

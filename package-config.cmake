@@ -265,7 +265,8 @@ macro(PROJECT_INSTALL_COMPONENT COMPONENT)
                  "${_PACKAGE_CONFIG_${COMPONENT}_DEPENDENCIES_FIND_PACKAGE}")
   string(REPLACE ";" "\n  " COMPONENT_FIND_DEPENDENCY
                  "${_PACKAGE_CONFIG_${COMPONENT}_DEPENDENCIES_FIND_DEPENDENCY}")
-  set(COMPONENT_CONFIG "${CMAKE_BINARY_DIR}/generated/${COMPONENT}Config.cmake")
+  set(COMPONENT_CONFIG
+      "${PROJECT_BINARY_DIR}/generated/${COMPONENT}Config.cmake")
   set(COMPONENT_EXTRA_MACRO "${PARSED_ARGN_EXTRA_MACRO}")
   include(CMakePackageConfigHelpers)
   configure_package_config_file(

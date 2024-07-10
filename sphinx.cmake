@@ -93,7 +93,7 @@ macro(SPHINX_SETUP)
     add_dependencies(sphinx-doc ${PROJECT_NAME}-sphinx-doc)
 
     add_custom_command(
-      OUTPUT ${CMAKE_BINARY_DIR}/doc/sphinx-html
+      OUTPUT ${PROJECT_BINARY_DIR}/doc/sphinx-html
       COMMAND
         ${PYTHON_EXECUTABLE} ${SPHINX_BUILD} -b html
         ${CMAKE_CURRENT_BINARY_DIR}/sphinx
@@ -104,11 +104,12 @@ macro(SPHINX_SETUP)
     set_property(
       DIRECTORY
       APPEND
-      PROPERTY ADDITIONAL_MAKE_CLEAN_FILES ${CMAKE_BINARY_DIR}/doc/sphinx-html)
+      PROPERTY ADDITIONAL_MAKE_CLEAN_FILES
+               ${PROJECT_BINARY_DIR}/doc/sphinx-html)
 
     # Install generated files.
     if(INSTALL_DOCUMENTATION)
-      install(DIRECTORY ${CMAKE_BINARY_DIR}/doc/sphinx-html
+      install(DIRECTORY ${PROJECT_BINARY_DIR}/doc/sphinx-html
               DESTINATION share/doc/${PROJECT_NAME})
 
       if(EXISTS ${PROJECT_SOURCE_DIR}/doc/pictures)
