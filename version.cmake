@@ -133,12 +133,6 @@ function(_COMPUTE_VERSION_FROM_ROS_PACKAGE_XML_FILE)
 endfunction()
 
 # .rst: .. ifmode:: user
-# ~~~
-# .. command:: VERSION_COMPUTE([PROJECT_SOURCE_DIR <dir>])
-# ~~~
-#
-# :param PROJECT_SOURCE_DIR: If PROJECT_SOURCE_DIR is already set, it will be
-# overwritten by <dir>.
 #
 # .. variable:: PROJECT_VERSION_COMPUTATION_METHODS
 #
@@ -201,11 +195,6 @@ endfunction()
 # If `PROJECT_VERSION`` is already set, this macro does nothing.
 #
 macro(VERSION_COMPUTE)
-  set(options)
-  set(oneValueArgs PROJECT_SOURCE_DIR)
-  set(multiValueArgs)
-  cmake_parse_arguments(_version_args "${options}" "${oneValueArgs}"
-                        "${multiValueArgs}" ${ARGN})
   set(PROJECT_STABLE False)
 
   if("${PROJECT_SOURCE_DIR}" STREQUAL "")
@@ -214,8 +203,6 @@ macro(VERSION_COMPUTE)
     else()
       set(PROJECT_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
     endif()
-  elseif(_version_args_PROJECT_SOURCE_DIR)
-    set(PROJECT_SOURCE_DIR ${_version_args_PROJECT_SOURCE_DIR})
   endif()
 
   if(NOT DEFINED PROJECT_VERSION_COMPUTATION_METHODS)
