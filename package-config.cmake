@@ -145,9 +145,10 @@ endmacro()
 # Packages not in the PROJECT_PACKAGES_IN_WORKSPACE are searched with
 # find_package.
 macro(ADD_PROJECT_PRIVATE_DEPENDENCY)
-  list(GET ${ARGN} 0 _package_name)
+  set(ALL_ARGUMENTS ${ARGN})
+  list(GET ALL_ARGUMENTS 0 _package_name)
   if(NOT ${_package_name} IN_LIST PROJECT_PACKAGES_IN_WORKSPACE)
-    find_package(${ARGN})
+    find_package(${ALL_ARGUMENTS})
   endif()
 endmacro()
 
