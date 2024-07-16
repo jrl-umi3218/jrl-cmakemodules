@@ -64,8 +64,7 @@ macro(DISTCHECK_SETUP)
                    "${CMAKE_BINARY_DIR}")
 
     if(NOT TARGET distcheck)
-      add_custom_target(distcheck
-        COMMENT "Checking generated tarball...")
+      add_custom_target(distcheck COMMENT "Checking generated tarball...")
     endif()
     add_custom_target(
       ${PROJECT_NAME}-distcheck

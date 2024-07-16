@@ -36,8 +36,7 @@ macro(_SETUP_PROJECT_DIST)
 
     # Use git-archive-all.sh to generate distributable source code
     if(NOT TARGET distdir)
-      add_custom_target(distdir
-        COMMENT "Generating dist directory...")
+      add_custom_target(distdir COMMENT "Generating dist directory...")
     endif()
     add_custom_target(
       ${PROJECT_NAME}-distdir
@@ -66,8 +65,8 @@ macro(_SETUP_PROJECT_DIST)
 
     # Create a tar.gz tarball for the project, and generate the signature
     if(NOT TARGET dist_targz)
-      add_custom_target(dist_targz
-        COMMENT "Generating tar.gz tarball and its signature...")
+      add_custom_target(
+        dist_targz COMMENT "Generating tar.gz tarball and its signature...")
     endif()
     add_custom_target(
       ${PROJECT_NAME}-dist_targz
@@ -80,14 +79,14 @@ macro(_SETUP_PROJECT_DIST)
           ${PROJECT_BINARY_DIR}/${PROJECT_NAME}${PROJECT_SUFFIX}-${PROJECT_VERSION}.tar.gz
         # cmake-format: on
       WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
-      COMMENT "Generating tar.gz tarball and its signature for ${PROJECT_NAME}...")
+      COMMENT
+        "Generating tar.gz tarball and its signature for ${PROJECT_NAME}...")
     add_dependencies(dist_targz ${PROJECT_NAME}-dist_targz)
 
     # Create a tar.bz2 tarball for the project, and generate the signature
     if(NOT TARGET dist_tarbz2)
       add_custom_target(
-        dist_tarbz2
-        COMMENT "Generating tar.bz2 tarball and its signature...")
+        dist_tarbz2 COMMENT "Generating tar.bz2 tarball and its signature...")
     endif()
     add_custom_target(
       ${PROJECT_NAME}-dist_tarbz2
@@ -100,14 +99,14 @@ macro(_SETUP_PROJECT_DIST)
           ${PROJECT_BINARY_DIR}/${PROJECT_NAME}${PROJECT_SUFFIX}-${PROJECT_VERSION}.tar.bz2
         # cmake-format: on
       WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
-      COMMENT "Generating tar.bz2 tarball and its signature for ${PROJECT_NAME}...")
+      COMMENT
+        "Generating tar.bz2 tarball and its signature for ${PROJECT_NAME}...")
     add_dependencies(dist_tarbz2 ${PROJECT_NAME}-dist_tarbz2)
 
     # Create a tar.xz tarball for the project, and generate the signature
     if(NOT TARGET dist_tarxz)
       add_custom_target(
-        dist_tarxz
-        COMMENT "Generating tar.xz tarball and its signature...")
+        dist_tarxz COMMENT "Generating tar.xz tarball and its signature...")
     endif()
     add_custom_target(
       ${PROJECT_NAME}-dist_tarxz
@@ -120,7 +119,8 @@ macro(_SETUP_PROJECT_DIST)
           ${PROJECT_BINARY_DIR}/${PROJECT_NAME}${PROJECT_SUFFIX}-${PROJECT_VERSION}.tar.xz
         # cmake-format: on
       WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
-      COMMENT "Generating tar.xz tarball and its signature for ${PROJECT_NAME}...")
+      COMMENT
+        "Generating tar.xz tarball and its signature for ${PROJECT_NAME}...")
     add_dependencies(dist_tarxz ${PROJECT_NAME}-dist_tarxz)
 
     # Alias: dist = dist_targz (backward compatibility)
@@ -132,9 +132,7 @@ macro(_SETUP_PROJECT_DIST)
 
     # TODO: call this during `make clean`
     if(NOT TARGET distclean)
-      add_custom_target(
-        distclean
-        COMMENT "Cleaning dist sources...")
+      add_custom_target(distclean COMMENT "Cleaning dist sources...")
     endif()
     add_custom_target(
       ${PROJECT_NAME}-distclean
@@ -148,9 +146,7 @@ macro(_SETUP_PROJECT_DIST)
     add_dependencies(distclean ${PROJECT_NAME}-distclean)
 
     if(NOT TARGET distorig)
-      add_custom_target(
-        distorig
-        COMMENT "Generating orig tarball...")
+      add_custom_target(distorig COMMENT "Generating orig tarball...")
     endif()
     add_custom_target(
       ${PROJECT_NAME}-distorig

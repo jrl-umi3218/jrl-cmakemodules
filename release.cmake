@@ -59,9 +59,7 @@ macro(RELEASE_SETUP)
     endif(APPLE)
 
     if(NOT TARGET release_package_xml)
-      add_custom_target(
-        release_package_xml
-        COMMENT "Update package.xml")
+      add_custom_target(release_package_xml COMMENT "Update package.xml")
     endif()
     add_custom_target(
       ${PROJECT_NAME}-release_package_xml
@@ -75,8 +73,7 @@ macro(RELEASE_SETUP)
     add_dependencies(release_package_xml ${PROJECT_NAME}-release_package_xml)
 
     if(NOT TARGET release_pyproject_toml)
-      add_custom_target(release_pyproject_toml
-        COMMENT "Update pyproject.toml")
+      add_custom_target(release_pyproject_toml COMMENT "Update pyproject.toml")
     endif()
     add_custom_target(
       ${PROJECT_NAME}-release_pyproject_toml
@@ -96,11 +93,11 @@ macro(RELEASE_SETUP)
          &&
          echo
          "Updated pyproject.toml and committed") ; fi)
-    add_dependencies(release_pyproject_toml ${PROJECT_NAME}-release_pyproject_toml)
+    add_dependencies(release_pyproject_toml
+                     ${PROJECT_NAME}-release_pyproject_toml)
 
     if(NOT TARGET release_changelog)
-      add_custom_target(release_changelog
-        COMMENT "Update CHANGELOG.md")
+      add_custom_target(release_changelog COMMENT "Update CHANGELOG.md")
     endif()
     add_custom_target(
       ${PROJECT_NAME}-release_changelog
@@ -126,9 +123,7 @@ macro(RELEASE_SETUP)
     add_dependencies(release_changelog ${PROJECT_NAME}-release_changelog)
 
     if(NOT TARGET release_pixi_toml)
-      add_custom_target(
-        release_pixi_toml
-        COMMENT "Update pixi.toml")
+      add_custom_target(release_pixi_toml COMMENT "Update pixi.toml")
     endif()
     add_custom_target(
       ${PROJECT_NAME}-release_pixi_toml
@@ -148,9 +143,7 @@ macro(RELEASE_SETUP)
     add_dependencies(release_pixi_toml ${PROJECT_NAME}-release_pixi_toml)
 
     if(NOT TARGET release_citation_cff)
-      add_custom_target(
-        release_citation_cff
-        COMMENT "Update CITATION.cff")
+      add_custom_target(release_citation_cff COMMENT "Update CITATION.cff")
     endif()
     add_custom_target(
       ${PROJECT_NAME}-release_citation_cff
@@ -166,9 +159,7 @@ macro(RELEASE_SETUP)
 
     set(BUILD_CMD ${CMAKE_COMMAND} --build ${PROJECT_BINARY_DIR} --target)
     if(NOT TARGET release)
-      add_custom_target(
-        release
-        COMMENT "Create a new release")
+      add_custom_target(release COMMENT "Create a new release")
     endif()
     add_custom_target(
       ${PROJECT_NAME}-release
