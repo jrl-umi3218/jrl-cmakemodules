@@ -165,8 +165,14 @@ macro(FINDPYTHON)
       set(Python${_PYTHON_VERSION_MAJOR}_EXECUTABLE ${PYTHON_EXECUTABLE})
       set(Python${_PYTHON_VERSION_MAJOR}_INCLUDE_DIR ${PYTHON_INCLUDE_DIR})
 
+      if(SEARCH_FOR_NUMPY)
+        find_numpy()
+        set(Python_NumPy_INCLUDE_DIR ${NUMPY_INCLUDE_DIRS})
+      endif()
+
       find_package("Python${_PYTHON_VERSION_MAJOR}" REQUIRED
                    COMPONENTS ${PYTHON_COMPONENTS})
+
     else()
       # No hint was provided. We can then check for first Python 2, then Python
       # 3
