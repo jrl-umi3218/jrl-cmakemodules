@@ -115,6 +115,26 @@
 # https://cmake.org/cmake/help/latest/module/CMakePackageConfigHelpers.html#generating-a-package-version-file
 # for further details.
 #
+# .. variable:: PROJECT_AUTO_RUN_FINALIZE
+#
+# If set, to true or unset SETUP_PROJECT_FINALIZE run automatically at the end
+# of the root CMakeLists.txt. If set to false, SETUP_PROJECT_FINALIZE must be
+# called manually. This is helpful when creating a CMake workspace where the
+# root CMakelists.txt don't belong to a project.
+#
+# .. variable:: PROJECT_PACKAGES_IN_WORKSPACE
+#
+# List of packages in the workspace. This must be defined in the root
+# CMakeLists. These packages will not be searched with find_package and all
+# target and variables defined in the module should be defined in a workspace
+# projects.
+#
+# .. variable:: PROJECT_PYTHON_PACKAGES_IN_WORKSPACE
+#
+# List of paths to Python package in the workspace. This must be defined in the
+# root CMakeLists.txt. Python package should be generated in a workspace
+# projects.
+#
 # Macros
 # ------
 #
@@ -133,6 +153,10 @@ set(PROJECT_JRL_CMAKE_MODULE_DIR
 set(PROJECT_JRL_CMAKE_BINARY_DIR
     ${CMAKE_CURRENT_BINARY_DIR}
     CACHE INTERNAL "")
+
+if(NOT DEFINED PROJECT_AUTO_RUN_FINALIZE)
+  set(PROJECT_AUTO_RUN_FINALIZE TRUE)
+endif()
 
 # Please note that functions starting with an underscore are internal functions
 # and should not be used directly.
@@ -218,20 +242,19 @@ set(CMAKE_PROJECT_${PROJECT_NAME}_INCLUDE
 # Set a hook to finalize the setup, CMake will set CMAKE_CURRENT_LIST_DIR to ""
 # at the end Based off
 # https://stackoverflow.com/questions/15760580/execute-command-or-macro-in-cmake-as-the-last-step-before-the-configure-step-f
-variable_watch(CMAKE_CURRENT_LIST_DIR SETUP_PROJECT_FINALIZE_HOOK)
-function(SETUP_PROJECT_FINALIZE_HOOK VARIABLE ACCESS)
-  if("${${VARIABLE}}" STREQUAL "")
-    set(CMAKE_CURRENT_LIST_DIR ${PROJECT_JRL_CMAKE_MODULE_DIR})
-    set(JRL_CMAKEMODULE_LOGGING_FILENAME
-        "${PROJECT_JRL_CMAKE_BINARY_DIR}/config.log")
-    setup_project_finalize()
-    if(PROJECT_USE_CMAKE_EXPORT)
-      setup_project_package_finalize()
+if(PROJECT_AUTO_RUN_FINALIZE)
+  variable_watch(CMAKE_CURRENT_LIST_DIR SETUP_PROJECT_FINALIZE_HOOK)
+  function(SETUP_PROJECT_FINALIZE_HOOK VARIABLE ACCESS)
+    if("${${VARIABLE}}" STREQUAL "")
+      set(CMAKE_CURRENT_LIST_DIR ${PROJECT_JRL_CMAKE_MODULE_DIR})
+      set(JRL_CMAKEMODULE_LOGGING_FILENAME
+          "${PROJECT_JRL_CMAKE_BINARY_DIR}/config.log")
+      setup_project_finalize()
+      set(CMAKE_CURRENT_LIST_DIR "") # restore value
+      set(JRL_CMAKEMODULE_LOGGING_FILENAME "") # restore value
     endif()
-    set(CMAKE_CURRENT_LIST_DIR "") # restore value
-    set(JRL_CMAKEMODULE_LOGGING_FILENAME "") # restore value
-  endif()
-endfunction()
+  endfunction()
+endif()
 
 # --------------------- # Project configuration # --------------------- #
 
@@ -332,6 +355,9 @@ macro(SETUP_PROJECT_FINALIZE)
   _install_project_data()
 
   logging_finalize()
+  if(PROJECT_USE_CMAKE_EXPORT)
+    setup_project_package_finalize()
+  endif()
 endmacro(SETUP_PROJECT_FINALIZE)
 
 # .rst: .. ifmode:: user

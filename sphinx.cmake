@@ -39,11 +39,15 @@ macro(SPHINX_SETUP)
       WARNING "Failed to find sphinx, documentation will not be generated.")
   else(NOT SPHINX_BUILD)
 
+    if(NOT TARGET sphinx-doc)
+      add_custom_target(sphinx-doc ALL
+                        COMMENT "Generating sphinx documentation")
+    endif()
     if(MSVC)
       # FIXME: it is impossible to trigger documentation installation at
       # install, so put the target in ALL instead.
       add_custom_target(
-        sphinx-doc ALL
+        ${PROJECT_NAME}-sphinx-doc
         COMMAND
           ${PYTHON_EXECUTABLE} ${SPHINX_BUILD} -b html
           ${CMAKE_CURRENT_BINARY_DIR}/sphinx
@@ -55,7 +59,7 @@ macro(SPHINX_SETUP)
       set(EXTRA_LD_PATH "\"${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}\":")
       set(EXTRA_LD_PATH "${EXTRA_LD_PATH}\"${DYNAMIC_GRAPH_PLUGINDIR}\":")
       add_custom_target(
-        sphinx-doc
+        ${PROJECT_NAME}-sphinx-doc
         COMMAND
           export DYLD_LIBRARY_PATH=${EXTRA_LD_PATH}:\$DYLD_LIBRARY_PATH \;
           ${PYTHON_EXECUTABLE} ${SPHINX_BUILD} -b html
@@ -73,7 +77,7 @@ macro(SPHINX_SETUP)
       set(EXTRA_LD_PATH "\"${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}\":")
       set(EXTRA_LD_PATH "${EXTRA_LD_PATH}\"${DYNAMIC_GRAPH_PLUGINDIR}\":")
       add_custom_target(
-        sphinx-doc
+        ${PROJECT_NAME}-sphinx-doc
         COMMAND
           export LD_LIBRARY_PATH=${EXTRA_LD_PATH}:$$LD_LIBRARY_PATH \;
           ${PYTHON_EXECUTABLE} ${SPHINX_BUILD} -b html
@@ -86,9 +90,10 @@ macro(SPHINX_SETUP)
           CODE "EXECUTE_PROCESS(COMMAND ${CMAKE_MAKE_PROGRAM} sphinx-doc)")
       endif(INSTALL_DOCUMENTATION)
     endif(MSVC)
+    add_dependencies(sphinx-doc ${PROJECT_NAME}-sphinx-doc)
 
     add_custom_command(
-      OUTPUT ${CMAKE_BINARY_DIR}/doc/sphinx-html
+      OUTPUT ${PROJECT_BINARY_DIR}/doc/sphinx-html
       COMMAND
         ${PYTHON_EXECUTABLE} ${SPHINX_BUILD} -b html
         ${CMAKE_CURRENT_BINARY_DIR}/sphinx
@@ -99,11 +104,12 @@ macro(SPHINX_SETUP)
     set_property(
       DIRECTORY
       APPEND
-      PROPERTY ADDITIONAL_MAKE_CLEAN_FILES ${CMAKE_BINARY_DIR}/doc/sphinx-html)
+      PROPERTY ADDITIONAL_MAKE_CLEAN_FILES
+               ${PROJECT_BINARY_DIR}/doc/sphinx-html)
 
     # Install generated files.
     if(INSTALL_DOCUMENTATION)
-      install(DIRECTORY ${CMAKE_BINARY_DIR}/doc/sphinx-html
+      install(DIRECTORY ${PROJECT_BINARY_DIR}/doc/sphinx-html
               DESTINATION share/doc/${PROJECT_NAME})
 
       if(EXISTS ${PROJECT_SOURCE_DIR}/doc/pictures)

@@ -57,11 +57,19 @@ macro(_SETUP_PROJECT_PACKAGE_INIT)
       CACHE INTERNAL "")
 endmacro(_SETUP_PROJECT_PACKAGE_INIT)
 
-# .rst: .. command:: ADD_PROJECT_DEPENDENCY(ARGS [PKG_CONFIG_REQUIRES pkg]
-# [FOR_COMPONENT component] [FIND_EXTERNAL pkg])
+# .rst:
+# ~~~
+# .. command:: ADD_PROJECT_DEPENDENCY(ARGS
+#                                    [PKG_CONFIG_REQUIRES pkg]
+#                                    [FOR_COMPONENT component]
+#                                    [FIND_EXTERNAL pkg])
+# ~~~
 #
 # This is a wrapper around find_package to add correct find_dependency calls in
-# the generated config script. All arguments are passed to find_package.
+# the generated config script.
+#
+# Packages not in the PROJECT_PACKAGES_IN_WORKSPACE are searched with
+# find_package.
 #
 # In cases where find_package is not supported by a project, or only in recent
 # versions, one should provide a custom <PackageName>Config.cmake or use a more
@@ -110,7 +118,10 @@ macro(ADD_PROJECT_DEPENDENCY)
   _add_to_list_if_not_present(
     _PACKAGE_CONFIG${component}_DEPENDENCIES_FIND_DEPENDENCY
     "find_dependency(${PACKAGE_ARGS})")
-  find_package(${PARSED_ARGN_UNPARSED_ARGUMENTS})
+  list(GET PARSED_ARGN_UNPARSED_ARGUMENTS 0 _package_name)
+  if(NOT ${_package_name} IN_LIST PROJECT_PACKAGES_IN_WORKSPACE)
+    find_package(${PARSED_ARGN_UNPARSED_ARGUMENTS})
+  endif()
 
   # Propagate variables changes to the cached values
   set(_PACKAGE_CONFIG${component}_DEPENDENCIES_PROJECTS
@@ -122,6 +133,23 @@ macro(ADD_PROJECT_DEPENDENCY)
   set(_PACKAGE_CONFIG${component}_DEPENDENCIES_FIND_DEPENDENCY
       "${_PACKAGE_CONFIG${component}_DEPENDENCIES_FIND_DEPENDENCY}"
       CACHE INTERNAL "")
+endmacro()
+
+# .rst:
+# ~~~
+# .. command:: ADD_PROJECT_PRIVATE_DEPENDENCY()
+# ~~~
+#
+# This is a wrapper around find_package.
+#
+# Packages not in the PROJECT_PACKAGES_IN_WORKSPACE are searched with
+# find_package.
+macro(ADD_PROJECT_PRIVATE_DEPENDENCY)
+  set(ALL_ARGUMENTS ${ARGN})
+  list(GET ALL_ARGUMENTS 0 _package_name)
+  if(NOT ${_package_name} IN_LIST PROJECT_PACKAGES_IN_WORKSPACE)
+    find_package(${ALL_ARGUMENTS})
+  endif()
 endmacro()
 
 # SETUP_PROJECT_PACKAGE_FINALIZE
@@ -265,7 +293,8 @@ macro(PROJECT_INSTALL_COMPONENT COMPONENT)
                  "${_PACKAGE_CONFIG_${COMPONENT}_DEPENDENCIES_FIND_PACKAGE}")
   string(REPLACE ";" "\n  " COMPONENT_FIND_DEPENDENCY
                  "${_PACKAGE_CONFIG_${COMPONENT}_DEPENDENCIES_FIND_DEPENDENCY}")
-  set(COMPONENT_CONFIG "${CMAKE_BINARY_DIR}/generated/${COMPONENT}Config.cmake")
+  set(COMPONENT_CONFIG
+      "${PROJECT_BINARY_DIR}/generated/${COMPONENT}Config.cmake")
   set(COMPONENT_EXTRA_MACRO "${PARSED_ARGN_EXTRA_MACRO}")
   include(CMakePackageConfigHelpers)
   configure_package_config_file(

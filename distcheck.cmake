@@ -63,8 +63,11 @@ macro(DISTCHECK_SETUP)
     string(REPLACE "${CMAKE_SOURCE_DIR}" "${SRCDIR}" NEW_CMAKE_BINARY_DIR
                    "${CMAKE_BINARY_DIR}")
 
+    if(NOT TARGET distcheck)
+      add_custom_target(distcheck COMMENT "Checking generated tarball...")
+    endif()
     add_custom_target(
-      distcheck
+      ${PROJECT_NAME}-distcheck
       COMMAND
         export LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH} && export
         ${LD_LIBRARY_PATH_VARIABLE_NAME}=$ENV{${LD_LIBRARY_PATH_VARIABLE_NAME}}
@@ -129,7 +132,8 @@ macro(DISTCHECK_SETUP)
       WORKING_DIRECTORY
         ${CMAKE_BINARY_DIR}/${PROJECT_NAME}${PROJECT_SUFFIX}-${PROJECT_VERSION}
       COMMENT "Checking generated tarball...")
-    add_dependencies(distcheck distdir)
+    add_dependencies(distcheck ${PROJECT_NAME}-distcheck)
+    add_dependencies(${PROJECT_NAME}-distcheck ${PROJECT_NAME}-distdir)
 
     unset(NEW_CMAKE_BINARY_DIR)
     unset(SRCDIR)
