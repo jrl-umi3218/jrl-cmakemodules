@@ -1,4 +1,4 @@
-# Copyright (C) 2018 INRIA
+# Copyright (C) 2018-2024 INRIA
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -20,15 +20,15 @@ set(CURRENT_FILE_PATH
 # .rst: .. command:: ADD_GTEST_SUITE([GIT_TAG])
 #
 # GIT_TAG: the git tag of gtest. This optional argument allows to use a precise
-# version of gtest (not necessarily the last master branch).
+# version of gtest (not necessarily the last main branch).
 #
 # Download and configure gtest. This macro follows the
-# https://github.com/google/googletest/tree/master/googletest#incorporating-into-an-existing-cmake-project
+# https://github.com/google/googletest/tree/main/googletest#incorporating-into-an-existing-cmake-project
 # instructions.
 #
 macro(ADD_GTEST_SUITE)
   # Handle optional argument
-  set(GTEST_GIT_TAG "master")
+  set(GTEST_GIT_TAG "main")
   set(extra_macro_args ${ARGN})
   list(LENGTH extra_macro_args num_extra_args)
   if(${num_extra_args} GREATER 0)
