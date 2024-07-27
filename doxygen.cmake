@@ -541,7 +541,9 @@ macro(_SETUP_PROJECT_DOCUMENTATION)
         COMMENT "Generating Doxygen documentation")
 
       if(INSTALL_DOCUMENTATION)
-        install(CODE "EXECUTE_PROCESS(COMMAND ${CMAKE_MAKE_PROGRAM} ${PROJECT_NAME}-doc)")
+        install(
+          CODE "EXECUTE_PROCESS(COMMAND ${CMAKE_MAKE_PROGRAM} ${PROJECT_NAME}-doc)"
+        )
       endif(INSTALL_DOCUMENTATION)
     endif(MSVC)
     add_dependencies(doc ${PROJECT_NAME}-doc)
