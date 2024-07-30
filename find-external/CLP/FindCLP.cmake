@@ -28,7 +28,7 @@ find_path(
   PATHS ${CLP_PREFIX})
 find_library(
   CLP_LIBRARY
-  NAMES libclp.so libClp.so
+  NAMES libclp libClp
   PATHS ${CLP_PREFIX})
 
 set(CLP_LIBRARIES ${CLP_LIBRARY})

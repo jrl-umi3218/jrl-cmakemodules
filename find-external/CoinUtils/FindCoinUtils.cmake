@@ -29,7 +29,7 @@ find_path(
   PATHS ${CoinUtils_PREFIX})
 find_library(
   CoinUtils_LIBRARY
-  NAMES libCoinUtils.so
+  NAMES libCoinUtils
   PATHS ${CoinUtils_PREFIX})
 
 set(CoinUtils_LIBRARIES ${CoinUtils_LIBRARY})
