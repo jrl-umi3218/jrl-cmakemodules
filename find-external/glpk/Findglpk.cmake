@@ -28,7 +28,7 @@ find_path(
   PATHS ${glpk_PREFIX})
 find_library(
   glpk_LIBRARY
-  NAMES libglpk
+  NAMES glpk
   PATHS ${glpk_PREFIX}
   PATH_SUFFIXES include/glpk)
 

@@ -29,7 +29,7 @@ find_path(
   PATH_SUFFIXES include/cdd include/cddlib)
 find_library(
   CDD_LIBRARY
-  NAMES libcdd
+  NAMES cdd
   PATHS ${CDD_PREFIX})
 
 set(CDD_LIBRARIES ${CDD_LIBRARY})
