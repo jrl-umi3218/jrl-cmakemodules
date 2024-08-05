@@ -518,18 +518,22 @@ macro(_SETUP_PROJECT_DOCUMENTATION)
     endif(DOXYGEN_DOT_FOUND)
 
     # Teach CMake how to generate the documentation.
-    if(NOT TARGET doc)
-      add_custom_target(doc ALL COMMENT "Generating Doxygen documentation")
-    endif()
     if(MSVC)
       # FIXME: it is impossible to trigger documentation installation at
       # install, so put the target in ALL instead.
+      if(NOT TARGET doc)
+        add_custom_target(doc ALL COMMENT "Generating Doxygen documentation")
+      endif()
       add_custom_target(
         ${PROJECT_NAME}-doc
         COMMAND ${DOXYGEN_EXECUTABLE} ${JRL_CMAKEMODULE_DOXYFILE_PATH}
         WORKING_DIRECTORY doc
         COMMENT "Generating Doxygen documentation")
     else(MSVC)
+      if(NOT TARGET doc)
+        add_custom_target(doc COMMENT "Generating Doxygen documentation")
+      endif()
+
       add_custom_target(
         ${PROJECT_NAME}-doc
         COMMAND ${DOXYGEN_EXECUTABLE} ${JRL_CMAKEMODULE_DOXYFILE_PATH}
@@ -537,7 +541,9 @@ macro(_SETUP_PROJECT_DOCUMENTATION)
         COMMENT "Generating Doxygen documentation")
 
       if(INSTALL_DOCUMENTATION)
-        install(CODE "EXECUTE_PROCESS(COMMAND ${CMAKE_MAKE_PROGRAM} doc)")
+        install(
+          CODE "EXECUTE_PROCESS(COMMAND ${CMAKE_MAKE_PROGRAM} ${PROJECT_NAME}-doc)"
+        )
       endif(INSTALL_DOCUMENTATION)
     endif(MSVC)
     add_dependencies(doc ${PROJECT_NAME}-doc)
