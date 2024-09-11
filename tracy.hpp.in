@@ -17,17 +17,17 @@
 #define TracyFunction __FUNCSIG__
 #endif
 #include <tracy/Tracy.hpp>
-#define @LIBRARY_NAME@_ZONE_SCOPED_N(name) ZoneScopedN(name)
-#define @LIBRARY_NAME@_ZONE_SCOPED ZoneScoped
-#define @LIBRARY_NAME@_ZONE_NAMED_N(varname, name, active) ZoneNamedN(varname, name, active)
-#define @LIBRARY_NAME@_ZONE_NAMED(varname, active) ZoneNamed(varname, active)
-#define @LIBRARY_NAME@_SET_THREAD_NAME(name) tracy::SetThreadName(name)
+#define @LIBRARY_NAME@_TRACY_ZONE_SCOPED_N(name) ZoneScopedN(name)
+#define @LIBRARY_NAME@_TRACY_ZONE_SCOPED ZoneScoped
+#define @LIBRARY_NAME@_TRACY_ZONE_NAMED_N(varname, name, active) ZoneNamedN(varname, name, active)
+#define @LIBRARY_NAME@_TRACY_ZONE_NAMED(varname, active) ZoneNamed(varname, active)
+#define @LIBRARY_NAME@_TRACY_SET_THREAD_NAME(name) tracy::SetThreadName(name)
 #else
-#define @LIBRARY_NAME@_ZONE_SCOPED_N(x)
-#define @LIBRARY_NAME@_ZONE_SCOPED
-#define @LIBRARY_NAME@_ZONE_NAMED_N(x, y, z)
-#define @LIBRARY_NAME@_ZONE_NAMED(x, y)
-#define @LIBRARY_NAME@_SET_THREAD_NAME(x)
+#define @LIBRARY_NAME@_TRACY_ZONE_SCOPED_N(x)
+#define @LIBRARY_NAME@_TRACY_ZONE_SCOPED
+#define @LIBRARY_NAME@_TRACY_ZONE_NAMED_N(x, y, z)
+#define @LIBRARY_NAME@_TRACY_ZONE_NAMED(x, y)
+#define @LIBRARY_NAME@_TRACY_SET_THREAD_NAME(x)
 #endif
 
 #endif  // @LIBRARY_NAME@_TRACY_HPP
