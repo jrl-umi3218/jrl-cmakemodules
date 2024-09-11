@@ -13,7 +13,6 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 function(_GENERATE_TRACY_HEADER)
   set(options)
   set(oneValueArgs INCLUDE_DIR HEADER_DIR FILENAME LIBRARY_NAME TRACY_ENABLE)
@@ -57,11 +56,16 @@ function(_SETUP_TRACY_HEADER)
   string(TOUPPER "${PACKAGE_CPPNAME}" PACKAGE_CPPNAME)
 
   _generate_tracy_header(
-    INCLUDE_DIR ${PROJECT_BINARY_DIR}/include
-    HEADER_DIR ${HEADER_DIR}
-    FILENAME tracy.hpp
-    LIBRARY_NAME ${PACKAGE_CPPNAME}
-    TRACY_ENABLE ${${PACKAGE_CPPNAME}_TRACY_ENABLE})
+    INCLUDE_DIR
+    ${PROJECT_BINARY_DIR}/include
+    HEADER_DIR
+    ${HEADER_DIR}
+    FILENAME
+    tracy.hpp
+    LIBRARY_NAME
+    ${PACKAGE_CPPNAME}
+    TRACY_ENABLE
+    ${${PACKAGE_CPPNAME}_TRACY_ENABLE})
 endfunction()
 
 option(${PACKAGE_CPPNAME}_TRACY_ENABLE "Enable Tracy." OFF)
