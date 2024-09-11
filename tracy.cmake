@@ -13,6 +13,32 @@
 # You should have received a copy of the GNU Lesser General Public License along
 # with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+# .rst:
+# ~~~
+# .. command:: GENERATE_TRACY_HEADER (
+#   INCLUDE_DIR <include_dir>
+#   HEADER_DIR <header_dir>
+#   FILENAME <filename>
+#   LIBRARY_NAME <library_name>
+#   TRACY_ENABLE <tracy_enable>)
+# ~~~
+#
+# This function generates a tracy wrapper header at
+# ``<include_dir>/<header_dir>/<filename>``.
+#
+# If INSTALL_GENERATED_HEADERS is ON, the configuration header will be installed
+# in
+# ``${CMAKE_INSTALL_INCLUDEDIR}/<header_dir>``.
+#
+# :param INCLUDE_DIR: Include root directory (absolute).
+#
+# :param HEADER_DIR: Include sub directory.
+#
+# :param FILENAME: Configuration header name.
+#
+# :param LIBRARY_NAME: Define prefix, should match the compiled library name.
+#
+# :param TRACY_ENABLE: Controls if tracy macro are empty or call tracy.
 function(_GENERATE_TRACY_HEADER)
   set(options)
   set(oneValueArgs INCLUDE_DIR HEADER_DIR FILENAME LIBRARY_NAME TRACY_ENABLE)
@@ -41,6 +67,9 @@ function(_GENERATE_TRACY_HEADER)
   endif()
 endfunction()
 
+# .rst:
+#
+# Read project parameters to generate tracy header
 function(_SETUP_TRACY_HEADER)
   # Install project headers.
   if(DEFINED PROJECT_CUSTOM_HEADER_DIR)
