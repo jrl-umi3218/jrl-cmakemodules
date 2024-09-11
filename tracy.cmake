@@ -29,7 +29,7 @@ function(_GENERATE_TRACY_HEADER)
     set(DEFINE_TRACY_ENABLE)
   endif()
 
-  configure_file(${PROJECT_JRL_CMAKE_MODULE_DIR}/tracy.hpp.in
+  configure_file(${PROJECT_JRL_CMAKE_MODULE_DIR}/tracy.hh.cmake
                  ${ARGS_INCLUDE_DIR}/${ARGS_HEADER_DIR}/${ARGS_FILENAME} @ONLY)
 
   # Install it if requested.
