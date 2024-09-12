@@ -102,7 +102,12 @@ macro(ADD_UNIT_TEST NAME)
 
   add_dependencies(build_tests ${NAME})
 
-  add_test(NAME ${NAME} COMMAND ${NAME})
+  if(ENABLE_COVERAGE)
+    add_test(NAME ${NAME} COMMAND ${KCOV} --include-path=${CMAKE_SOURCE_DIR}
+                                  ${KCOV_DIR}/${NAME} ${NAME})
+  else()
+    add_test(NAME ${NAME} COMMAND ${NAME})
+  endif()
   # Support definition of DYLD_LIBRARY_PATH for OSX systems
   if(APPLE)
     set_tests_properties(
@@ -182,22 +187,28 @@ endfunction()
 #
 macro(ADD_PYTHON_UNIT_TEST NAME SOURCE)
   if(ENABLE_COVERAGE)
-    set_property(GLOBAL PROPERTY JRL_CMAKEMODULES_HAS_PYTHON_COVERAGE ON)
-    set(PYTHONPATH "${CMAKE_INSTALL_PREFIX}/${PYTHON_SITELIB}")
+    # run this python test to gather C++ coverage of python bindings
     add_test(
       NAME ${NAME}
-      COMMAND ${PYTHON_EXECUTABLE} -m coverage run --branch -p
-              --source=${PYTHONPATH} "${PROJECT_SOURCE_DIR}/${SOURCE}"
-      WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
+      COMMAND ${KCOV} --include-path=${CMAKE_SOURCE_DIR} ${KCOV_DIR}/${NAME}
+              ${PYTHON_EXECUTABLE} "${PROJECT_SOURCE_DIR}/${SOURCE}")
+    # run this python test again, but this time to gather python coverage
+    add_test(NAME ${NAME}-pycov
+             COMMAND ${KCOV} --include-path=${CMAKE_SOURCE_DIR}
+                     ${KCOV_DIR}/${NAME} "${PROJECT_SOURCE_DIR}/${SOURCE}")
   else()
     add_test(NAME ${NAME} COMMAND ${PYTHON_EXECUTABLE}
                                   "${PROJECT_SOURCE_DIR}/${SOURCE}")
-    set(PYTHONPATH)
   endif()
 
   set(MODULES "${ARGN}") # ARGN is not a variable
+  set(PYTHONPATH)
   compute_pythonpath(ENV_VARIABLES ${MODULES})
   set_tests_properties(${NAME} PROPERTIES ENVIRONMENT "${ENV_VARIABLES}")
+  if(ENABLE_COVERAGE)
+    set_tests_properties(${NAME}-pycov PROPERTIES ENVIRONMENT
+                                                  "${ENV_VARIABLES}")
+  endif()
 endmacro(
   ADD_PYTHON_UNIT_TEST
   NAME
