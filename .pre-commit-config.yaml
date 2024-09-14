@@ -7,15 +7,7 @@ repos:
   - id: ruff
     args:
     - --fix
-    exclude: |
-      (?x)^(
-          .cmake-format.py
-      )$
   - id: ruff-format
-    exclude: |
-      (?x)^(
-          .cmake-format.py
-      )$
 - repo: https://github.com/cheshirekow/cmake-format-precommit
   rev: v0.6.13
   hooks:
