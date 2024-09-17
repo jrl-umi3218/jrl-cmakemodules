@@ -115,6 +115,8 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
           ./stubs.cmake
           ./swig.cmake
           ./test.cmake
+          ./tracy.cmake
+          ./tracy.hh.cmake
           ./uninstall.cmake
           ./version.cmake
           ./version-script.cmake
