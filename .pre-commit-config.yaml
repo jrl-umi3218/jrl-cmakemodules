@@ -1,14 +1,13 @@
 ci:
   autoupdate_schedule: quarterly
 repos:
-- repo: https://github.com/PyCQA/flake8
-  rev: 7.1.0
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  rev: v0.5.7
   hooks:
-  - id: flake8
-    exclude: |
-      (?x)^(
-          .cmake-format.py
-      )$
+  - id: ruff
+    args:
+    - --fix
+  - id: ruff-format
 - repo: https://github.com/cheshirekow/cmake-format-precommit
   rev: v0.6.13
   hooks:
@@ -42,14 +41,6 @@ repos:
   - id: fix-byte-order-marker
   - id: mixed-line-ending
   - id: trailing-whitespace
-- repo: https://github.com/psf/black
-  rev: 24.4.2
-  hooks:
-  - id: black
-    exclude: |
-      (?x)^(
-          .cmake-format.py
-      )$
 - repo: meta
   hooks:
   - id: check-hooks-apply
