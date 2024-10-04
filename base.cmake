@@ -353,6 +353,7 @@ macro(SETUP_PROJECT_FINALIZE)
   _setup_debian()
   # Install data if needed
   _install_project_data()
+  _install_project_ros2_ament_files()
 
   logging_finalize()
   if(PROJECT_USE_CMAKE_EXPORT)
