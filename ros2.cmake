@@ -13,10 +13,9 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# This macro creates 3 files which are allowing a package to be found
-# using the AMENT system present in ros 2
-# Setting BUILDING_ROS2_PACKAGE is enough to trigger this behavior.
-# _install_project_ros2_ament_files()
+# This macro creates 3 files which are allowing a package to be found using the
+# AMENT system present in ros 2 Setting BUILDING_ROS2_PACKAGE is enough to
+# trigger this behavior. _install_project_ros2_ament_files()
 macro(_install_project_ros2_ament_files)
   if(BUILDING_ROS2_PACKAGE)
     message(STATUS "Create files for AMENT (ROS 2)")
@@ -27,7 +26,7 @@ macro(_install_project_ros2_ament_files)
       "")
     install(
       FILES
-      ${CMAKE_CURRENT_BINARY_DIR}/share/ament_index/resource_index/packages/${PROJECT_NAME}
+        ${CMAKE_CURRENT_BINARY_DIR}/share/ament_index/resource_index/packages/${PROJECT_NAME}
       DESTINATION share/ament_index/resource_index/packages)
     file(
       WRITE
@@ -35,13 +34,14 @@ macro(_install_project_ros2_ament_files)
       "prepend-non-duplicate;AMENT_PREFIX_PATH;")
     install(
       FILES
-      ${CMAKE_CURRENT_BINARY_DIR}/share/${PROJECT_NAME}/hook/ament_prefix_path.dsv
+        ${CMAKE_CURRENT_BINARY_DIR}/share/${PROJECT_NAME}/hook/ament_prefix_path.dsv
       DESTINATION share/${PROJECT_NAME}/hook)
     file(WRITE
-      ${CMAKE_CURRENT_BINARY_DIR}/share/${PROJECT_NAME}/hook/python_path.dsv
-      "prepend-non-duplicate;PYTHONPATH;${PYTHON_SITELIB}")
+         ${CMAKE_CURRENT_BINARY_DIR}/share/${PROJECT_NAME}/hook/python_path.dsv
+         "prepend-non-duplicate;PYTHONPATH;${PYTHON_SITELIB}")
     install(
-      FILES ${CMAKE_CURRENT_BINARY_DIR}/share/${PROJECT_NAME}/hook/python_path.dsv
+      FILES
+        ${CMAKE_CURRENT_BINARY_DIR}/share/${PROJECT_NAME}/hook/python_path.dsv
       DESTINATION share/${PROJECT_NAME}/hook)
   endif(BUILDING_ROS2_PACKAGE)
 endmacro(_install_project_ros2_ament_files)
