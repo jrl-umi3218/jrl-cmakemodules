@@ -108,7 +108,7 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
           ./release.cmake
           ./relpath.cmake
           ./ros.cmake
-          ./ros2.cmake          
+          ./ros2.cmake
           ./sdformat.cmake
           ./setup.cfg
           ./shared-library.cmake
