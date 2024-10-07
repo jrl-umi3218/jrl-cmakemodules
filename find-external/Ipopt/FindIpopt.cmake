@@ -2,7 +2,9 @@
 #
 # Author: Wilson Jallet
 #
-# Adapted from: https://github.com/casadi/casadi/blob/main/cmake/FindIPOPT.cmake
+# Adapted from:
+# https://github.com/casadi/casadi/blob/main/cmake/FindIPOPT.cmake, LGPL 3.0
+# License
 #
 # Uses the modern PkgConfig CMake module helpers to find an installed version of
 # Ipopt, for which a CMake shared imported library target is created with the
