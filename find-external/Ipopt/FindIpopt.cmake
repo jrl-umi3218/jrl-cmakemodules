@@ -4,8 +4,9 @@
 #
 # Adapted from: https://github.com/casadi/casadi/blob/main/cmake/FindIPOPT.cmake
 #
-# Uses the modern PkgConfig CMake module helpers to find an installed version of Ipopt,
-# for which a CMake shared imported library target is created with the required includes and compile options in its link interface.
+# Uses the modern PkgConfig CMake module helpers to find an installed version of
+# Ipopt, for which a CMake shared imported library target is created with the
+# required includes and compile options in its link interface.
 #
 find_package(Ipopt CONFIG QUIET)
 
