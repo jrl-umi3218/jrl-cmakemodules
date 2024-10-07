@@ -15,10 +15,7 @@ find_package(Ipopt CONFIG QUIET)
 if(Ipopt_FOUND)
   message(DEBUG "Found Ipopt (using IpoptConfig.cmake or ipopt-config.cmake)")
 else()
-  find_package(PkgConfig QUIET)
-  if(NOT PKG_CONFIG_FOUND)
-    message(FATAL_ERROR "pkg-config not found!")
-  endif()
+  find_package(PkgConfig REQUIRED)
   pkg_check_modules(Ipopt REQUIRED ipopt)
 
   include(FindPackageHandleStandardArgs)
@@ -35,13 +32,11 @@ else()
     ipopt_lib_path
     NAMES ipopt
     PATHS ${Ipopt_LIBRARY_DIRS})
-  message(STATUS "  Ipopt library ipopt found at ${ipopt_lib_path}")
+  message(STATUS "  Ipopt library found at ${ipopt_lib_path}")
   set_target_properties(ipopt PROPERTIES IMPORTED_LOCATION ${ipopt_lib_path})
   target_include_directories(ipopt INTERFACE ${Ipopt_INCLUDE_DIRS})
 
-  if(${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
-
-  else()
+  if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     target_compile_definitions(ipopt INTERFACE HAVE_CSTDDEF)
   endif()
   target_compile_options(ipopt INTERFACE ${Ipopt_CFLAGS_OTHER})
