@@ -40,10 +40,6 @@ else()
                INTERFACE_COMPILE_OPTIONS "${Ipopt_CFLAGS_OTHER}"
                IMPORTED_CONFIGURATIONS "RELEASE")
 
-  if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    target_compile_definitions(ipopt INTERFACE HAVE_CSTDDEF)
-  endif()
-
   if(WIN32)
     set_target_properties(ipopt PROPERTIES IMPORTED_IMPLIB_RELEASE
                                            "${ipopt_lib_path}")
