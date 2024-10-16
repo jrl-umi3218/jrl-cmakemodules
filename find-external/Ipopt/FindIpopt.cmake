@@ -28,18 +28,29 @@ else()
   message(STATUS "  Ipopt library dirs: ${Ipopt_LIBRARY_DIRS}")
   message(STATUS "  Ipopt include dirs: ${Ipopt_INCLUDE_DIRS}")
   add_library(ipopt SHARED IMPORTED)
+  # On Windows, ipopt library is named ipopt-3
   find_library(
     ipopt_lib_path
-    NAMES ipopt
-    PATHS ${Ipopt_LIBRARY_DIRS})
+    NAMES ipopt ipopt-3
+    PATHS ${Ipopt_LIBRARY_DIRS} REQUIRED)
   message(STATUS "  Ipopt library found at ${ipopt_lib_path}")
-  set_target_properties(ipopt PROPERTIES IMPORTED_LOCATION ${ipopt_lib_path})
-  target_include_directories(ipopt INTERFACE ${Ipopt_INCLUDE_DIRS})
+  set_target_properties(
+    ipopt
+    PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${Ipopt_INCLUDE_DIRS}"
+               INTERFACE_COMPILE_OPTIONS "${Ipopt_CFLAGS_OTHER}"
+               IMPORTED_CONFIGURATIONS "RELEASE")
 
   if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     target_compile_definitions(ipopt INTERFACE HAVE_CSTDDEF)
   endif()
-  target_compile_options(ipopt INTERFACE ${Ipopt_CFLAGS_OTHER})
+
+  if(WIN32)
+    set_target_properties(ipopt PROPERTIES IMPORTED_IMPLIB_RELEASE
+                                           "${ipopt_lib_path}")
+  else()
+    set_target_properties(ipopt PROPERTIES IMPORTED_LOCATION_RELEASE
+                                           "${ipopt_lib_path}")
+  endif()
 
   add_library(Ipopt::Ipopt ALIAS ipopt)
 endif()
