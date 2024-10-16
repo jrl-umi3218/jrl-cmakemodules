@@ -8,10 +8,10 @@ repos:
     args:
     - --fix
   - id: ruff-format
-- repo: https://github.com/cheshirekow/cmake-format-precommit
-  rev: v0.6.13
+- repo: https://github.com/BlankSpruce/gersemi
+  rev: 0.15.1
   hooks:
-  - id: cmake-format
+  - id: gersemi
     exclude: |
       (?x)^(
           .*\.(h|hh|pc|py)\.cmake|
