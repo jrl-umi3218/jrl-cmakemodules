@@ -30,18 +30,24 @@ macro(SPHINX_SETUP)
   endif(MSVC)
 
   find_program(
-    SPHINX_BUILD sphinx-build
+    SPHINX_BUILD
+    sphinx-build
     DOC "Sphinx documentation generator tool"
-    PATHS "${SPHINX_BUILD_PATH}")
+    PATHS "${SPHINX_BUILD_PATH}"
+  )
 
   if(NOT SPHINX_BUILD)
     message(
-      WARNING "Failed to find sphinx, documentation will not be generated.")
+      WARNING
+      "Failed to find sphinx, documentation will not be generated."
+    )
   else(NOT SPHINX_BUILD)
-
     if(NOT TARGET sphinx-doc)
-      add_custom_target(sphinx-doc ALL
-                        COMMENT "Generating sphinx documentation")
+      add_custom_target(
+        sphinx-doc
+        ALL
+        COMMENT "Generating sphinx documentation"
+      )
     endif()
     if(MSVC)
       # FIXME: it is impossible to trigger documentation installation at
@@ -52,7 +58,8 @@ macro(SPHINX_SETUP)
           ${PYTHON_EXECUTABLE} ${SPHINX_BUILD} -b html
           ${CMAKE_CURRENT_BINARY_DIR}/sphinx
           ${CMAKE_CURRENT_BINARY_DIR}/sphinx-html
-        COMMENT "Generating sphinx documentation")
+        COMMENT "Generating sphinx documentation"
+      )
     elseif(APPLE)
       # THE DYLD_LIBRARY_PATH should be completed to run the sphinx command.
       # otherwise some symbols won't be found.
@@ -65,11 +72,13 @@ macro(SPHINX_SETUP)
           ${PYTHON_EXECUTABLE} ${SPHINX_BUILD} -b html
           ${CMAKE_CURRENT_BINARY_DIR}/sphinx
           ${CMAKE_CURRENT_BINARY_DIR}/sphinx-html
-        COMMENT "Generating sphinx documentation")
+        COMMENT "Generating sphinx documentation"
+      )
 
       if(INSTALL_DOCUMENTATION)
         install(
-          CODE "EXECUTE_PROCESS(COMMAND ${CMAKE_MAKE_PROGRAM} sphinx-doc)")
+          CODE "EXECUTE_PROCESS(COMMAND ${CMAKE_MAKE_PROGRAM} sphinx-doc)"
+        )
       endif(INSTALL_DOCUMENTATION)
     else() # UNIX
       # THE LD_LIBRARY_PATH should be completed to run the sphinx command.
@@ -83,11 +92,13 @@ macro(SPHINX_SETUP)
           ${PYTHON_EXECUTABLE} ${SPHINX_BUILD} -b html
           ${CMAKE_CURRENT_BINARY_DIR}/sphinx
           ${CMAKE_CURRENT_BINARY_DIR}/sphinx-html
-        COMMENT "Generating sphinx documentation")
+        COMMENT "Generating sphinx documentation"
+      )
 
       if(INSTALL_DOCUMENTATION)
         install(
-          CODE "EXECUTE_PROCESS(COMMAND ${CMAKE_MAKE_PROGRAM} sphinx-doc)")
+          CODE "EXECUTE_PROCESS(COMMAND ${CMAKE_MAKE_PROGRAM} sphinx-doc)"
+        )
       endif(INSTALL_DOCUMENTATION)
     endif(MSVC)
     add_dependencies(sphinx-doc ${PROJECT_NAME}-sphinx-doc)
@@ -98,26 +109,30 @@ macro(SPHINX_SETUP)
         ${PYTHON_EXECUTABLE} ${SPHINX_BUILD} -b html
         ${CMAKE_CURRENT_BINARY_DIR}/sphinx
         ${CMAKE_CURRENT_BINARY_DIR}/sphinx-html
-      COMMENT "Generating sphinx documentation")
+      COMMENT "Generating sphinx documentation"
+    )
 
     # Clean generated files.
     set_property(
       DIRECTORY
       APPEND
-      PROPERTY ADDITIONAL_MAKE_CLEAN_FILES
-               ${PROJECT_BINARY_DIR}/doc/sphinx-html)
+      PROPERTY ADDITIONAL_MAKE_CLEAN_FILES ${PROJECT_BINARY_DIR}/doc/sphinx-html
+    )
 
     # Install generated files.
     if(INSTALL_DOCUMENTATION)
-      install(DIRECTORY ${PROJECT_BINARY_DIR}/doc/sphinx-html
-              DESTINATION share/doc/${PROJECT_NAME})
+      install(
+        DIRECTORY ${PROJECT_BINARY_DIR}/doc/sphinx-html
+        DESTINATION share/doc/${PROJECT_NAME}
+      )
 
       if(EXISTS ${PROJECT_SOURCE_DIR}/doc/pictures)
-        install(DIRECTORY ${PROJECT_SOURCE_DIR}/doc/pictures
-                DESTINATION share/doc/${PROJECT_NAME}/sphinx-html)
+        install(
+          DIRECTORY ${PROJECT_SOURCE_DIR}/doc/pictures
+          DESTINATION share/doc/${PROJECT_NAME}/sphinx-html
+        )
       endif(EXISTS ${PROJECT_SOURCE_DIR}/doc/pictures)
     endif(INSTALL_DOCUMENTATION)
-
   endif(NOT SPHINX_BUILD)
 
   list(APPEND LOGGING_WATCHED_VARIABLES SPHINX_BUILD)
@@ -130,10 +145,16 @@ endmacro(SPHINX_SETUP)
 #
 macro(SPHINX_FINALIZE)
   if(SPHINX_BUILD)
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/sphinx/index.rst.in
-                   ${CMAKE_CURRENT_BINARY_DIR}/sphinx/index.rst @ONLY)
+    configure_file(
+      ${CMAKE_CURRENT_SOURCE_DIR}/sphinx/index.rst.in
+      ${CMAKE_CURRENT_BINARY_DIR}/sphinx/index.rst
+      @ONLY
+    )
 
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/sphinx/conf.py.in
-                   ${CMAKE_CURRENT_BINARY_DIR}/sphinx/conf.py @ONLY)
+    configure_file(
+      ${CMAKE_CURRENT_SOURCE_DIR}/sphinx/conf.py.in
+      ${CMAKE_CURRENT_BINARY_DIR}/sphinx/conf.py
+      @ONLY
+    )
   endif(SPHINX_BUILD)
 endmacro(SPHINX_FINALIZE)

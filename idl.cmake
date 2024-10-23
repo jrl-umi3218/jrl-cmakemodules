@@ -59,8 +59,13 @@ macro(GENERATE_IDL_CPP FILENAME DIRECTORY)
   set(options ENABLE_Wba NO_DEFAULT)
   set(oneValueArgs HEADER_SUFFIX)
   set(multiValueArgs ARGUMENTS)
-  cmake_parse_arguments(_omni "${options}" "${oneValueArgs}"
-                        "${multiValueArgs}" ${ARGN})
+  cmake_parse_arguments(
+    _omni
+    "${options}"
+    "${oneValueArgs}"
+    "${multiValueArgs}"
+    ${ARGN}
+  )
   if(NOT DEFINED _omni_HEADER_SUFFIX)
     set(_omni_HEADER_SUFFIX ".hh")
   endif()
@@ -76,8 +81,13 @@ macro(GENERATE_IDL_CPP FILENAME DIRECTORY)
   endif(${OMNIIDL} STREQUAL OMNIIDL-NOTFOUND)
 
   set(IDL_COMPILED_FILES ${FILENAME}SK.cc ${FILENAME}${_omni_HEADER_SUFFIX})
-  set(_omniidl_args -bcxx ${_OMNIIDL_INCLUDE_FLAG} -Wbh=${_omni_HEADER_SUFFIX}
-                    ${_omni_ARGUMENTS})
+  set(
+    _omniidl_args
+    -bcxx
+    ${_OMNIIDL_INCLUDE_FLAG}
+    -Wbh=${_omni_HEADER_SUFFIX}
+    ${_omni_ARGUMENTS}
+  )
   # This is to keep backward compatibility
   if(NOT _omni_NO_DEFAULT)
     set(_omniidl_args ${_omniidl_args} -Wbkeep_inc_path)
@@ -88,10 +98,11 @@ macro(GENERATE_IDL_CPP FILENAME DIRECTORY)
   endif(_omni_ENABLE_Wba)
   add_custom_command(
     OUTPUT ${IDL_COMPILED_FILES}
-    COMMAND ${OMNIIDL} ARGS ${_omniidl_args} -C${_PATH}
-            ${DIRECTORY}/${_NAME}.idl
+    COMMAND ${OMNIIDL}
+    ARGS ${_omniidl_args} -C${_PATH} ${DIRECTORY}/${_NAME}.idl
     MAIN_DEPENDENCY ${DIRECTORY}/${_NAME}.idl
-    COMMENT "Generating C++ stubs for ${_NAME}")
+    COMMENT "Generating C++ stubs for ${_NAME}"
+  )
 
   list(APPEND ALL_IDL_CPP_STUBS ${IDL_COMPILED_FILES})
 
@@ -99,20 +110,18 @@ macro(GENERATE_IDL_CPP FILENAME DIRECTORY)
   set_property(
     DIRECTORY
     APPEND
-    PROPERTY ADDITIONAL_MAKE_CLEAN_FILES ${IDL_COMPILED_FILES})
+    PROPERTY ADDITIONAL_MAKE_CLEAN_FILES ${IDL_COMPILED_FILES}
+  )
   set_property(
     SOURCE ${IDL_COMPILED_FILES}
     APPEND_STRING
     PROPERTY
       COMPILE_FLAGS
-      "-Wno-conversion -Wno-cast-qual -Wno-unused-variable -Wno-unused-parameter"
+        "-Wno-conversion -Wno-cast-qual -Wno-unused-variable -Wno-unused-parameter"
   )
 
   list(APPEND LOGGING_WATCHED_VARIABLES OMNIIDL ALL_IDL_CPP_STUBS)
-endmacro(
-  GENERATE_IDL_CPP
-  FILENAME
-  DIRECTORY)
+endmacro(GENERATE_IDL_CPP FILENAME DIRECTORY)
 
 # .rst: .. command:: GENERATE_IDL_PYTHON (FILENAME DIRECTORY)
 #
@@ -145,8 +154,13 @@ macro(GENERATE_IDL_PYTHON FILENAME DIRECTORY)
   set(options ENABLE_DOCSTRING)
   set(oneValueArgs STUBS)
   set(multiValueArgs ARGUMENTS)
-  cmake_parse_arguments(_omni "${options}" "${oneValueArgs}"
-                        "${multiValueArgs}" ${ARGN})
+  cmake_parse_arguments(
+    _omni
+    "${options}"
+    "${oneValueArgs}"
+    "${multiValueArgs}"
+    ${ARGN}
+  )
 
   get_filename_component(_PATH ${FILENAME} PATH)
   get_filename_component(_NAME ${FILENAME} NAME)
@@ -159,26 +173,38 @@ macro(GENERATE_IDL_PYTHON FILENAME DIRECTORY)
   endif(${OMNIIDL} STREQUAL OMNIIDL-NOTFOUND)
 
   if(_omni_ENABLE_DOCSTRING AND PYTHON_VERSION_MAJOR EQUAL 3)
-    set(_omniidl_args -p${PROJECT_JRL_CMAKE_MODULE_DIR}/hpp/idl
-                      -bomniidl_be_python_with_docstring -K)
+    set(
+      _omniidl_args
+      -p${PROJECT_JRL_CMAKE_MODULE_DIR}/hpp/idl
+      -bomniidl_be_python_with_docstring
+      -K
+    )
   else()
     set(_omniidl_args -bpython)
   endif()
-  set(_omniidl_args ${_omniidl_args} ${_OMNIIDL_INCLUDE_FLAG} -C${_PATH}
-                    ${_omni_ARGUMENTS})
+  set(
+    _omniidl_args
+    ${_omniidl_args}
+    ${_OMNIIDL_INCLUDE_FLAG}
+    -C${_PATH}
+    ${_omni_ARGUMENTS}
+  )
   if(DEFINED _omni_STUBS)
     set(_omniidl_args ${_omniidl_args} -Wbstubs=${_omni_STUBS})
     string(REPLACE "." "/" _omni_STUBS_DIR ${_omni_STUBS})
   endif()
-  set(output_files
-      ${CMAKE_CURRENT_BINARY_DIR}/${_PATH}/${_omni_STUBS_DIR}/${FILENAME}_idl.py
+  set(
+    output_files
+    ${CMAKE_CURRENT_BINARY_DIR}/${_PATH}/${_omni_STUBS_DIR}/${FILENAME}_idl.py
   )
 
   add_custom_command(
     OUTPUT ${output_files}
-    COMMAND ${OMNIIDL} ARGS ${_omniidl_args} ${DIRECTORY}/${_NAME}.idl
+    COMMAND ${OMNIIDL}
+    ARGS ${_omniidl_args} ${DIRECTORY}/${_NAME}.idl
     MAIN_DEPENDENCY ${DIRECTORY}/${_NAME}.idl
-    COMMENT "Generating Python stubs for ${_NAME}")
+    COMMENT "Generating Python stubs for ${_NAME}"
+  )
 
   list(APPEND ALL_IDL_PYTHON_STUBS ${output_files})
 
@@ -186,13 +212,11 @@ macro(GENERATE_IDL_PYTHON FILENAME DIRECTORY)
   set_property(
     DIRECTORY
     APPEND
-    PROPERTY ADDITIONAL_MAKE_CLEAN_FILES ${output_files})
+    PROPERTY ADDITIONAL_MAKE_CLEAN_FILES ${output_files}
+  )
 
   list(APPEND LOGGING_WATCHED_VARIABLES OMNIIDL ALL_IDL_PYTHON_STUBS)
-endmacro(
-  GENERATE_IDL_PYTHON
-  FILENAME
-  DIRECTORY)
+endmacro(GENERATE_IDL_PYTHON FILENAME DIRECTORY)
 
 # GENERATE_IDL_FILE FILENAME DIRECTORY
 # ------------------------------------
@@ -201,9 +225,6 @@ endmacro(
 macro(GENERATE_IDL_FILE FILENAME DIRECTORY)
   message(
     FATAL_ERROR
-      "GENERATE_IDL_FILE has been removed. Please use GENERATE_IDL_CPP instead."
+    "GENERATE_IDL_FILE has been removed. Please use GENERATE_IDL_CPP instead."
   )
-endmacro(
-  GENERATE_IDL_FILE
-  FILENAME
-  DIRECTORY)
+endmacro(GENERATE_IDL_FILE FILENAME DIRECTORY)

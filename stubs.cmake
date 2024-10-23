@@ -13,9 +13,7 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-set(CURRENT_FILE_PATH
-    ${CMAKE_CURRENT_LIST_DIR}
-    CACHE INTERNAL "")
+set(CURRENT_FILE_PATH ${CMAKE_CURRENT_LIST_DIR} CACHE INTERNAL "")
 
 # .rst: .. command:: LOAD_STUBGEN([GIT_TAG])
 #
@@ -35,12 +33,15 @@ macro(LOAD_STUBGEN)
 
   # Download at configure time
   set(STUBGEN_DIR ${CMAKE_CURRENT_BINARY_DIR}/stubgen)
-  configure_file(${CURRENT_FILE_PATH}/stubgen/CMakeLists.txt.in
-                 stubgen/CMakeLists.txt)
+  configure_file(
+    ${CURRENT_FILE_PATH}/stubgen/CMakeLists.txt.in
+    stubgen/CMakeLists.txt
+  )
   execute_process(
     COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
     RESULT_VARIABLE result
-    WORKING_DIRECTORY ${STUBGEN_DIR})
+    WORKING_DIRECTORY ${STUBGEN_DIR}
+  )
   if(result)
     message(FATAL_ERROR "CMake step for stubgen failed: ${result}")
   endif()
@@ -48,7 +49,8 @@ macro(LOAD_STUBGEN)
   execute_process(
     COMMAND ${CMAKE_COMMAND} --build .
     RESULT_VARIABLE result
-    WORKING_DIRECTORY ${STUBGEN_DIR})
+    WORKING_DIRECTORY ${STUBGEN_DIR}
+  )
   if(result)
     message(FATAL_ERROR "Build step for stubgen failed: ${result}")
   endif()
@@ -76,21 +78,30 @@ endmacro(LOAD_STUBGEN)
 # Where the module is installed
 #
 function(GENERATE_STUBS module_path module_name module_install_dir)
-
   if(NOT STUBGEN_MAIN_FILE)
     message(
-      FATAL_ERROR "You need to first load the stubgen module via LOAD_STUBGEN.")
+      FATAL_ERROR
+      "You need to first load the stubgen module via LOAD_STUBGEN."
+    )
   endif(NOT STUBGEN_MAIN_FILE)
 
   # Regex from IsValidTargetName in CMake/Source/cmGeneratorExpression.cxx
   if(NOT module_path)
-    string(REGEX REPLACE "[^A-Za-z0-9_.+-]" "_" target_name
-                         "${PROJECT_NAME}-generate_stubs_${module_name}")
+    string(
+      REGEX REPLACE
+      "[^A-Za-z0-9_.+-]"
+      "_"
+      target_name
+      "${PROJECT_NAME}-generate_stubs_${module_name}"
+    )
   else()
     string(
-      REGEX
-      REPLACE "[^A-Za-z0-9_.+-]" "_" target_name
-              "${PROJECT_NAME}-generate_stubs_${module_path}_${module_name}")
+      REGEX REPLACE
+      "[^A-Za-z0-9_.+-]"
+      "_"
+      target_name
+      "${PROJECT_NAME}-generate_stubs_${module_path}_${module_name}"
+    )
   endif()
 
   if($ENV{PYTHONPATH})
@@ -111,8 +122,10 @@ function(GENERATE_STUBS module_path module_name module_install_dir)
   if(WIN32)
     foreach(py_target IN LISTS optional_args)
       if(TARGET ${py_target})
-        set(_is_lib
-            "$<STREQUAL:$<TARGET_PROPERTY:${py_target},TYPE>,SHARED_LIBRARY>")
+        set(
+          _is_lib
+          "$<STREQUAL:$<TARGET_PROPERTY:${py_target},TYPE>,SHARED_LIBRARY>"
+        )
         set(_target_dir "$<TARGET_FILE_DIR:${py_target}>")
         set(_target_path $<${_is_lib}:${_target_dir}> ${_target_path})
       endif()
@@ -124,18 +137,20 @@ function(GENERATE_STUBS module_path module_name module_install_dir)
   endif()
 
   add_custom_target(
-    ${target_name} ALL
+    ${target_name}
+    ALL
     COMMAND
       ${CMAKE_COMMAND} -E env ${ENV_DLL_PATH} ${CMAKE_COMMAND} -E env
       PYTHONPATH=${PYTHONPATH} "${PYTHON_EXECUTABLE}" "${STUBGEN_MAIN_FILE}"
       "-o" "${module_path}" "${module_name}" "--boost-python" --ignore-invalid
       signature "--no-setup-py" "--root-module-suffix" ""
-    VERBATIM)
+    VERBATIM
+  )
   foreach(py_target IN LISTS optional_args)
     if(TARGET ${py_target})
       message(
         STATUS
-          "generate_stubs: adding dependency on ${py_target}. Stubs will be generated after it is built."
+        "generate_stubs: adding dependency on ${py_target}. Stubs will be generated after it is built."
       )
       add_dependencies(${target_name} ${py_target})
     else(TARGET ${py_target})
@@ -147,11 +162,12 @@ function(GENERATE_STUBS module_path module_name module_install_dir)
     DIRECTORY ${module_path}/${module_name}
     DESTINATION ${module_install_dir}
     FILES_MATCHING
-    PATTERN "*.pyi")
+    PATTERN "*.pyi"
+  )
 
   set_property(
     TARGET ${target_name}
     APPEND
-    PROPERTY ADDITIONAL_CLEAN_FILES FILES_MATCHING PATTERN "*.pyi")
-
+    PROPERTY ADDITIONAL_CLEAN_FILES FILES_MATCHING PATTERN "*.pyi"
+  )
 endfunction(GENERATE_STUBS module_name)

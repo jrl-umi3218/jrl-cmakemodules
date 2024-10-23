@@ -18,8 +18,13 @@ macro(MODERNIZE_TARGET_LINK_LIBRARIES target)
   set(options)
   set(oneValueArgs SCOPE)
   set(multiValueArgs TARGETS LIBRARIES INCLUDE_DIRS)
-  cmake_parse_arguments(MODERNIZE_LINK "${options}" "${oneValueArgs}"
-                        "${multiValueArgs}" ${ARGN})
+  cmake_parse_arguments(
+    MODERNIZE_LINK
+    "${options}"
+    "${oneValueArgs}"
+    "${multiValueArgs}"
+    ${ARGN}
+  )
 
   set(_targets_available TRUE)
   foreach(_tgt ${MODERNIZE_LINK_TARGETS})
@@ -33,12 +38,22 @@ macro(MODERNIZE_TARGET_LINK_LIBRARIES target)
   endforeach()
 
   if(_targets_available)
-    target_link_libraries(${target} ${MODERNIZE_LINK_SCOPE}
-                          ${MODERNIZE_LINK_TARGETS})
+    target_link_libraries(
+      ${target}
+      ${MODERNIZE_LINK_SCOPE}
+      ${MODERNIZE_LINK_TARGETS}
+    )
   else()
-    target_link_libraries(${target} ${MODERNIZE_LINK_SCOPE}
-                          ${MODERNIZE_LINK_LIBRARIES})
-    target_include_directories(${target} SYSTEM ${MODERNIZE_LINK_SCOPE}
-                               ${MODERNIZE_LINK_INCLUDE_DIRS})
+    target_link_libraries(
+      ${target}
+      ${MODERNIZE_LINK_SCOPE}
+      ${MODERNIZE_LINK_LIBRARIES}
+    )
+    target_include_directories(
+      ${target}
+      SYSTEM
+      ${MODERNIZE_LINK_SCOPE}
+      ${MODERNIZE_LINK_INCLUDE_DIRS}
+    )
   endif()
 endmacro()

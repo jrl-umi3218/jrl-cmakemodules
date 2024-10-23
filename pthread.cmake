@@ -25,8 +25,12 @@ macro(SEARCH_FOR_PTHREAD)
     if(CMAKE_USE_PTHREADS_INIT)
       add_definitions(-pthread)
     else(CMAKE_USE_PTHREADS_INIT)
-      message(FATAL_ERROR "Pthread is required on Unix, but "
-                          ${CMAKE_THREAD_LIBS_INIT} " has been detected.")
+      message(
+        FATAL_ERROR
+        "Pthread is required on Unix, but "
+        ${CMAKE_THREAD_LIBS_INIT}
+        " has been detected."
+      )
     endif(CMAKE_USE_PTHREADS_INIT)
   elseif(WIN32)
     # Nothing to do.
@@ -41,5 +45,6 @@ macro(SEARCH_FOR_PTHREAD)
     CMAKE_USE_SPROC_INIT
     CMAKE_USE_WIN32_THREADS_INIT
     CMAKE_USE_PTHREADS_INIT
-    CMAKE_HP_PTHREADS_INIT)
+    CMAKE_HP_PTHREADS_INIT
+  )
 endmacro(SEARCH_FOR_PTHREAD)

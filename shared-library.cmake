@@ -34,9 +34,14 @@ elseif(UNIX)
   execute_process(
     COMMAND ${CMAKE_LINKER} -v
     OUTPUT_VARIABLE LD_VERSION_STR
-    ERROR_VARIABLE LD_VERSION_STR)
-  string(REGEX MATCH "([0-9]+\\.[0-9]+(\\.[0-9]+)?)" LD_VERSION
-               ${LD_VERSION_STR})
+    ERROR_VARIABLE LD_VERSION_STR
+  )
+  string(
+    REGEX MATCH
+    "([0-9]+\\.[0-9]+(\\.[0-9]+)?)"
+    LD_VERSION
+    ${LD_VERSION_STR}
+  )
   if(${LD_VERSION} VERSION_LESS "2.24.90")
     set(LIBINCL_ABSKW "-l:")
   else()

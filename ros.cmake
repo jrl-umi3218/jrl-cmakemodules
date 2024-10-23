@@ -51,7 +51,8 @@ macro(ADD_ROSPACK_DEPENDENCY PKG_ROS)
   execute_process(
     COMMAND "${ROSPACK}" find "${PKG}"
     OUTPUT_VARIABLE "${PKG}_ROS_PREFIX"
-    ERROR_QUIET)
+    ERROR_QUIET
+  )
   if(NOT ${PKG}_ROS_PREFIX)
     message(FATAL_ERROR "Failed to detect ${PKG}.")
   endif()
@@ -60,40 +61,53 @@ macro(ADD_ROSPACK_DEPENDENCY PKG_ROS)
   find_program(ROSVERSION rosversion)
   if(NOT ROSVERSION)
     message(
-      FATAL_ERROR "failed to find the rosversion binary. Is ROS installed?")
+      FATAL_ERROR
+      "failed to find the rosversion binary. Is ROS installed?"
+    )
   endif()
 
   execute_process(
     COMMAND "${ROSVERSION}" "${PKG}"
     OUTPUT_VARIABLE ${PKG}_ROSVERSION_TMP
-    ERROR_QUIET)
+    ERROR_QUIET
+  )
   string(REGEX REPLACE "\n" "" ${PKG}_ROSVERSION ${${PKG}_ROSVERSION_TMP})
 
   # check whether the version satisfies the constraint
   if(NOT "${SIGN}" STREQUAL "")
     set(RESULT FALSE)
-    if(("${${PKG}_ROSVERSION}" VERSION_LESS "${PKG_VERSION}")
-       AND ((${SIGN} STREQUAL "<=") OR (${SIGN} STREQUAL "<")))
+    if(
+      ("${${PKG}_ROSVERSION}" VERSION_LESS "${PKG_VERSION}")
+      AND ((${SIGN} STREQUAL "<=") OR (${SIGN} STREQUAL "<"))
+    )
       set(RESULT TRUE)
     endif()
 
-    if(("${${PKG}_ROSVERSION}" VERSION_EQUAL "${PKG_VERSION}")
-       AND ((${SIGN} STREQUAL ">=")
-            OR (${SIGN} STREQUAL "=")
-            OR (${SIGN} STREQUAL "<=")))
+    if(
+      ("${${PKG}_ROSVERSION}" VERSION_EQUAL "${PKG_VERSION}")
+      AND
+        (
+          (${SIGN} STREQUAL ">=")
+          OR (${SIGN} STREQUAL "=")
+          OR (${SIGN} STREQUAL "<=")
+        )
+    )
       set(RESULT TRUE)
     endif()
 
-    if(("${${PKG}_ROSVERSION}" VERSION_GREATER "${PKG_VERSION}")
-       AND (("${SIGN}" STREQUAL ">=") OR ("${SIGN}" STREQUAL ">")))
+    if(
+      ("${${PKG}_ROSVERSION}" VERSION_GREATER "${PKG_VERSION}")
+      AND (("${SIGN}" STREQUAL ">=") OR ("${SIGN}" STREQUAL ">"))
+    )
       set(RESULT TRUE)
     endif()
 
     if(NOT RESULT)
       message(
         FATAL_ERROR
-          "The package ${PKG} does not have the correct version."
-          " Found: ${${PKG}_ROSVERSION}, desired: ${SIGN} ${PKG_VERSION}")
+        "The package ${PKG} does not have the correct version."
+        " Found: ${${PKG}_ROSVERSION}, desired: ${SIGN} ${PKG_VERSION}"
+      )
     endif()
   endif(NOT "${SIGN}" STREQUAL "")
 
@@ -104,11 +118,13 @@ macro(ADD_ROSPACK_DEPENDENCY PKG_ROS)
   execute_process(
     COMMAND "${ROSPACK}" export "--lang=cpp" "--attrib=cflags" "${PKG}"
     OUTPUT_VARIABLE "${PREFIX}_CFLAGS"
-    ERROR_QUIET)
+    ERROR_QUIET
+  )
   execute_process(
     COMMAND "${ROSPACK}" export "--lang=cpp" "--attrib=lflags" "${PKG}"
     OUTPUT_VARIABLE "${PREFIX}_LIBS"
-    ERROR_QUIET)
+    ERROR_QUIET
+  )
   string(REPLACE "\n" "" ${PREFIX}_CFLAGS "${${PREFIX}_CFLAGS}")
   string(REPLACE "\n" "" ${PREFIX}_LIBS "${${PREFIX}_LIBS}")
   string(REPLACE "\n" "" ${PKG}_ROS_PREFIX "${${PKG}_ROS_PREFIX}")
@@ -151,8 +167,10 @@ macro(ROSPACK_USE_DEPENDENCY TARGET PKG)
   set(LDFLAGS "${LDFLAGS} ${${PREFIX}_LIBS}")
 
   # Update the flags.
-  set_target_properties("${TARGET}" PROPERTIES COMPILE_FLAGS "${CFLAGS}"
-                                               LINK_FLAGS "${LDFLAGS}")
+  set_target_properties(
+    "${TARGET}"
+    PROPERTIES COMPILE_FLAGS "${CFLAGS}" LINK_FLAGS "${LDFLAGS}"
+  )
 
   # Correct the potential link issue due to the order of link flags. (appears
   # e.g. on ubuntu 12.04). Note that this issue is the same as the one in

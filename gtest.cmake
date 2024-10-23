@@ -13,9 +13,7 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-set(CURRENT_FILE_PATH
-    ${CMAKE_CURRENT_LIST_DIR}
-    CACHE INTERNAL "")
+set(CURRENT_FILE_PATH ${CMAKE_CURRENT_LIST_DIR} CACHE INTERNAL "")
 
 # .rst: .. command:: ADD_GTEST_SUITE([GIT_TAG])
 #
@@ -35,34 +33,38 @@ macro(ADD_GTEST_SUITE)
     list(GET extra_macro_args 0 GTEST_GIT_TAG)
   endif()
   # Download and unpack googletest at configure time
-  configure_file(${CURRENT_FILE_PATH}/gtest/CMakeLists.txt.in
-                 gtest/CMakeLists.txt)
+  configure_file(
+    ${CURRENT_FILE_PATH}/gtest/CMakeLists.txt.in
+    gtest/CMakeLists.txt
+  )
   execute_process(
     COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
     RESULT_VARIABLE result
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/gtest)
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/gtest
+  )
   if(result)
     message(FATAL_ERROR "CMake step for googletest failed: ${result}")
   endif()
   execute_process(
     COMMAND ${CMAKE_COMMAND} --build .
     RESULT_VARIABLE result
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/gtest)
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/gtest
+  )
   if(result)
     message(FATAL_ERROR "Build step for googletest failed: ${result}")
   endif()
 
   # Prevent overriding the parent project's compiler/linker settings on Windows
-  set(gtest_force_shared_crt
-      ON
-      CACHE BOOL "" FORCE)
+  set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
   # Add googletest directly to our build. This defines the gtest and gtest_main
   # targets.
-  add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/gtest/src
-                   ${CMAKE_CURRENT_BINARY_DIR}/gtest/build EXCLUDE_FROM_ALL)
+  add_subdirectory(
+    ${CMAKE_CURRENT_BINARY_DIR}/gtest/src
+    ${CMAKE_CURRENT_BINARY_DIR}/gtest/build
+    EXCLUDE_FROM_ALL
+  )
 
   # Force the include directories to be silent with respect to warnings.
   include_directories(SYSTEM "${gtest_SOURCE_DIR}/include")
-
 endmacro(ADD_GTEST_SUITE)

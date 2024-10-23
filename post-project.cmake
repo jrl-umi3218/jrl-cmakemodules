@@ -40,8 +40,13 @@ else(${ARGC})
 endif(${ARGC})
 
 option(BUILD_DOCUMENTATION "Build the documentation." ON)
-cmake_dependent_option(INSTALL_DOCUMENTATION "Install the documentation." ON
-                       BUILD_DOCUMENTATION OFF)
+cmake_dependent_option(
+  INSTALL_DOCUMENTATION
+  "Install the documentation."
+  ON
+  BUILD_DOCUMENTATION
+  OFF
+)
 option(INSTALL_GENERATED_HEADERS "Generate and install standard headers" ON)
 option(INSTALL_PKG_CONFIG_FILE "Generate and install standard .pc file" ON)
 

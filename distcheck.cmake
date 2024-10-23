@@ -37,14 +37,14 @@
 macro(DISTCHECK_SETUP)
   if(UNIX)
     find_program(SED sed)
-    set(SRCDIR
-        ${CMAKE_BINARY_DIR}/${PROJECT_NAME}${PROJECT_SUFFIX}-${PROJECT_VERSION})
+    set(
+      SRCDIR
+      ${CMAKE_BINARY_DIR}/${PROJECT_NAME}${PROJECT_SUFFIX}-${PROJECT_VERSION}
+    )
     set(BUILDDIR ${SRCDIR}/_build)
     set(INSTDIR ${SRCDIR}/_inst)
     set(TEST_RESULTS_DIR ${BUILDDIR}/test_results)
-    set(DISTCHECK_MAKEFLAGS
-        ""
-        CACHE PATH "MAKEFLAGS used for distcheck's make")
+    set(DISTCHECK_MAKEFLAGS "" CACHE PATH "MAKEFLAGS used for distcheck's make")
 
     # The -i argument of sed command differs according on APPLE systems
     if(APPLE)
@@ -60,8 +60,13 @@ macro(DISTCHECK_SETUP)
       set(LD_LIBRARY_PATH_VARIABLE_NAME "LD_LIBRARY_PATH")
     endif(APPLE)
 
-    string(REPLACE "${CMAKE_SOURCE_DIR}" "${SRCDIR}" NEW_CMAKE_BINARY_DIR
-                   "${CMAKE_BINARY_DIR}")
+    string(
+      REPLACE
+      "${CMAKE_SOURCE_DIR}"
+      "${SRCDIR}"
+      NEW_CMAKE_BINARY_DIR
+      "${CMAKE_BINARY_DIR}"
+    )
 
     if(NOT TARGET distcheck)
       add_custom_target(distcheck COMMENT "Checking generated tarball...")
@@ -76,13 +81,13 @@ macro(DISTCHECK_SETUP)
         mkdir -p _inst && chmod u+rwx _build _inst && chmod a-w . && cp
         ${CMAKE_BINARY_DIR}/CMakeCache.txt _build/ && ${SED} ${SED_I_OPTION} -e
         "'s|${CMAKE_SOURCE_DIR}|${SRCDIR}|g'" _build/CMakeCache.txt # Change
-                                                                    # previous
-                                                                    # source dir
-                                                                    # to the
-                                                                    # source one
+        # previous
+        # source dir
+        # to the
+        # source one
         && ${SED} ${SED_I_OPTION} -e "'s|${NEW_CMAKE_BINARY_DIR}|${BUILDDIR}|g'"
         _build/CMakeCache.txt # Change previous binary dir by the current _build
-                              # one
+        # one
         && ${SED} ${SED_I_OPTION} -e "'s|CMAKE_CXX_COMPILER:FILEPATH=.\\+||g'"
         -e "'s|CMAKE_CXX_FLAGS:STRING=.\\+||g'" -e
         "'s|CMAKE_CXX_FLAGS_DEBUG:STRING=.\\+||g'" -e
@@ -114,8 +119,8 @@ macro(DISTCHECK_SETUP)
         -DCMAKE_INSTALL_PREFIX=${INSTDIR}
         -DCATKIN_TEST_RESULTS_DIR=${TEST_RESULTS_DIR} .. || cmake .. ||
         (echo "ERROR: the cmake configuration failed." && false) && make
-        ${DISTCHECK_MAKEFLAGS} || (echo "ERROR: the compilation failed." &&
-                                   false) && make test ||
+        ${DISTCHECK_MAKEFLAGS} ||
+        (echo "ERROR: the compilation failed." && false) && make test ||
         (echo "ERROR: the test suite failed." && false) && make install ||
         (echo "ERROR: the install target failed." && false) && make uninstall ||
         (echo "ERROR: the uninstall target failed." && false) && test `find
@@ -131,7 +136,8 @@ macro(DISTCHECK_SETUP)
         "=============================================================="
       WORKING_DIRECTORY
         ${CMAKE_BINARY_DIR}/${PROJECT_NAME}${PROJECT_SUFFIX}-${PROJECT_VERSION}
-      COMMENT "Checking generated tarball...")
+      COMMENT "Checking generated tarball..."
+    )
     add_dependencies(distcheck ${PROJECT_NAME}-distcheck)
     add_dependencies(${PROJECT_NAME}-distcheck ${PROJECT_NAME}-distdir)
 

@@ -39,8 +39,12 @@ macro(GET_RELATIVE_RPATH TARGET_INSTALL_DIR VARIABLE)
     endif()
     rel_install_path("${TARGET_INSTALL_DIR}" _TGT_INV_REL)
     if(IS_ABSOLUTE ${CMAKE_INSTALL_LIBDIR})
-      file(RELATIVE_PATH _LIB_REL "${CMAKE_INSTALL_PREFIX}"
-           ${CMAKE_INSTALL_LIBDIR})
+      file(
+        RELATIVE_PATH
+        _LIB_REL
+        "${CMAKE_INSTALL_PREFIX}"
+        ${CMAKE_INSTALL_LIBDIR}
+      )
     else()
       set(_LIB_REL ${CMAKE_INSTALL_LIBDIR})
     endif()

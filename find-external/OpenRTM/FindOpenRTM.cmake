@@ -15,12 +15,15 @@ if(UNIX)
       set(OPENRTM_CONFIG_EXECUTABLE)
       message(
         FATAL_ERROR
-          "rtm-config was not found in ${OPENRTM_DIR}/bin. Please set OPENRTM_DIR correctly."
+        "rtm-config was not found in ${OPENRTM_DIR}/bin. Please set OPENRTM_DIR correctly."
       )
     endif()
   else()
-    find_program(OPENRTM_CONFIG_EXECUTABLE rtm-config
-                 DOC "The location of the rtm-config script")
+    find_program(
+      OPENRTM_CONFIG_EXECUTABLE
+      rtm-config
+      DOC "The location of the rtm-config script"
+    )
     mark_as_advanced(OPENRTM_CONFIG_EXECUTABLE)
   endif()
 
@@ -31,7 +34,8 @@ if(UNIX)
       COMMAND ${OPENRTM_CONFIG_EXECUTABLE} --version
       OUTPUT_VARIABLE OPENRTM_VERSION
       RESULT_VARIABLE RESULT
-      OUTPUT_STRIP_TRAILING_WHITESPACE)
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
 
     if(NOT RESULT EQUAL 0)
       set(OPENRTM_FOUND FALSE)
@@ -41,7 +45,8 @@ if(UNIX)
       COMMAND ${OPENRTM_CONFIG_EXECUTABLE} --prefix
       OUTPUT_VARIABLE OPENRTM_DIR
       RESULT_VARIABLE RESULT
-      OUTPUT_STRIP_TRAILING_WHITESPACE)
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
 
     if(RESULT EQUAL 0)
       if(OPENRTM_DIR)
@@ -55,11 +60,16 @@ if(UNIX)
     execute_process(
       COMMAND ${OPENRTM_CONFIG_EXECUTABLE} --cflags
       OUTPUT_VARIABLE OPENRTM_CXX_FLAGS
-      RESULT_VARIABLE RESULT)
+      RESULT_VARIABLE RESULT
+    )
 
     if(RESULT EQUAL 0)
-      string(REGEX MATCHALL "-D.*[^ ;]+" OPENRTM_DEFINITIONS
-                   ${OPENRTM_CXX_FLAGS})
+      string(
+        REGEX MATCHALL
+        "-D.*[^ ;]+"
+        OPENRTM_DEFINITIONS
+        ${OPENRTM_CXX_FLAGS}
+      )
     else()
       set(OPENRTM_FOUND FALSE)
     endif()
@@ -68,19 +78,28 @@ if(UNIX)
       COMMAND ${OPENRTM_CONFIG_EXECUTABLE} --libs
       OUTPUT_VARIABLE OPENRTM_LIBRARIES
       RESULT_VARIABLE RESULT
-      OUTPUT_STRIP_TRAILING_WHITESPACE)
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
 
     if(RESULT EQUAL 0)
-      string(REGEX MATCHALL "-L[^ ;]+" OPENRTM_LIBRARY_DIRS
-                   ${OPENRTM_LIBRARIES})
-      string(REGEX REPLACE "-L" ";" OPENRTM_LIBRARY_DIRS
-                           ${OPENRTM_LIBRARY_DIRS})
+      string(
+        REGEX MATCHALL
+        "-L[^ ;]+"
+        OPENRTM_LIBRARY_DIRS
+        ${OPENRTM_LIBRARIES}
+      )
+      string(
+        REGEX REPLACE
+        "-L"
+        ";"
+        OPENRTM_LIBRARY_DIRS
+        ${OPENRTM_LIBRARY_DIRS}
+      )
       string(REGEX REPLACE "-L[^ ;]+" "" OPENRTM_LIBRARIES ${OPENRTM_LIBRARIES})
       separate_arguments(OPENRTM_LIBRARIES)
     else()
       set(OPENRTM_FOUND FALSE)
     endif()
-
   endif(OPENRTM_CONFIG_EXECUTABLE)
   set(OPENRTM_PKG_CONFIG_FILE "/usr/lib/pkgconfig/openrtm-aist.pc")
   if(EXISTS ${OPENRTM_PKG_CONFIG_FILE})
@@ -103,11 +122,11 @@ if(WIN32)
     else()
       set(OPENRTM_DEFAULT_VERSION ${OPENRTM_VERSION100})
     endif()
-    set(OPENRTM_VERSION
-        ${OPENRTM_DEFAULT_VERSION}
-        CACHE
-          STRING
-          "Set version of OpenRTM-aist. Default version is ${OPENRTM_DEFAULT_VERSION}"
+    set(
+      OPENRTM_VERSION
+      ${OPENRTM_DEFAULT_VERSION}
+      CACHE STRING
+      "Set version of OpenRTM-aist. Default version is ${OPENRTM_DEFAULT_VERSION}"
     )
     set(OPENRTM_INCLUDE_DIRS ${OPENRTM_DIR})
     set(OPENRTM_LIBRARY_DIRS ${OPENRTM_DIR}/bin)
@@ -134,9 +153,7 @@ if(WIN32)
       if(NOT $ENV{ACE_ROOT} STREQUAL "")
         set(ACE_ROOT $ENV{ACE_ROOT})
       endif()
-      set(ACE_ROOT
-          ${ACE_ROOT}
-          CACHE PATH "The top directory of ACE")
+      set(ACE_ROOT ${ACE_ROOT} CACHE PATH "The top directory of ACE")
     endif()
     if(ACE_ROOT)
       include_directories(${ACE_ROOT})
@@ -156,15 +173,13 @@ if(NOT OPENRTM_FOUND)
   set(OPENRTM_DIR NOT_FOUND)
 endif()
 
-set(OPENRTM_DIR
-    ${OPENRTM_DIR}
-    CACHE PATH "The top directory of OpenRTM-aist")
+set(OPENRTM_DIR ${OPENRTM_DIR} CACHE PATH "The top directory of OpenRTM-aist")
 
 if(OPENRTM_FOUND)
   if(${OPENRTM_VERSION} MATCHES "^0\\.")
     message(
       FATAL_ERROR
-        "Not support OpenRTM-aist Ver.${OPENRTM_VERSION}, please install OpenRTM-aist Ver.1.0.0 or later and specify it's location."
+      "Not support OpenRTM-aist Ver.${OPENRTM_VERSION}, please install OpenRTM-aist Ver.1.0.0 or later and specify it's location."
     )
   endif()
 
@@ -183,7 +198,9 @@ else()
   if(NOT OpenRTM_FIND_QUIETLY)
     if(OpenRTM_FIND_REQUIRED)
       message(
-        FATAL_ERROR "OpenRTM-aist required, please specify it's location.")
+        FATAL_ERROR
+        "OpenRTM-aist required, please specify it's location."
+      )
     endif()
   endif()
 endif()

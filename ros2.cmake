@@ -23,25 +23,32 @@ macro(_install_project_ros2_ament_files)
     file(
       WRITE
       ${CMAKE_CURRENT_BINARY_DIR}/share/ament_index/resource_index/packages/${PROJECT_NAME}
-      "")
+      ""
+    )
     install(
       FILES
         ${CMAKE_CURRENT_BINARY_DIR}/share/ament_index/resource_index/packages/${PROJECT_NAME}
-      DESTINATION share/ament_index/resource_index/packages)
+      DESTINATION share/ament_index/resource_index/packages
+    )
     file(
       WRITE
       ${CMAKE_CURRENT_BINARY_DIR}/share/${PROJECT_NAME}/hook/ament_prefix_path.dsv
-      "prepend-non-duplicate;AMENT_PREFIX_PATH;")
+      "prepend-non-duplicate;AMENT_PREFIX_PATH;"
+    )
     install(
       FILES
         ${CMAKE_CURRENT_BINARY_DIR}/share/${PROJECT_NAME}/hook/ament_prefix_path.dsv
-      DESTINATION share/${PROJECT_NAME}/hook)
-    file(WRITE
-         ${CMAKE_CURRENT_BINARY_DIR}/share/${PROJECT_NAME}/hook/python_path.dsv
-         "prepend-non-duplicate;PYTHONPATH;${PYTHON_SITELIB}")
+      DESTINATION share/${PROJECT_NAME}/hook
+    )
+    file(
+      WRITE
+      ${CMAKE_CURRENT_BINARY_DIR}/share/${PROJECT_NAME}/hook/python_path.dsv
+      "prepend-non-duplicate;PYTHONPATH;${PYTHON_SITELIB}"
+    )
     install(
       FILES
         ${CMAKE_CURRENT_BINARY_DIR}/share/${PROJECT_NAME}/hook/python_path.dsv
-      DESTINATION share/${PROJECT_NAME}/hook)
+      DESTINATION share/${PROJECT_NAME}/hook
+    )
   endif(BUILDING_ROS2_PACKAGE)
 endmacro(_install_project_ros2_ament_files)

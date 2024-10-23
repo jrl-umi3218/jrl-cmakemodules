@@ -26,11 +26,9 @@ find_path(
   CDD_INCLUDE_DIR
   NAMES cdd.h cddmp.h
   PATHS ${CDD_PREFIX}
-  PATH_SUFFIXES include/cdd include/cddlib)
-find_library(
-  CDD_LIBRARY
-  NAMES cdd
-  PATHS ${CDD_PREFIX})
+  PATH_SUFFIXES include/cdd include/cddlib
+)
+find_library(CDD_LIBRARY NAMES cdd PATHS ${CDD_PREFIX})
 
 set(CDD_LIBRARIES ${CDD_LIBRARY})
 set(CDD_INCLUDE_DIRS ${CDD_INCLUDE_DIR})
@@ -41,13 +39,18 @@ mark_as_advanced(CDD_INCLUDE_DIR CDD_LIBRARY)
 
 if(CDD_FOUND AND NOT TARGET CDD::CDD)
   add_library(CDD::CDD SHARED IMPORTED)
-  set_target_properties(CDD::CDD PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
-                                            "${CDD_INCLUDE_DIR}")
-  set_target_properties(CDD::CDD PROPERTIES IMPORTED_LOCATION_RELEASE
-                                            "${CDD_LIBRARY}")
+  set_target_properties(
+    CDD::CDD
+    PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${CDD_INCLUDE_DIR}"
+  )
+  set_target_properties(
+    CDD::CDD
+    PROPERTIES IMPORTED_LOCATION_RELEASE "${CDD_LIBRARY}"
+  )
   set_property(
     TARGET CDD::CDD
     APPEND
-    PROPERTY IMPORTED_CONFIGURATIONS "RELEASE")
+    PROPERTY IMPORTED_CONFIGURATIONS "RELEASE"
+  )
   message(STATUS "CDD found (include: ${CDD_INCLUDE_DIR}, lib: ${CDD_LIBRARY})")
 endif()

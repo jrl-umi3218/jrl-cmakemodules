@@ -34,10 +34,7 @@
 # of the .pc file by the macro.
 #
 macro(KINEO_ADDON MODULE_NAME)
-  execute_process(
-    COMMAND "uname" "-n"
-    OUTPUT_VARIABLE UNAME_N
-    ERROR_QUIET)
+  execute_process(COMMAND "uname" "-n" OUTPUT_VARIABLE UNAME_N ERROR_QUIET)
   string(REPLACE "\n" "" UNAME_N "${UNAME_N}")
 
   set(ADDON_INSTALLDIR lib/modules/${UNAME_N})
@@ -45,16 +42,22 @@ macro(KINEO_ADDON MODULE_NAME)
   pkg_config_append_libs(${PROJECT_NAME})
   add_library(${MODULE_NAME} SHARED ${KINEO_ADDON_SOURCES})
   set_target_properties(
-    ${MODULE_NAME} PROPERTIES SOVERSION ${PROJECT_VERSION} INSTALL_RPATH
-                                                           ${ADDON_INSTALLDIR})
+    ${MODULE_NAME}
+    PROPERTIES SOVERSION ${PROJECT_VERSION} INSTALL_RPATH ${ADDON_INSTALLDIR}
+  )
   add_custom_command(
-    OUTPUT ${ADDON_INSTALLDIR}/lib${MODULE_NAME}.kab DEPEND
-           ${ADDON_INSTALLDIR}/lib${MODULE_NAME}.so
-    COMMAND KineoAddonBuilder ARGS -m
-            ${CMAKE_INSTALL_PREFIX}/${ADDON_INSTALLDIR}/lib${MODULE_NAME}.so)
+    OUTPUT
+      ${ADDON_INSTALLDIR}/lib${MODULE_NAME}.kab
+      DEPEND
+      ${ADDON_INSTALLDIR}/lib${MODULE_NAME}.so
+    COMMAND KineoAddonBuilder
+    ARGS -m ${CMAKE_INSTALL_PREFIX}/${ADDON_INSTALLDIR}/lib${MODULE_NAME}.so
+  )
   add_custom_target(license DEPENDS ${ADDON_INSTALLDIR}/lib${MODULE_NAME}.kab)
   add_dependencies(
-    license ${CMAKE_INSTALL_PREFIX}/${ADDON_INSTALLDIR}/lib${MODULE_NAME}.so)
+    license
+    ${CMAKE_INSTALL_PREFIX}/${ADDON_INSTALLDIR}/lib${MODULE_NAME}.so
+  )
   install(TARGETS ${MODULE_NAME} DESTINATION ${ADDON_INSTALLDIR})
 endmacro()
 
@@ -74,12 +77,20 @@ endmacro()
 #
 macro(KINEO_STANDALONE STANDALONE_NAME)
   add_custom_command(
-    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${STANDALONE_NAME}.kab DEPEND
-           ${CMAKE_CURRENT_BUILD_DIR}/${STANDALONE_NAME}
-    COMMAND KineoAddonBuilder ARGS -a
-            ${CMAKE_CURRENT_BINARY_DIR}/${STANDALONE_NAME})
-  add_custom_target(${STANDALONE_NAME}-license ALL
-                    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${STANDALONE_NAME}.kab)
-  add_dependencies(${STANDALONE_NAME}-license
-                   ${CMAKE_CURRENT_BINARY_DIR}/${STANDALONE_NAME})
+    OUTPUT
+      ${CMAKE_CURRENT_BINARY_DIR}/${STANDALONE_NAME}.kab
+      DEPEND
+      ${CMAKE_CURRENT_BUILD_DIR}/${STANDALONE_NAME}
+    COMMAND KineoAddonBuilder
+    ARGS -a ${CMAKE_CURRENT_BINARY_DIR}/${STANDALONE_NAME}
+  )
+  add_custom_target(
+    ${STANDALONE_NAME}-license
+    ALL
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${STANDALONE_NAME}.kab
+  )
+  add_dependencies(
+    ${STANDALONE_NAME}-license
+    ${CMAKE_CURRENT_BINARY_DIR}/${STANDALONE_NAME}
+  )
 endmacro()

@@ -23,7 +23,8 @@ macro(SEARCH_GRX)
     include/rtm/idl/SDOPackage.hh
     HINTS /opt/grx/
     DOC "GRX software prefix (i.e. '/opt/grxX.Y')"
-    NO_DEFAULT_PATH)
+    NO_DEFAULT_PATH
+  )
 endmacro(SEARCH_GRX)
 
 # Search if openhrp3.0(.7) is installed. Set the value GRX_PREFIX if found
@@ -35,7 +36,8 @@ macro(SEARCH_GRX3)
     OpenHRP/DynamicsSimulator/server/DynamicsSimulator
     HINTS /opt/grx3.0
     DOC "GRX software prefix (i.e. '/opt/grxX.Y')"
-    NO_DEFAULT_PATH)
+    NO_DEFAULT_PATH
+  )
 endmacro(SEARCH_GRX3)
 
 # Check the robots installed in openhrp Args: the robot researched (and handled
@@ -56,7 +58,7 @@ macro(SEARCH_GRX_ROBOTS HANDLED_ROBOTS)
   if(NOT GRX_ROBOTS)
     message(
       FATAL_ERROR
-        "None of the following robots (${HANDLED_ROBOTS}) were found in ${GRX_PREFIX}."
+      "None of the following robots (${HANDLED_ROBOTS}) were found in ${GRX_PREFIX}."
     )
   else()
     message("The following robots were found: ${GRX_ROBOTS}")

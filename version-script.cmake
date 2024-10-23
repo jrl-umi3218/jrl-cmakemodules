@@ -29,15 +29,23 @@ endif()
 macro(_CHECK_VERSION_SCRIPT_SUPPORT)
   set(VERSION_SCRIPT "${PROJECT_JRL_CMAKE_MODULE_DIR}/version-script-test.lds")
   if(COMMAND check_linker_flag)
-    check_linker_flag("C" "-Wl,--version-script=${VERSION_SCRIPT}"
-                      HAS_VERSION_SCRIPT_SUPPORT)
+    check_linker_flag(
+      "C"
+      "-Wl,--version-script=${VERSION_SCRIPT}"
+      HAS_VERSION_SCRIPT_SUPPORT
+    )
   else()
-    check_c_compiler_flag("-Wl,--version-script=${VERSION_SCRIPT}"
-                          HAS_VERSION_SCRIPT_SUPPORT)
+    check_c_compiler_flag(
+      "-Wl,--version-script=${VERSION_SCRIPT}"
+      HAS_VERSION_SCRIPT_SUPPORT
+    )
   endif()
-  set(_HAS_VERSION_SCRIPT_SUPPORT
-      ${HAS_VERSION_SCRIPT_SUPPORT}
-      CACHE INTERNAL "Linker supports version scripts")
+  set(
+    _HAS_VERSION_SCRIPT_SUPPORT
+    ${HAS_VERSION_SCRIPT_SUPPORT}
+    CACHE INTERNAL
+    "Linker supports version scripts"
+  )
 endmacro(_CHECK_VERSION_SCRIPT_SUPPORT)
 
 # .rst: .. command:: ADD_VERSION_SCRIPT(TARGET VERSION_SCRIPT)
@@ -63,7 +71,8 @@ macro(ADD_VERSION_SCRIPT TARGET VERSION_SCRIPT)
       set_property(
         TARGET ${TARGET}
         APPEND_STRING
-        PROPERTY LINK_FLAGS " -Wl,--version-script=${VERSION_SCRIPT}")
+        PROPERTY LINK_FLAGS " -Wl,--version-script=${VERSION_SCRIPT}"
+      )
       set_target_properties(${TARGET} PROPERTIES LINK_DEPENDS ${VERSION_SCRIPT})
     endif()
   endif()

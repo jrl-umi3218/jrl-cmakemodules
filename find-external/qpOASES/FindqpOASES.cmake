@@ -25,35 +25,47 @@
 find_path(
   qpOASES_INCLUDE_DIR
   NAMES qpOASES.hpp
-  PATHS ${qpOASES_PREFIX} ${qpOASES_PREFIX}/include)
+  PATHS ${qpOASES_PREFIX} ${qpOASES_PREFIX}/include
+)
 find_library(
   qpOASES_LIBRARY
   NAMES qpOASES
-  PATHS ${qpOASES_PREFIX} ${qpOASES_PREFIX}/lib)
+  PATHS ${qpOASES_PREFIX} ${qpOASES_PREFIX}/lib
+)
 
 set(qpOASES_LIBRARIES ${qpOASES_LIBRARY})
 set(qpOASES_INCLUDE_DIRS ${qpOASES_INCLUDE_DIR})
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(qpOASES DEFAULT_MSG qpOASES_LIBRARY
-                                  qpOASES_INCLUDE_DIR)
+find_package_handle_standard_args(
+  qpOASES
+  DEFAULT_MSG
+  qpOASES_LIBRARY
+  qpOASES_INCLUDE_DIR
+)
 mark_as_advanced(qpOASES_INCLUDE_DIR qpOASES_LIBRARY)
 
 if(qpOASES_FOUND AND NOT TARGET qpOASES::qpOASES)
   add_library(qpOASES::qpOASES SHARED IMPORTED)
   set_target_properties(
-    qpOASES::qpOASES PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
-                                "${qpOASES_INCLUDE_DIR}")
-  set_target_properties(qpOASES::qpOASES PROPERTIES IMPORTED_LOCATION_RELEASE
-                                                    "${qpOASES_LIBRARY}")
+    qpOASES::qpOASES
+    PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${qpOASES_INCLUDE_DIR}"
+  )
+  set_target_properties(
+    qpOASES::qpOASES
+    PROPERTIES IMPORTED_LOCATION_RELEASE "${qpOASES_LIBRARY}"
+  )
   set_property(
     TARGET qpOASES::qpOASES
     APPEND
-    PROPERTY IMPORTED_CONFIGURATIONS "RELEASE")
-  set_target_properties(qpOASES::qpOASES
-                        PROPERTIES IMPORTED_LINK_INTERFACE_LANGUAGES "CXX")
+    PROPERTY IMPORTED_CONFIGURATIONS "RELEASE"
+  )
+  set_target_properties(
+    qpOASES::qpOASES
+    PROPERTIES IMPORTED_LINK_INTERFACE_LANGUAGES "CXX"
+  )
   message(
     STATUS
-      "qpOASES found (include: ${qpOASES_INCLUDE_DIR}, lib: ${qpOASES_LIBRARY})"
+    "qpOASES found (include: ${qpOASES_INCLUDE_DIR}, lib: ${qpOASES_LIBRARY})"
   )
 endif()

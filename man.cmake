@@ -30,14 +30,17 @@ macro(MANPAGE NAME)
 
   add_custom_command(
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${NAME}.1
-    COMMAND ${POD2MAN} --section=1 --center="LOCAL USER COMMANDS" --release
-            ${PROJECT_NAME} ${NAME}.pod > ${NAME}.1
-    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${NAME}.pod)
+    COMMAND
+      ${POD2MAN} --section=1 --center="LOCAL USER COMMANDS" --release
+      ${PROJECT_NAME} ${NAME}.pod > ${NAME}.1
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${NAME}.pod
+  )
 
   add_custom_command(
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${NAME}.1.gz
     COMMAND ${GZIP} -c ${NAME}.1 > ${NAME}.1.gz
-    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${NAME}.1)
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${NAME}.1
+  )
 
   # Trigger man page generation at install.
   install(CODE "EXECUTE_PROCESS(COMMAND ${CMAKE_MAKE_PROGRAM} man)")
@@ -49,8 +52,10 @@ macro(MANPAGE NAME)
   endif(MANDIR)
 
   # Install man page.
-  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${NAME}.1.gz
-          DESTINATION ${DESTINATION_MAN_PAGE})
+  install(
+    FILES ${CMAKE_CURRENT_BINARY_DIR}/${NAME}.1.gz
+    DESTINATION ${DESTINATION_MAN_PAGE}
+  )
 
   list(APPEND LOGGING_WATCHED_VARIABLES POD2MAN GZIP)
 endmacro(MANPAGE)

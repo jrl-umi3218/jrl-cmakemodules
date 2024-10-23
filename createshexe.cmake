@@ -23,7 +23,8 @@ macro(CREATE_SH_EXE EXEC_NAME)
   if(UNIX)
     set(sh_exe_filename "${EXEC_NAME}.sh")
     file(
-      WRITE ${CMAKE_CURRENT_BINARY_DIR}/${sh_exe_filename}
+      WRITE
+      ${CMAKE_CURRENT_BINARY_DIR}/${sh_exe_filename}
       "#!/bin/sh\nLD_LIBRARY_PATH=$LD_LIBRARY_PATH:${CMAKE_INSTALL_PREFIX}/lib/plugin;export LD_LIBRARY_PATH\n./${EXEC_NAME}"
     )
     install(
@@ -36,6 +37,7 @@ macro(CREATE_SH_EXE EXEC_NAME)
         GROUP_EXECUTE
         GROUP_READ
         WORLD_EXECUTE
-        WORLD_READ)
+        WORLD_READ
+    )
   endif(UNIX)
 endmacro(CREATE_SH_EXE)

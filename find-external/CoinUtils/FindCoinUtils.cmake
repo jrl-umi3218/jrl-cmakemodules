@@ -26,35 +26,41 @@
 find_path(
   CoinUtils_INCLUDE_DIR
   NAMES coin/CoinBuild.hpp
-  PATHS ${CoinUtils_PREFIX})
-find_library(
-  CoinUtils_LIBRARY
-  NAMES CoinUtils
-  PATHS ${CoinUtils_PREFIX})
+  PATHS ${CoinUtils_PREFIX}
+)
+find_library(CoinUtils_LIBRARY NAMES CoinUtils PATHS ${CoinUtils_PREFIX})
 
 set(CoinUtils_LIBRARIES ${CoinUtils_LIBRARY})
 set(CoinUtils_INCLUDE_DIRS ${CoinUtils_INCLUDE_DIR})
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(CoinUtils DEFAULT_MSG CoinUtils_LIBRARY
-                                  CoinUtils_INCLUDE_DIR)
+find_package_handle_standard_args(
+  CoinUtils
+  DEFAULT_MSG
+  CoinUtils_LIBRARY
+  CoinUtils_INCLUDE_DIR
+)
 mark_as_advanced(CoinUtils_INCLUDE_DIR CoinUtils_LIBRARY)
 
 if(CoinUtils_FOUND AND NOT TARGET CoinUtils::CoinUtils)
   add_library(CoinUtils::CoinUtils SHARED IMPORTED)
   set_target_properties(
     CoinUtils::CoinUtils
-    PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
-               "${CoinUtils_INCLUDE_DIR};${CoinUtils_INCLUDE_DIR}/coin")
+    PROPERTIES
+      INTERFACE_INCLUDE_DIRECTORIES
+        "${CoinUtils_INCLUDE_DIR};${CoinUtils_INCLUDE_DIR}/coin"
+  )
   set_target_properties(
-    CoinUtils::CoinUtils PROPERTIES IMPORTED_LOCATION_RELEASE
-                                    "${CoinUtils_LIBRARY}")
+    CoinUtils::CoinUtils
+    PROPERTIES IMPORTED_LOCATION_RELEASE "${CoinUtils_LIBRARY}"
+  )
   set_property(
     TARGET CoinUtils::CoinUtils
     APPEND
-    PROPERTY IMPORTED_CONFIGURATIONS "RELEASE")
+    PROPERTY IMPORTED_CONFIGURATIONS "RELEASE"
+  )
   message(
     STATUS
-      "CoinUtils found (include: ${CoinUtils_INCLUDE_DIR}, lib: ${CoinUtils_LIBRARY})"
+    "CoinUtils found (include: ${CoinUtils_INCLUDE_DIR}, lib: ${CoinUtils_LIBRARY})"
   )
 endif()

@@ -20,27 +20,31 @@
 #
 macro(_SETUP_PROJECT_UNINSTALL)
   # Detect if the .catkin was created previously
-  if(NOT DEFINED PACKAGE_CREATES_DOT_CATKIN
-     OR NOT "${PACKAGE_PREVIOUS_INSTALL_PREFIX}" STREQUAL
-        "${CMAKE_INSTALL_PREFIX}")
-    set(PACKAGE_PREVIOUS_INSTALL_PREFIX
-        "${CMAKE_INSTALL_PREFIX}"
-        CACHE INTERNAL "Cache install prefix given to the package")
+  if(
+    NOT DEFINED PACKAGE_CREATES_DOT_CATKIN
+    OR
+      NOT
+        "${PACKAGE_PREVIOUS_INSTALL_PREFIX}" STREQUAL "${CMAKE_INSTALL_PREFIX}"
+  )
+    set(
+      PACKAGE_PREVIOUS_INSTALL_PREFIX
+      "${CMAKE_INSTALL_PREFIX}"
+      CACHE INTERNAL
+      "Cache install prefix given to the package"
+    )
     if(EXISTS "${CMAKE_INSTALL_PREFIX}/.catkin")
-      set(PACKAGE_CREATES_DOT_CATKIN
-          FALSE
-          CACHE INTERNAL "")
+      set(PACKAGE_CREATES_DOT_CATKIN FALSE CACHE INTERNAL "")
     else()
-      set(PACKAGE_CREATES_DOT_CATKIN
-          TRUE
-          CACHE INTERNAL "")
+      set(PACKAGE_CREATES_DOT_CATKIN TRUE CACHE INTERNAL "")
     endif()
   endif()
   # FIXME: it is utterly stupid to rely on the install manifest. Can't we just
   # remember what we install ?!
   configure_file(
     "${CMAKE_CURRENT_LIST_DIR}/cmake_uninstall.cmake.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/cmake/cmake_uninstall.cmake" @ONLY)
+    "${CMAKE_CURRENT_BINARY_DIR}/cmake/cmake_uninstall.cmake"
+    @ONLY
+  )
 
   if(NOT TARGET uninstall)
     add_custom_target(uninstall)
@@ -49,12 +53,15 @@ macro(_SETUP_PROJECT_UNINSTALL)
     ${PROJECT_NAME}-uninstall
     "${CMAKE_COMMAND}"
     -DPACKAGE_CREATES_DOT_CATKIN=${PACKAGE_CREATES_DOT_CATKIN} -P
-    "${CMAKE_CURRENT_BINARY_DIR}/cmake/cmake_uninstall.cmake")
+    "${CMAKE_CURRENT_BINARY_DIR}/cmake/cmake_uninstall.cmake"
+  )
   add_dependencies(uninstall ${PROJECT_NAME}-uninstall)
 
   configure_file(
     "${CMAKE_CURRENT_LIST_DIR}/cmake_reinstall.cmake.in"
-    "${PROJECT_BINARY_DIR}/cmake/cmake_reinstall.cmake.configured" @ONLY)
+    "${PROJECT_BINARY_DIR}/cmake/cmake_reinstall.cmake.configured"
+    @ONLY
+  )
   if(DEFINED CMAKE_BUILD_TYPE)
     file(MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/cmake/${CMAKE_BUILD_TYPE}")
   else(DEFINED CMAKE_BUILD_TYPE)
@@ -63,9 +70,10 @@ macro(_SETUP_PROJECT_UNINSTALL)
     endforeach()
   endif(DEFINED CMAKE_BUILD_TYPE)
   file(
-    GENERATE
-    OUTPUT "${PROJECT_BINARY_DIR}/cmake/$<CONFIGURATION>/cmake_reinstall.cmake"
-    INPUT "${PROJECT_BINARY_DIR}/cmake/cmake_reinstall.cmake.configured")
+    GENERATE OUTPUT
+    "${PROJECT_BINARY_DIR}/cmake/$<CONFIGURATION>/cmake_reinstall.cmake"
+    INPUT "${PROJECT_BINARY_DIR}/cmake/cmake_reinstall.cmake.configured"
+  )
 
   if(NOT TARGET reinstall)
     add_custom_target(reinstall)
@@ -73,7 +81,8 @@ macro(_SETUP_PROJECT_UNINSTALL)
   add_custom_target(
     ${PROJECT_NAME}-reinstall
     "${CMAKE_COMMAND}" -P
-    "${PROJECT_BINARY_DIR}/cmake/$<CONFIGURATION>/cmake_reinstall.cmake")
+    "${PROJECT_BINARY_DIR}/cmake/$<CONFIGURATION>/cmake_reinstall.cmake"
+  )
   add_dependencies(reinstall ${PROJECT_NAME}-reinstall)
 endmacro(_SETUP_PROJECT_UNINSTALL)
 
@@ -84,5 +93,6 @@ if(DEFINED CMAKE_CONFIGURATION_TYPES)
   set(UNINSTALL_CONFIG_ARG "--config \${CMAKE_INSTALL_CONFIG_NAME}")
 endif()
 install(
-  CODE "execute_process(COMMAND \"${CMAKE_COMMAND}\" --build \"${PROJECT_BINARY_DIR}\" ${UNINSTALL_CONFIG_ARG} --target uninstall)"
+  CODE
+    "execute_process(COMMAND \"${CMAKE_COMMAND}\" --build \"${PROJECT_BINARY_DIR}\" ${UNINSTALL_CONFIG_ARG} --target uninstall)"
 )
