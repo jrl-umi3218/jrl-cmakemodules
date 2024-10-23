@@ -32,15 +32,20 @@ function(_list_join var_in sep var_out)
       endif()
     endforeach()
   endif()
-  set(${var_out}
-      ${out}
-      PARENT_SCOPE)
+  set(${var_out} ${out} PARENT_SCOPE)
 endfunction()
 
 # Additional pkg-config variables whose value will be imported during the
 # dependency check.
-set(PKG_CONFIG_ADDITIONAL_VARIABLES bindir pkglibdir datarootdir pkgdatarootdir
-                                    docdir doxygendocdir)
+set(
+  PKG_CONFIG_ADDITIONAL_VARIABLES
+  bindir
+  pkglibdir
+  datarootdir
+  pkgdatarootdir
+  docdir
+  doxygendocdir
+)
 
 # .rst: .. ifmode:: internal
 #
@@ -54,119 +59,113 @@ set(PKG_CONFIG_ADDITIONAL_VARIABLES bindir pkglibdir datarootdir pkgdatarootdir
 macro(_SETUP_PROJECT_PKG_CONFIG)
   # Pkg-config related commands.
   rel_install_path("${CMAKE_INSTALL_LIBDIR}/pkgconfig" _PC_REL_INSTALL_PATH)
-  set(_PKG_CONFIG_PREFIX
-      "\${pcfiledir}/${_PC_REL_INSTALL_PATH}"
-      CACHE INTERNAL "")
-  set(_PKG_CONFIG_EXEC_PREFIX
-      "${_PKG_CONFIG_PREFIX}"
-      CACHE INTERNAL "")
-  set(_PKG_CONFIG_LIBDIR
-      "${_PKG_CONFIG_PREFIX}/${CMAKE_INSTALL_LIBDIR}"
-      CACHE INTERNAL "")
-  set(_PKG_CONFIG_BINDIR
-      "${_PKG_CONFIG_PREFIX}/${CMAKE_INSTALL_BINDIR}"
-      CACHE INTERNAL "")
-  set(_PKG_CONFIG_PKGLIBDIR
-      "${_PKG_CONFIG_PREFIX}/${CMAKE_INSTALL_PKGLIBDIR}"
-      CACHE INTERNAL "")
-  set(_PKG_CONFIG_INCLUDEDIR
-      "${_PKG_CONFIG_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}"
-      CACHE INTERNAL "")
-  set(_PKG_CONFIG_DATAROOTDIR
-      "${_PKG_CONFIG_PREFIX}/${CMAKE_INSTALL_DATAROOTDIR}"
-      CACHE INTERNAL "")
-  set(_PKG_CONFIG_PKGDATAROOTDIR
-      "${_PKG_CONFIG_PREFIX}/${CMAKE_INSTALL_DATADIR}"
-      CACHE INTERNAL "")
+  set(
+    _PKG_CONFIG_PREFIX
+    "\${pcfiledir}/${_PC_REL_INSTALL_PATH}"
+    CACHE INTERNAL
+    ""
+  )
+  set(_PKG_CONFIG_EXEC_PREFIX "${_PKG_CONFIG_PREFIX}" CACHE INTERNAL "")
+  set(
+    _PKG_CONFIG_LIBDIR
+    "${_PKG_CONFIG_PREFIX}/${CMAKE_INSTALL_LIBDIR}"
+    CACHE INTERNAL
+    ""
+  )
+  set(
+    _PKG_CONFIG_BINDIR
+    "${_PKG_CONFIG_PREFIX}/${CMAKE_INSTALL_BINDIR}"
+    CACHE INTERNAL
+    ""
+  )
+  set(
+    _PKG_CONFIG_PKGLIBDIR
+    "${_PKG_CONFIG_PREFIX}/${CMAKE_INSTALL_PKGLIBDIR}"
+    CACHE INTERNAL
+    ""
+  )
+  set(
+    _PKG_CONFIG_INCLUDEDIR
+    "${_PKG_CONFIG_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}"
+    CACHE INTERNAL
+    ""
+  )
+  set(
+    _PKG_CONFIG_DATAROOTDIR
+    "${_PKG_CONFIG_PREFIX}/${CMAKE_INSTALL_DATAROOTDIR}"
+    CACHE INTERNAL
+    ""
+  )
+  set(
+    _PKG_CONFIG_PKGDATAROOTDIR
+    "${_PKG_CONFIG_PREFIX}/${CMAKE_INSTALL_DATADIR}"
+    CACHE INTERNAL
+    ""
+  )
   if(INSTALL_DOCUMENTATION)
-    set(_PKG_CONFIG_DOCDIR
-        "${_PKG_CONFIG_PREFIX}/${CMAKE_INSTALL_DOCDIR}"
-        CACHE INTERNAL "")
-    set(_PKG_CONFIG_DOXYGENDOCDIR
-        "${_PKG_CONFIG_DOCDIR}/doxygen-html"
-        CACHE INTERNAL "")
+    set(
+      _PKG_CONFIG_DOCDIR
+      "${_PKG_CONFIG_PREFIX}/${CMAKE_INSTALL_DOCDIR}"
+      CACHE INTERNAL
+      ""
+    )
+    set(
+      _PKG_CONFIG_DOXYGENDOCDIR
+      "${_PKG_CONFIG_DOCDIR}/doxygen-html"
+      CACHE INTERNAL
+      ""
+    )
   else(INSTALL_DOCUMENTATION)
-    set(_PKG_CONFIG_DOCDIR
-        ""
-        CACHE INTERNAL "")
-    set(_PKG_CONFIG_DOXYGENDOCDIR
-        ""
-        CACHE INTERNAL "")
+    set(_PKG_CONFIG_DOCDIR "" CACHE INTERNAL "")
+    set(_PKG_CONFIG_DOXYGENDOCDIR "" CACHE INTERNAL "")
   endif(INSTALL_DOCUMENTATION)
 
   if(DEFINED PROJECT_DEBUG_POSTFIX)
     if(DEFINED CMAKE_CONFIGURATION_TYPES)
-      set(_PKG_CONFIG_PROJECT_NAME_NOPOSTFIX
-          "${PROJECT_NAME}"
-          CACHE INTERNAL "")
-      set(_PKG_CONFIG_PROJECT_NAME
-          "${PROJECT_NAME}${PKGCONFIG_POSTFIX}"
-          CACHE INTERNAL "")
+      set(
+        _PKG_CONFIG_PROJECT_NAME_NOPOSTFIX
+        "${PROJECT_NAME}"
+        CACHE INTERNAL
+        ""
+      )
+      set(
+        _PKG_CONFIG_PROJECT_NAME
+        "${PROJECT_NAME}${PKGCONFIG_POSTFIX}"
+        CACHE INTERNAL
+        ""
+      )
     else()
-      set(_PKG_CONFIG_PROJECT_NAME
-          "${PROJECT_NAME}${PKGCONFIG_POSTFIX}"
-          CACHE INTERNAL "")
+      set(
+        _PKG_CONFIG_PROJECT_NAME
+        "${PROJECT_NAME}${PKGCONFIG_POSTFIX}"
+        CACHE INTERNAL
+        ""
+      )
     endif()
   else()
-    set(_PKG_CONFIG_PROJECT_NAME
-        "${PROJECT_NAME}"
-        CACHE INTERNAL "")
+    set(_PKG_CONFIG_PROJECT_NAME "${PROJECT_NAME}" CACHE INTERNAL "")
   endif()
-  set(_PKG_CONFIG_DESCRIPTION
-      "${PROJECT_DESCRIPTION}"
-      CACHE INTERNAL "")
-  set(_PKG_CONFIG_URL
-      "${PROJECT_URL}"
-      CACHE INTERNAL "")
-  set(_PKG_CONFIG_VERSION
-      "${PROJECT_VERSION}"
-      CACHE INTERNAL "")
-  set(_PKG_CONFIG_REQUIRES
-      ""
-      CACHE INTERNAL "")
-  set(_PKG_CONFIG_REQUIRES_DEBUG
-      ""
-      CACHE INTERNAL "")
-  set(_PKG_CONFIG_REQUIRES_OPTIMIZED
-      ""
-      CACHE INTERNAL "")
-  set(_PKG_CONFIG_COMPILE_TIME_REQUIRES
-      ""
-      CACHE INTERNAL "")
-  set(_PKG_CONFIG_CONFLICTS
-      ""
-      CACHE INTERNAL "")
-  set(_PKG_CONFIG_LIBS
-      ""
-      CACHE INTERNAL "")
-  set(_PKG_CONFIG_LIBS_DEBUG
-      "${LIBDIR_KW}\${libdir}"
-      CACHE INTERNAL "")
-  set(_PKG_CONFIG_LIBS_OPTIMIZED
-      "${LIBDIR_KW}\${libdir}"
-      CACHE INTERNAL "")
-  set(_PKG_CONFIG_LIBS_PRIVATE
-      ""
-      CACHE INTERNAL "")
-  set(_PKG_CONFIG_CFLAGS
-      "-I\${includedir}"
-      CACHE INTERNAL "")
-  set(_PKG_CONFIG_CFLAGS_DEBUG
-      ""
-      CACHE INTERNAL "")
-  set(_PKG_CONFIG_CFLAGS_OPTIMIZED
-      ""
-      CACHE INTERNAL "")
-  set(_PKG_CONFIG_FILENAME
-      "${PROJECT_NAME}.pc"
-      CACHE INTERNAL "")
+  set(_PKG_CONFIG_DESCRIPTION "${PROJECT_DESCRIPTION}" CACHE INTERNAL "")
+  set(_PKG_CONFIG_URL "${PROJECT_URL}" CACHE INTERNAL "")
+  set(_PKG_CONFIG_VERSION "${PROJECT_VERSION}" CACHE INTERNAL "")
+  set(_PKG_CONFIG_REQUIRES "" CACHE INTERNAL "")
+  set(_PKG_CONFIG_REQUIRES_DEBUG "" CACHE INTERNAL "")
+  set(_PKG_CONFIG_REQUIRES_OPTIMIZED "" CACHE INTERNAL "")
+  set(_PKG_CONFIG_COMPILE_TIME_REQUIRES "" CACHE INTERNAL "")
+  set(_PKG_CONFIG_CONFLICTS "" CACHE INTERNAL "")
+  set(_PKG_CONFIG_LIBS "" CACHE INTERNAL "")
+  set(_PKG_CONFIG_LIBS_DEBUG "${LIBDIR_KW}\${libdir}" CACHE INTERNAL "")
+  set(_PKG_CONFIG_LIBS_OPTIMIZED "${LIBDIR_KW}\${libdir}" CACHE INTERNAL "")
+  set(_PKG_CONFIG_LIBS_PRIVATE "" CACHE INTERNAL "")
+  set(_PKG_CONFIG_CFLAGS "-I\${includedir}" CACHE INTERNAL "")
+  set(_PKG_CONFIG_CFLAGS_DEBUG "" CACHE INTERNAL "")
+  set(_PKG_CONFIG_CFLAGS_OPTIMIZED "" CACHE INTERNAL "")
+  set(_PKG_CONFIG_FILENAME "${PROJECT_NAME}.pc" CACHE INTERNAL "")
 
   set(PKG_CONFIG_EXTRA "")
 
   # Where to install the pkg-config file?
-  set(_PKG_CONFIG_DIR
-      "${_PKG_CONFIG_LIBDIR}/pkgconfig"
-      CACHE INTERNAL "")
+  set(_PKG_CONFIG_DIR "${_PKG_CONFIG_LIBDIR}/pkgconfig" CACHE INTERNAL "")
 
   # Watch variables.
   list(
@@ -201,7 +200,8 @@ macro(_SETUP_PROJECT_PKG_CONFIG)
     _PKG_CONFIG_CFLAGS_DEBUG
     _PKG_CONFIG_CFLAGS_OPTIMIZED
     _PKG_CONFIG_FILENAME
-    PKG_CONFIG_EXTRA)
+    PKG_CONFIG_EXTRA
+  )
 endmacro(_SETUP_PROJECT_PKG_CONFIG)
 
 # _SETUP_PROJECT_PKG_CONFIG_FINALIZE_DEBUG
@@ -228,7 +228,8 @@ macro(_SETUP_PROJECT_PKG_CONFIG_FINALIZE_DEBUG)
   _list_join(_PKG_CONFIG_REQUIRES ", " _PKG_CONFIG_REQUIRES_LIST)
   configure_file(
     "${PROJECT_JRL_CMAKE_MODULE_DIR}/pkg-config.pc.cmake"
-    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}${PKGCONFIG_POSTFIX}.pc")
+    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}${PKGCONFIG_POSTFIX}.pc"
+  )
   # Restore altered variables
   set(_PKG_CONFIG_CFLAGS ${TEMP_CFLAGS})
   set(_PKG_CONFIG_LIBS ${TEMP_LIBS})
@@ -237,7 +238,8 @@ macro(_SETUP_PROJECT_PKG_CONFIG_FINALIZE_DEBUG)
   install(
     FILES "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}${PKGCONFIG_POSTFIX}.pc"
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
-    PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_WRITE)
+    PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_WRITE
+  )
 endmacro(_SETUP_PROJECT_PKG_CONFIG_FINALIZE_DEBUG)
 
 # _SETUP_PROJECT_PKG_CONFIG_FINALIZE_OPTIMIZED
@@ -256,8 +258,10 @@ macro(_SETUP_PROJECT_PKG_CONFIG_FINALIZE_OPTIMIZED)
   set(TEMP_PROJECT_NAME ${_PKG_CONFIG_PROJECT_NAME})
   set(_PKG_CONFIG_PROJECT_NAME ${_PKG_CONFIG_PROJECT_NAME_NOPOSTFIX})
   set(TEMP_CFLAGS ${_PKG_CONFIG_CFLAGS})
-  set(_PKG_CONFIG_CFLAGS
-      "${_PKG_CONFIG_CFLAGS_OPTIMIZED} ${_PKG_CONFIG_CFLAGS}")
+  set(
+    _PKG_CONFIG_CFLAGS
+    "${_PKG_CONFIG_CFLAGS_OPTIMIZED} ${_PKG_CONFIG_CFLAGS}"
+  )
   set(TEMP_LIBS ${_PKG_CONFIG_LIBS})
   set(_PKG_CONFIG_LIBS "${_PKG_CONFIG_LIBS_OPTIMIZED} ${_PKG_CONFIG_LIBS}")
   set(TEMP_REQUIRES ${_PKG_CONFIG_REQUIRES})
@@ -266,13 +270,18 @@ macro(_SETUP_PROJECT_PKG_CONFIG_FINALIZE_OPTIMIZED)
   endif()
   _list_join(_PKG_CONFIG_REQUIRES ", " _PKG_CONFIG_REQUIRES_LIST)
   if(DEFINED CUSTOM_PKG_CONFIG_FILENAME)
-    set(_PKG_CONFIG_FILENAME
-        "${CUSTOM_PKG_CONFIG_FILENAME}.pc"
-        CACHE INTERNAL "")
+    set(
+      _PKG_CONFIG_FILENAME
+      "${CUSTOM_PKG_CONFIG_FILENAME}.pc"
+      CACHE INTERNAL
+      ""
+    )
   endif(DEFINED CUSTOM_PKG_CONFIG_FILENAME)
   # Generate the pkg-config file.
-  configure_file("${PROJECT_JRL_CMAKE_MODULE_DIR}/pkg-config.pc.cmake"
-                 "${CMAKE_CURRENT_BINARY_DIR}/${_PKG_CONFIG_FILENAME}")
+  configure_file(
+    "${PROJECT_JRL_CMAKE_MODULE_DIR}/pkg-config.pc.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/${_PKG_CONFIG_FILENAME}"
+  )
   # Restore altered variables
   set(_PKG_CONFIG_PROJECT_NAME ${TEMP_PROJECT_NAME})
   set(_PKG_CONFIG_CFLAGS ${TEMP_CFLAGS})
@@ -282,7 +291,8 @@ macro(_SETUP_PROJECT_PKG_CONFIG_FINALIZE_OPTIMIZED)
   install(
     FILES "${CMAKE_CURRENT_BINARY_DIR}/${_PKG_CONFIG_FILENAME}"
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
-    PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_WRITE)
+    PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_WRITE
+  )
 endmacro(_SETUP_PROJECT_PKG_CONFIG_FINALIZE_OPTIMIZED)
 
 # _SETUP_PROJECT_PKG_CONFIG_FINALIZE
@@ -324,20 +334,36 @@ endmacro(_SETUP_PROJECT_PKG_CONFIG_FINALIZE)
 # _PKG_PREFIX_VAR <- MY_PACKAGE - _PKG_CONFIG_STRING_NOSPACE_VAR <-
 # `my-package>0.4` `my-package` results in - _PKG_LIB_NAME_VAR <- my-package -
 # _PKG_PREFIX_VAR <- MY_PACKAGE - _PKG_CONFIG_STRING_NOSPACE_VAR <- `my-package`
-macro(_PARSE_PKG_CONFIG_STRING PKG_CONFIG_STRING _PKG_LIB_NAME_VAR
-      _PKG_PREFIX_VAR _PKG_CONFIG_NOSPACE_VAR)
+macro(
+  _PARSE_PKG_CONFIG_STRING
+  PKG_CONFIG_STRING
+  _PKG_LIB_NAME_VAR
+  _PKG_PREFIX_VAR
+  _PKG_CONFIG_NOSPACE_VAR
+)
   # Decompose the equation
-  string(REGEX MATCH "([^ ]+)( (>|>=|=|<=|<) (.*))?" _UNUSED
-               "${PKG_CONFIG_STRING}")
+  string(
+    REGEX MATCH
+    "([^ ]+)( (>|>=|=|<=|<) (.*))?"
+    _UNUSED
+    "${PKG_CONFIG_STRING}"
+  )
   # Reconstruct the equation, without the space around the operator
-  set(${_PKG_CONFIG_NOSPACE_VAR}
-      "${CMAKE_MATCH_1}${CMAKE_MATCH_3}${CMAKE_MATCH_4}")
+  set(
+    ${_PKG_CONFIG_NOSPACE_VAR}
+    "${CMAKE_MATCH_1}${CMAKE_MATCH_3}${CMAKE_MATCH_4}"
+  )
   # The left part of the equation is the package name
   set(${_PKG_LIB_NAME_VAR} "${CMAKE_MATCH_1}")
   # Transform it into a valid variable prefix. 1. replace invalid characters
   # into underscores.
-  string(REGEX REPLACE "[^a-zA-Z0-9]" "_" ${_PKG_PREFIX_VAR}
-                       "${${_PKG_LIB_NAME_VAR}}")
+  string(
+    REGEX REPLACE
+    "[^a-zA-Z0-9]"
+    "_"
+    ${_PKG_PREFIX_VAR}
+    "${${_PKG_LIB_NAME_VAR}}"
+  )
   # 1. make it uppercase.
   string(TOUPPER "${${_PKG_PREFIX_VAR}}" ${_PKG_PREFIX_VAR})
 endmacro()
@@ -358,13 +384,20 @@ endmacro()
 # PKG_CONFIG_STRING       : string passed to pkg-config to check the version.
 # Typically, this string looks like: ``my-package >= 0.5''
 #
-macro(ADD_DEPENDENCY P_REQUIRED COMPILE_TIME_ONLY PKG_CONFIG_STRING
-      PKG_CONFIG_DEBUG_STRING)
+macro(
+  ADD_DEPENDENCY
+  P_REQUIRED
+  COMPILE_TIME_ONLY
+  PKG_CONFIG_STRING
+  PKG_CONFIG_DEBUG_STRING
+)
   _parse_pkg_config_string("${PKG_CONFIG_STRING}" LIBRARY_NAME PREFIX
-                           PKG_CONFIG_STRING_NOSPACE)
+                           PKG_CONFIG_STRING_NOSPACE
+  )
   if(NOT ${PKG_CONFIG_DEBUG_STRING} STREQUAL "")
     _parse_pkg_config_string("${PKG_CONFIG_DEBUG_STRING}" LIBRARY_DEBUG_NAME
-                             ${PREFIX}_DEBUG PKG_CONFIG_DEBUG_STRING_NOSPACE)
+                             ${PREFIX}_DEBUG PKG_CONFIG_DEBUG_STRING_NOSPACE
+    )
   endif()
 
   # Force redetection each time CMake is launched. Rationale: these values are
@@ -407,8 +440,11 @@ macro(ADD_DEPENDENCY P_REQUIRED COMPILE_TIME_ONLY PKG_CONFIG_STRING
   if(DEFINED ${PREFIX}_DEBUG)
     if(${P_DEBUG_REQUIRED})
       message(STATUS "${PKG_CONFIG_DEBUG_STRING} is required")
-      pkg_check_modules("${PREFIX}_DEBUG" REQUIRED
-                        "${PKG_CONFIG_DEBUG_STRING_NOSPACE}")
+      pkg_check_modules(
+        "${PREFIX}_DEBUG"
+        REQUIRED
+        "${PKG_CONFIG_DEBUG_STRING_NOSPACE}"
+      )
     else(${P_DEBUG_REQUIRED})
       message(STATUS "${PKG_CONFIG_DEBUG_STRING} is optional")
       pkg_check_modules("${PREFIX}_DEBUG" "${PKG_CONFIG_DEBUG_STRING_NOSPACE}")
@@ -422,10 +458,20 @@ macro(ADD_DEPENDENCY P_REQUIRED COMPILE_TIME_ONLY PKG_CONFIG_STRING
     string(REPLACE "-l:/" "/" "${PREFIX}_LDFLAGS" "${${PREFIX}_LDFLAGS}")
 
     if(DEFINED ${PREFIX}_DEBUG)
-      string(REPLACE ":/" "/" "${PREFIX}_DEBUG_LIBRARIES"
-                     "${${PREFIX}_DEBUG_LIBRARIES}")
-      string(REPLACE "-l:/" "/" "${PREFIX}_DEBUG_LDFLAGS"
-                     "${${PREFIX}_DEBUG_LDFLAGS}")
+      string(
+        REPLACE
+        ":/"
+        "/"
+        "${PREFIX}_DEBUG_LIBRARIES"
+        "${${PREFIX}_DEBUG_LIBRARIES}"
+      )
+      string(
+        REPLACE
+        "-l:/"
+        "/"
+        "${PREFIX}_DEBUG_LDFLAGS"
+        "${${PREFIX}_DEBUG_LDFLAGS}"
+      )
     endif()
   endif()
 
@@ -452,7 +498,8 @@ macro(ADD_DEPENDENCY P_REQUIRED COMPILE_TIME_ONLY PKG_CONFIG_STRING
     ${PREFIX}_DATAROOTDIR
     ${PREFIX}_PKGDATAROOTDIR
     ${PREFIX}_DOCDIR
-    ${PREFIX}_DOXYGENDOCDIR)
+    ${PREFIX}_DOXYGENDOCDIR
+  )
   if(DEFINED ${PREFIX}_DEBUG)
     list(
       APPEND
@@ -476,7 +523,8 @@ macro(ADD_DEPENDENCY P_REQUIRED COMPILE_TIME_ONLY PKG_CONFIG_STRING
       ${PREFIX}_DEBUG_DATAROOTDIR
       ${PREFIX}_DEBUG_PKGDATAROOTDIR
       ${PREFIX}_DEBUG_DOCDIR
-      ${PREFIX}_DEBUG_DOXYGENDOCDIR)
+      ${PREFIX}_DEBUG_DOXYGENDOCDIR
+    )
   endif()
 
   # Get the values of additional variables.
@@ -484,22 +532,35 @@ macro(ADD_DEPENDENCY P_REQUIRED COMPILE_TIME_ONLY PKG_CONFIG_STRING
     # Upper-case version of the variable for CMake variable generation.
     string(TOUPPER "${VARIABLE}" "VARIABLE_UC")
     execute_process(
-      COMMAND "${PKG_CONFIG_EXECUTABLE}" "--variable=${VARIABLE}"
-              "${LIBRARY_NAME}"
+      COMMAND
+        "${PKG_CONFIG_EXECUTABLE}" "--variable=${VARIABLE}" "${LIBRARY_NAME}"
       OUTPUT_VARIABLE "${PREFIX}_${VARIABLE_UC}"
-      ERROR_QUIET)
-    string(REPLACE "\n" "" "${PREFIX}_${VARIABLE_UC}"
-                   "${${PREFIX}_${VARIABLE_UC}}")
+      ERROR_QUIET
+    )
+    string(
+      REPLACE
+      "\n"
+      ""
+      "${PREFIX}_${VARIABLE_UC}"
+      "${${PREFIX}_${VARIABLE_UC}}"
+    )
     # Watch additional variables.
     list(APPEND LOGGING_WATCHED_VARIABLES ${PREFIX}_${VARIABLE_UC})
     if(DEFINED ${PREFIX}_DEBUG)
       execute_process(
-        COMMAND "${PKG_CONFIG_EXECUTABLE}" "--variable=${VARIABLE}"
-                "${LIBRARY_DEBUG_NAME}"
+        COMMAND
+          "${PKG_CONFIG_EXECUTABLE}" "--variable=${VARIABLE}"
+          "${LIBRARY_DEBUG_NAME}"
         OUTPUT_VARIABLE "${PREFIX}_DEBUG_${VARIABLE_UC}"
-        ERROR_QUIET)
-      string(REPLACE "\n" "" "${PREFIX}_DEBUG_${VARIABLE_UC}"
-                     "${${PREFIX}_DEBUG_${VARIABLE_UC}}")
+        ERROR_QUIET
+      )
+      string(
+        REPLACE
+        "\n"
+        ""
+        "${PREFIX}_DEBUG_${VARIABLE_UC}"
+        "${${PREFIX}_DEBUG_${VARIABLE_UC}}"
+      )
       list(APPEND LOGGING_WATCHED_VARIABLES ${PREFIX}_DEBUG_${VARIABLE_UC})
     endif()
   endforeach(VARIABLE)
@@ -533,25 +594,29 @@ macro(ADD_DEPENDENCY P_REQUIRED COMPILE_TIME_ONLY PKG_CONFIG_STRING
     if(NOT ${COMPILE_TIME_ONLY})
       if(DEFINED PROJECT_DEBUG_POSTFIX AND DEFINED ${PREFIX}_DEBUG)
         _add_to_list_if_not_present(_PKG_CONFIG_REQUIRES_DEBUG
-                                    "${PKG_CONFIG_DEBUG_STRING}")
+                                    "${PKG_CONFIG_DEBUG_STRING}"
+        )
         _add_to_list_if_not_present(_PKG_CONFIG_REQUIRES_OPTIMIZED
-                                    "${PKG_CONFIG_STRING}")
+                                    "${PKG_CONFIG_STRING}"
+        )
       else()
         # Warn the user in case he/she is using alternative libraries for debug
         # but no postfix
         if(NOT DEFINED PROJECT_DEBUG_POSTFIX AND DEFINED ${PREFIX}_DEBUG)
           message(
             AUTHOR_WARNING
-              "You are linking with different libraries in debug mode but the
+            "You are linking with different libraries in debug mode but the
              generated .pc cannot reflect that, it will default to release flags. Consider
              setting PROJECT_DEBUG_POSTFIX to generate different libraries and pc files in
-             debug mode.")
+             debug mode."
+          )
         endif()
         _add_to_list_if_not_present(_PKG_CONFIG_REQUIRES "${PKG_CONFIG_STRING}")
       endif()
     else()
       _add_to_list_if_not_present(_PKG_CONFIG_COMPILE_TIME_REQUIRES
-                                  "${PKG_CONFIG_STRING}")
+                                  "${PKG_CONFIG_STRING}"
+      )
     endif()
   endif()
 
@@ -562,16 +627,19 @@ macro(ADD_DEPENDENCY P_REQUIRED COMPILE_TIME_ONLY PKG_CONFIG_STRING
   endif(COMMAND ADD_CMAKE_DEPENDENCY)
 
   if(${${PREFIX}_FOUND})
-    message(STATUS "Pkg-config module ${LIBRARY_NAME} v${${PREFIX}_VERSION}"
-                   " has been detected with success.")
+    message(
+      STATUS
+      "Pkg-config module ${LIBRARY_NAME} v${${PREFIX}_VERSION}"
+      " has been detected with success."
+    )
   endif()
   if(DEFINED ${PREFIX}_DEBUG AND "${${PREFIX}_DEBUG_FOUND}")
     message(
       STATUS
-        "Pkg-config module ${LIBRARY_DEBUG_NAME} v${${PREFIX}_DEBUG_VERSION}"
-        " has been detected with success.")
+      "Pkg-config module ${LIBRARY_DEBUG_NAME} v${${PREFIX}_DEBUG_VERSION}"
+      " has been detected with success."
+    )
   endif()
-
 endmacro(ADD_DEPENDENCY)
 
 # .rst: .. ifmode:: internal
@@ -587,13 +655,19 @@ macro(_GET_PKG_CONFIG_DEBUG_STRING PKG_CONFIG_STRING)
   foreach(ARG ${ARGN})
     set(PKG_CONFIG_DEBUG_STRING ${ARG})
   endforeach()
-  if(WIN32
-     AND DEFINED PROJECT_DEBUG_POSTFIX
-     AND "${PKG_CONFIG_DEBUG_STRING}" STREQUAL "")
+  if(
+    WIN32
+    AND DEFINED PROJECT_DEBUG_POSTFIX
+    AND "${PKG_CONFIG_DEBUG_STRING}" STREQUAL ""
+  )
     _parse_pkg_config_string("${PKG_CONFIG_STRING}" LIBRARY_NAME PREFIX)
-    string(REGEX
-           REPLACE "${LIBRARY_NAME}" "${LIBRARY_NAME}${PROJECT_DEBUG_POSTFIX}"
-                   LIBRARY_NAME "${PKG_CONFIG_STRING}")
+    string(
+      REGEX REPLACE
+      "${LIBRARY_NAME}"
+      "${LIBRARY_NAME}${PROJECT_DEBUG_POSTFIX}"
+      LIBRARY_NAME
+      "${PKG_CONFIG_STRING}"
+    )
     pkg_check_modules("${PREFIX}" "${LIBRARY_NAME}")
     if(${PREFIX}_FOUND)
       set(PKG_CONFIG_DEBUG_STRING "${LIBRARY_NAME}")
@@ -693,9 +767,12 @@ endmacro(ADD_DOC_DEPENDENCY)
 macro(PKG_CONFIG_APPEND_LIBRARY_DIR DIRS)
   foreach(DIR ${DIRS})
     if(DIR)
-      set(_PKG_CONFIG_LIBS
-          "${_PKG_CONFIG_LIBS} ${LIBDIR_KW}${DIR}"
-          CACHE INTERNAL "")
+      set(
+        _PKG_CONFIG_LIBS
+        "${_PKG_CONFIG_LIBS} ${LIBDIR_KW}${DIR}"
+        CACHE INTERNAL
+        ""
+      )
     endif(DIR)
   endforeach(DIR ${DIRS})
 endmacro(PKG_CONFIG_APPEND_LIBRARY_DIR DIR)
@@ -713,14 +790,17 @@ macro(PKG_CONFIG_APPEND_CFLAGS_DEBUG FLAGS)
   if(NOT DEFINED PROJECT_DEBUG_POSTFIX)
     message(
       FATAL_ERROR
-        "You are trying to use PKG_CONFIG_APPEND_CFLAGS_DEBUG on a package that does not have a debug library"
+      "You are trying to use PKG_CONFIG_APPEND_CFLAGS_DEBUG on a package that does not have a debug library"
     )
   endif()
   foreach(FLAG ${FLAGS})
     if(FLAG)
-      set(_PKG_CONFIG_CFLAGS_DEBUG
-          "${_PKG_CONFIG_CFLAGS_DEBUG} ${FLAG}"
-          CACHE INTERNAL "")
+      set(
+        _PKG_CONFIG_CFLAGS_DEBUG
+        "${_PKG_CONFIG_CFLAGS_DEBUG} ${FLAG}"
+        CACHE INTERNAL
+        ""
+      )
     endif(FLAG)
   endforeach(FLAG ${FLAGS})
 endmacro(PKG_CONFIG_APPEND_CFLAGS_DEBUG FLAGS)
@@ -738,14 +818,17 @@ macro(PKG_CONFIG_APPEND_CFLAGS_OPTIMIZED FLAGS)
   if(NOT DEFINED PROJECT_DEBUG_POSTFIX)
     message(
       FATAL_ERROR
-        "You are trying to use PKG_CONFIG_APPEND_CFLAGS_OPTIMIZED on a package that does not have a debug library"
+      "You are trying to use PKG_CONFIG_APPEND_CFLAGS_OPTIMIZED on a package that does not have a debug library"
     )
   endif()
   foreach(FLAG ${FLAGS})
     if(FLAG)
-      set(_PKG_CONFIG_CFLAGS_OPTIMIZED
-          "${_PKG_CONFIG_CFLAGS_OPTIMIZED} ${FLAG}"
-          CACHE INTERNAL "")
+      set(
+        _PKG_CONFIG_CFLAGS_OPTIMIZED
+        "${_PKG_CONFIG_CFLAGS_OPTIMIZED} ${FLAG}"
+        CACHE INTERNAL
+        ""
+      )
     endif(FLAG)
   endforeach(FLAG ${FLAGS})
 endmacro(PKG_CONFIG_APPEND_CFLAGS_OPTIMIZED FLAGS)
@@ -759,9 +842,7 @@ endmacro(PKG_CONFIG_APPEND_CFLAGS_OPTIMIZED FLAGS)
 macro(PKG_CONFIG_APPEND_CFLAGS FLAGS)
   foreach(FLAG ${FLAGS})
     if(FLAG)
-      set(_PKG_CONFIG_CFLAGS
-          "${_PKG_CONFIG_CFLAGS} ${FLAG}"
-          CACHE INTERNAL "")
+      set(_PKG_CONFIG_CFLAGS "${_PKG_CONFIG_CFLAGS} ${FLAG}" CACHE INTERNAL "")
     endif(FLAG)
   endforeach(FLAG ${FLAGS})
 endmacro(PKG_CONFIG_APPEND_CFLAGS)
@@ -790,13 +871,14 @@ macro(PKG_CONFIG_APPEND_LIBS_RAW LIBS)
       if(APPLE AND ${LIB} MATCHES "\\.framework")
         get_filename_component(framework_PATH ${LIB} PATH)
         get_filename_component(framework_NAME ${LIB} NAME_WE)
-        set(_PKG_CONFIG_LIBS
-            "${_PKG_CONFIG_LIBS} -F${framework_PATH} -Wl,-framework,${framework_NAME}"
-            CACHE INTERNAL "")
+        set(
+          _PKG_CONFIG_LIBS
+          "${_PKG_CONFIG_LIBS} -F${framework_PATH} -Wl,-framework,${framework_NAME}"
+          CACHE INTERNAL
+          ""
+        )
       else(APPLE AND ${LIB} MATCHES "\\.framework")
-        set(_PKG_CONFIG_LIBS
-            "${_PKG_CONFIG_LIBS} ${LIB}"
-            CACHE INTERNAL "")
+        set(_PKG_CONFIG_LIBS "${_PKG_CONFIG_LIBS} ${LIB}" CACHE INTERNAL "")
       endif(APPLE AND ${LIB} MATCHES "\\.framework")
     endif(LIB)
   endforeach(LIB ${LIBS})
@@ -848,26 +930,19 @@ macro(PKG_CONFIG_APPEND_LIBS LIBS)
           OUTPUT_NAME_SET
           TARGET ${LIB}
           PROPERTY ${OUTPUT_NAME_FIX}
-          SET)
+          SET
+        )
         if(OUTPUT_NAME_SET)
           get_target_property(OUTPUT_LIB_NAME ${LIB} ${OUTPUT_NAME_FIX})
         endif(OUTPUT_NAME_SET)
 
         # If SUFFIX property is defined, use it for defining the library name.
-        get_property(
-          SUFFIX_SET
-          TARGET ${LIB}
-          PROPERTY ${SUFFIX_FIX}
-          SET)
+        get_property(SUFFIX_SET TARGET ${LIB} PROPERTY ${SUFFIX_FIX} SET)
         if(SUFFIX_SET)
           get_target_property(LIB_SUFFIX ${LIB} ${SUFFIX_FIX})
         endif(SUFFIX_SET)
 
-        get_property(
-          PREFIX_SET
-          TARGET ${LIB}
-          PROPERTY ${PREFIX_FIX}
-          SET)
+        get_property(PREFIX_SET TARGET ${LIB} PROPERTY ${PREFIX_FIX} SET)
         if(PREFIX_SET)
           get_target_property(LIB_PREFIX ${LIB} ${PREFIX_FIX})
         endif(PREFIX_SET)
@@ -883,31 +958,44 @@ macro(PKG_CONFIG_APPEND_LIBS LIBS)
         endif(UNIX OR APPLE)
         # Single build type generator
         if(DEFINED CMAKE_BUILD_TYPE)
-          set(_PKG_CONFIG_LIBS
-              "${_PKG_CONFIG_LIBS} ${LIBINCL_KW}${LIB_COMPLETE_NAME}${PKGCONFIG_POSTFIX}${LIB_EXT}"
-              CACHE INTERNAL "")
+          set(
+            _PKG_CONFIG_LIBS
+            "${_PKG_CONFIG_LIBS} ${LIBINCL_KW}${LIB_COMPLETE_NAME}${PKGCONFIG_POSTFIX}${LIB_EXT}"
+            CACHE INTERNAL
+            ""
+          )
           # Multiple build types generator
         else()
-          set(_PKG_CONFIG_LIBS_DEBUG
-              "${_PKG_CONFIG_LIBS_DEBUG} ${LIBINCL_KW}${LIB_COMPLETE_NAME}${PKGCONFIG_POSTFIX}${LIB_EXT}"
-              CACHE INTERNAL "")
-          string(STRIP ${_PKG_CONFIG_LIBS_DEBUG} _PKG_CONFIG_LIBS_DEBUG
-          )# To address CMP0004
-          set(_PKG_CONFIG_LIBS_OPTIMIZED
-              "${_PKG_CONFIG_LIBS_OPTIMIZED} ${LIBINCL_KW}${LIB_COMPLETE_NAME}${LIB_EXT}"
-              CACHE INTERNAL "")
-          string(STRIP ${_PKG_CONFIG_LIBS_OPTIMIZED} _PKG_CONFIG_LIBS_OPTIMIZED
-          )# To address CMP0004
+          set(
+            _PKG_CONFIG_LIBS_DEBUG
+            "${_PKG_CONFIG_LIBS_DEBUG} ${LIBINCL_KW}${LIB_COMPLETE_NAME}${PKGCONFIG_POSTFIX}${LIB_EXT}"
+            CACHE INTERNAL
+            ""
+          )
+          string(STRIP ${_PKG_CONFIG_LIBS_DEBUG} _PKG_CONFIG_LIBS_DEBUG) # To address CMP0004
+          set(
+            _PKG_CONFIG_LIBS_OPTIMIZED
+            "${_PKG_CONFIG_LIBS_OPTIMIZED} ${LIBINCL_KW}${LIB_COMPLETE_NAME}${LIB_EXT}"
+            CACHE INTERNAL
+            ""
+          )
+          string(STRIP ${_PKG_CONFIG_LIBS_OPTIMIZED} _PKG_CONFIG_LIBS_OPTIMIZED) # To address CMP0004
         endif()
       else()
         if(IS_ABSOLUTE ${LIB})
-          set(_PKG_CONFIG_LIBS
-              "${_PKG_CONFIG_LIBS} ${LIBINCL_ABSKW}${LIB}"
-              CACHE INTERNAL "")
+          set(
+            _PKG_CONFIG_LIBS
+            "${_PKG_CONFIG_LIBS} ${LIBINCL_ABSKW}${LIB}"
+            CACHE INTERNAL
+            ""
+          )
         else()
-          set(_PKG_CONFIG_LIBS
-              "${_PKG_CONFIG_LIBS} ${LIBINCL_KW}${LIB}${LIB_EXT}"
-              CACHE INTERNAL "")
+          set(
+            _PKG_CONFIG_LIBS
+            "${_PKG_CONFIG_LIBS} ${LIBINCL_KW}${LIB}${LIB_EXT}"
+            CACHE INTERNAL
+            ""
+          )
         endif()
         string(STRIP ${_PKG_CONFIG_LIBS} _PKG_CONFIG_LIBS) # To address CMP0004
       endif()
@@ -927,14 +1015,15 @@ endmacro(PKG_CONFIG_APPEND_LIBS)
 # I.e. PKG_CONFIG_USE_LCOMPILE_DEPENDENCY(my-binary my-package)
 #
 macro(PKG_CONFIG_USE_LCOMPILE_DEPENDENCY TARGET PREFIX NO_INCLUDE_SYSTEM)
-
   if(DEFINED ${PREFIX}_DEBUG_FOUND)
     foreach(FLAG ${${PREFIX}_DEBUG_CFLAGS_OTHER})
       target_compile_options(${TARGET} PUBLIC "$<$<CONFIG:Debug>:${FLAG}>")
     endforeach()
     foreach(FLAG ${${PREFIX}_CFLAGS_OTHER})
-      target_compile_options(${TARGET}
-                             PUBLIC "$<$<NOT:$<CONFIG:Debug>>:${FLAG}>")
+      target_compile_options(
+        ${TARGET}
+        PUBLIC "$<$<NOT:$<CONFIG:Debug>>:${FLAG}>"
+      )
     endforeach()
   else()
     foreach(FLAG ${${PREFIX}_CFLAGS_OTHER})
@@ -952,21 +1041,30 @@ macro(PKG_CONFIG_USE_LCOMPILE_DEPENDENCY TARGET PREFIX NO_INCLUDE_SYSTEM)
     set(SYSTEM "")
   endif()
 
-  target_include_directories(${TARGET} ${SYSTEM} ${SCOPE}
-                             ${${PREFIX}_INCLUDE_DIRS})
+  target_include_directories(
+    ${TARGET}
+    ${SYSTEM}
+    ${SCOPE}
+    ${${PREFIX}_INCLUDE_DIRS}
+  )
   if(DEFINED ${PREFIX}_DEBUG_FOUND)
-    target_include_directories(${TARGET} ${SYSTEM} ${SCOPE}
-                               ${${PREFIX}_DEBUG_INCLUDE_DIRS})
+    target_include_directories(
+      ${TARGET}
+      ${SYSTEM}
+      ${SCOPE}
+      ${${PREFIX}_DEBUG_INCLUDE_DIRS}
+    )
   endif()
-
 endmacro(PKG_CONFIG_USE_LCOMPILE_DEPENDENCY)
 
 macro(_FILTER_LINK_FLAGS TARGET IS_GENERAL IS_DEBUG FLAGS)
   foreach(FLAG ${FLAGS})
     string(FIND "${FLAG}" "/" STARTS_WITH_SLASH)
     string(FIND "${FLAG}" "-" STARTS_WITH_DASH)
-    if(NOT WIN32 OR (NOT ${STARTS_WITH_DASH} EQUAL 0
-                     AND NOT ${STARTS_WITH_SLASH} EQUAL 0))
+    if(
+      NOT WIN32
+      OR (NOT ${STARTS_WITH_DASH} EQUAL 0 AND NOT ${STARTS_WITH_SLASH} EQUAL 0)
+    )
       if(${IS_GENERAL})
         target_link_libraries(${TARGET} ${PUBLIC_KEYWORD} ${FLAG})
       elseif(${IS_DEBUG})
@@ -981,7 +1079,14 @@ endmacro()
 # Internal use only. _PKG_CONFIG_MANIPULATE_LDFLAGS(TARGET PREFIX CONFIG
 # IS_GENERAL IS_DEBUG)
 #
-macro(_PKG_CONFIG_MANIPULATE_LDFLAGS TARGET PREFIX CONFIG IS_GENERAL IS_DEBUG)
+macro(
+  _PKG_CONFIG_MANIPULATE_LDFLAGS
+  TARGET
+  PREFIX
+  CONFIG
+  IS_GENERAL
+  IS_DEBUG
+)
   # Make sure we do not override previous flags
   get_target_property(LDFLAGS ${TARGET} LINK_FLAGS${CONFIG})
 
@@ -1000,14 +1105,16 @@ macro(_PKG_CONFIG_MANIPULATE_LDFLAGS TARGET PREFIX CONFIG IS_GENERAL IS_DEBUG)
   set_target_properties(${TARGET} PROPERTIES LINK_FLAGS${CONFIG} "${LDFLAGS}")
   _filter_link_flags(${TARGET} ${IS_GENERAL} ${IS_DEBUG} "${${PREFIX}_LDFLAGS}")
   _filter_link_flags(${TARGET} ${IS_GENERAL} ${IS_DEBUG}
-                     "${${PREFIX}_LDFLAGS_OTHER}")
+                     "${${PREFIX}_LDFLAGS_OTHER}"
+  )
 endmacro(
   _PKG_CONFIG_MANIPULATE_LDFLAGS
   TARGET
   PREFIX
   CONFIG
   IS_GENERAL
-  IS_DEBUG)
+  IS_DEBUG
+)
 
 # Internal use only. PKG_CONFIG_USE_LLINK_DEPENDENCY(TARGET DEPENDENCY)
 # --------------------------------------------
@@ -1020,7 +1127,6 @@ endmacro(
 # I.e. PKG_CONFIG_USE_LLINK_DEPENDENCY(my-binary my-package)
 #
 macro(PKG_CONFIG_USE_LLINK_DEPENDENCY TARGET PREFIX)
-
   if(NOT DEFINED ${PREFIX}_DEBUG_FOUND)
     _pkg_config_manipulate_ldflags(${TARGET} ${PREFIX} "" 1 0)
   else()
@@ -1038,10 +1144,12 @@ macro(PKG_CONFIG_USE_LLINK_DEPENDENCY TARGET PREFIX)
         string(TOUPPER "_${config}" config_in)
         if(${config_in} MATCHES "_DEBUG")
           _pkg_config_manipulate_ldflags(${TARGET} "${PREFIX}_DEBUG"
-                                         "${config_in}" 0 1)
+                                         "${config_in}" 0 1
+          )
         else()
           _pkg_config_manipulate_ldflags(${TARGET} "${PREFIX}" "${config_in}" 0
-                                         0)
+                                         0
+          )
         endif()
       endforeach()
     endif()
@@ -1052,11 +1160,9 @@ macro(PKG_CONFIG_USE_LLINK_DEPENDENCY TARGET PREFIX)
   if(DEFINED ${PREFIX}_DEBUG_FOUND)
     link_directories(${${PREFIX}_DEBUG_LIBRARY_DIRS})
   endif()
-
 endmacro(PKG_CONFIG_USE_LLINK_DEPENDENCY)
 
 macro(BUILD_PREFIX_FOR_PKG DEPENDENCY PREFIX)
-
   # Transform the dependency into a valid variable prefix. 1. replace invalid
   # characters into underscores.
   string(REGEX REPLACE "[^a-zA-Z0-9]" "_" LPREFIX "${DEPENDENCY}")
@@ -1067,15 +1173,15 @@ macro(BUILD_PREFIX_FOR_PKG DEPENDENCY PREFIX)
   if(NOT DEFINED ${LPREFIX}_FOUND)
     message(
       FATAL_ERROR
-        "The package ${DEPENDENCY} has not been detected correctly.\n"
-        "Have you called ADD_REQUIRED_DEPENDENCY/ADD_OPTIONAL_DEPENDENCY?")
+      "The package ${DEPENDENCY} has not been detected correctly.\n"
+      "Have you called ADD_REQUIRED_DEPENDENCY/ADD_OPTIONAL_DEPENDENCY?"
+    )
   endif()
   if(NOT (${LPREFIX}_FOUND OR ${LPREFIX}_DEBUG_FOUND))
     message(FATAL_ERROR "The package ${DEPENDENCY} has not been found.")
   endif()
 
   set(${PREFIX} ${LPREFIX})
-
 endmacro(BUILD_PREFIX_FOR_PKG)
 
 # .rst: .. ifmode:: import
@@ -1100,16 +1206,19 @@ macro(PKG_CONFIG_USE_DEPENDENCY TARGET DEPENDENCY)
   set(options NO_INCLUDE_SYSTEM)
   set(oneValueArgs)
   set(multiValueArgs)
-  cmake_parse_arguments(PKG_CONFIG_USE_DEPENDENCY "${options}"
-                        "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+  cmake_parse_arguments(
+    PKG_CONFIG_USE_DEPENDENCY
+    "${options}"
+    "${oneValueArgs}"
+    "${multiValueArgs}"
+    ${ARGN}
+  )
   build_prefix_for_pkg(${DEPENDENCY} PREFIX)
   pkg_config_use_lcompile_dependency(
-    ${TARGET} ${PREFIX} ${PKG_CONFIG_USE_DEPENDENCY_NO_INCLUDE_SYSTEM})
+    ${TARGET} ${PREFIX} ${PKG_CONFIG_USE_DEPENDENCY_NO_INCLUDE_SYSTEM}
+  )
   pkg_config_use_llink_dependency(${TARGET} ${PREFIX})
-endmacro(
-  PKG_CONFIG_USE_DEPENDENCY
-  TARGET
-  DEPENDENCY)
+endmacro(PKG_CONFIG_USE_DEPENDENCY TARGET DEPENDENCY)
 
 # .rst: .. ifmode:: import-advanced
 #
@@ -1131,15 +1240,18 @@ macro(PKG_CONFIG_USE_COMPILE_DEPENDENCY TARGET DEPENDENCY)
   set(options NO_INCLUDE_SYSTEM)
   set(oneValueArgs)
   set(multiValueArgs)
-  cmake_parse_arguments(PKG_CONFIG_USE_DEPENDENCY "${options}"
-                        "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+  cmake_parse_arguments(
+    PKG_CONFIG_USE_DEPENDENCY
+    "${options}"
+    "${oneValueArgs}"
+    "${multiValueArgs}"
+    ${ARGN}
+  )
   build_prefix_for_pkg(${DEPENDENCY} PREFIX)
   pkg_config_use_lcompile_dependency(
-    ${TARGET} ${PREFIX} ${PKG_CONFIG_USE_COMPILE_DEPENDENCY_NO_INCLUDE_SYSTEM})
-endmacro(
-  PKG_CONFIG_USE_COMPILE_DEPENDENCY
-  TARGET
-  DEPENDENCY)
+    ${TARGET} ${PREFIX} ${PKG_CONFIG_USE_COMPILE_DEPENDENCY_NO_INCLUDE_SYSTEM}
+  )
+endmacro(PKG_CONFIG_USE_COMPILE_DEPENDENCY TARGET DEPENDENCY)
 
 # .rst: .. ifmode:: import-advanced
 #
@@ -1151,10 +1263,7 @@ endmacro(
 macro(PKG_CONFIG_USE_LINK_DEPENDENCY TARGET DEPENDENCY)
   build_prefix_for_pkg(${DEPENDENCY} PREFIX)
   pkg_config_use_llink_dependency(${TARGET} ${PREFIX})
-endmacro(
-  PKG_CONFIG_USE_LINK_DEPENDENCY
-  TARGET
-  DEPENDENCY)
+endmacro(PKG_CONFIG_USE_LINK_DEPENDENCY TARGET DEPENDENCY)
 
 # .rst: .. ifmode:: import-advanced
 #
@@ -1177,7 +1286,4 @@ macro(PKG_CONFIG_ADD_COMPILE_OPTIONS COMPILE_OPTIONS DEPENDENCY)
   foreach(FLAG ${${PREFIX}_CFLAGS_OTHER})
     list(APPEND COMPILE_OPTIONS "${FLAG}")
   endforeach()
-endmacro(
-  PKG_CONFIG_ADD_COMPILE_OPTIONS
-  COMPILE_OPTIONS
-  DEPENDENCY)
+endmacro(PKG_CONFIG_ADD_COMPILE_OPTIONS COMPILE_OPTIONS DEPENDENCY)

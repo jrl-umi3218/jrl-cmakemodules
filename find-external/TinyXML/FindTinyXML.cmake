@@ -26,16 +26,18 @@ find_path(
   TinyXML_INCLUDE_DIR
   NAMES tinyxml.h
   PATHS ${TinyXML_PREFIX}
-  PATH_SUFFIXES include/tinyxml)
-find_library(
-  TinyXML_LIBRARY
-  NAMES tinyxml
-  PATHS ${TinyXML_PREFIX})
+  PATH_SUFFIXES include/tinyxml
+)
+find_library(TinyXML_LIBRARY NAMES tinyxml PATHS ${TinyXML_PREFIX})
 
 set(TinyXML_LIBRARIES ${TinyXML_LIBRARY})
 set(TinyXML_INCLUDE_DIRS ${TinyXML_INCLUDE_DIR})
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(TinyXML DEFAULT_MSG TinyXML_LIBRARY
-                                  TinyXML_INCLUDE_DIR)
+find_package_handle_standard_args(
+  TinyXML
+  DEFAULT_MSG
+  TinyXML_LIBRARY
+  TinyXML_INCLUDE_DIR
+)
 mark_as_advanced(TinyXML_INCLUDE_DIR TinyXML_LIBRARY)

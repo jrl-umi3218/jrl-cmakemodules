@@ -29,10 +29,15 @@ macro(ADD_CMAKE_DEPENDENCY PKG_CONFIG_STRING)
   string(REGEX MATCH "[^<>= ]+" LIBRARY_NAME "${PKG_CONFIG_STRING}")
   # Carefull the space in front of the matching string is important to avoid
   # confusion with package name.
-  string(REGEX MATCHALL " [0-9]+.[0-9]+(.[a-z0-9-])*" VERSION
-               "${PKG_CONFIG_STRING}")
+  string(
+    REGEX MATCHALL
+    " [0-9]+.[0-9]+(.[a-z0-9-])*"
+    VERSION
+    "${PKG_CONFIG_STRING}"
+  )
   _add_to_list(CPACK_INTERNAL_CONFIG_REQUIRES "${LIBRARY_NAME}(>=${VERSION})"
-               ",")
+               ","
+  )
 endmacro(ADD_CMAKE_DEPENDENCY)
 
 # SETUP_PROJECT_CPACK
@@ -52,18 +57,27 @@ macro(SETUP_PROJECT_CPACK)
   set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
 
   set(CPACK_PACKAGE_DESCRIPTION_FILE ${PROJECT_SOURCE_DIR}/README.md)
-  set(CPACK_DEBIAN_PACKAGE_MAINTAINER
-      "Olivier Stasse (olivier.stasse@aist.go.jp)")
+  set(
+    CPACK_DEBIAN_PACKAGE_MAINTAINER
+    "Olivier Stasse (olivier.stasse@aist.go.jp)"
+  )
 
   # The following components are regex's to match anywhere (unless anchored) in
   # absolute path + filename to find files or directories to be excluded from
   # source tarball.
-  set(CPACK_SOURCE_IGNORE_FILES "~$" "^${PROJECT_SOURCE_DIR}/build/"
-                                "^${PROJECT_SOURCE_DIR}/.git/")
+  set(
+    CPACK_SOURCE_IGNORE_FILES
+    "~$"
+    "^${PROJECT_SOURCE_DIR}/build/"
+    "^${PROJECT_SOURCE_DIR}/.git/"
+  )
 
-  set(CPACK_SOURCE_PACKAGE_FILE_NAME
-      "${PROJECT_NAME}-src-${PROJECT_VERSION}"
-      CACHE INTERNAL "tarball basename")
+  set(
+    CPACK_SOURCE_PACKAGE_FILE_NAME
+    "${PROJECT_NAME}-src-${PROJECT_VERSION}"
+    CACHE INTERNAL
+    "tarball basename"
+  )
 
   set(CPACK_PACKAGE_NAME ${PROJECT_NAME})
   set(CPACK_BINARY_DEB ON)
@@ -77,5 +91,4 @@ macro(SETUP_PROJECT_CPACK)
   # CPack SHOULD be called after setting all the variables. SETUP_PROJECT_CPACK
   # is supposed to be called only once for a project.
   include(CPack)
-
 endmacro(SETUP_PROJECT_CPACK)

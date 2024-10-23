@@ -15,21 +15,24 @@ endmacro()
 
 unset_test_vars()
 _parse_pkg_config_string("my-package > 0.4" PKG_LIB_NAME PKG_PREFIX
-                         PKG_CONFIG_STRING_NOSPACE)
+                         PKG_CONFIG_STRING_NOSPACE
+)
 expect_strequal("my-package" "${PKG_LIB_NAME}")
 expect_strequal("MY_PACKAGE" "${PKG_PREFIX}")
 expect_strequal("my-package>0.4" "${PKG_CONFIG_STRING_NOSPACE}")
 
 unset_test_vars()
 _parse_pkg_config_string("my-package >= 0.4" PKG_LIB_NAME PKG_PREFIX
-                         PKG_CONFIG_STRING_NOSPACE)
+                         PKG_CONFIG_STRING_NOSPACE
+)
 expect_strequal("my-package" "${PKG_LIB_NAME}")
 expect_strequal("MY_PACKAGE" "${PKG_PREFIX}")
 expect_strequal("my-package>=0.4" "${PKG_CONFIG_STRING_NOSPACE}")
 
 unset_test_vars()
 _parse_pkg_config_string("my-package" PKG_LIB_NAME PKG_PREFIX
-                         PKG_CONFIG_STRING_NOSPACE)
+                         PKG_CONFIG_STRING_NOSPACE
+)
 expect_strequal("my-package" "${PKG_LIB_NAME}")
 expect_strequal("MY_PACKAGE" "${PKG_PREFIX}")
 expect_strequal("my-package" "${PKG_CONFIG_STRING_NOSPACE}")
@@ -39,7 +42,8 @@ expect_strequal("my-package" "${PKG_CONFIG_STRING_NOSPACE}")
 # with pkg-config's behavior.
 unset_test_vars()
 _parse_pkg_config_string("my-package>=0.4" PKG_LIB_NAME PKG_PREFIX
-                         PKG_CONFIG_STRING_NOSPACE)
+                         PKG_CONFIG_STRING_NOSPACE
+)
 expect_strequal("my-package>=0.4" "${PKG_LIB_NAME}")
 expect_strequal("MY_PACKAGE__0_4" "${PKG_PREFIX}")
 expect_strequal("my-package>=0.4" "${PKG_CONFIG_STRING_NOSPACE}")

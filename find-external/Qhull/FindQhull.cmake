@@ -61,26 +61,30 @@ if(Qhull_FOUND)
       set_property(
         TARGET QHULL::QHULL
         APPEND
-        PROPERTY INTERFACE_LINK_LIBRARIES Qhull::qhull_r)
+        PROPERTY INTERFACE_LINK_LIBRARIES Qhull::qhull_r
+      )
       set(QHULL_LIBRARY_TYPE SHARED)
     elseif(PCL_QHULL_REQUIRED_TYPE MATCHES "STATIC")
       set_property(
         TARGET QHULL::QHULL
         APPEND
-        PROPERTY INTERFACE_LINK_LIBRARIES Qhull::qhullstatic_r)
+        PROPERTY INTERFACE_LINK_LIBRARIES Qhull::qhullstatic_r
+      )
       set(QHULL_LIBRARY_TYPE STATIC)
     else()
       if(PCL_SHARED_LIBS)
         set_property(
           TARGET QHULL::QHULL
           APPEND
-          PROPERTY INTERFACE_LINK_LIBRARIES Qhull::qhull_r)
+          PROPERTY INTERFACE_LINK_LIBRARIES Qhull::qhull_r
+        )
         set(QHULL_LIBRARY_TYPE SHARED)
       else()
         set_property(
           TARGET QHULL::QHULL
           APPEND
-          PROPERTY INTERFACE_LINK_LIBRARIES Qhull::qhullstatic_r)
+          PROPERTY INTERFACE_LINK_LIBRARIES Qhull::qhullstatic_r
+        )
         set(QHULL_LIBRARY_TYPE STATIC)
       endif()
     endif()
@@ -88,13 +92,15 @@ if(Qhull_FOUND)
     set_property(
       TARGET QHULL::QHULL
       APPEND
-      PROPERTY INTERFACE_LINK_LIBRARIES Qhull::qhullstatic_r)
+      PROPERTY INTERFACE_LINK_LIBRARIES Qhull::qhullstatic_r
+    )
     set(QHULL_LIBRARY_TYPE STATIC)
   else()
     set_property(
       TARGET QHULL::QHULL
       APPEND
-      PROPERTY INTERFACE_LINK_LIBRARIES Qhull::qhull_r)
+      PROPERTY INTERFACE_LINK_LIBRARIES Qhull::qhull_r
+    )
     set(QHULL_LIBRARY_TYPE SHARED)
   endif()
 
@@ -106,11 +112,10 @@ find_file(
   NAMES libqhull_r.h
   HINTS "${QHULL_ROOT}" "$ENV{QHULL_ROOT}" "${QHULL_INCLUDE_DIR}"
   PATHS "$ENV{PROGRAMFILES}/QHull" "$ENV{PROGRAMW6432}/QHull"
-  PATH_SUFFIXES qhull_r src/libqhull_r libqhull_r include)
+  PATH_SUFFIXES qhull_r src/libqhull_r libqhull_r include
+)
 
-set(QHULL_HEADER
-    "${QHULL_HEADER}"
-    CACHE INTERNAL "QHull header" FORCE)
+set(QHULL_HEADER "${QHULL_HEADER}" CACHE INTERNAL "QHull header" FORCE)
 
 if(QHULL_HEADER)
   get_filename_component(qhull_header ${QHULL_HEADER} NAME_WE)
@@ -129,28 +134,32 @@ find_library(
   NAMES qhull_r qhull
   HINTS "${QHULL_ROOT}" "$ENV{QHULL_ROOT}"
   PATHS "$ENV{PROGRAMFILES}/QHull" "$ENV{PROGRAMW6432}/QHull"
-  PATH_SUFFIXES project build bin lib)
+  PATH_SUFFIXES project build bin lib
+)
 
 find_library(
   QHULL_LIBRARY_DEBUG
   NAMES qhull_rd qhull_d
   HINTS "${QHULL_ROOT}" "$ENV{QHULL_ROOT}"
   PATHS "$ENV{PROGRAMFILES}/QHull" "$ENV{PROGRAMW6432}/QHull"
-  PATH_SUFFIXES project build bin lib debug/lib)
+  PATH_SUFFIXES project build bin lib debug/lib
+)
 
 find_library(
   QHULL_LIBRARY_STATIC
   NAMES qhullstatic_r
   HINTS "${QHULL_ROOT}" "$ENV{QHULL_ROOT}"
   PATHS "$ENV{PROGRAMFILES}/QHull" "$ENV{PROGRAMW6432}/QHull"
-  PATH_SUFFIXES project build bin lib)
+  PATH_SUFFIXES project build bin lib
+)
 
 find_library(
   QHULL_LIBRARY_DEBUG_STATIC
   NAMES qhullstatic_rd
   HINTS "${QHULL_ROOT}" "$ENV{QHULL_ROOT}"
   PATHS "$ENV{PROGRAMFILES}/QHull" "$ENV{PROGRAMW6432}/QHull"
-  PATH_SUFFIXES project build bin lib debug/lib)
+  PATH_SUFFIXES project build bin lib debug/lib
+)
 
 if(QHULL_LIBRARY_SHARED AND QHULL_LIBRARY_STATIC)
   if(PCL_QHULL_REQUIRED_TYPE MATCHES "SHARED")
@@ -180,45 +189,66 @@ include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(
   Qhull
   FOUND_VAR QHULL_FOUND
-  REQUIRED_VARS QHULL_LIBRARY QHULL_INCLUDE_DIR)
+  REQUIRED_VARS QHULL_LIBRARY QHULL_INCLUDE_DIR
+)
 
 if(QHULL_FOUND)
   set(HAVE_QHULL ON)
   add_library(QHULL::QHULL ${QHULL_LIBRARY_TYPE} IMPORTED)
-  set_target_properties(QHULL::QHULL PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
-                                                "${QHULL_INCLUDE_DIR}")
+  set_target_properties(
+    QHULL::QHULL
+    PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${QHULL_INCLUDE_DIR}"
+  )
   set_property(
     TARGET QHULL::QHULL
     APPEND
-    PROPERTY IMPORTED_CONFIGURATIONS "RELEASE")
-  set_target_properties(QHULL::QHULL
-                        PROPERTIES IMPORTED_LINK_INTERFACE_LANGUAGES "CXX")
-  set_target_properties(QHULL::QHULL PROPERTIES INTERFACE_COMPILE_DEFINITIONS
-                                                "qh_QHpointer")
+    PROPERTY IMPORTED_CONFIGURATIONS "RELEASE"
+  )
+  set_target_properties(
+    QHULL::QHULL
+    PROPERTIES IMPORTED_LINK_INTERFACE_LANGUAGES "CXX"
+  )
+  set_target_properties(
+    QHULL::QHULL
+    PROPERTIES INTERFACE_COMPILE_DEFINITIONS "qh_QHpointer"
+  )
   if(MSVC)
-    set_target_properties(QHULL::QHULL PROPERTIES INTERFACE_COMPILE_DEFINITIONS
-                                                  "qh_QHpointer_dllimport")
+    set_target_properties(
+      QHULL::QHULL
+      PROPERTIES INTERFACE_COMPILE_DEFINITIONS "qh_QHpointer_dllimport"
+    )
   endif()
   if(WIN32 AND NOT (PCL_QHULL_REQUIRED_TYPE MATCHES "STATIC"))
-    set_target_properties(QHULL::QHULL PROPERTIES IMPORTED_IMPLIB_RELEASE
-                                                  "${QHULL_LIBRARY}")
+    set_target_properties(
+      QHULL::QHULL
+      PROPERTIES IMPORTED_IMPLIB_RELEASE "${QHULL_LIBRARY}"
+    )
   else()
-    set_target_properties(QHULL::QHULL PROPERTIES IMPORTED_LOCATION_RELEASE
-                                                  "${QHULL_LIBRARY}")
+    set_target_properties(
+      QHULL::QHULL
+      PROPERTIES IMPORTED_LOCATION_RELEASE "${QHULL_LIBRARY}"
+    )
   endif()
   if(QHULL_LIBRARY_DEBUG)
     set_property(
       TARGET QHULL::QHULL
       APPEND
-      PROPERTY IMPORTED_CONFIGURATIONS "DEBUG")
+      PROPERTY IMPORTED_CONFIGURATIONS "DEBUG"
+    )
     if(WIN32 AND NOT (PCL_QHULL_REQUIRED_TYPE MATCHES "STATIC"))
-      set_target_properties(QHULL::QHULL PROPERTIES IMPORTED_IMPLIB_DEBUG
-                                                    "${QHULL_LIBRARY_DEBUG}")
+      set_target_properties(
+        QHULL::QHULL
+        PROPERTIES IMPORTED_IMPLIB_DEBUG "${QHULL_LIBRARY_DEBUG}"
+      )
     else()
-      set_target_properties(QHULL::QHULL PROPERTIES IMPORTED_LOCATION_DEBUG
-                                                    "${QHULL_LIBRARY_DEBUG}")
+      set_target_properties(
+        QHULL::QHULL
+        PROPERTIES IMPORTED_LOCATION_DEBUG "${QHULL_LIBRARY_DEBUG}"
+      )
     endif()
   endif()
   message(
-    STATUS "QHULL found (include: ${QHULL_INCLUDE_DIR}, lib: ${QHULL_LIBRARY})")
+    STATUS
+    "QHULL found (include: ${QHULL_INCLUDE_DIR}, lib: ${QHULL_LIBRARY})"
+  )
 endif()

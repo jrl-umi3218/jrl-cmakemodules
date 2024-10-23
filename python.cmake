@@ -59,7 +59,7 @@ macro(FINDPYTHON)
   if(DEFINED FINDPYTHON_ALREADY_CALLED)
     message(
       AUTHOR_WARNING
-        "Macro FINDPYTHON has already been called. Several call to FINDPYTHON may not find the same Python version (for a yet unknown reason)."
+      "Macro FINDPYTHON has already been called. Several call to FINDPYTHON may not find the same Python version (for a yet unknown reason)."
     )
   endif()
   set(FINDPYTHON_ALREADY_CALLED TRUE)
@@ -79,7 +79,7 @@ macro(FINDPYTHON)
     if(NOT ${_index} EQUAL -1)
       message(
         STATUS
-          "For CMake < 3.18, Development.Module is not available. Falling back to Development"
+        "For CMake < 3.18, Development.Module is not available. Falling back to Development"
       )
       list(REMOVE_ITEM PYTHON_COMPONENTS Development.Module)
       set(PYTHON_COMPONENTS ${PYTHON_COMPONENTS} Development)
@@ -88,7 +88,7 @@ macro(FINDPYTHON)
       if(SEARCH_FOR_NUMPY)
         message(
           STATUS
-            "For CMake < 3.14, NumPy is not available. Falling back to custom FIND_NUMPY()"
+          "For CMake < 3.14, NumPy is not available. Falling back to custom FIND_NUMPY()"
         )
         list(REMOVE_ITEM PYTHON_COMPONENTS NumPy)
       endif()
@@ -96,12 +96,12 @@ macro(FINDPYTHON)
   endif()
 
   if(NOT CMAKE_VERSION VERSION_LESS "3.12")
-
-    if(DEFINED PYTHON_EXECUTABLE
-       OR DEFINED Python_EXECUTABLE
-       OR DEFINED Python2_EXECUTABLE
-       OR DEFINED Python3_EXECUTABLE)
-
+    if(
+      DEFINED PYTHON_EXECUTABLE
+      OR DEFINED Python_EXECUTABLE
+      OR DEFINED Python2_EXECUTABLE
+      OR DEFINED Python3_EXECUTABLE
+    )
       if(NOT DEFINED PYTHON_EXECUTABLE)
         if(DEFINED Python_EXECUTABLE)
           set(PYTHON_EXECUTABLE ${Python_EXECUTABLE})
@@ -124,7 +124,8 @@ macro(FINDPYTHON)
       if(NOT EXISTS ${PYTHON_EXECUTABLE})
         message(
           FATAL_ERROR
-            "${PYTHON_EXECUTABLE} is not a valid path to the Python executable")
+          "${PYTHON_EXECUTABLE} is not a valid path to the Python executable"
+        )
       endif()
       execute_process(
         COMMAND ${PYTHON_EXECUTABLE} --version
@@ -132,30 +133,41 @@ macro(FINDPYTHON)
         RESULT_VARIABLE _PYTHON_VERSION_RESULT_VARIABLE
         OUTPUT_VARIABLE _PYTHON_VERSION_OUTPUT
         ERROR_VARIABLE _PYTHON_VERSION_OUTPUT
-        OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_STRIP_TRAILING_WHITESPACE)
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        ERROR_STRIP_TRAILING_WHITESPACE
+      )
 
       if(NOT "${_PYTHON_VERSION_RESULT_VARIABLE}" STREQUAL "0")
         message(FATAL_ERROR "${PYTHON_EXECUTABLE} --version did not succeed.")
       endif()
-      string(REGEX REPLACE "Python " "" _PYTHON_VERSION
-                           ${_PYTHON_VERSION_OUTPUT})
+      string(
+        REGEX REPLACE
+        "Python "
+        ""
+        _PYTHON_VERSION
+        ${_PYTHON_VERSION_OUTPUT}
+      )
       string(REGEX REPLACE "\\." ";" _PYTHON_VERSION ${_PYTHON_VERSION})
       list(GET _PYTHON_VERSION 0 _PYTHON_VERSION_MAJOR)
 
       # Provide some hints according to the current PYTHON_EXECUTABLE
       if(NOT DEFINED PYTHON_INCLUDE_DIR)
         if(_PYTHON_VERSION_MAJOR EQUAL "2")
-          set(_PYTHON_INCLUDE_DIR_CMD
-              "import distutils.sysconfig as sysconfig; print(sysconfig.get_python_inc())"
+          set(
+            _PYTHON_INCLUDE_DIR_CMD
+            "import distutils.sysconfig as sysconfig; print(sysconfig.get_python_inc())"
           )
         else()
-          set(_PYTHON_INCLUDE_DIR_CMD
-              "import sysconfig; print(sysconfig.get_path('include'))")
+          set(
+            _PYTHON_INCLUDE_DIR_CMD
+            "import sysconfig; print(sysconfig.get_path('include'))"
+          )
         endif()
         execute_process(
           COMMAND "${PYTHON_EXECUTABLE}" "-c" "${_PYTHON_INCLUDE_DIR_CMD}"
           OUTPUT_VARIABLE PYTHON_INCLUDE_DIR
-          ERROR_QUIET)
+          ERROR_QUIET
+        )
         string(STRIP "${PYTHON_INCLUDE_DIR}" PYTHON_INCLUDE_DIR)
         file(TO_CMAKE_PATH "${PYTHON_INCLUDE_DIR}" PYTHON_INCLUDE_DIR)
       endif()
@@ -170,9 +182,11 @@ macro(FINDPYTHON)
         set(Python_NumPy_INCLUDE_DIR ${NUMPY_INCLUDE_DIRS})
       endif()
 
-      find_package("Python${_PYTHON_VERSION_MAJOR}" REQUIRED
-                   COMPONENTS ${PYTHON_COMPONENTS})
-
+      find_package(
+        "Python${_PYTHON_VERSION_MAJOR}"
+        REQUIRED
+        COMPONENTS ${PYTHON_COMPONENTS}
+      )
     else()
       # No hint was provided. We can then check for first Python 2, then Python
       # 3
@@ -209,14 +223,14 @@ macro(FINDPYTHON)
     endif()
 
     if(SEARCH_FOR_NUMPY)
-      set(NUMPY_INCLUDE_DIRS
-          "${Python${_PYTHON_VERSION_MAJOR}_NumPy_INCLUDE_DIRS}")
+      set(
+        NUMPY_INCLUDE_DIRS
+        "${Python${_PYTHON_VERSION_MAJOR}_NumPy_INCLUDE_DIRS}"
+      )
       string(REPLACE "\\" "/" NUMPY_INCLUDE_DIRS "${NUMPY_INCLUDE_DIRS}")
       file(TO_CMAKE_PATH "${NUMPY_INCLUDE_DIRS}" NUMPY_INCLUDE_DIRS)
     endif()
-
   else()
-
     find_package(PythonInterp ${ARGN})
     if(NOT ${PYTHONINTERP_FOUND} STREQUAL TRUE)
       message(FATAL_ERROR "Python executable has not been found.")
@@ -229,21 +243,24 @@ macro(FINDPYTHON)
       # defined
       if(NOT DEFINED PYTHON_INCLUDE_DIR)
         if(PYTHON_VERSION_MAJOR EQUAL "2")
-          set(_PYTHON_INCLUDE_DIR_CMD
-              "import distutils.sysconfig as sysconfig; print(sysconfig.get_python_inc())"
+          set(
+            _PYTHON_INCLUDE_DIR_CMD
+            "import distutils.sysconfig as sysconfig; print(sysconfig.get_python_inc())"
           )
         else()
-          set(_PYTHON_INCLUDE_DIR_CMD
-              "import sysconfig; print(sysconfig.get_path('include'))")
+          set(
+            _PYTHON_INCLUDE_DIR_CMD
+            "import sysconfig; print(sysconfig.get_path('include'))"
+          )
         endif()
         execute_process(
           COMMAND "${PYTHON_EXECUTABLE}" "-c" "${_PYTHON_INCLUDE_DIR_CMD}"
           OUTPUT_VARIABLE PYTHON_INCLUDE_DIR
-          ERROR_QUIET)
+          ERROR_QUIET
+        )
         string(STRIP "${PYTHON_INCLUDE_DIR}" PYTHON_INCLUDE_DIR)
       endif()
       set(PYTHON_INCLUDE_DIRS ${PYTHON_INCLUDE_DIR})
-
     endif()
 
     # Inform PythonLibs of the required version of PythonInterp
@@ -259,14 +276,15 @@ macro(FINDPYTHON)
     list(GET _PYTHONLIBS_VERSION 0 PYTHONLIBS_VERSION_MAJOR)
     list(GET _PYTHONLIBS_VERSION 1 PYTHONLIBS_VERSION_MINOR)
 
-    if(NOT ${PYTHON_VERSION_MAJOR} EQUAL ${PYTHONLIBS_VERSION_MAJOR}
-       OR NOT ${PYTHON_VERSION_MINOR} EQUAL ${PYTHONLIBS_VERSION_MINOR})
+    if(
+      NOT ${PYTHON_VERSION_MAJOR} EQUAL ${PYTHONLIBS_VERSION_MAJOR}
+      OR NOT ${PYTHON_VERSION_MINOR} EQUAL ${PYTHONLIBS_VERSION_MINOR}
+    )
       message(
         FATAL_ERROR
-          "Python interpreter and libraries are in different version: ${PYTHON_VERSION_STRING} vs ${PYTHONLIBS_VERSION_STRING}"
+        "Python interpreter and libraries are in different version: ${PYTHON_VERSION_STRING} vs ${PYTHONLIBS_VERSION_STRING}"
       )
     endif()
-
   endif()
 
   # Find PYTHON_LIBRARY_DIRS
@@ -284,17 +302,20 @@ macro(FINDPYTHON)
     option(PYTHON_STANDARD_LAYOUT "Enable standard Python package layout" OFF)
 
     if(PYTHON_STANDARD_LAYOUT)
-      set(_PYTHON_SITELIB_CMD
-          "import sys, os; print(os.sep.join(['lib', 'python' + '.'.join(sys.version.split('.')[:2]), 'site-packages']))"
+      set(
+        _PYTHON_SITELIB_CMD
+        "import sys, os; print(os.sep.join(['lib', 'python' + '.'.join(sys.version.split('.')[:2]), 'site-packages']))"
       )
     else()
       if(PYTHON_VERSION_MAJOR EQUAL "2")
-        set(_PYTHON_SITELIB_CMD
-            "from distutils import sysconfig; print(sysconfig.get_python_lib(prefix='', plat_specific=False))"
+        set(
+          _PYTHON_SITELIB_CMD
+          "from distutils import sysconfig; print(sysconfig.get_python_lib(prefix='', plat_specific=False))"
         )
       else()
-        set(_PYTHON_SITELIB_CMD
-            "import sysconfig; from pathlib import Path; print(Path(sysconfig.get_path('purelib')).relative_to(sysconfig.get_path('data')))"
+        set(
+          _PYTHON_SITELIB_CMD
+          "import sysconfig; from pathlib import Path; print(Path(sysconfig.get_path('purelib')).relative_to(sysconfig.get_path('data')))"
         )
       endif()
     endif()
@@ -302,20 +323,31 @@ macro(FINDPYTHON)
     execute_process(
       COMMAND "${PYTHON_EXECUTABLE}" "-c" "${_PYTHON_SITELIB_CMD}"
       OUTPUT_VARIABLE PYTHON_SITELIB
-      OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET)
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+      ERROR_QUIET
+    )
 
     # Keep compatility with former jrl-cmake-modules versions
     if(PYTHON_DEB_LAYOUT)
-      string(REPLACE "site-packages" "dist-packages" PYTHON_SITELIB
-                     "${PYTHON_SITELIB}")
+      string(
+        REPLACE
+        "site-packages"
+        "dist-packages"
+        PYTHON_SITELIB
+        "${PYTHON_SITELIB}"
+      )
     endif()
 
     # If PYTHON_PACKAGES_DIR is defined, then force the Python packages
     # directory name
     if(PYTHON_PACKAGES_DIR)
-      string(REGEX
-             REPLACE "(site-packages|dist-packages)" "${PYTHON_PACKAGES_DIR}"
-                     PYTHON_SITELIB "${PYTHON_SITELIB}")
+      string(
+        REGEX REPLACE
+        "(site-packages|dist-packages)"
+        "${PYTHON_PACKAGES_DIR}"
+        PYTHON_SITELIB
+        "${PYTHON_SITELIB}"
+      )
     endif()
   endif()
 
@@ -330,7 +362,8 @@ macro(FINDPYTHON)
       COMMAND
         "${PYTHON_EXECUTABLE}" "-c"
         "from sysconfig import get_config_var; print('.' + get_config_var('SOABI'))"
-      OUTPUT_VARIABLE PYTHON_SOABI)
+      OUTPUT_VARIABLE PYTHON_SOABI
+    )
     string(STRIP ${PYTHON_SOABI} PYTHON_SOABI)
   endif()
 
@@ -341,7 +374,8 @@ macro(FINDPYTHON)
       COMMAND
         "${PYTHON_EXECUTABLE}" "-c"
         "from sysconfig import get_config_var; print(get_config_var('EXT_SUFFIX'))"
-      OUTPUT_VARIABLE PYTHON_EXT_SUFFIX)
+      OUTPUT_VARIABLE PYTHON_EXT_SUFFIX
+    )
     string(STRIP ${PYTHON_EXT_SUFFIX} PYTHON_EXT_SUFFIX)
   endif()
   if("${PYTHON_EXT_SUFFIX}" STREQUAL "")
@@ -356,19 +390,23 @@ macro(FINDPYTHON)
     install_jrl_cmakemodules_file("python.cmake")
     install_jrl_cmakemodules_file("python-helpers.cmake")
     string(
-      CONCAT PYTHON_EXPORT_DEPENDENCY_MACROS
-             "list(APPEND PYTHON_COMPONENTS ${PYTHON_COMPONENTS})\n"
-             "list(REMOVE_DUPLICATES PYTHON_COMPONENTS)\n"
-             "if(NOT FINDPYTHON_ALREADY_CALLED)\n"
-             "FINDPYTHON()\n"
-             "endif()\n")
+      CONCAT
+      PYTHON_EXPORT_DEPENDENCY_MACROS
+      "list(APPEND PYTHON_COMPONENTS ${PYTHON_COMPONENTS})\n"
+      "list(REMOVE_DUPLICATES PYTHON_COMPONENTS)\n"
+      "if(NOT FINDPYTHON_ALREADY_CALLED)\n"
+      "FINDPYTHON()\n"
+      "endif()\n"
+    )
   endif()
 
   if(SEARCH_FOR_NUMPY)
     find_numpy()
     if(PYTHON_EXPORT_DEPENDENCY)
-      set(PYTHON_EXPORT_DEPENDENCY_MACROS
-          "set(SEARCH_FOR_NUMPY TRUE)\n${PYTHON_EXPORT_DEPENDENCY_MACROS}")
+      set(
+        PYTHON_EXPORT_DEPENDENCY_MACROS
+        "set(SEARCH_FOR_NUMPY TRUE)\n${PYTHON_EXPORT_DEPENDENCY_MACROS}"
+      )
     endif()
   endif()
 
@@ -387,8 +425,8 @@ macro(FINDPYTHON)
     PYTHONLIBS_VERSION_STRING
     PYTHON_EXECUTABLE
     PYTHON_SOABI
-    PYTHON_EXT_SUFFIX)
-
+    PYTHON_EXT_SUFFIX
+  )
 endmacro(FINDPYTHON)
 
 # .rst: .. command:: DYNAMIC_GRAPH_PYTHON_MODULE ( SUBMODULENAME LIBRARYNAME
@@ -415,11 +453,15 @@ endmacro(FINDPYTHON)
 # the name referencing the type in the factory.
 #
 macro(DYNAMIC_GRAPH_PYTHON_MODULE SUBMODULENAME LIBRARYNAME TARGETNAME)
-
   set(options DONT_INSTALL_INIT_PY)
   set(oneValueArgs SOURCE_PYTHON_MODULE MODULE_HEADER)
-  cmake_parse_arguments(ARG "${options}" "${oneValueArgs}" "${multiValueArgs}"
-                        ${ARGN})
+  cmake_parse_arguments(
+    ARG
+    "${options}"
+    "${oneValueArgs}"
+    "${multiValueArgs}"
+    ${ARGN}
+  )
 
   # By default the __init__.py file is installed.
   if(NOT DEFINED ARG_SOURCE_PYTHON_MODULE)
@@ -427,9 +469,11 @@ macro(DYNAMIC_GRAPH_PYTHON_MODULE SUBMODULENAME LIBRARYNAME TARGETNAME)
     configure_file(
       ${PROJECT_JRL_CMAKE_MODULE_DIR}/dynamic_graph/python-module-py.cc.in
       ${PROJECT_BINARY_DIR}/src/dynamic_graph/${SUBMODULENAME}/python-module-py.cc
-      @ONLY)
-    set(ARG_SOURCE_PYTHON_MODULE
-        "${PROJECT_BINARY_DIR}/src/dynamic_graph/${SUBMODULENAME}/python-module-py.cc"
+      @ONLY
+    )
+    set(
+      ARG_SOURCE_PYTHON_MODULE
+      "${PROJECT_BINARY_DIR}/src/dynamic_graph/${SUBMODULENAME}/python-module-py.cc"
     )
   endif()
 
@@ -444,8 +488,13 @@ macro(DYNAMIC_GRAPH_PYTHON_MODULE SUBMODULENAME LIBRARYNAME TARGETNAME)
   file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/src/dynamic_graph/${SUBMODULENAME})
 
   set(PYTHON_INSTALL_DIR "${PYTHON_SITELIB}/dynamic_graph/${SUBMODULENAME}")
-  string(REGEX REPLACE "[^/]+" ".." PYTHON_INSTALL_DIR_REVERSE
-                       ${PYTHON_INSTALL_DIR})
+  string(
+    REGEX REPLACE
+    "[^/]+"
+    ".."
+    PYTHON_INSTALL_DIR_REVERSE
+    ${PYTHON_INSTALL_DIR}
+  )
 
   set_target_properties(
     ${PYTHON_MODULE}
@@ -453,24 +502,31 @@ macro(DYNAMIC_GRAPH_PYTHON_MODULE SUBMODULENAME LIBRARYNAME TARGETNAME)
       PREFIX ""
       OUTPUT_NAME dynamic_graph/${SUBMODULENAME}/wrap
       BUILD_RPATH
-      "${DYNAMIC_GRAPH_PLUGINDIR}:\$ORIGIN/${PYTHON_INSTALL_DIR_REVERSE}/${DYNAMIC_GRAPH_PLUGINDIR}"
+        "${DYNAMIC_GRAPH_PLUGINDIR}:\$ORIGIN/${PYTHON_INSTALL_DIR_REVERSE}/${DYNAMIC_GRAPH_PLUGINDIR}"
   )
 
   if(UNIX AND NOT APPLE)
     target_link_libraries(${PYTHON_MODULE} PUBLIC "-Wl,--no-as-needed")
   endif()
-  target_link_libraries(${PYTHON_MODULE} PUBLIC ${LIBRARYNAME}
-                                                dynamic-graph::dynamic-graph)
+  target_link_libraries(
+    ${PYTHON_MODULE}
+    PUBLIC ${LIBRARYNAME} dynamic-graph::dynamic-graph
+  )
   target_link_boost_python(${PYTHON_MODULE} PUBLIC)
   if(PROJECT_NAME STREQUAL "dynamic-graph-python")
     target_link_libraries(${PYTHON_MODULE} PUBLIC dynamic-graph-python)
   else()
-    target_link_libraries(${PYTHON_MODULE}
-                          PUBLIC dynamic-graph-python::dynamic-graph-python)
+    target_link_libraries(
+      ${PYTHON_MODULE}
+      PUBLIC dynamic-graph-python::dynamic-graph-python
+    )
   endif()
 
-  target_include_directories(${PYTHON_MODULE} SYSTEM
-                             PRIVATE ${PYTHON_INCLUDE_DIRS})
+  target_include_directories(
+    ${PYTHON_MODULE}
+    SYSTEM
+    PRIVATE ${PYTHON_INCLUDE_DIRS}
+  )
 
   #
   # Installation
@@ -485,17 +541,16 @@ macro(DYNAMIC_GRAPH_PYTHON_MODULE SUBMODULENAME LIBRARYNAME TARGETNAME)
 
   # Install if not DONT_INSTALL_INIT_PY
   if(NOT DONT_INSTALL_INIT_PY)
-
     configure_file(
       ${PROJECT_JRL_CMAKE_MODULE_DIR}/dynamic_graph/submodule/__init__.py.cmake
-      ${PROJECT_BINARY_DIR}/src/dynamic_graph/${SUBMODULENAME}/__init__.py)
+      ${PROJECT_BINARY_DIR}/src/dynamic_graph/${SUBMODULENAME}/__init__.py
+    )
 
     install(
       FILES ${PROJECT_BINARY_DIR}/src/dynamic_graph/${SUBMODULENAME}/__init__.py
-      DESTINATION ${PYTHON_INSTALL_DIR})
-
+      DESTINATION ${PYTHON_INSTALL_DIR}
+    )
   endif()
-
 endmacro(DYNAMIC_GRAPH_PYTHON_MODULE SUBMODULENAME)
 
 # .rst: .. command:: FIND_NUMPY()
@@ -510,26 +565,30 @@ macro(FIND_NUMPY)
   execute_process(
     COMMAND "${PYTHON_EXECUTABLE}" "-c" "import numpy; print (True)"
     OUTPUT_VARIABLE IS_NUMPY
-    ERROR_QUIET)
+    ERROR_QUIET
+  )
   if(NOT IS_NUMPY)
     message(FATAL_ERROR "Failed to detect numpy")
   else()
     if(NOT NUMPY_INCLUDE_DIRS)
       execute_process(
-        COMMAND "${PYTHON_EXECUTABLE}" "-c"
-                "import numpy; print (numpy.get_include())"
+        COMMAND
+          "${PYTHON_EXECUTABLE}" "-c"
+          "import numpy; print (numpy.get_include())"
         OUTPUT_VARIABLE NUMPY_INCLUDE_DIRS
-        ERROR_QUIET)
+        ERROR_QUIET
+      )
       string(REGEX REPLACE "\n$" "" NUMPY_INCLUDE_DIRS "${NUMPY_INCLUDE_DIRS}")
       file(TO_CMAKE_PATH "${NUMPY_INCLUDE_DIRS}" NUMPY_INCLUDE_DIRS)
     endif()
     message(STATUS "  NUMPY_INCLUDE_DIRS=${NUMPY_INCLUDE_DIRS}")
     # Retrive NUMPY_VERSION
     execute_process(
-      COMMAND "${PYTHON_EXECUTABLE}" "-c"
-              "import numpy; print (numpy.__version__)"
+      COMMAND
+        "${PYTHON_EXECUTABLE}" "-c" "import numpy; print (numpy.__version__)"
       OUTPUT_VARIABLE NUMPY_VERSION
-      ERROR_QUIET)
+      ERROR_QUIET
+    )
     string(REGEX REPLACE "\n$" "" NUMPY_VERSION "${NUMPY_VERSION}")
     message(STATUS "  NUMPY_VERSION=${NUMPY_VERSION}")
   endif()
@@ -544,17 +603,19 @@ macro(FIND_SCIPY)
   execute_process(
     COMMAND "${PYTHON_EXECUTABLE}" "-c" "import scipy; print (True)"
     OUTPUT_VARIABLE IS_SCIPY
-    ERROR_QUIET)
+    ERROR_QUIET
+  )
 
   if(NOT IS_SCIPY)
     message(FATAL_ERROR "Failed to detect scipy")
   else()
     # Retrive SCIPY_VERSION
     execute_process(
-      COMMAND "${PYTHON_EXECUTABLE}" "-c"
-              "import scipy; print (scipy.__version__)"
+      COMMAND
+        "${PYTHON_EXECUTABLE}" "-c" "import scipy; print (scipy.__version__)"
       OUTPUT_VARIABLE SCIPY_VERSION
-      ERROR_QUIET)
+      ERROR_QUIET
+    )
     string(REGEX REPLACE "\n$" "" SCIPY_VERSION "${SCIPY_VERSION}")
     message(STATUS "  SCIPY_VERSION=${SCIPY_VERSION}")
   endif()

@@ -22,8 +22,11 @@ macro(create_simple_controller CONTROLLER_NAME)
   target_link_libraries(${CONTROLLER_NAME} ${OPENRTM_LIBRARIES})
   set_target_properties(${CONTROLLER_NAME} PROPERTIES PREFIX "")
 
-  add_executable(${CONTROLLER_NAME}Comp ${CONTROLLER_NAME}Comp.cpp
-                                        ${CONTROLLER_NAME}.cpp)
+  add_executable(
+    ${CONTROLLER_NAME}Comp
+    ${CONTROLLER_NAME}Comp.cpp
+    ${CONTROLLER_NAME}.cpp
+  )
   target_link_libraries(${CONTROLLER_NAME}Comp ${OPENRTM_LIBRARIES})
 
   if(WIN32)
@@ -34,15 +37,25 @@ macro(create_simple_controller CONTROLLER_NAME)
   set(controller_install_path lib/openhrp/controller/${CONTROLLER_NAME})
 
   install(
-    TARGETS ${CONTROLLER_NAME} ${CONTROLLER_NAME}Comp
-    DESTINATION ${controller_install_path}
-    CONFIGURATIONS Release)
+    TARGETS
+      ${CONTROLLER_NAME}
+      ${CONTROLLER_NAME}Comp
+      DESTINATION
+      ${controller_install_path}
+      CONFIGURATIONS
+      Release
+  )
 
   if(WIN32)
     install(
-      TARGETS ${CONTROLLER_NAME} ${CONTROLLER_NAME}Comp
-      DESTINATION ${PROJECT_SOURCE_DIR}
-      CONFIGURATIONS Release)
+      TARGETS
+        ${CONTROLLER_NAME}
+        ${CONTROLLER_NAME}Comp
+        DESTINATION
+        ${PROJECT_SOURCE_DIR}
+        CONFIGURATIONS
+        Release
+    )
   endif()
 
   install(FILES rtc.conf bridge.conf DESTINATION ${controller_install_path})
@@ -51,7 +64,7 @@ macro(create_simple_controller CONTROLLER_NAME)
     install(
       DIRECTORY etc
       DESTINATION ${controller_install_path}
-      PATTERN ".svn" EXCLUDE)
+      PATTERN ".svn" EXCLUDE
+    )
   endif()
-
 endmacro()

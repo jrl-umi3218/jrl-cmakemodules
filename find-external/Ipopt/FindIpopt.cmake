@@ -23,7 +23,8 @@ else()
     Ipopt
     FAIL_MESSAGE DEFAULT_MSG
     REQUIRED_VARS Ipopt_INCLUDE_DIRS Ipopt_LIBRARIES
-    VERSION_VAR Ipopt_VERSION)
+    VERSION_VAR Ipopt_VERSION
+  )
 
   message(STATUS "  Ipopt library dirs: ${Ipopt_LIBRARY_DIRS}")
   message(STATUS "  Ipopt include dirs: ${Ipopt_INCLUDE_DIRS}")
@@ -32,20 +33,28 @@ else()
   find_library(
     ipopt_lib_path
     NAMES ipopt ipopt-3
-    PATHS ${Ipopt_LIBRARY_DIRS} REQUIRED)
+    PATHS ${Ipopt_LIBRARY_DIRS}
+    REQUIRED
+  )
   message(STATUS "  Ipopt library found at ${ipopt_lib_path}")
   set_target_properties(
     ipopt
-    PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${Ipopt_INCLUDE_DIRS}"
-               INTERFACE_COMPILE_OPTIONS "${Ipopt_CFLAGS_OTHER}"
-               IMPORTED_CONFIGURATIONS "RELEASE")
+    PROPERTIES
+      INTERFACE_INCLUDE_DIRECTORIES "${Ipopt_INCLUDE_DIRS}"
+      INTERFACE_COMPILE_OPTIONS "${Ipopt_CFLAGS_OTHER}"
+      IMPORTED_CONFIGURATIONS "RELEASE"
+  )
 
   if(WIN32)
-    set_target_properties(ipopt PROPERTIES IMPORTED_IMPLIB_RELEASE
-                                           "${ipopt_lib_path}")
+    set_target_properties(
+      ipopt
+      PROPERTIES IMPORTED_IMPLIB_RELEASE "${ipopt_lib_path}"
+    )
   else()
-    set_target_properties(ipopt PROPERTIES IMPORTED_LOCATION_RELEASE
-                                           "${ipopt_lib_path}")
+    set_target_properties(
+      ipopt
+      PROPERTIES IMPORTED_LOCATION_RELEASE "${ipopt_lib_path}"
+    )
   endif()
 
   add_library(Ipopt::Ipopt ALIAS ipopt)

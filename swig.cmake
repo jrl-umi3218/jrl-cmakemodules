@@ -2,7 +2,8 @@ macro(GENERATE_INCLUDE_FLAGS)
   get_property(
     dirs
     DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    PROPERTY INCLUDE_DIRECTORIES)
+    PROPERTY INCLUDE_DIRECTORIES
+  )
   set(INCLUDE_FLAGS "")
   foreach(dir ${dirs})
     set(INCLUDE_FLAGS "-I${dir}" ${INCLUDE_FLAGS})
@@ -18,12 +19,18 @@ macro(ADD_SWIG_PYTHON_BINDING FILENAME DIRECTORY)
   set(outname ${CMAKE_BINARY_DIR}/${DIRECTORY}/${FILENAME}_wrap.cxx)
   add_custom_command(
     OUTPUT ${outname}
-    COMMAND ${SWIG} ARGS -c++ -python -outcurrentdir ${INCLUDE_FLAGS}
-            ${CMAKE_SOURCE_DIR}/${DIRECTORY}/${FILENAME}.i
-    MAIN_DEPENDENCY ${FILENAME}.i)
+    COMMAND ${SWIG}
+    ARGS
+      -c++ -python -outcurrentdir ${INCLUDE_FLAGS}
+      ${CMAKE_SOURCE_DIR}/${DIRECTORY}/${FILENAME}.i
+    MAIN_DEPENDENCY ${FILENAME}.i
+  )
   set(PYTHON_SWIG_SOURCES ${FILENAME} ${PYTHON_SWIG_SOURCES})
-  set(PYTHON_SWIG_STUBS ${CMAKE_BINARY_DIR}/${DIRECTORY}/${FILENAME}_wrap.cxx
-                        ${PYTHON_SWIG_STUBS})
+  set(
+    PYTHON_SWIG_STUBS
+    ${CMAKE_BINARY_DIR}/${DIRECTORY}/${FILENAME}_wrap.cxx
+    ${PYTHON_SWIG_STUBS}
+  )
 endmacro(ADD_SWIG_PYTHON_BINDING FILENAME)
 
 macro(GENERATE_SWIG_BINDINGS)
@@ -41,8 +48,10 @@ macro(BUILD_SWIG_BINDINGS LIBRARIES)
     add_library(${libname} SHARED ${stubpath})
     target_link_libraries(${libname} ${LIBRARIES})
     add_dependencies(${libname} generate_python_bindings)
-    set_target_properties(${libname} PROPERTIES OUTPUT_NAME ${realname} PREFIX
-                                                                        "")
+    set_target_properties(
+      ${libname}
+      PROPERTIES OUTPUT_NAME ${realname} PREFIX ""
+    )
   endforeach()
 endmacro()
 
@@ -51,7 +60,9 @@ macro(INSTALL_SWIG_BINDINGS PYTHON_SITELIB PACKAGE)
     install(TARGETS ${target} DESTINATION ${PYTHON_SITELIB}/${PACKAGE})
   endforeach()
   foreach(source ${PYTHON_SWIG_SOURCES})
-    install(PROGRAMS ${CMAKE_BINARY_DIR}/binding/${source}.py
-            DESTINATION ${PYTHON_SITELIB}/${PACKAGE})
+    install(
+      PROGRAMS ${CMAKE_BINARY_DIR}/binding/${source}.py
+      DESTINATION ${PYTHON_SITELIB}/${PACKAGE}
+    )
   endforeach()
 endmacro()

@@ -22,14 +22,8 @@
 # directories CLP_LIBRARIES - The libraries needed to use CLP CLP_DEFINITIONS -
 # Compiler switches required for using CLP
 
-find_path(
-  CLP_INCLUDE_DIR
-  NAMES coin/ClpSimplex.hpp
-  PATHS ${CLP_PREFIX})
-find_library(
-  CLP_LIBRARY
-  NAMES clp Clp
-  PATHS ${CLP_PREFIX})
+find_path(CLP_INCLUDE_DIR NAMES coin/ClpSimplex.hpp PATHS ${CLP_PREFIX})
+find_library(CLP_LIBRARY NAMES clp Clp PATHS ${CLP_PREFIX})
 
 set(CLP_LIBRARIES ${CLP_LIBRARY})
 set(CLP_INCLUDE_DIRS ${CLP_INCLUDE_DIR})
@@ -40,13 +34,18 @@ mark_as_advanced(CLP_INCLUDE_DIR CLP_LIBRARY)
 
 if(CLP_FOUND AND NOT TARGET CLP::CLP)
   add_library(CLP::CLP SHARED IMPORTED)
-  set_target_properties(CLP::CLP PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
-                                            "${CLP_INCLUDE_DIR}")
-  set_target_properties(CLP::CLP PROPERTIES IMPORTED_LOCATION_RELEASE
-                                            "${CLP_LIBRARY}")
+  set_target_properties(
+    CLP::CLP
+    PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${CLP_INCLUDE_DIR}"
+  )
+  set_target_properties(
+    CLP::CLP
+    PROPERTIES IMPORTED_LOCATION_RELEASE "${CLP_LIBRARY}"
+  )
   set_property(
     TARGET CLP::CLP
     APPEND
-    PROPERTY IMPORTED_CONFIGURATIONS "RELEASE")
+    PROPERTY IMPORTED_CONFIGURATIONS "RELEASE"
+  )
   message(STATUS "CLP found (include: ${CLP_INCLUDE_DIR}, lib: ${CLP_LIBRARY})")
 endif()

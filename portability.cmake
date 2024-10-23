@@ -36,8 +36,11 @@ function(CONFIG_FILES)
   foreach(I RANGE 0 ${ARGC})
     set(FILE ${ARGV${I}})
     if(FILE)
-      configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${FILE}.in
-                     ${CMAKE_CURRENT_BINARY_DIR}/${FILE} @ONLY)
+      configure_file(
+        ${CMAKE_CURRENT_SOURCE_DIR}/${FILE}.in
+        ${CMAKE_CURRENT_BINARY_DIR}/${FILE}
+        @ONLY
+      )
     endif(FILE)
   endforeach(I RANGE 0 ${ARGC})
 endfunction(CONFIG_FILES)
@@ -53,8 +56,10 @@ function(CONFIG_FILES_CMAKE)
   foreach(I RANGE 0 ${ARGC})
     set(FILE ${ARGV${I}})
     if(FILE)
-      configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${FILE}.cmake
-                     ${CMAKE_CURRENT_BINARY_DIR}/${FILE})
+      configure_file(
+        ${CMAKE_CURRENT_SOURCE_DIR}/${FILE}.cmake
+        ${CMAKE_CURRENT_BINARY_DIR}/${FILE}
+      )
     endif(FILE)
   endforeach(I RANGE 0 ${ARGC})
 endfunction(CONFIG_FILES_CMAKE)
@@ -70,8 +75,6 @@ endfunction(CONFIG_FILES_CMAKE)
 function(NORMALIZE_PATH mypath)
   if(WIN32)
     string(REPLACE "\\" "/" ${mypath} "${${mypath}}")
-    set(${mypath}
-        ${${mypath}}
-        PARENT_SCOPE)
+    set(${mypath} ${${mypath}} PARENT_SCOPE)
   endif(WIN32)
 endfunction(NORMALIZE_PATH)

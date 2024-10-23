@@ -22,8 +22,11 @@ macro(_SETUP_DEBIAN)
   if(BUILDING_DEBIAN_PACKAGE)
     message(STATUS "setup debian. Trying to get the type of ${PROJECT_NAME}")
     get_target_property(${PROJECT_NAME}_IS_SHARED_LIBRARY ${PROJECT_NAME} TYPE)
-    message(STATUS "${PROJECT_NAME}_IS_SHARED_LIBRARY:"
-                   ${${PROJECT_NAME}_IS_SHARED_LIBRARY})
+    message(
+      STATUS
+      "${PROJECT_NAME}_IS_SHARED_LIBRARY:"
+      ${${PROJECT_NAME}_IS_SHARED_LIBRARY}
+    )
 
     if(UNIX)
       if(IS_DIRECTORY ${PROJECT_SOURCE_DIR}/debian)
@@ -36,17 +39,25 @@ macro(_SETUP_DEBIAN)
             RESULT_VARIABLE LGIT_DESCRIBE_RESULT
             OUTPUT_VARIABLE LGIT_DESCRIBE_OUTPUT
             ERROR_VARIABLE LGIT_DESCRIBE_ERROR
-            OUTPUT_STRIP_TRAILING_WHITESPACE)
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+          )
           message(STATUS "LGIT_DESCRIBE_OUTPUT:" ${LGIT_DESCRIBE_OUTPUT})
           message(STATUS "LGIT_DESCRIBE_ERROR:" ${LGIT_DESCRIBE_ERROR})
 
           # From the v[0-9]+.[0-9]+.[0-9]+ version remove the v in prefix.
-          string(REGEX REPLACE "^v" "" LPROJECT_RELEASE_VERSION
-                               "${LGIT_DESCRIBE_OUTPUT}")
+          string(
+            REGEX REPLACE
+            "^v"
+            ""
+            LPROJECT_RELEASE_VERSION
+            "${LGIT_DESCRIBE_OUTPUT}"
+          )
 
           # Considers the file *.release.version
-          set(file_release_version
-              "${PROJECT_SOURCE_DIR}/debian/${PROJECT_NAME}.release.version")
+          set(
+            file_release_version
+            "${PROJECT_SOURCE_DIR}/debian/${PROJECT_NAME}.release.version"
+          )
 
           message(STATUS "file_release_version: ${file_release_version}")
           message(STATUS "Everything sounds great: ${LPROJECT_RELEASE_VERSION}")
@@ -63,20 +74,23 @@ macro(_SETUP_DEBIAN)
             # Then create the containing the release version.
             message(STATUS "Create the release version file")
             file(WRITE ${file_release_version} "${LPROJECT_RELEASE_VERSION}")
-
           endif(LPROJECT_RELEASE_VERSION STREQUAL "")
 
-          set(install_file_name_src
-              "debian/lib${PROJECT_NAME}${LPROJECT_RELEASE_VERSION}.install.cmake"
+          set(
+            install_file_name_src
+            "debian/lib${PROJECT_NAME}${LPROJECT_RELEASE_VERSION}.install.cmake"
           )
 
           message(STATUS "install_file_name_src :" ${install_file_name_src})
           if(EXISTS ${PROJECT_SOURCE_DIR}/${install_file_name_src})
-            set(install_file_name_dest
-                "debian/lib${PROJECT_NAME}${LPROJECT_RELEASE_VERSION}.install")
+            set(
+              install_file_name_dest
+              "debian/lib${PROJECT_NAME}${LPROJECT_RELEASE_VERSION}.install"
+            )
             execute_process(
               COMMAND cp ${install_file_name_src} ${install_file_name_dest}
-              WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+              WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+            )
 
             message(STATUS "install_file_name :" ${install_file_name_dest})
             file(APPEND ${install_file_name_dest} "/etc/ld.so.conf.d/*\n")
@@ -85,7 +99,6 @@ macro(_SETUP_DEBIAN)
             file(WRITE ${install_file_name} "${CMAKE_INSTALL_PREFIX}/lib")
             message(STATUS "install_file_name :" ${install_file_name})
             install(FILES ${install_file_name} DESTINATION /etc/ld.so.conf.d)
-
           endif(EXISTS ${PROJECT_SOURCE_DIR}/${install_file_name_src})
         endif(${PROJECT_NAME}_IS_SHARED_LIBRARY STREQUAL "SHARED_LIBRARY")
       endif(IS_DIRECTORY ${PROJECT_SOURCE_DIR}/debian)
@@ -109,7 +122,8 @@ macro(_SETUP_PROJECT_DEB)
       ${PROJECT_NAME}-deb-src
       COMMAND git-buildpackage --git-debian-branch=debian
       WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-      COMMENT "Generating source Debian package...")
+      COMMENT "Generating source Debian package..."
+    )
     add_dependencies(deb-src ${PROJECT_NAME}-deb-src)
 
     if(NOT TARGET deb)
@@ -117,10 +131,12 @@ macro(_SETUP_PROJECT_DEB)
     endif()
     add_custom_target(
       ${PROJECT_NAME}-deb
-      COMMAND git-buildpackage --git-debian-branch=debian
-              --git-builder="debuild -S -i.git -I.git"
+      COMMAND
+        git-buildpackage --git-debian-branch=debian
+        --git-builder="debuild -S -i.git -I.git"
       WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-      COMMENT "Generating Debian package...")
+      COMMENT "Generating Debian package..."
+    )
     add_dependencies(deb ${PROJECT_NAME}-deb)
   endif(UNIX AND NOT APPLE)
 endmacro(_SETUP_PROJECT_DEB)

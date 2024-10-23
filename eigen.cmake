@@ -26,7 +26,8 @@ macro(SEARCH_FOR_EIGEN)
   # ref https://github.com/jrl-umi3218/jrl-cmakemodules/issues/319
   message(
     AUTHOR_WARNING
-      "SEARCH_FOR_EIGEN is deprecated and will be removed in the future")
+    "SEARCH_FOR_EIGEN is deprecated and will be removed in the future"
+  )
   set(_Eigen_FOUND 0)
   if(${ARGC} GREATER 0)
     set(Eigen_REQUIRED ${ARGV0})
@@ -38,10 +39,14 @@ macro(SEARCH_FOR_EIGEN)
   pkg_check_modules(_Eigen ${Eigen_REQUIRED})
 
   if(${_Eigen_FOUND})
-    set(${PROJECT_NAME}_CXX_FLAGS
-        "${${PROJECT_NAME}_CXX_FLAGS} ${_Eigen_CFLAGS_OTHER}")
-    set(${PROJECT_NAME}_LINK_FLAGS
-        "${${PROJECT_NAME}_LINK_FLAGS} ${_Eigen_LDFLAGS_OTHER}")
+    set(
+      ${PROJECT_NAME}_CXX_FLAGS
+      "${${PROJECT_NAME}_CXX_FLAGS} ${_Eigen_CFLAGS_OTHER}"
+    )
+    set(
+      ${PROJECT_NAME}_LINK_FLAGS
+      "${${PROJECT_NAME}_LINK_FLAGS} ${_Eigen_LDFLAGS_OTHER}"
+    )
 
     include_directories(SYSTEM ${_Eigen_INCLUDE_DIRS})
     _add_to_list(_PKG_CONFIG_REQUIRES "${Eigen_REQUIRED}" ",")
@@ -51,7 +56,8 @@ macro(SEARCH_FOR_EIGEN)
       Eigen_INCLUDE_DIR
       NAMES signature_of_eigen3_matrix_library
       PATHS ${CMAKE_INSTALL_PREFIX}/include
-      PATH_SUFFIXES eigen3 eigen)
+      PATH_SUFFIXES eigen3 eigen
+    )
     include_directories(SYSTEM ${Eigen_INCLUDE_DIR})
     pkg_config_append_cflags(-I"${Eigen_INCLUDE_DIR}")
   endif()

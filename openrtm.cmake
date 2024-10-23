@@ -15,9 +15,11 @@
 
 # OpenRTM-aist
 macro(openrtm)
-
-  set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
-                        ${PROJECT_JRL_CMAKE_MODULE_DIR}/find-external/OpenRTM)
+  set(
+    CMAKE_MODULE_PATH
+    ${CMAKE_MODULE_PATH}
+    ${PROJECT_JRL_CMAKE_MODULE_DIR}/find-external/OpenRTM
+  )
 
   find_package(OpenRTM REQUIRED)
   set(ADDITIONAL_SYMBOL "")
@@ -27,8 +29,10 @@ macro(openrtm)
     add_definitions(${OPENRTM_DEFINITIONS})
   endif()
 
-  set(OPENHRP_RTM_IDL_DIR
-      "${OpenHRP_SOURCE_DIR}/idl/OpenRTM/${OPENRTM_VERSION}")
+  set(
+    OPENHRP_RTM_IDL_DIR
+    "${OpenHRP_SOURCE_DIR}/idl/OpenRTM/${OPENRTM_VERSION}"
+  )
   if(OPENRTM_VERSION STREQUAL OPENRTM_VERSION042)
     set(ADDITIONAL_SYMBOL "OPENRTM_VERSION_042")
   endif()
@@ -44,5 +48,4 @@ macro(openrtm)
   endif()
 
   add_definitions(${OMNIORB_CFLAGS})
-
 endmacro(openrtm)

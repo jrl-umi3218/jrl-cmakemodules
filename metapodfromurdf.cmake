@@ -15,12 +15,14 @@
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
 macro(ADD_METAPOD_FROM_URDF_MODEL model_name)
-
   set(robot_name "robot_${model_name}")
   set(lib_robot_name "metapod_${model_name}")
   set(dir_robot ${PROJECT_BINARY_DIR}/include/metapod/models/${model_name})
-  set(robot_name_sources ${dir_robot}/${model_name}.hh
-                         ${dir_robot}/${model_name}.cc)
+  set(
+    robot_name_sources
+    ${dir_robot}/${model_name}.hh
+    ${dir_robot}/${model_name}.cc
+  )
   set(data_robot_dir ${METAPOD_PREFIX}/share/metapod/data/${model_name})
   set(config_file_robot ${data_robot_dir}/${model_name}.config)
   set(license_file_robot ${data_robot_dir}/${model_name}_license_file.txt)
@@ -30,6 +32,7 @@ macro(ADD_METAPOD_FROM_URDF_MODEL model_name)
     OUTPUT ${robot_name_sources}
     COMMAND
       metapodfromurdf --name ${model_name} --libname ${lib_robot_name}
-      --directory ${dir_robot} --config-file ${config_file_robot}
-      --license-file ${license_file_robot} ${urdf_file_robot})
+      --directory ${dir_robot} --config-file ${config_file_robot} --license-file
+      ${license_file_robot} ${urdf_file_robot}
+  )
 endmacro(ADD_METAPOD_FROM_URDF_MODEL)

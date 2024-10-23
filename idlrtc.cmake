@@ -33,12 +33,12 @@ macro(GENERATE_IDLRTC_FILE FILENAME DIRECTORY)
   set(OMNIIDL_INC_DIR "")
 
   # Check if there is an optional value
-  message(STATUS "ARGC: "${ARGC})
+  message(STATUS "ARGC: " ${ARGC})
   if(${ARGC} EQUAL 3)
     # If there is, the directory to include are added.
     set(LIST_INCLUDE_DIRECTORIES ${ARGV2})
 
-    message(STATUS "ARGV2: "${ARGV2})
+    message(STATUS "ARGV2: " ${ARGV2})
     foreach(INCDIR ${LIST_INCLUDE_DIRECTORIES})
       # The format for the first one is special to avoid a \ to be introduced.
       if(OMNIIDL_INC_DIR STREQUAL "")
@@ -47,28 +47,41 @@ macro(GENERATE_IDLRTC_FILE FILENAME DIRECTORY)
         set(OMNIIDL_INC_DIR ${OMNIIDL_INC_DIR} "-I${INCDIR}")
       endif(OMNIIDL_INC_DIR STREQUAL "")
     endforeach(INCDIR ${LIST_INCLUDE_DIRECTORIES})
-
   endif(${ARGC} EQUAL 3)
 
-  set(IDL_FLAGS "-Wbuse_quotes" "-Wbh=.hh" "-Wbs=SK.cc" "-Wba" "-Wbd=DynSK.cc")
+  set(
+    IDL_FLAGS
+    "-Wbuse_quotes"
+    "-Wbh=.hh"
+    "-Wbs=SK.cc"
+    "-Wba"
+    "-Wbd=DynSK.cc"
+  )
   message(STATUS "OMNIIDL_INC_DIR:" ${OMNIIDL_INC_DIR})
   add_custom_command(
     OUTPUT ${FILENAME}SK.cc ${FILENAME}DynSK.cc ${FILENAME}.hh
-    COMMAND ${OMNIIDL} ARGS -bcxx ${IDL_FLAGS} ${OMNIIDL_INC_DIR}
-            ${DIRECTORY}/${FILENAME}.idl
-    MAIN_DEPENDENCY ${DIRECTORY}/${FILENAME}.idl)
-  set(ALL_IDL_STUBS ${FILENAME}SK.cc ${FILENAME}DynSK.cc ${FILENAME}.hh
-                    ${ALL_IDL_STUBS})
+    COMMAND ${OMNIIDL}
+    ARGS -bcxx ${IDL_FLAGS} ${OMNIIDL_INC_DIR} ${DIRECTORY}/${FILENAME}.idl
+    MAIN_DEPENDENCY ${DIRECTORY}/${FILENAME}.idl
+  )
+  set(
+    ALL_IDL_STUBS
+    ${FILENAME}SK.cc
+    ${FILENAME}DynSK.cc
+    ${FILENAME}.hh
+    ${ALL_IDL_STUBS}
+  )
 
   # Clean generated files.
   set_property(
     DIRECTORY
     APPEND
-    PROPERTY ADDITIONAL_MAKE_CLEAN_FILES ${FILENAME}SK.cc ${FILENAME}DynSK.cc
-             ${FILENAME}.hh)
+    PROPERTY
+      ADDITIONAL_MAKE_CLEAN_FILES
+        ${FILENAME}SK.cc
+        ${FILENAME}DynSK.cc
+        ${FILENAME}.hh
+  )
 
   list(APPEND LOGGING_WATCHED_VARIABLES OMNIIDL ALL_IDL_STUBS)
-endmacro(
-  GENERATE_IDLRTC_FILE
-  FILENAME
-  DIRECTORY)
+endmacro(GENERATE_IDLRTC_FILE FILENAME DIRECTORY)

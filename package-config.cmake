@@ -40,21 +40,11 @@ macro(_SETUP_PROJECT_PACKAGE_INIT)
   set(TARGETS_EXPORT_NAME "${PROJECT_NAME}Targets")
   set(namespace "${PROJECT_NAME}::")
 
-  set(_PACKAGE_CONFIG_DEPENDENCIES_PROJECTS
-      ""
-      CACHE INTERNAL "")
-  set(_PACKAGE_CONFIG_DEPENDENCIES_FIND_PACKAGE
-      ""
-      CACHE INTERNAL "")
-  set(_PACKAGE_CONFIG_DEPENDENCIES_FIND_DEPENDENCY
-      ""
-      CACHE INTERNAL "")
-  set(_PACKAGE_CONFIG_DEPENDENCIES_FIND_EXTERNAL
-      ""
-      CACHE INTERNAL "")
-  set(PACKAGE_EXTRA_MACROS
-      ""
-      CACHE INTERNAL "")
+  set(_PACKAGE_CONFIG_DEPENDENCIES_PROJECTS "" CACHE INTERNAL "")
+  set(_PACKAGE_CONFIG_DEPENDENCIES_FIND_PACKAGE "" CACHE INTERNAL "")
+  set(_PACKAGE_CONFIG_DEPENDENCIES_FIND_DEPENDENCY "" CACHE INTERNAL "")
+  set(_PACKAGE_CONFIG_DEPENDENCIES_FIND_EXTERNAL "" CACHE INTERNAL "")
+  set(PACKAGE_EXTRA_MACROS "" CACHE INTERNAL "")
 endmacro(_SETUP_PROJECT_PACKAGE_INIT)
 
 # .rst:
@@ -85,54 +75,80 @@ macro(ADD_PROJECT_DEPENDENCY)
   # add dependency to the generated .pc ref
   # https://github.com/jrl-umi3218/jrl-cmakemodules/pull/335
   cmake_parse_arguments(
-    PARSED_ARGN "" "PKG_CONFIG_REQUIRES;FOR_COMPONENT;FIND_EXTERNAL" "" ${ARGN})
+    PARSED_ARGN
+    ""
+    "PKG_CONFIG_REQUIRES;FOR_COMPONENT;FIND_EXTERNAL"
+    ""
+    ${ARGN}
+  )
   if(PARSED_ARGN_PKG_CONFIG_REQUIRES)
     _add_to_list_if_not_present(_PKG_CONFIG_REQUIRES
-                                "${PARSED_ARGN_PKG_CONFIG_REQUIRES}")
+                                "${PARSED_ARGN_PKG_CONFIG_REQUIRES}"
+    )
     _add_to_list_if_not_present(_PKG_CONFIG_DEP_NOT_FOR_CONFIG_CMAKE
-                                "${PARSED_ARGN_PKG_CONFIG_REQUIRES}")
+                                "${PARSED_ARGN_PKG_CONFIG_REQUIRES}"
+    )
   endif()
   if(PARSED_ARGN_FOR_COMPONENT)
     set(component "_${PARSED_ARGN_FOR_COMPONENT}")
   endif(PARSED_ARGN_FOR_COMPONENT)
   if(PARSED_ARGN_FIND_EXTERNAL)
     set(_ext "find-external/${PARSED_ARGN_FIND_EXTERNAL}")
-    set(CMAKE_MODULE_PATH "${PROJECT_JRL_CMAKE_MODULE_DIR}/${_ext}"
-                          ${CMAKE_MODULE_PATH})
+    set(
+      CMAKE_MODULE_PATH
+      "${PROJECT_JRL_CMAKE_MODULE_DIR}/${_ext}"
+      ${CMAKE_MODULE_PATH}
+    )
     set(_ext_path "${CONFIG_INSTALL_DIR}/${_ext}")
     if(NOT IS_ABSOLUTE ${_ext_path})
       set(_ext_path "\${PACKAGE_PREFIX_DIR}/${_ext_path}")
     endif()
-    set(_PACKAGE_CONFIG_DEPENDENCIES_FIND_EXTERNAL
-        "${_PACKAGE_CONFIG_DEPENDENCIES_FIND_EXTERNAL}\n  ${_ext_path}")
-    install(DIRECTORY "${PROJECT_JRL_CMAKE_MODULE_DIR}/${_ext}"
-            DESTINATION "${CONFIG_INSTALL_DIR}/find-external")
+    set(
+      _PACKAGE_CONFIG_DEPENDENCIES_FIND_EXTERNAL
+      "${_PACKAGE_CONFIG_DEPENDENCIES_FIND_EXTERNAL}\n  ${_ext_path}"
+    )
+    install(
+      DIRECTORY "${PROJECT_JRL_CMAKE_MODULE_DIR}/${_ext}"
+      DESTINATION "${CONFIG_INSTALL_DIR}/find-external"
+    )
   endif()
   _add_to_list_if_not_present(_PACKAGE_CONFIG${component}_DEPENDENCIES_PROJECTS
-                              "${ARGV0}")
+                              "${ARGV0}"
+  )
 
   string(REPLACE ";" " " PACKAGE_ARGS "${PARSED_ARGN_UNPARSED_ARGUMENTS}")
   _add_to_list_if_not_present(
     _PACKAGE_CONFIG${component}_DEPENDENCIES_FIND_PACKAGE
-    "find_package(${PACKAGE_ARGS})")
+    "find_package(${PACKAGE_ARGS})"
+  )
   _add_to_list_if_not_present(
     _PACKAGE_CONFIG${component}_DEPENDENCIES_FIND_DEPENDENCY
-    "find_dependency(${PACKAGE_ARGS})")
+    "find_dependency(${PACKAGE_ARGS})"
+  )
   list(GET PARSED_ARGN_UNPARSED_ARGUMENTS 0 _package_name)
   if(NOT ${_package_name} IN_LIST PROJECT_PACKAGES_IN_WORKSPACE)
     find_package(${PARSED_ARGN_UNPARSED_ARGUMENTS})
   endif()
 
   # Propagate variables changes to the cached values
-  set(_PACKAGE_CONFIG${component}_DEPENDENCIES_PROJECTS
-      "${_PACKAGE_CONFIG${component}_DEPENDENCIES_PROJECTS}"
-      CACHE INTERNAL "")
-  set(_PACKAGE_CONFIG${component}_DEPENDENCIES_FIND_PACKAGE
-      "${_PACKAGE_CONFIG${component}_DEPENDENCIES_FIND_PACKAGE}"
-      CACHE INTERNAL "")
-  set(_PACKAGE_CONFIG${component}_DEPENDENCIES_FIND_DEPENDENCY
-      "${_PACKAGE_CONFIG${component}_DEPENDENCIES_FIND_DEPENDENCY}"
-      CACHE INTERNAL "")
+  set(
+    _PACKAGE_CONFIG${component}_DEPENDENCIES_PROJECTS
+    "${_PACKAGE_CONFIG${component}_DEPENDENCIES_PROJECTS}"
+    CACHE INTERNAL
+    ""
+  )
+  set(
+    _PACKAGE_CONFIG${component}_DEPENDENCIES_FIND_PACKAGE
+    "${_PACKAGE_CONFIG${component}_DEPENDENCIES_FIND_PACKAGE}"
+    CACHE INTERNAL
+    ""
+  )
+  set(
+    _PACKAGE_CONFIG${component}_DEPENDENCIES_FIND_DEPENDENCY
+    "${_PACKAGE_CONFIG${component}_DEPENDENCIES_FIND_DEPENDENCY}"
+    CACHE INTERNAL
+    ""
+  )
 endmacro()
 
 # .rst:
@@ -186,28 +202,45 @@ macro(SETUP_PROJECT_PACKAGE_FINALIZE)
   set(TARGETS_EXPORT_NAME "${PROJECT_NAME}Targets")
   set(namespace "${PROJECT_NAME}::")
   string(TOUPPER "${PROJECT_NAME}" PROJECT_NAME_UPPER)
-  string(REGEX REPLACE "[^a-zA-Z0-9]" "_" PROJECT_NAME_UPPER
-                       "${PROJECT_NAME_UPPER}")
+  string(
+    REGEX REPLACE
+    "[^a-zA-Z0-9]"
+    "_"
+    PROJECT_NAME_UPPER
+    "${PROJECT_NAME_UPPER}"
+  )
 
   # Include module with fuction 'write_basic_package_version_file'
   include(CMakePackageConfigHelpers)
 
-  string(REPLACE ";" "\n  " PACKAGE_DEPENDENCIES_FIND_PACKAGE
-                 "${_PACKAGE_CONFIG_DEPENDENCIES_FIND_PACKAGE}")
-  string(REPLACE ";" "\n  " PACKAGE_DEPENDENCIES_FIND_DEPENDENCY
-                 "${_PACKAGE_CONFIG_DEPENDENCIES_FIND_DEPENDENCY}")
+  string(
+    REPLACE
+    ";"
+    "\n  "
+    PACKAGE_DEPENDENCIES_FIND_PACKAGE
+    "${_PACKAGE_CONFIG_DEPENDENCIES_FIND_PACKAGE}"
+  )
+  string(
+    REPLACE
+    ";"
+    "\n  "
+    PACKAGE_DEPENDENCIES_FIND_DEPENDENCY
+    "${_PACKAGE_CONFIG_DEPENDENCIES_FIND_DEPENDENCY}"
+  )
 
   if(DEFINED _MINIMAL_CXX_STANDARD)
     install_jrl_cmakemodules_file("cxx-standard.cmake")
 
     # Add check for standard - enforce if required
     if(${MINIMAL_CXX_STANDARD_ENFORCE})
-      set(PACKAGE_EXTRA_MACROS
-          "${PACKAGE_EXTRA_MACROS}\nCHECK_MINIMAL_CXX_STANDARD(${_MINIMAL_CXX_STANDARD} ENFORCE)"
+      set(
+        PACKAGE_EXTRA_MACROS
+        "${PACKAGE_EXTRA_MACROS}\nCHECK_MINIMAL_CXX_STANDARD(${_MINIMAL_CXX_STANDARD} ENFORCE)"
       )
     else()
-      set(PACKAGE_EXTRA_MACROS
-          "${PACKAGE_EXTRA_MACROS}\nCHECK_MINIMAL_CXX_STANDARD(${_MINIMAL_CXX_STANDARD})"
+      set(
+        PACKAGE_EXTRA_MACROS
+        "${PACKAGE_EXTRA_MACROS}\nCHECK_MINIMAL_CXX_STANDARD(${_MINIMAL_CXX_STANDARD})"
       )
     endif()
   endif()
@@ -220,7 +253,8 @@ macro(SETUP_PROJECT_PACKAGE_FINALIZE)
   write_basic_package_version_file(
     "${VERSION_CONFIG}"
     VERSION ${PROJECT_VERSION}
-    COMPATIBILITY ${PROJECT_COMPATIBILITY_VERSION})
+    COMPATIBILITY ${PROJECT_COMPATIBILITY_VERSION}
+  )
 
   # Configure '<PROJECT-NAME>Config.cmake' Use variables: * TARGETS_EXPORT_NAME
   # * PROJECT_NAME * _PKG_CONFIG_REQUIRES
@@ -234,32 +268,38 @@ macro(SETUP_PROJECT_PACKAGE_FINALIZE)
   endif(_PKG_CONFIG_REQUIRES)
 
   if(NOT PROJECT_EXPORT_NO_TARGET)
-    set(INCLUDE_TARGETS_FILE
-        "include(\"\${CMAKE_CURRENT_LIST_DIR}/${TARGETS_EXPORT_NAME}.cmake\")")
+    set(
+      INCLUDE_TARGETS_FILE
+      "include(\"\${CMAKE_CURRENT_LIST_DIR}/${TARGETS_EXPORT_NAME}.cmake\")"
+    )
   else()
     set(INCLUDE_TARGETS_FILE "# Package with no targets")
   endif()
 
   set(INSTALL_FULL_INCLUDEDIR ${CMAKE_INSTALL_FULL_INCLUDEDIR})
   configure_package_config_file(
-    "${PROJECT_JRL_CMAKE_MODULE_DIR}/Config.cmake.in" "${PROJECT_CONFIG}"
+    "${PROJECT_JRL_CMAKE_MODULE_DIR}/Config.cmake.in"
+    "${PROJECT_CONFIG}"
     INSTALL_DESTINATION "${CONFIG_INSTALL_DIR}"
-    PATH_VARS INSTALL_FULL_INCLUDEDIR)
+    PATH_VARS INSTALL_FULL_INCLUDEDIR
+  )
   unset(INSTALL_FULL_INCLUDEDIR)
 
   # Config * <prefix>/lib/cmake/Foo/FooConfig.cmake *
   # <prefix>/lib/cmake/Foo/FooConfigVersion.cmake
-  install(FILES "${PROJECT_CONFIG}" "${VERSION_CONFIG}"
-          DESTINATION "${CONFIG_INSTALL_DIR}")
+  install(
+    FILES "${PROJECT_CONFIG}" "${VERSION_CONFIG}"
+    DESTINATION "${CONFIG_INSTALL_DIR}"
+  )
 
   # Config * <prefix>/lib/cmake/Foo/FooTargets.cmake
   if(NOT PROJECT_EXPORT_NO_TARGET)
     install(
       EXPORT "${TARGETS_EXPORT_NAME}"
       NAMESPACE "${namespace}"
-      DESTINATION "${CONFIG_INSTALL_DIR}")
+      DESTINATION "${CONFIG_INSTALL_DIR}"
+    )
   endif()
-
 endmacro(SETUP_PROJECT_PACKAGE_FINALIZE)
 
 # .rst: .. command:: PROJECT_INSTALL_COMPONENT(COMPONENT [EXTRA_MACRO
@@ -284,24 +324,41 @@ macro(PROJECT_INSTALL_COMPONENT COMPONENT)
   install(
     EXPORT ${COMPONENT}Targets
     NAMESPACE "${namespace}"
-    DESTINATION "${CONFIG_INSTALL_DIR}")
+    DESTINATION "${CONFIG_INSTALL_DIR}"
+  )
 
   set(COMPONENT ${COMPONENT})
-  set(_PACKAGE_CONFIG_COMPONENT_DEPENDENCIES_PROJECTS
-      "${_PACKAGE_CONFIG_${COMPONENT}_DEPENDENCIES_PROJECTS}")
-  string(REPLACE ";" "\n  " COMPONENT_FIND_PACKAGE
-                 "${_PACKAGE_CONFIG_${COMPONENT}_DEPENDENCIES_FIND_PACKAGE}")
-  string(REPLACE ";" "\n  " COMPONENT_FIND_DEPENDENCY
-                 "${_PACKAGE_CONFIG_${COMPONENT}_DEPENDENCIES_FIND_DEPENDENCY}")
-  set(COMPONENT_CONFIG
-      "${PROJECT_BINARY_DIR}/generated/${COMPONENT}Config.cmake")
+  set(
+    _PACKAGE_CONFIG_COMPONENT_DEPENDENCIES_PROJECTS
+    "${_PACKAGE_CONFIG_${COMPONENT}_DEPENDENCIES_PROJECTS}"
+  )
+  string(
+    REPLACE
+    ";"
+    "\n  "
+    COMPONENT_FIND_PACKAGE
+    "${_PACKAGE_CONFIG_${COMPONENT}_DEPENDENCIES_FIND_PACKAGE}"
+  )
+  string(
+    REPLACE
+    ";"
+    "\n  "
+    COMPONENT_FIND_DEPENDENCY
+    "${_PACKAGE_CONFIG_${COMPONENT}_DEPENDENCIES_FIND_DEPENDENCY}"
+  )
+  set(
+    COMPONENT_CONFIG
+    "${PROJECT_BINARY_DIR}/generated/${COMPONENT}Config.cmake"
+  )
   set(COMPONENT_EXTRA_MACRO "${PARSED_ARGN_EXTRA_MACRO}")
   include(CMakePackageConfigHelpers)
   configure_package_config_file(
     "${PROJECT_JRL_CMAKE_MODULE_DIR}/componentConfig.cmake.in"
     "${COMPONENT_CONFIG}"
     INSTALL_DESTINATION "${CONFIG_INSTALL_DIR}"
-    NO_CHECK_REQUIRED_COMPONENTS_MACRO NO_SET_AND_CHECK_MACRO)
+    NO_CHECK_REQUIRED_COMPONENTS_MACRO
+    NO_SET_AND_CHECK_MACRO
+  )
   install(FILES "${COMPONENT_CONFIG}" DESTINATION "${CONFIG_INSTALL_DIR}")
 endmacro()
 
@@ -310,10 +367,13 @@ endmacro()
 # install jrl-cmakemodules/$filename along CMake package exports
 #
 macro(INSTALL_JRL_CMAKEMODULES_FILE filename)
-  install(FILES "${PROJECT_JRL_CMAKE_MODULE_DIR}/${filename}"
-          DESTINATION "${CONFIG_INSTALL_DIR}")
-  set(INCLUDE_INSTALLED_JRL_FILES
-      "${INCLUDE_INSTALLED_JRL_FILES}\ninclude(\"\${CMAKE_CURRENT_LIST_DIR}/${filename}\")"
+  install(
+    FILES "${PROJECT_JRL_CMAKE_MODULE_DIR}/${filename}"
+    DESTINATION "${CONFIG_INSTALL_DIR}"
+  )
+  set(
+    INCLUDE_INSTALLED_JRL_FILES
+    "${INCLUDE_INSTALLED_JRL_FILES}\ninclude(\"\${CMAKE_CURRENT_LIST_DIR}/${filename}\")"
   )
 endmacro()
 
@@ -322,6 +382,8 @@ endmacro()
 # install jrl-cmakemodules/$dirname along CMake package exports
 #
 macro(INSTALL_JRL_CMAKEMODULES_DIR dirname)
-  install(DIRECTORY "${PROJECT_JRL_CMAKE_MODULE_DIR}/${dirname}"
-          DESTINATION "${CONFIG_INSTALL_DIR}")
+  install(
+    DIRECTORY "${PROJECT_JRL_CMAKE_MODULE_DIR}/${dirname}"
+    DESTINATION "${CONFIG_INSTALL_DIR}"
+  )
 endmacro()

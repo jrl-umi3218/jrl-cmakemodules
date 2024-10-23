@@ -6,8 +6,11 @@ if(assimp_FOUND)
   # not defined - INTERFACE_INCLUDE_DIRECTORIES is set to a wrong path
   # ASSIMP_INCLUDE_DIRS and IMPORTED_LOCATION_RELEASE are well computed, so we
   # can redefine some target properties with them
-  get_target_property(_ASSIMP_INC_DIR assimp::assimp
-                      INTERFACE_INCLUDE_DIRECTORIES)
+  get_target_property(
+    _ASSIMP_INC_DIR
+    assimp::assimp
+    INTERFACE_INCLUDE_DIRECTORIES
+  )
   set(_ASSIMP_TARGET_OK TRUE)
   foreach(v ${_ASSIMP_INC_DIR})
     if(NOT EXISTS ${v})
@@ -15,12 +18,17 @@ if(assimp_FOUND)
     endif()
   endforeach()
   if(NOT _ASSIMP_TARGET_OK)
-    get_target_property(_ASSIMP_IMP_LOC_RELEASE assimp::assimp
-                        IMPORTED_LOCATION_RELEASE)
+    get_target_property(
+      _ASSIMP_IMP_LOC_RELEASE
+      assimp::assimp
+      IMPORTED_LOCATION_RELEASE
+    )
     set_target_properties(
       assimp::assimp
-      PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${ASSIMP_INCLUDE_DIRS}"
-                 IMPORTED_LOCATION "${_ASSIMP_IMP_LOC_RELEASE}")
+      PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${ASSIMP_INCLUDE_DIRS}"
+        IMPORTED_LOCATION "${_ASSIMP_IMP_LOC_RELEASE}"
+    )
   endif()
 else()
   if(CMAKE_SIZEOF_VOID_P EQUAL 8)
@@ -36,7 +44,8 @@ else()
     find_path(
       ASSIMP_INCLUDE_DIR
       NAMES assimp/anim.h
-      HINTS ${ASSIMP_ROOT_DIR}/include)
+      HINTS ${ASSIMP_ROOT_DIR}/include
+    )
     set(assimp_INCLUDE_DIRS ${ASSIMP_INCLUDE_DIR})
 
     if(MSVC12)
@@ -46,26 +55,38 @@ else()
     endif(MSVC12)
 
     if(MSVC12 OR MSVC14)
-
       foreach(ASSIMP_MSVC_VERSION ${ASSIMP_MSVC_VERSIONS})
         find_path(
           ASSIMP_LIBRARY_DIR
-          NAMES assimp-${ASSIMP_MSVC_VERSION}-mt.lib
-                assimp-${ASSIMP_MSVC_VERSION}-mtd.lib
-          HINTS ${ASSIMP_ROOT_DIR}/lib${ASSIMP_ARCHITECTURE})
+          NAMES
+            assimp-${ASSIMP_MSVC_VERSION}-mt.lib
+            assimp-${ASSIMP_MSVC_VERSION}-mtd.lib
+          HINTS ${ASSIMP_ROOT_DIR}/lib${ASSIMP_ARCHITECTURE}
+        )
 
-        find_library(ASSIMP_LIBRARY_RELEASE assimp-${ASSIMP_MSVC_VERSION}-mt.lib
-                     PATHS ${ASSIMP_LIBRARY_DIR})
-        find_library(ASSIMP_LIBRARY_DEBUG assimp-${ASSIMP_MSVC_VERSION}-mtd.lib
-                     PATHS ${ASSIMP_LIBRARY_DIR})
+        find_library(
+          ASSIMP_LIBRARY_RELEASE
+          assimp-${ASSIMP_MSVC_VERSION}-mt.lib
+          PATHS ${ASSIMP_LIBRARY_DIR}
+        )
+        find_library(
+          ASSIMP_LIBRARY_DEBUG
+          assimp-${ASSIMP_MSVC_VERSION}-mtd.lib
+          PATHS ${ASSIMP_LIBRARY_DIR}
+        )
 
         if(NOT ASSIMP_LIBRARY_RELEASE AND NOT ASSIMP_LIBRARY_DEBUG)
           continue()
         endif()
 
         if(ASSIMP_LIBRARY_DEBUG)
-          set(ASSIMP_LIBRARY optimized ${ASSIMP_LIBRARY_RELEASE} debug
-                             ${ASSIMP_LIBRARY_DEBUG})
+          set(
+            ASSIMP_LIBRARY
+            optimized
+            ${ASSIMP_LIBRARY_RELEASE}
+            debug
+            ${ASSIMP_LIBRARY_DEBUG}
+          )
         else()
           set(ASSIMP_LIBRARY optimized ${ASSIMP_LIBRARY_RELEASE})
         endif()
@@ -84,28 +105,33 @@ else()
               ${ASSIMP_ROOT_DIR}/bin${ASSIMP_ARCHITECTURE}/assimp-${ASSIMP_MSVC_VERSION}-mt.dll
               ${TargetDirectory}/Release/assimp-${ASSIMP_MSVC_VERSION}-mt.dll
             COMMENT "Copying Assimp binaries to '${TargetDirectory}'"
-            VERBATIM)
+            VERBATIM
+          )
         endfunction(ASSIMP_COPY_BINARIES)
 
         set(assimp_LIBRARIES ${ASSIMP_LIBRARY})
       endforeach()
     endif()
-
   else(WIN32)
-
     find_path(
       assimp_INCLUDE_DIRS
-      NAMES assimp/postprocess.h assimp/scene.h assimp/version.h assimp/config.h
-            assimp/cimport.h
+      NAMES
+        assimp/postprocess.h
+        assimp/scene.h
+        assimp/version.h
+        assimp/config.h
+        assimp/cimport.h
       PATHS /usr/local/include
-      PATHS /usr/include/)
+      PATHS /usr/include/
+    )
 
     find_library(
       assimp_LIBRARIES
       NAMES assimp
       PATHS /usr/local/lib/
       PATHS /usr/lib64/
-      PATHS /usr/lib/)
+      PATHS /usr/lib/
+    )
 
     if(assimp_INCLUDE_DIRS AND assimp_LIBRARIES)
       set(assimp_FOUND TRUE)
@@ -120,6 +146,5 @@ else()
         message(FATAL_ERROR "Could not find asset importer library")
       endif(assimp_FIND_REQUIRED)
     endif(assimp_FOUND)
-
   endif(WIN32)
 endif()

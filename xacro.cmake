@@ -44,22 +44,18 @@ macro(RUN_XACRO INPUT OUTPUT)
 
   add_custom_command(
     OUTPUT ${OUTPUT}
-    COMMAND ${_xacro_py} ARGS ${XACRO_OPTIONS} -o ${OUTPUT} ${INPUT}
+    COMMAND ${_xacro_py}
+    ARGS ${XACRO_OPTIONS} -o ${OUTPUT} ${INPUT}
     MAIN_DEPENDENCY ${INPUT}
-    COMMENT "Generating ${OUTPUT}")
+    COMMENT "Generating ${OUTPUT}"
+  )
   list(APPEND ALL_GENERATED_URDF ${OUTPUT})
 
   # Clean generated files.
-  set_property(
-    DIRECTORY
-    APPEND
-    PROPERTY ADDITIONAL_MAKE_CLEAN_FILES ${OUTPUT})
+  set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES ${OUTPUT})
 
   list(APPEND LOGGING_WATCHED_VARIABLES ALL_GENERATED_URDF)
-endmacro(
-  RUN_XACRO
-  INPUT
-  OUTPUT)
+endmacro(RUN_XACRO INPUT OUTPUT)
 
 # .rst: .. command:: GENERATE_URDF_FILE (FILENAME EXTENSION)
 #
@@ -82,19 +78,20 @@ macro(GENERATE_URDF_FILE FILENAME EXTENSION)
     if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${FILENAME}.xacro.in)
       message(
         FATAL_ERROR
-          "cannot find \"${FILENAME}.xacro\" or \"${FILENAME}.xacro.in\"")
+        "cannot find \"${FILENAME}.xacro\" or \"${FILENAME}.xacro.in\""
+      )
     endif(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${FILENAME}.xacro.in)
 
     set(_XACRO_FILE_ ${CMAKE_CURRENT_BINARY_DIR}/${FILENAME}.xacro)
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${FILENAME}.xacro.in
-                   ${_XACRO_FILE_} @ONLY)
+    configure_file(
+      ${CMAKE_CURRENT_SOURCE_DIR}/${FILENAME}.xacro.in
+      ${_XACRO_FILE_}
+      @ONLY
+    )
     # MESSAGE("Configuring ${FILENAME}.xacro.in")
   else(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${FILENAME}.xacro)
     set(_XACRO_FILE_ ${CMAKE_CURRENT_SOURCE_DIR}/${FILENAME}.xacro)
   endif(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${FILENAME}.xacro)
 
   run_xacro(${_XACRO_FILE_} ${CMAKE_CURRENT_BINARY_DIR}/${OUTPUT_FILE})
-endmacro(
-  GENERATE_URDF_FILE
-  FILENAME
-  CONFIGURE)
+endmacro(GENERATE_URDF_FILE FILENAME CONFIGURE)

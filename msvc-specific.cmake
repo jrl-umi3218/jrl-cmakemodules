@@ -30,7 +30,9 @@
 #
 macro(GET_MSVC_VERSION)
   message(
-    DEPRECATION "This macro is deprecated. Use GET_MSVC_TOOLS_VERSION instead.")
+    DEPRECATION
+    "This macro is deprecated. Use GET_MSVC_TOOLS_VERSION instead."
+  )
   if(MSVC60)
     set(MSVC_VERSION "6.0")
   elseif(MSVC70)
@@ -54,13 +56,14 @@ macro(GET_MSVC_VERSION)
       set(MSVC_VERSION "14.0")
       message(
         AUTHOR_WARNING
-          "MSVC version not found. Set MSVC_VERSION to 14.0 by default. Please update the GET_MSVC_VERSION macro."
+        "MSVC version not found. Set MSVC_VERSION to 14.0 by default. Please update the GET_MSVC_VERSION macro."
       )
     else()
       set(MSVC_VERSION "")
       message(
         AUTHOR_WARNING
-          "MSVC version not found. You are not using a MSVC generator.")
+        "MSVC version not found. You are not using a MSVC generator."
+      )
     endif()
   endif()
 endmacro(GET_MSVC_VERSION)
@@ -77,7 +80,7 @@ macro(GET_MSVC_TOOLS_VERSION)
   if(CONTAINS_DOT)
     message(
       AUTHOR_WARNING
-        "MSVC_VERSION has been overwritten with a tools version number (likely by a call to deprecated GET_MSVC_VERSION. Using this number."
+      "MSVC_VERSION has been overwritten with a tools version number (likely by a call to deprecated GET_MSVC_VERSION. Using this number."
     )
     set(MSVC_TOOLS_VERSION ${MSVC_VERSION})
   else()
@@ -108,13 +111,14 @@ macro(GET_MSVC_TOOLS_VERSION)
         set(MSVC_TOOLS_VERSION "16.0")
         message(
           AUTHOR_WARNING
-            "MSVC version not found. Assuming newer version and set MSVC_TOOLS_VERSION to 16.0 by default. Please update the GET_MSVC_TOOLS_VERSION macro."
+          "MSVC version not found. Assuming newer version and set MSVC_TOOLS_VERSION to 16.0 by default. Please update the GET_MSVC_TOOLS_VERSION macro."
         )
       else()
         set(MSVC_TOOLS_VERSION "")
         message(
           AUTHOR_WARNING
-            "MSVC version not found. You are not using a MSVC generator.")
+          "MSVC version not found. You are not using a MSVC generator."
+        )
       endif()
     endif()
   endif()
@@ -135,13 +139,19 @@ macro(REQUIRE_MINIMUM_MSVC_VERSION VERSION)
   get_msvc_tools_version()
   if(${MSVC_TOOLS_VERSION})
     if(NOT ${MSVC_TOOLS_VERSION} VERSION_GREATER ${VERSION})
-      message(FATAL_ERROR "Minimum MSVC version required is " ${VERSION}
-                          " but version " ${MSVC_TOOLS_VERSION} " was found.")
+      message(
+        FATAL_ERROR
+        "Minimum MSVC version required is "
+        ${VERSION}
+        " but version "
+        ${MSVC_TOOLS_VERSION}
+        " was found."
+      )
     endif()
   else()
     message(
       FATAL_ERROR
-        "You are requiring a minimum version for MSVC but you do not use a MSVC generator."
+      "You are requiring a minimum version for MSVC but you do not use a MSVC generator."
     )
   endif(${MSVC_TOOLS_VERSION})
 endmacro(REQUIRE_MINIMUM_MSVC_VERSION)
@@ -166,15 +176,23 @@ macro(GENERATE_MSVC_DOT_USER_FILE)
   if(MSVC)
     require_minimum_msvc_version("10.0")
 
-    set(oneValueArgs NAME COMMAND COMMAND_ARGS WORKING_DIRECTORY
-                     ADDITIONAL_PATH)
+    set(
+      oneValueArgs
+      NAME
+      COMMAND
+      COMMAND_ARGS
+      WORKING_DIRECTORY
+      ADDITIONAL_PATH
+    )
     cmake_parse_arguments(GMDUT "" "${oneValueArgs}" "" ${ARGN})
 
-    if((NOT GMDUT_NAME)
-       AND (NOT GMDUT_COMMAND)
-       AND (NOT GMDUT_COMMAND_ARGS)
-       AND (NOT GMDUT_WORK_DIR)
-       AND (NOT GMDUT_ADDITIONAL_PATH))
+    if(
+      (NOT GMDUT_NAME)
+      AND (NOT GMDUT_COMMAND)
+      AND (NOT GMDUT_COMMAND_ARGS)
+      AND (NOT GMDUT_WORK_DIR)
+      AND (NOT GMDUT_ADDITIONAL_PATH)
+    )
       # legacy version
       set(GMDUT_NAME ${ARGV0})
       if(${ARGC} GREATER 1)
@@ -183,7 +201,7 @@ macro(GENERATE_MSVC_DOT_USER_FILE)
     endif()
 
     if("${CMAKE_MSVCIDE_RUN_PATH}" STREQUAL "")
-      set(CMAKE_MSVCIDE_RUN_PATH "$(SolutionDir)\src\$(Configuration)")
+      set(CMAKE_MSVCIDE_RUN_PATH "${SolutionDir}\\src\\${Configuration}")
     endif()
 
     if(NOT GMDUT_NAME)
@@ -200,10 +218,14 @@ macro(GENERATE_MSVC_DOT_USER_FILE)
     endif()
 
     get_msvc_tools_version()
-    set(DOT_USER_TEMPLATE_PATH
-        ${PROJECT_JRL_CMAKE_MODULE_DIR}/msvc.vcxproj.user.in)
-    set(DOT_USER_FILE_PATH
-        ${CMAKE_CURRENT_BINARY_DIR}/${GMDUT_NAME}.vcxproj.user)
+    set(
+      DOT_USER_TEMPLATE_PATH
+      ${PROJECT_JRL_CMAKE_MODULE_DIR}/msvc.vcxproj.user.in
+    )
+    set(
+      DOT_USER_FILE_PATH
+      ${CMAKE_CURRENT_BINARY_DIR}/${GMDUT_NAME}.vcxproj.user
+    )
     configure_file(${DOT_USER_TEMPLATE_PATH} ${DOT_USER_FILE_PATH})
 
     unset(MSVC_DOT_USER_ADDITIONAL_PATH_DOT_USER)

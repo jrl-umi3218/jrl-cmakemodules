@@ -31,36 +31,44 @@ if(TinyXML2_FOUND)
       if(NOT ${TINYXML_LIBRARY_LIST_LENGTH} EQUAL 4)
         message(
           FATAL_ERROR
-            "Unable to extract the library file path from ${TINYXML2_LIBRARY}")
+          "Unable to extract the library file path from ${TINYXML2_LIBRARY}"
+        )
       endif()
       if(CMAKE_BUILD_TYPE MATCHES DEBUG)
         list(GET TINYXML2_LIBRARY 0 ASSERT_DEBUG)
         if(NOT ${ASSERT_DEBUG} STREQUAL "debug")
           message(
             FATAL_ERROR
-              "could not parse debug library path from ${TINYXML2_LIBRARY}")
+            "could not parse debug library path from ${TINYXML2_LIBRARY}"
+          )
         endif()
         list(GET TINYXML2_LIBRARY 1 TINYXML2_LIBRARY_PATH)
       else()
         list(GET TINYXML2_LIBRARY 2 ASSERT_OPTIMIZED)
         if(NOT ${ASSERT_OPTIMIZED} STREQUAL "optimized")
           message(
-            FATAL_ERROR "could not parse library path from ${TINYXML2_LIBRARY}")
+            FATAL_ERROR
+            "could not parse library path from ${TINYXML2_LIBRARY}"
+          )
         endif()
         list(GET TINYXML2_LIBRARY 3 TINYXML2_LIBRARY_PATH)
       endif()
       if(NOT EXISTS ${TINYXML2_LIBRARY_PATH})
         message(
           FATAL_ERROR
-            "library file path ${TINYXML2_LIBRARY_PATH} does not exist")
+          "library file path ${TINYXML2_LIBRARY_PATH} does not exist"
+        )
       endif()
 
       add_library(tinyxml2::tinyxml2 UNKNOWN IMPORTED)
-      set_property(TARGET tinyxml2::tinyxml2 PROPERTY IMPORTED_LOCATION
-                                                      ${TINYXML2_LIBRARY_PATH})
       set_property(
-        TARGET tinyxml2::tinyxml2 PROPERTY INTERFACE_INCLUDE_DIRECTORIES
-                                           ${TINYXML2_INCLUDE_DIR})
+        TARGET tinyxml2::tinyxml2
+        PROPERTY IMPORTED_LOCATION ${TINYXML2_LIBRARY_PATH}
+      )
+      set_property(
+        TARGET tinyxml2::tinyxml2
+        PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${TINYXML2_INCLUDE_DIR}
+      )
       list(APPEND TinyXML2_TARGETS tinyxml2::tinyxml2)
     endif()
   endif()
@@ -70,17 +78,25 @@ else()
   find_library(TINYXML2_LIBRARY tinyxml2)
 
   include(FindPackageHandleStandardArgs)
-  find_package_handle_standard_args(TinyXML2 DEFAULT_MSG TINYXML2_LIBRARY
-                                    TINYXML2_INCLUDE_DIR)
+  find_package_handle_standard_args(
+    TinyXML2
+    DEFAULT_MSG
+    TINYXML2_LIBRARY
+    TINYXML2_INCLUDE_DIR
+  )
 
   mark_as_advanced(TINYXML2_INCLUDE_DIR TINYXML2_LIBRARY)
 
   if(NOT TARGET tinyxml2::tinyxml2)
     add_library(tinyxml2::tinyxml2 UNKNOWN IMPORTED)
-    set_property(TARGET tinyxml2::tinyxml2 PROPERTY IMPORTED_LOCATION
-                                                    ${TINYXML2_LIBRARY})
-    set_property(TARGET tinyxml2::tinyxml2
-                 PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${TINYXML2_INCLUDE_DIR})
+    set_property(
+      TARGET tinyxml2::tinyxml2
+      PROPERTY IMPORTED_LOCATION ${TINYXML2_LIBRARY}
+    )
+    set_property(
+      TARGET tinyxml2::tinyxml2
+      PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${TINYXML2_INCLUDE_DIR}
+    )
     list(APPEND TinyXML2_TARGETS tinyxml2::tinyxml2)
   endif()
 endif()

@@ -22,7 +22,4 @@ add_project_dependency(Boost 1.50 REQUIRED COMPONENT timer)
 add_library(myLibrary ${MY_SOURCES})
 target_link_libraries(myLibrary MyDependency::MyAwesomeLib Boost::timer)
 
-install(
-  TARGETS myLibrary
-  EXPORT ${TARGETS_EXPORT_NAME}
-  DESTINATION lib)
+install(TARGETS myLibrary EXPORT ${TARGETS_EXPORT_NAME} DESTINATION lib)

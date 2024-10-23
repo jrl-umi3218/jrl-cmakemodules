@@ -65,16 +65,12 @@ include(${CMAKE_CURRENT_LIST_DIR}/base.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/hpp/doc.cmake)
 
 # Activate hpp-util logging if requested
-set(HPP_DEBUG
-    FALSE
-    CACHE BOOL "trigger hpp-util debug output")
+set(HPP_DEBUG FALSE CACHE BOOL "trigger hpp-util debug output")
 if(HPP_DEBUG)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHPP_DEBUG")
 endif()
 # Activate hpp-util logging if requested
-set(HPP_BENCHMARK
-    FALSE
-    CACHE BOOL "trigger hpp-util benchmark output")
+set(HPP_BENCHMARK FALSE CACHE BOOL "trigger hpp-util benchmark output")
 if(HPP_BENCHMARK)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHPP_ENABLE_BENCHMARK")
 endif()

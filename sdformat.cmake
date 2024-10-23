@@ -11,7 +11,15 @@
 # FATAL_ERROR is generated.
 #
 macro(SEARCH_FOR_SDFORMAT)
-  set(SDF_VERSIONS "14" "13" "12" "11" "10" "9")
+  set(
+    SDF_VERSIONS
+    "14"
+    "13"
+    "12"
+    "11"
+    "10"
+    "9"
+  )
   list(APPEND SDF_VERSIONS "")
   set(P_REQUIRED False)
   set(variadic_args ${ARGN})
@@ -23,7 +31,7 @@ macro(SEARCH_FOR_SDFORMAT)
     else()
       message(
         STATUS
-          "Got an unknown optional arg: ${optional_arg}. Only REQUIRED is recognized."
+        "Got an unknown optional arg: ${optional_arg}. Only REQUIRED is recognized."
       )
     endif()
   endif()
@@ -40,7 +48,8 @@ macro(SEARCH_FOR_SDFORMAT)
     if(P_REQUIRED)
       message(
         FATAL_ERROR
-          "SDFormat required but not found. Accepted versions: ${SDF_VERSIONS}")
+        "SDFormat required but not found. Accepted versions: ${SDF_VERSIONS}"
+      )
     else()
       message(STATUS "SDFormat not found. Accepted versions: ${SDF_VERSIONS}")
     endif()

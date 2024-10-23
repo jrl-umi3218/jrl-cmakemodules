@@ -41,10 +41,22 @@
 # :param TRACY_ENABLE: Controls if tracy macro are empty or call tracy.
 function(_GENERATE_TRACY_HEADER)
   set(options)
-  set(oneValueArgs INCLUDE_DIR HEADER_DIR FILENAME LIBRARY_NAME TRACY_ENABLE)
+  set(
+    oneValueArgs
+    INCLUDE_DIR
+    HEADER_DIR
+    FILENAME
+    LIBRARY_NAME
+    TRACY_ENABLE
+  )
   set(multiValueArgs)
-  cmake_parse_arguments(ARGS "${options}" "${oneValueArgs}" "${multiValueArgs}"
-                        ${ARGN})
+  cmake_parse_arguments(
+    ARGS
+    "${options}"
+    "${oneValueArgs}"
+    "${multiValueArgs}"
+    ${ARGN}
+  )
 
   # Set variables for configure_file command
   set(LIBRARY_NAME ${ARGS_LIBRARY_NAME})
@@ -55,15 +67,19 @@ function(_GENERATE_TRACY_HEADER)
     set(DEFINE_TRACY_ENABLE)
   endif()
 
-  configure_file(${PROJECT_JRL_CMAKE_MODULE_DIR}/tracy.hh.cmake
-                 ${ARGS_INCLUDE_DIR}/${ARGS_HEADER_DIR}/${ARGS_FILENAME} @ONLY)
+  configure_file(
+    ${PROJECT_JRL_CMAKE_MODULE_DIR}/tracy.hh.cmake
+    ${ARGS_INCLUDE_DIR}/${ARGS_HEADER_DIR}/${ARGS_FILENAME}
+    @ONLY
+  )
 
   # Install it if requested.
   if(INSTALL_GENERATED_HEADERS)
     install(
       FILES ${ARGS_INCLUDE_DIR}/${ARGS_HEADER_DIR}/${ARGS_FILENAME}
       DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${ARGS_HEADER_DIR}
-      PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_WRITE)
+      PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_WRITE
+    )
   endif()
 endfunction()
 
@@ -100,7 +116,8 @@ function(_SETUP_TRACY_HEADER)
     LIBRARY_NAME
     ${PACKAGE_CPPNAME}
     TRACY_ENABLE
-    ${${PACKAGE_CPPNAME}_TRACY_ENABLE})
+    ${${PACKAGE_CPPNAME}_TRACY_ENABLE}
+  )
 endfunction()
 
 option(${PACKAGE_CPPNAME}_TRACY_ENABLE "Enable Tracy." OFF)

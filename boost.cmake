@@ -21,27 +21,24 @@
 # FALSE otherwise. This function is for internal use only.
 #
 function(SEARCH_FOR_BOOST_COMPONENT boost_python_name found)
-  set(${found}
-      FALSE
-      PARENT_SCOPE)
-  find_package(Boost ${BOOST_REQUIRED} QUIET
-               OPTIONAL_COMPONENTS ${boost_python_name})
+  set(${found} FALSE PARENT_SCOPE)
+  find_package(
+    Boost
+    ${BOOST_REQUIRED}
+    QUIET
+    OPTIONAL_COMPONENTS ${boost_python_name}
+  )
   string(TOUPPER ${boost_python_name} boost_python_name_UPPER)
   if(Boost_${boost_python_name_UPPER}_FOUND)
-    set(${found}
-        TRUE
-        PARENT_SCOPE)
+    set(${found} TRUE PARENT_SCOPE)
   endif()
-endfunction(
-  SEARCH_FOR_BOOST_COMPONENT
-  boost_python_name
-  found)
+endfunction(SEARCH_FOR_BOOST_COMPONENT boost_python_name found)
 
 if(CMAKE_VERSION VERSION_LESS "3.12")
   set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/boost ${CMAKE_MODULE_PATH})
   message(
     STATUS
-      "CMake versions older than 3.12 may warn when looking to Boost components. Custom macros are used to find it."
+    "CMake versions older than 3.12 may warn when looking to Boost components. Custom macros are used to find it."
   )
 endif(CMAKE_VERSION VERSION_LESS "3.12")
 
@@ -85,12 +82,16 @@ endmacro(EXPORT_BOOST_DEFAULT_OPTIONS)
 #
 
 macro(SEARCH_FOR_BOOST_PYTHON)
-
   set(options REQUIRED)
   set(oneValueArgs NAME)
   set(multiValueArgs)
-  cmake_parse_arguments(SEARCH_FOR_BOOST_PYTHON_ARGS "${options}"
-                        "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+  cmake_parse_arguments(
+    SEARCH_FOR_BOOST_PYTHON_ARGS
+    "${options}"
+    "${oneValueArgs}"
+    "${multiValueArgs}"
+    ${ARGN}
+  )
   cmake_parse_arguments(_BOOST_PYTHON_REQUIRED "REQUIRED" "" "" ${ARGN})
   set(BOOST_PYTHON_NAME "python")
   set(BOOST_PYTHON_REQUIRED "")
@@ -103,7 +104,7 @@ macro(SEARCH_FOR_BOOST_PYTHON)
   if(NOT PYTHON_EXECUTABLE)
     message(
       FATAL_ERROR
-        "Python has not been found. You should first call FindPython before calling SEARCH_FOR_BOOST_PYTHON macro."
+      "Python has not been found. You should first call FindPython before calling SEARCH_FOR_BOOST_PYTHON macro."
     )
   endif(NOT PYTHON_EXECUTABLE)
 
@@ -111,10 +112,12 @@ macro(SEARCH_FOR_BOOST_PYTHON)
     set(BOOST_PYTHON_NAME ${SEARCH_FOR_BOOST_PYTHON_ARGS_NAME})
   else()
     # Test: pythonX, pythonXY and python-pyXY
-    set(BOOST_PYTHON_COMPONENT_LIST
-        "python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}"
-        "python${PYTHON_VERSION_MAJOR}"
-        "python-py${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}")
+    set(
+      BOOST_PYTHON_COMPONENT_LIST
+      "python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}"
+      "python${PYTHON_VERSION_MAJOR}"
+      "python-py${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}"
+    )
     set(BOOST_PYTHON_FOUND FALSE)
     foreach(BOOST_PYTHON_COMPONENT ${BOOST_PYTHON_COMPONENT_LIST})
       search_for_boost_component(${BOOST_PYTHON_COMPONENT} BOOST_PYTHON_FOUND)
@@ -129,24 +132,30 @@ macro(SEARCH_FOR_BOOST_PYTHON)
     if(NOT BOOST_PYTHON_FOUND)
       message(
         WARNING
-          "Impossible to check Boost.Python version. Trying with 'python'.")
+        "Impossible to check Boost.Python version. Trying with 'python'."
+      )
     endif(NOT BOOST_PYTHON_FOUND)
-
   endif()
 
   if(PYTHON_EXPORT_DEPENDENCY)
     install_jrl_cmakemodules_dir("boost")
     install_jrl_cmakemodules_file("boost.cmake")
-    set(PYTHON_EXPORT_DEPENDENCY_MACROS
-        "${PYTHON_EXPORT_DEPENDENCY_MACROS}\nSEARCH_FOR_BOOST_PYTHON(${BOOST_PYTHON_REQUIRED} NAME ${BOOST_PYTHON_NAME})"
+    set(
+      PYTHON_EXPORT_DEPENDENCY_MACROS
+      "${PYTHON_EXPORT_DEPENDENCY_MACROS}\nSEARCH_FOR_BOOST_PYTHON(${BOOST_PYTHON_REQUIRED} NAME ${BOOST_PYTHON_NAME})"
     )
   endif()
   find_package(Boost ${BOOST_PYTHON_REQUIRED} COMPONENTS ${BOOST_PYTHON_NAME})
   string(TOUPPER ${BOOST_PYTHON_NAME} UPPERCOMPONENT)
 
-  list(APPEND LOGGING_WATCHED_VARIABLES Boost_${UPPERCOMPONENT}_FOUND
-       Boost_${UPPERCOMPONENT}_LIBRARY Boost_${UPPERCOMPONENT}_LIBRARY_DEBUG
-       Boost_${UPPERCOMPONENT}_LIBRARY_RELEASE)
+  list(
+    APPEND
+    LOGGING_WATCHED_VARIABLES
+    Boost_${UPPERCOMPONENT}_FOUND
+    Boost_${UPPERCOMPONENT}_LIBRARY
+    Boost_${UPPERCOMPONENT}_LIBRARY_DEBUG
+    Boost_${UPPERCOMPONENT}_LIBRARY_RELEASE
+  )
 
   set(Boost_PYTHON_LIBRARY ${Boost_${UPPERCOMPONENT}_LIBRARY})
   list(APPEND Boost_PYTHON_LIBRARIES ${Boost_PYTHON_LIBRARY})
@@ -181,7 +190,7 @@ endmacro(SEARCH_FOR_BOOST_PYTHON)
 macro(SEARCH_FOR_BOOST)
   message(
     AUTHOR_WARNING
-      "SEARCH_FOR_BOOST is deprecated. Please use find_package() / SEARCH_FOR_BOOST_PYTHON()"
+    "SEARCH_FOR_BOOST is deprecated. Please use find_package() / SEARCH_FOR_BOOST_PYTHON()"
   )
   set(Boost_USE_STATIC_LIBS OFF)
   set(Boost_USE_MULTITHREADED ON)
@@ -189,16 +198,26 @@ macro(SEARCH_FOR_BOOST)
   # First try to find Boost to get the version
   find_package(Boost ${BOOST_REQUIRED})
   string(REPLACE "_" "." Boost_SHORT_VERSION ${Boost_LIB_VERSION})
-  if("${Boost_SHORT_VERSION}" VERSION_GREATER "1.70" OR "${Boost_SHORT_VERSION}"
-                                                        VERSION_EQUAL "1.70")
+  if(
+    "${Boost_SHORT_VERSION}" VERSION_GREATER "1.70"
+    OR "${Boost_SHORT_VERSION}" VERSION_EQUAL "1.70"
+  )
     set(BUILD_SHARED_LIBS ON)
     set(Boost_NO_BOOST_CMAKE ON)
-  endif("${Boost_SHORT_VERSION}" VERSION_GREATER "1.70"
-        OR "${Boost_SHORT_VERSION}" VERSION_EQUAL "1.70")
+  endif(
+    "${Boost_SHORT_VERSION}" VERSION_GREATER "1.70"
+    OR "${Boost_SHORT_VERSION}" VERSION_EQUAL "1.70"
+  )
 
   if(NOT DEFINED BOOST_COMPONENTS)
-    set(BOOST_COMPONENTS filesystem system thread program_options
-                         unit_test_framework)
+    set(
+      BOOST_COMPONENTS
+      filesystem
+      system
+      thread
+      program_options
+      unit_test_framework
+    )
   endif(NOT DEFINED BOOST_COMPONENTS)
 
   # Check if python is in the list and adjust the version according to the
@@ -211,17 +230,28 @@ macro(SEARCH_FOR_BOOST)
   endif(${PYTHON_IN_BOOST_COMPONENTS} GREATER -1)
 
   # Make Boost component exportable
-  list(INSERT _PACKAGE_CONFIG_DEPENDENCIES_FIND_PACKAGE 0
-       "SET(Boost_USE_STATIC_LIBS OFF);SET(Boost_USE_MULTITHREADED ON)")
-  list(INSERT _PACKAGE_CONFIG_DEPENDENCIES_FIND_DEPENDENCY 0
-       "SET(Boost_USE_STATIC_LIBS OFF);SET(Boost_USE_MULTITHREADED ON)")
+  list(
+    INSERT
+    _PACKAGE_CONFIG_DEPENDENCIES_FIND_PACKAGE
+    0
+    "SET(Boost_USE_STATIC_LIBS OFF);SET(Boost_USE_MULTITHREADED ON)"
+  )
+  list(
+    INSERT
+    _PACKAGE_CONFIG_DEPENDENCIES_FIND_DEPENDENCY
+    0
+    "SET(Boost_USE_STATIC_LIBS OFF);SET(Boost_USE_MULTITHREADED ON)"
+  )
   add_project_dependency(Boost ${BOOST_REQUIRED} COMPONENTS ${BOOST_COMPONENTS}
-                         REQUIRED)
+                         REQUIRED
+  )
 
   if(NOT Boost_FOUND)
     message(
-      FATAL_ERROR "Failed to detect Boost with the following components:\n"
-                  ${COMPONENTS})
+      FATAL_ERROR
+      "Failed to detect Boost with the following components:\n"
+      ${COMPONENTS}
+    )
   endif(NOT Boost_FOUND)
 
   pkg_config_append_cflags("-I${Boost_INCLUDE_DIR}")
@@ -248,12 +278,18 @@ macro(SEARCH_FOR_BOOST)
     Boost_MAJOR_VERSION
     Boost_MINOR_VERSION
     Boost_SUBMINOR_VERSION
-    Boost_LIB_DIAGNOSTIC_DEFINITIONS)
+    Boost_LIB_DIAGNOSTIC_DEFINITIONS
+  )
   foreach(COMPONENT ${BOOST_COMPONENTS})
     string(TOUPPER ${COMPONENT} UPPERCOMPONENT)
-    list(APPEND LOGGING_WATCHED_VARIABLES Boost_${UPPERCOMPONENT}_FOUND
-         Boost_${UPPERCOMPONENT}_LIBRARY Boost_${UPPERCOMPONENT}_LIBRARY_DEBUG
-         Boost_${UPPERCOMPONENT}_LIBRARY_RELEASE)
+    list(
+      APPEND
+      LOGGING_WATCHED_VARIABLES
+      Boost_${UPPERCOMPONENT}_FOUND
+      Boost_${UPPERCOMPONENT}_LIBRARY
+      Boost_${UPPERCOMPONENT}_LIBRARY_DEBUG
+      Boost_${UPPERCOMPONENT}_LIBRARY_RELEASE
+    )
   endforeach()
 
   # On darwin systems, we must link againt boost_python with unresolved symbols.
@@ -286,34 +322,49 @@ macro(TARGET_LINK_BOOST_PYTHON target)
 
   if(TARGET Boost::python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR})
     target_link_libraries(
-      ${target} ${PUBLIC_KEYWORD}
-      Boost::python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR})
-
+      ${target}
+      ${PUBLIC_KEYWORD}
+      Boost::python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}
+    )
   else()
-
     if(APPLE)
       get_target_property(TARGET_TYPE ${target} TYPE)
 
       if(${TARGET_TYPE} MATCHES EXECUTABLE)
-        target_link_libraries(${target} ${PUBLIC_KEYWORD}
-                              ${Boost_PYTHON_LIBRARY})
+        target_link_libraries(
+          ${target}
+          ${PUBLIC_KEYWORD}
+          ${Boost_PYTHON_LIBRARY}
+        )
       else(${TARGET_TYPE} MATCHES EXECUTABLE)
         target_link_libraries(
-          ${target} ${PUBLIC_KEYWORD}
-          -Wl,-undefined,dynamic_lookup,${Boost_PYTHON_LIBRARIES})
+          ${target}
+          ${PUBLIC_KEYWORD}
+          -Wl,-undefined,dynamic_lookup,${Boost_PYTHON_LIBRARIES}
+        )
       endif(${TARGET_TYPE} MATCHES EXECUTABLE)
 
-      target_include_directories(${target} SYSTEM ${PUBLIC_KEYWORD}
-                                 ${Boost_INCLUDE_DIR})
+      target_include_directories(
+        ${target}
+        SYSTEM
+        ${PUBLIC_KEYWORD}
+        ${Boost_INCLUDE_DIR}
+      )
     else(APPLE)
-
-      target_link_libraries(${target} ${PUBLIC_KEYWORD}
-                            ${Boost_PYTHON_LIBRARIES})
-      target_include_directories(${target} SYSTEM ${PUBLIC_KEYWORD}
-                                 ${Boost_INCLUDE_DIR} ${PYTHON_INCLUDE_DIR})
+      target_link_libraries(
+        ${target}
+        ${PUBLIC_KEYWORD}
+        ${Boost_PYTHON_LIBRARIES}
+      )
+      target_include_directories(
+        ${target}
+        SYSTEM
+        ${PUBLIC_KEYWORD}
+        ${Boost_INCLUDE_DIR}
+        ${PYTHON_INCLUDE_DIR}
+      )
     endif(APPLE)
     list(APPEND LOGGING_WATCHED_VARIABLES Boost_PYTHON_LIBRARIES)
-
   endif()
 endmacro(TARGET_LINK_BOOST_PYTHON)
 

@@ -15,11 +15,15 @@ project(${PROJECT_NAME} LANGUAGES CXX)
 # * Otherwise it is assumed it is created by the project and removed with the
 #   uninstall target
 
-option(FORCE_DOT_CATKIN_CREATION
-       "Force creation of .catkin file in install destination" OFF)
+option(
+  FORCE_DOT_CATKIN_CREATION
+  "Force creation of .catkin file in install destination"
+  OFF
+)
 
 if(FORCE_DOT_CATKIN_CREATION)
   install(
-    CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_INSTALL_PREFIX}/.catkin)"
+    CODE
+      "execute_process(COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_INSTALL_PREFIX}/.catkin)"
   )
 endif()
