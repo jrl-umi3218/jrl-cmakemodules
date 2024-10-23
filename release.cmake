@@ -69,7 +69,8 @@ macro(RELEASE_SETUP)
         sed -i.back \"s|<version>.*</version>|<version>$$VERSION</version>|g\"
         package.xml && rm package.xml.back && ${GIT} add package.xml && ${GIT}
         commit -m "release: Update package.xml version to $$VERSION" && echo
-        "Updated package.xml and committed")
+        "Updated package.xml and committed"
+    )
     add_dependencies(release_package_xml ${PROJECT_NAME}-release_package_xml)
 
     if(NOT TARGET release_pyproject_toml)
@@ -82,19 +83,18 @@ macro(RELEASE_SETUP)
       COMMAND
         ${PYTHON_EXECUTABLE} ${PROJECT_JRL_CMAKE_MODULE_DIR}/pyproject.py
         $$VERSION && if ! (git diff --quiet pyproject.toml) ; then
-        (${GIT}
-         add
-         pyproject.toml
-         &&
-         ${GIT}
-         commit
-         -m
-         "release: Update pyproject.toml version to $$VERSION"
-         &&
-         echo
-         "Updated pyproject.toml and committed") ; fi)
-    add_dependencies(release_pyproject_toml
-                     ${PROJECT_NAME}-release_pyproject_toml)
+        (
+          ${GIT}
+          add pyproject.toml && ${GIT} commit -m
+          "release: Update pyproject.toml version to $$VERSION" && echo
+          "Updated pyproject.toml and committed"
+        )
+        ; fi
+    )
+    add_dependencies(
+      release_pyproject_toml
+      ${PROJECT_NAME}-release_pyproject_toml
+    )
 
     if(NOT TARGET release_changelog)
       add_custom_target(release_changelog COMMENT "Update CHANGELOG.md")
@@ -109,28 +109,25 @@ macro(RELEASE_SETUP)
         CHANGELOG.md && sed -i.back
         "\"s|^\\[Unreleased]: \\(https://.*compare/\\)\\(v.*\\)...HEAD|[Unreleased]: \\1v$$VERSION...HEAD\\n[$$VERSION]: \\1\\2...v$$VERSION|\""
         CHANGELOG.md && if ! (git diff --quiet CHANGELOG.md) ; then
-        (${GIT}
-         add
-         CHANGELOG.md
-         &&
-         ${GIT}
-         commit
-         -m
-         "release: Update CHANGELOG.md for $$VERSION"
-         &&
-         echo
-         "Updated CHANGELOG.md and committed") ; fi)
+        (
+          ${GIT}
+          add CHANGELOG.md && ${GIT} commit -m
+          "release: Update CHANGELOG.md for $$VERSION" && echo
+          "Updated CHANGELOG.md and committed"
+        )
+        ; fi
+    )
     add_dependencies(release_changelog ${PROJECT_NAME}-release_changelog)
 
     if(NOT TARGET release_pixi_toml)
       add_custom_target(release_pixi_toml COMMENT "Update pixi.toml")
     endif()
+    # gersemi: off
     add_custom_target(
       ${PROJECT_NAME}-release_pixi_toml
       WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
       COMMENT "Update pixi.toml for ${PROJECT_NAME}"
       COMMAND
-        # cmake-format: off
         ${PYTHON_EXECUTABLE} ${PROJECT_JRL_CMAKE_MODULE_DIR}/pixi.py $$VERSION &&
         if ! (git diff --quiet pixi.toml) ; then
         (
@@ -138,8 +135,8 @@ macro(RELEASE_SETUP)
          ${GIT} commit -m "release: Update pixi.toml version to $$VERSION" &&
          echo "Updated pixi.toml and committed"
         ) ; fi
-# cmake-format: on
     )
+    # gersemi: on
     add_dependencies(release_pixi_toml ${PROJECT_NAME}-release_pixi_toml)
 
     if(NOT TARGET release_citation_cff)
@@ -154,19 +151,20 @@ macro(RELEASE_SETUP)
         "\"s|^version:.*|version: $$VERSION|;s|^date-released:.*|date-released: \\\"${TODAY}\\\"|\""
         CITATION.cff && rm CITATION.cff.back && ${GIT} add CITATION.cff &&
         ${GIT} commit -m "release: Update CITATION.cff version to $$VERSION" &&
-        echo "Updated CITATION.cff and committed")
+        echo "Updated CITATION.cff and committed"
+    )
     add_dependencies(release_citation_cff ${PROJECT_NAME}-release_citation_cff)
 
     set(BUILD_CMD ${CMAKE_COMMAND} --build ${PROJECT_BINARY_DIR} --target)
     if(NOT TARGET release)
       add_custom_target(release COMMENT "Create a new release")
     endif()
+    # gersemi: off
     add_custom_target(
       ${PROJECT_NAME}-release
       WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
       COMMENT "Create a new release for ${PROJECT_NAME}"
       COMMAND
-        # cmake-format: off
         export LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH} &&
         export ${LD_LIBRARY_PATH_VARIABLE_NAME}=$ENV{${LD_LIBRARY_PATH_VARIABLE_NAME}} &&
         export PYTHONPATH=$ENV{PYTHONPATH} &&
@@ -196,8 +194,8 @@ macro(RELEASE_SETUP)
         ${BUILD_CMD} ${PROJECT_NAME}-dist &&
         ${BUILD_CMD} ${PROJECT_NAME}-distclean &&
         echo "Please, run 'git push --tags' and upload the tarball to github to finalize this release."
-# cmake-format: on
     )
+    # gersemi: on
     add_dependencies(release ${PROJECT_NAME}-release)
   endif()
 endmacro()
