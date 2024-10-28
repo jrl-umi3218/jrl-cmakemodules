@@ -292,9 +292,7 @@ macro(FINDPYTHON)
   message(STATUS "PythonLibraryDirs: ${PYTHON_LIBRARY_DIRS}")
   message(STATUS "PythonLibVersionString: ${PYTHONLIBS_VERSION_STRING}")
 
-  if(PYTHON_SITELIB)
-    file(TO_CMAKE_PATH "${PYTHON_SITELIB}" PYTHON_SITELIB)
-  else()
+  if(NOT PYTHON_SITELIB)
     # Use either site-packages (default) or dist-packages (Debian packages)
     # directory
     option(PYTHON_DEB_LAYOUT "Enable Debian-style Python package layout" OFF)
@@ -349,6 +347,11 @@ macro(FINDPYTHON)
         "${PYTHON_SITELIB}"
       )
     endif()
+  endif()
+
+  # Avoid Windows path
+  if(PYTHON_SITELIB)
+    file(TO_CMAKE_PATH "${PYTHON_SITELIB}" PYTHON_SITELIB)
   endif()
 
   message(STATUS "Python site lib: ${PYTHON_SITELIB}")
