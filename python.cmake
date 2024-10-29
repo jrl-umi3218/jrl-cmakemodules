@@ -349,7 +349,7 @@ macro(FINDPYTHON)
     endif()
   endif()
 
-  # Avoid Windows path
+  # Avoid paths in Windows format
   if(PYTHON_SITELIB)
     file(TO_CMAKE_PATH "${PYTHON_SITELIB}" PYTHON_SITELIB)
   endif()
