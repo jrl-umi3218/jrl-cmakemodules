@@ -68,6 +68,7 @@ macro(DISTCHECK_SETUP)
       "${CMAKE_BINARY_DIR}"
     )
 
+    set(BUILD_CMD ${CMAKE_COMMAND} --build ${PROJECT_BINARY_DIR} --target)
     if(NOT TARGET distcheck)
       add_custom_target(distcheck COMMENT "Checking generated tarball...")
     endif()
@@ -124,22 +125,22 @@ macro(DISTCHECK_SETUP)
           cmake .. ||
           (echo "ERROR: the cmake configuration failed." && false)
           &&
-        make ${DISTCHECK_MAKEFLAGS} ||
+        ${BUILD_CMD} ${DISTCHECK_MAKEFLAGS} all ||
           (echo "ERROR: the compilation failed." && false)
           &&
-        make test ||
+        ${BUILD_CMD} test ||
           (echo "ERROR: the test suite failed." && false)
           &&
-        make install ||
+        ${BUILD_CMD} install ||
           (echo "ERROR: the install target failed." && false)
           &&
-        make uninstall ||
+        ${BUILD_CMD} uninstall ||
           (echo "ERROR: the uninstall target failed." && false)
           &&
         test `find ${INSTDIR} -type f | wc -l` -eq 0 ||
           (echo "ERROR: the uninstall target does not work." && false)
           &&
-        make clean || (echo "ERROR: the clean target failed." && false)
+        ${BUILD_CMD} clean || (echo "ERROR: the clean target failed." && false)
           &&
         cd ${CMAKE_BINARY_DIR}/${PROJECT_NAME}${PROJECT_SUFFIX}-${PROJECT_VERSION} &&
         chmod u+w . _build _inst &&
