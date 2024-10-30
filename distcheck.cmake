@@ -86,6 +86,8 @@ macro(DISTCHECK_SETUP)
         mkdir -p _inst &&
         chmod u+rwx _build _inst &&
         chmod a-w . &&
+        # Link xpixi directory into new source dir to avoid issue when replacing path in CMakeCache.txt
+        if [ -d ${CMAKE_SOURCE_DIR}/.pixi ]; then ( ln -s ${CMAKE_SOURCE_DIR}/.pixi ${SRCDIR}/.pixi ) ; fi &&
         cp ${CMAKE_BINARY_DIR}/CMakeCache.txt _build/ &&
         # Change previous source dir to the source one
         ${SED} ${SED_I_OPTION} -e "'s|${CMAKE_SOURCE_DIR}|${SRCDIR}|g'" _build/CMakeCache.txt &&
