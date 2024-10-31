@@ -56,8 +56,9 @@
 #    define @LIBRARY_NAME@_DLLIMPORT [[gnu::visibility("default")]]
 #    define @LIBRARY_NAME@_DLLEXPORT [[gnu::visibility("default")]]
 #    define @LIBRARY_NAME@_DLLLOCAL  [[gnu::visibility("hidden")]]
-#    define @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DECLARATION_DLLIMPORT [[gnu::visibility("default")]]
-#    define @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DECLARATION_DLLEXPORT [[gnu::visibility("default")]]
+// gnu::visibility is not working with clang and explicit template instantiation
+#    define @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DECLARATION_DLLIMPORT __attribute__ ((visibility("default")))
+#    define @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DECLARATION_DLLEXPORT __attribute__ ((visibility("default")))
 #    define @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DEFINITION_DLLIMPORT
 #    define @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DEFINITION_DLLEXPORT
 #   else
