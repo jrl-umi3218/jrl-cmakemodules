@@ -50,13 +50,23 @@
 # else
 // On Linux, for GCC >= 4, tag symbols using GCC extension.
 #  if __GNUC__ >= 4
-#   define @LIBRARY_NAME@_DLLIMPORT __attribute__ ((visibility("default")))
-#   define @LIBRARY_NAME@_DLLEXPORT __attribute__ ((visibility("default")))
-#   define @LIBRARY_NAME@_DLLLOCAL  __attribute__ ((visibility("hidden")))
-#   define @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DECLARATION_DLLIMPORT __attribute__ ((visibility("default")))
-#   define @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DECLARATION_DLLEXPORT __attribute__ ((visibility("default")))
-#   define @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DEFINITION_DLLIMPORT
-#   define @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DEFINITION_DLLEXPORT
+#   if defined(__cplusplus) && (__cplusplus >= 201103L)
+#    define @LIBRARY_NAME@_DLLIMPORT [[gnu::visibility("default")]]
+#    define @LIBRARY_NAME@_DLLEXPORT [[gnu::visibility("default")]]
+#    define @LIBRARY_NAME@_DLLLOCAL  [[gnu::visibility("hidden")]]
+#    define @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DECLARATION_DLLIMPORT [[gnu::visibility("default")]]
+#    define @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DECLARATION_DLLEXPORT [[gnu::visibility("default")]]
+#    define @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DEFINITION_DLLIMPORT
+#    define @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DEFINITION_DLLEXPORT
+#   else
+#    define @LIBRARY_NAME@_DLLIMPORT __attribute__ ((visibility("default")))
+#    define @LIBRARY_NAME@_DLLEXPORT __attribute__ ((visibility("default")))
+#    define @LIBRARY_NAME@_DLLLOCAL  __attribute__ ((visibility("hidden")))
+#    define @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DECLARATION_DLLIMPORT __attribute__ ((visibility("default")))
+#    define @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DECLARATION_DLLEXPORT __attribute__ ((visibility("default")))
+#    define @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DEFINITION_DLLIMPORT
+#    define @LIBRARY_NAME@_EXPLICIT_INSTANTIATION_DEFINITION_DLLEXPORT
+#   endif
 #  else
 // Otherwise (GCC < 4 or another compiler is used), export everything.
 #   define @LIBRARY_NAME@_DLLIMPORT
