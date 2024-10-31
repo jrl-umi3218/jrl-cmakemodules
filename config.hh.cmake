@@ -50,6 +50,8 @@
 # else
 // On Linux, for GCC >= 4, tag symbols using GCC extension.
 #  if __GNUC__ >= 4
+// Use C++11 attribute if avaiable.
+// This avoid issue when mixing old and C++11 attributes with GCC < 13
 #   if defined(__cplusplus) && (__cplusplus >= 201103L)
 #    define @LIBRARY_NAME@_DLLIMPORT [[gnu::visibility("default")]]
 #    define @LIBRARY_NAME@_DLLEXPORT [[gnu::visibility("default")]]
