@@ -85,6 +85,7 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
       ./idl.cmake
       ./idlrtc.cmake
       ./install-data.cmake
+      ./install-helpers.cmake
       ./julia.cmake
       ./kineo.cmake
       ./lapack.cmake
@@ -101,6 +102,8 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
       ./openrtm.cmake
       ./oscheck.cmake
       ./package-config.cmake
+      ./package.xml
+      ./pixi.py
       ./pkg-config.cmake
       ./pkg-config.pc.cmake
       ./portability.cmake
@@ -114,7 +117,6 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
       ./release.cmake
       ./relpath.cmake
       ./ros.cmake
-      ./ros2.cmake
       ./sdformat.cmake
       ./setup.cfg
       ./shared-library.cmake

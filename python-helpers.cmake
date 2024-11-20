@@ -13,25 +13,82 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# .rst: .. command::  PYTHON_INSTALL(MODULE FILE DEST)
+# .rst:
+#
+# ~~~
+# .. command:: PYTHON_INSTALL(<module> <file> <dest> COMPONENT <component>)
+# ~~~
 #
 # Compile and install a Python file.
 #
+# :param module: Python module name.
+#
+# :param file: Python file name.
+#
+# :param file: Installation directory.
+#
+# :param component: Component to forward to install command.
 macro(PYTHON_INSTALL MODULE FILE DEST)
+  set(options)
+  set(oneValueArgs COMPONENT)
+  set(multiValueArgs)
+  cmake_parse_arguments(
+    ARGS
+    "${options}"
+    "${oneValueArgs}"
+    "${multiValueArgs}"
+    ${ARGN}
+  )
+
+  if(ARGS_COMPONENT)
+    set(_COMPONENT_NAME ${ARGS_COMPONENT})
+  else()
+    set(_COMPONENT_NAME ${CMAKE_INSTALL_DEFAULT_COMPONENT_NAME})
+  endif()
+
   python_build("${MODULE}" "${FILE}")
 
   install(
     FILES "${CMAKE_CURRENT_SOURCE_DIR}/${MODULE}/${FILE}"
     DESTINATION "${DEST}/${MODULE}"
+    COMPONENT ${_COMPONENT_NAME}
   )
 endmacro()
 
-# .rst: .. command:: PYTHON_INSTALL_ON_SITE (MODULE FILE)
+# .rst:
+#
+# ~~~
+# .. command:: PYTHON_INSTALL_ON_SITE (<module> <file> COMPONENT <component>)
+# ~~~
 #
 # Compile and install a Python file in :cmake:variable:`PYTHON_SITELIB`.
 #
+# :param module: Python module name.
+#
+# :param file: Python file name.
+#
+# :param component: Component to forward to install command.
 macro(PYTHON_INSTALL_ON_SITE MODULE FILE)
-  python_install("${MODULE}" "${FILE}" ${PYTHON_SITELIB})
+  set(options)
+  set(oneValueArgs COMPONENT)
+  set(multiValueArgs)
+  cmake_parse_arguments(
+    ARGS
+    "${options}"
+    "${oneValueArgs}"
+    "${multiValueArgs}"
+    ${ARGN}
+  )
+
+  if(ARGS_COMPONENT)
+    set(_COMPONENT_NAME ${ARGS_COMPONENT})
+  else()
+    set(_COMPONENT_NAME ${CMAKE_INSTALL_DEFAULT_COMPONENT_NAME})
+  endif()
+
+  python_install("${MODULE}" "${FILE}" ${PYTHON_SITELIB} COMPONENT
+                 ${_COMPONENT_NAME}
+  )
 endmacro()
 
 # PYTHON_BUILD_GET_TARGET(TARGET)

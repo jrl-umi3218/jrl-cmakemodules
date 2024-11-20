@@ -170,11 +170,16 @@ function(
   EXPORT_SYMBOL
 )
   generate_configuration_header_v2(
-    INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/include
-    HEADER_DIR ${HEADER_DIR}
-    FILENAME ${FILENAME}
-    LIBRARY_NAME ${LIBRARY_NAME}
-    EXPORT_SYMBOL ${EXPORT_SYMBOL}
+    INCLUDE_DIR
+    ${CMAKE_CURRENT_BINARY_DIR}/include
+    HEADER_DIR
+    ${HEADER_DIR}
+    FILENAME
+    ${FILENAME}
+    LIBRARY_NAME
+    ${LIBRARY_NAME}
+    EXPORT_SYMBOL
+    ${EXPORT_SYMBOL}
   )
 endfunction(GENERATE_CONFIGURATION_HEADER)
 
@@ -271,19 +276,41 @@ endfunction(GENERATE_CONFIGURATION_HEADER_V2)
 macro(_SETUP_PROJECT_HEADER_FINALIZE)
   # If the header list is set, install it.
   if(DEFINED ${PROJECT_NAME}_HEADERS)
-    foreach(FILE ${${PROJECT_NAME}_HEADERS})
-      header_install(${FILE})
-    endforeach(FILE)
+    header_install(${${PROJECT_NAME}_HEADERS})
   endif(DEFINED ${PROJECT_NAME}_HEADERS)
 endmacro(_SETUP_PROJECT_HEADER_FINALIZE)
 
 # .rst: .. ifmode:: internal
 #
-# .. command:: HEADER_INSTALL (FILES)
+# ~~~
+# .. command:: HEADER_INSTALL (COMPONENT <component> <files>...)
+# ~~~
 #
 # Install a list of headers.
 #
-macro(HEADER_INSTALL FILES)
+# :param component: Component to forward to install command.
+#
+# :param files: Files to install.
+macro(HEADER_INSTALL)
+  set(options)
+  set(oneValueArgs COMPONENT)
+  set(multiValueArgs)
+  cmake_parse_arguments(
+    ARGS
+    "${options}"
+    "${oneValueArgs}"
+    "${multiValueArgs}"
+    ${ARGN}
+  )
+
+  if(ARGS_COMPONENT)
+    set(_COMPONENT_NAME ${ARGS_COMPONENT})
+  else()
+    set(_COMPONENT_NAME ${CMAKE_INSTALL_DEFAULT_COMPONENT_NAME})
+  endif()
+
+  set(FILES ${ARGS_UNPARSED_ARGUMENTS})
+
   foreach(FILE ${FILES})
     get_filename_component(DIR "${FILE}" PATH)
     string(REGEX REPLACE "${CMAKE_BINARY_DIR}" "" DIR "${DIR}")
@@ -293,6 +320,7 @@ macro(HEADER_INSTALL FILES)
       FILES ${FILE}
       DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${DIR}"
       PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_WRITE
+      COMPONENT ${_COMPONENT_NAME}
     )
   endforeach()
 endmacro()
