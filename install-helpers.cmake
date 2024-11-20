@@ -30,12 +30,20 @@ function(ADD_INSTALL_TARGET)
   set(options)
   set(oneValueArgs NAME COMPONENT)
   set(multiValueArgs)
-  cmake_parse_arguments(ARGS "${options}" "${oneValueArgs}" "${multiValueArgs}"
-                        ${ARGN})
+  cmake_parse_arguments(
+    ARGS
+    "${options}"
+    "${oneValueArgs}"
+    "${multiValueArgs}"
+    ${ARGN}
+  )
   set(target_name install-${ARGS_NAME})
   set(component ${ARGS_COMPONENT})
 
   add_custom_target(
-    ${target_name} COMMAND ${CMAKE_COMMAND} -DCOMPONENT=${component} -P
-                           ${PROJECT_BINARY_DIR}/cmake_install.cmake)
+    ${target_name}
+    COMMAND
+      ${CMAKE_COMMAND} -DCOMPONENT=${component} -P
+      ${PROJECT_BINARY_DIR}/cmake_install.cmake
+  )
 endfunction()
