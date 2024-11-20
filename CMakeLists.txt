@@ -116,6 +116,7 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
       ./README.md
       ./release.cmake
       ./relpath.cmake
+      ./ros2.cmake
       ./ros.cmake
       ./sdformat.cmake
       ./setup.cfg
