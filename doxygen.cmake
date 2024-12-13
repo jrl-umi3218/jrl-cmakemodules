@@ -628,18 +628,18 @@ macro(_SETUP_PROJECT_DOCUMENTATION)
       if(EXISTS ${PROJECT_BINARY_DIR}/doc/${PROJECT_NAME}.doxytag)
         install(
           FILES ${PROJECT_BINARY_DIR}/doc/${PROJECT_NAME}.doxytag
-          DESTINATION ${CMAKE_INSTALL_DOCDIR}/doxygen-html
+          DESTINATION ${CMAKE_INSTALL_FULL_DOCDIR}/doxygen-html
         )
       endif()
       install(
         DIRECTORY ${PROJECT_BINARY_DIR}/doc/doxygen-html
-        DESTINATION ${CMAKE_INSTALL_DOCDIR}
+        DESTINATION ${CMAKE_INSTALL_FULL_DOCDIR}
       )
 
       if(EXISTS ${PROJECT_SOURCE_DIR}/doc/pictures)
         install(
           DIRECTORY ${PROJECT_SOURCE_DIR}/doc/pictures
-          DESTINATION ${CMAKE_INSTALL_DOCDIR}/doxygen-html
+          DESTINATION ${CMAKE_INSTALL_FULL_DOCDIR}/doxygen-html
         )
       endif(EXISTS ${PROJECT_SOURCE_DIR}/doc/pictures)
     endif(INSTALL_DOCUMENTATION)
@@ -738,7 +738,6 @@ macro(_SETUP_PROJECT_DOCUMENTATION_FINALIZE)
     if(INSTALL_DOCUMENTATION)
       # Find doxytag files To ignore this list of tag files, set variable
       # DOXYGEN_TAGFILES
-      set(INSTALL_DOCDIR ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DOCDIR})
       set(PKG_REQUIRES ${_PKG_CONFIG_REQUIRES})
       list(APPEND PKG_REQUIRES ${_PKG_CONFIG_COMPILE_TIME_REQUIRES})
       foreach(PKG_CONFIG_STRING ${PKG_REQUIRES})
@@ -753,7 +752,7 @@ macro(_SETUP_PROJECT_DOCUMENTATION_FINALIZE)
           file(
             RELATIVE_PATH
             DEP_DOCDIR
-            ${INSTALL_DOCDIR}
+            ${CMAKE_INSTALL_FULL_DOCDIR}
             ${${PREFIX}_DOXYGENDOCDIR}
           )
 
