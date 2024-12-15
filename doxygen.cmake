@@ -706,6 +706,9 @@ endmacro()
 # Doxyfile.extra and Doxyfile files are generated at the end to allow the
 # replacement of user-defined variables.
 #
+# Additional doxygen tagfiles from dependencies can be added to
+# `DOXYGEN_TAGFILES_FROM_DEPENDENCIES`
+#
 macro(_SETUP_PROJECT_DOCUMENTATION_FINALIZE)
   if(DOXYGEN_FOUND)
     if(NOT "${DOXYGEN_USE_MATHJAX}" STREQUAL "YES")
@@ -738,6 +741,7 @@ macro(_SETUP_PROJECT_DOCUMENTATION_FINALIZE)
     if(INSTALL_DOCUMENTATION)
       # Find doxytag files To ignore this list of tag files, set variable
       # DOXYGEN_TAGFILES
+      set(_TAGFILES_FROM_DEPENDENCIES "${DOXYGEN_TAGFILES_FROM_DEPENDENCIES}")
       set(PKG_REQUIRES ${_PKG_CONFIG_REQUIRES})
       list(APPEND PKG_REQUIRES ${_PKG_CONFIG_COMPILE_TIME_REQUIRES})
       foreach(PKG_CONFIG_STRING ${PKG_REQUIRES})
