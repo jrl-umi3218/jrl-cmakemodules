@@ -410,8 +410,9 @@ macro(_SETUP_DOXYGEN_DEFAULT_OPTIONS)
   _set_if_undefined(DOXYGEN_PROJECT_NUMBER "${PROJECT_VERSION}")
   _set_if_undefined(DOXYGEN_PROJECT_BRIEF "\"${PROJECT_DESCRIPTION}\"")
   _set_if_undefined(DOXYGEN_STRIP_FROM_PATH "${PROJECT_SOURCE_DIR}")
-  _set_if_undefined(DOXYGEN_STRIP_FROM_INC_PATH
-                    "${PROJECT_SOURCE_DIR}/src ${PROJECT_SOURCE_DIR}/include"
+  _set_if_undefined(
+    DOXYGEN_STRIP_FROM_INC_PATH
+    "${PROJECT_SOURCE_DIR}/src ${PROJECT_SOURCE_DIR}/include"
   )
   _set_if_undefined(DOXYGEN_EXTRACT_ALL "YES")
   # ---------------------------------------------------------------------------
@@ -423,8 +424,9 @@ macro(_SETUP_DOXYGEN_DEFAULT_OPTIONS)
   # Configuration options related to the input files
   # ---------------------------------------------------------------------------
   _set_if_undefined(DOXYGEN_IMAGE_PATH "${PROJECT_SOURCE_DIR}/doc")
-  _set_if_undefined(DOXYGEN_FILE_PATTERNS
-                    "*.cc *.cpp *.h *.hh *.hpp *.hxx *.idl"
+  _set_if_undefined(
+    DOXYGEN_FILE_PATTERNS
+    "*.cc *.cpp *.h *.hh *.hpp *.hxx *.idl"
   )
   _set_if_undefined(DOXYGEN_RECURSIVE YES)
   # ---------------------------------------------------------------------------
@@ -514,7 +516,7 @@ macro(_SETUP_PROJECT_DOCUMENTATION)
     endif(has_parent_scope)
     unset(has_parent_scope)
 
-    _setup_doxygen_default_options()
+    _SETUP_DOXYGEN_DEFAULT_OPTIONS()
     # Generate variable to be substitued in Doxyfile.in for dot use.
     if(DOXYGEN_DOT_FOUND)
       set(DOXYGEN_HAVE_DOT YES)
@@ -577,21 +579,26 @@ macro(_SETUP_PROJECT_DOCUMENTATION)
         ${PROJECT_NAME}-doc
         ${PROJECT_NAME}-generate-template-css
       )
-      _set_if_undefined(DOXYGEN_HTML_HEADER
-                        "${PROJECT_BINARY_DIR}/doc/header.html"
+      _set_if_undefined(
+        DOXYGEN_HTML_HEADER
+        "${PROJECT_BINARY_DIR}/doc/header.html"
       )
-      _set_if_undefined(DOXYGEN_HTML_FOOTER
-                        "${PROJECT_BINARY_DIR}/doc/footer.html"
+      _set_if_undefined(
+        DOXYGEN_HTML_FOOTER
+        "${PROJECT_BINARY_DIR}/doc/footer.html"
       )
-      _set_if_undefined(DOXYGEN_HTML_STYLESHEET
-                        "${PROJECT_BINARY_DIR}/doc/doxygen.css"
+      _set_if_undefined(
+        DOXYGEN_HTML_STYLESHEET
+        "${PROJECT_BINARY_DIR}/doc/doxygen.css"
       )
     else(DOXYGEN_USE_TEMPLATE_CSS)
-      _set_if_undefined(DOXYGEN_HTML_FOOTER
-                        "${PROJECT_JRL_CMAKE_MODULE_DIR}/doxygen/footer.html"
+      _set_if_undefined(
+        DOXYGEN_HTML_FOOTER
+        "${PROJECT_JRL_CMAKE_MODULE_DIR}/doxygen/footer.html"
       )
-      _set_if_undefined(DOXYGEN_HTML_STYLESHEET
-                        "${PROJECT_JRL_CMAKE_MODULE_DIR}/doxygen/doxygen.css"
+      _set_if_undefined(
+        DOXYGEN_HTML_STYLESHEET
+        "${PROJECT_JRL_CMAKE_MODULE_DIR}/doxygen/doxygen.css"
       )
     endif(DOXYGEN_USE_TEMPLATE_CSS)
 
@@ -691,8 +698,9 @@ macro(_DOXYTAG_ENTRIES_FROM_CMAKE_DEPENDENCIES DEPENDENCIES VAR_OUT)
       )
     endif()
     if(DEFINED ${PREFIX}_DEPENDENCIES)
-      _doxytag_entries_from_cmake_dependencies("${${PREFIX}_DEPENDENCIES}"
-                                               ${VAR_OUT}
+      _DOXYTAG_ENTRIES_FROM_CMAKE_DEPENDENCIES(
+        "${${PREFIX}_DEPENDENCIES}"
+        ${VAR_OUT}
       )
     endif()
   endforeach()
@@ -742,8 +750,11 @@ macro(_SETUP_PROJECT_DOCUMENTATION_FINALIZE)
       set(PKG_REQUIRES ${_PKG_CONFIG_REQUIRES})
       list(APPEND PKG_REQUIRES ${_PKG_CONFIG_COMPILE_TIME_REQUIRES})
       foreach(PKG_CONFIG_STRING ${PKG_REQUIRES})
-        _parse_pkg_config_string(${PKG_CONFIG_STRING} LIBRARY_NAME PREFIX
-                                 PKG_CONFIG_STRING_NOSPACE
+        _PARSE_PKG_CONFIG_STRING(
+          ${PKG_CONFIG_STRING}
+          LIBRARY_NAME
+          PREFIX
+          PKG_CONFIG_STRING_NOSPACE
         )
         # If DOXYGENDOCDIR is specified, add a doc path.
         if(
@@ -763,12 +774,14 @@ macro(_SETUP_PROJECT_DOCUMENTATION_FINALIZE)
           )
         endif()
       endforeach()
-      _doxytag_entries_from_cmake_dependencies(
-        "${_PACKAGE_CONFIG_DEPENDENCIES_PROJECTS}" _TAGFILES_FROM_DEPENDENCIES
+      _DOXYTAG_ENTRIES_FROM_CMAKE_DEPENDENCIES(
+        "${_PACKAGE_CONFIG_DEPENDENCIES_PROJECTS}"
+        _TAGFILES_FROM_DEPENDENCIES
       )
       if(_TAGFILES_FROM_DEPENDENCIES)
-        remove_duplicates(${_TAGFILES_FROM_DEPENDENCIES}
-                          DOXYGEN_TAGFILES_FROM_DEPENDENCIES
+        REMOVE_DUPLICATES(
+          ${_TAGFILES_FROM_DEPENDENCIES}
+          DOXYGEN_TAGFILES_FROM_DEPENDENCIES
         )
       endif()
     endif()
@@ -803,7 +816,7 @@ macro(_SETUP_PROJECT_DOCUMENTATION_FINALIZE)
         @ONLY
       )
       # Generate Doxyfile.
-      _setup_doxygen_config_file(${JRL_CMAKEMODULE_DOXYFILE_PATH})
+      _SETUP_DOXYGEN_CONFIG_FILE(${JRL_CMAKEMODULE_DOXYFILE_PATH})
       file(STRINGS ${PROJECT_BINARY_DIR}/doc/Doxyfile.extra doxyfile_extra)
       foreach(x ${doxyfile_extra})
         file(APPEND ${JRL_CMAKEMODULE_DOXYFILE_PATH} ${x} "\n")
@@ -813,7 +826,7 @@ macro(_SETUP_PROJECT_DOCUMENTATION_FINALIZE)
       # doxygen/Doxyfile.extra.in
       set(DOXYGEN_IMAGE_PATH "${PROJECT_SOURCE_DIR}/doc/pictures")
       # Generate Doxyfile.
-      _setup_doxygen_config_file(${JRL_CMAKEMODULE_DOXYFILE_PATH})
+      _SETUP_DOXYGEN_CONFIG_FILE(${JRL_CMAKEMODULE_DOXYFILE_PATH})
     endif()
   endif(DOXYGEN_FOUND)
 endmacro(_SETUP_PROJECT_DOCUMENTATION_FINALIZE)

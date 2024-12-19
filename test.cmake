@@ -95,7 +95,7 @@ endmacro(CREATE_CTEST_BUILD_TESTS_TARGET)
 # The behaviour of this function depends on :variable:`BUILD_TESTING` option.
 #
 macro(ADD_UNIT_TEST NAME)
-  create_ctest_build_tests_target()
+  CREATE_CTEST_BUILD_TESTS_TARGET()
 
   if(NOT BUILD_TESTING)
     add_executable(${NAME} EXCLUDE_FROM_ALL ${ARGN})
@@ -212,7 +212,7 @@ macro(ADD_PYTHON_UNIT_TEST NAME SOURCE)
 
   set(MODULES "${ARGN}") # ARGN is not a variable
   set(PYTHONPATH)
-  compute_pythonpath(ENV_VARIABLES ${MODULES})
+  COMPUTE_PYTHONPATH(ENV_VARIABLES ${MODULES})
   set_tests_properties(${NAME} PROPERTIES ENVIRONMENT "${ENV_VARIABLES}")
   if(ENABLE_COVERAGE)
     set_tests_properties(
@@ -233,8 +233,13 @@ endmacro(ADD_PYTHON_UNIT_TEST NAME SOURCE)
 # work if valgrind is installed
 #
 macro(ADD_PYTHON_MEMORYCHECK_UNIT_TEST NAME SOURCE)
-  add_python_memorycheck_unit_test_v2(NAME ${NAME} SOURCE ${SOURCE} MODULES
-                                      ${ARGN}
+  ADD_PYTHON_MEMORYCHECK_UNIT_TEST_V2(
+    NAME
+    ${NAME}
+    SOURCE
+    ${SOURCE}
+    MODULES
+    ${ARGN}
   )
 endmacro()
 
@@ -288,7 +293,7 @@ macro(ADD_PYTHON_MEMORYCHECK_UNIT_TEST_V2)
 
     add_test(NAME ${ARGS_NAME} COMMAND ${CMAKE_COMMAND} -P ${TEST_FILE_NAME})
 
-    compute_pythonpath(ENV_VARIABLES ${ARGS_MODULES})
+    COMPUTE_PYTHONPATH(ENV_VARIABLES ${ARGS_MODULES})
     set_tests_properties(${ARGS_NAME} PROPERTIES ENVIRONMENT "${ENV_VARIABLES}")
   endif()
 endmacro()
@@ -310,6 +315,6 @@ endmacro(ADD_JULIA_UNIT_TEST NAME SOURCE)
 # Compile a program and add it as a test
 #
 macro(DEFINE_UNIT_TEST NAME LIB)
-  add_unit_test(${NAME} ${NAME}.cc)
+  ADD_UNIT_TEST(${NAME} ${NAME}.cc)
   target_link_libraries(${NAME} ${PUBLIC_KEYWORD} ${LIB})
 endmacro(DEFINE_UNIT_TEST)

@@ -49,7 +49,7 @@ macro(SEARCH_FOR_EIGEN)
     )
 
     include_directories(SYSTEM ${_Eigen_INCLUDE_DIRS})
-    _add_to_list(_PKG_CONFIG_REQUIRES "${Eigen_REQUIRED}" ",")
+    _ADD_TO_LIST(_PKG_CONFIG_REQUIRES "${Eigen_REQUIRED}" ",")
   else()
     # fallback: search for the signature_of_eigen3_matrix_library file
     find_path(
@@ -59,6 +59,6 @@ macro(SEARCH_FOR_EIGEN)
       PATH_SUFFIXES eigen3 eigen
     )
     include_directories(SYSTEM ${Eigen_INCLUDE_DIR})
-    pkg_config_append_cflags(-I"${Eigen_INCLUDE_DIR}")
+    PKG_CONFIG_APPEND_CFLAGS(-I"${Eigen_INCLUDE_DIR}")
   endif()
 endmacro(SEARCH_FOR_EIGEN)

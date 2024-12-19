@@ -66,7 +66,7 @@ function(ADD_GROUP GROUP_NAME FILENAMES)
     list(GET REDUCED_FILENAMES 0 str_a)
     foreach(id RANGE 1 ${max_id})
       list(GET REDUCED_FILENAMES ${id} str_b)
-      largest_common_prefix(${str_a} ${str_b} prefix)
+      LARGEST_COMMON_PREFIX(${str_a} ${str_b} prefix)
       set(str_a ${prefix})
       if("${str_a}" STREQUAL "")
         break()
@@ -97,7 +97,7 @@ endfunction(ADD_GROUP)
 # Add FILENAMES to "Header Files" group when using IDE Cmake Generator
 #
 macro(ADD_HEADER_GROUP FILENAMES)
-  add_group("Header Files" ${FILENAMES})
+  ADD_GROUP("Header Files" ${FILENAMES})
 endmacro(ADD_HEADER_GROUP FILENAMES)
 
 # ADD_SOURCE_GROUP
@@ -106,5 +106,5 @@ endmacro(ADD_HEADER_GROUP FILENAMES)
 # Add FILENAMES to "Source Files" group when using IDE Cmake Generator
 #
 macro(ADD_SOURCE_GROUP FILENAMES)
-  add_group("Source Files" ${FILENAMES})
+  ADD_GROUP("Source Files" ${FILENAMES})
 endmacro(ADD_SOURCE_GROUP FILENAMES)

@@ -82,11 +82,13 @@ macro(ADD_PROJECT_DEPENDENCY)
     ${ARGN}
   )
   if(PARSED_ARGN_PKG_CONFIG_REQUIRES)
-    _add_to_list_if_not_present(_PKG_CONFIG_REQUIRES
-                                "${PARSED_ARGN_PKG_CONFIG_REQUIRES}"
+    _ADD_TO_LIST_IF_NOT_PRESENT(
+      _PKG_CONFIG_REQUIRES
+      "${PARSED_ARGN_PKG_CONFIG_REQUIRES}"
     )
-    _add_to_list_if_not_present(_PKG_CONFIG_DEP_NOT_FOR_CONFIG_CMAKE
-                                "${PARSED_ARGN_PKG_CONFIG_REQUIRES}"
+    _ADD_TO_LIST_IF_NOT_PRESENT(
+      _PKG_CONFIG_DEP_NOT_FOR_CONFIG_CMAKE
+      "${PARSED_ARGN_PKG_CONFIG_REQUIRES}"
     )
   endif()
   if(PARSED_ARGN_FOR_COMPONENT)
@@ -112,16 +114,17 @@ macro(ADD_PROJECT_DEPENDENCY)
       DESTINATION "${CONFIG_INSTALL_DIR}/find-external"
     )
   endif()
-  _add_to_list_if_not_present(_PACKAGE_CONFIG${component}_DEPENDENCIES_PROJECTS
-                              "${ARGV0}"
+  _ADD_TO_LIST_IF_NOT_PRESENT(
+    _PACKAGE_CONFIG${component}_DEPENDENCIES_PROJECTS
+    "${ARGV0}"
   )
 
   string(REPLACE ";" " " PACKAGE_ARGS "${PARSED_ARGN_UNPARSED_ARGUMENTS}")
-  _add_to_list_if_not_present(
+  _ADD_TO_LIST_IF_NOT_PRESENT(
     _PACKAGE_CONFIG${component}_DEPENDENCIES_FIND_PACKAGE
     "find_package(${PACKAGE_ARGS})"
   )
-  _add_to_list_if_not_present(
+  _ADD_TO_LIST_IF_NOT_PRESENT(
     _PACKAGE_CONFIG${component}_DEPENDENCIES_FIND_DEPENDENCY
     "find_dependency(${PACKAGE_ARGS})"
   )
@@ -229,7 +232,7 @@ macro(SETUP_PROJECT_PACKAGE_FINALIZE)
   )
 
   if(DEFINED _MINIMAL_CXX_STANDARD)
-    install_jrl_cmakemodules_file("cxx-standard.cmake")
+    INSTALL_JRL_CMAKEMODULES_FILE("cxx-standard.cmake")
 
     # Add check for standard - enforce if required
     if(${MINIMAL_CXX_STANDARD_ENFORCE})

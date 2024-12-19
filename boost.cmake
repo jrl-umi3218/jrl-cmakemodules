@@ -99,7 +99,7 @@ macro(SEARCH_FOR_BOOST_PYTHON)
     set(BOOST_PYTHON_REQUIRED REQUIRED)
   endif(SEARCH_FOR_BOOST_PYTHON_ARGS_REQUIRED)
 
-  set_boost_default_options()
+  SET_BOOST_DEFAULT_OPTIONS()
 
   if(NOT PYTHON_EXECUTABLE)
     message(
@@ -120,7 +120,7 @@ macro(SEARCH_FOR_BOOST_PYTHON)
     )
     set(BOOST_PYTHON_FOUND FALSE)
     foreach(BOOST_PYTHON_COMPONENT ${BOOST_PYTHON_COMPONENT_LIST})
-      search_for_boost_component(${BOOST_PYTHON_COMPONENT} BOOST_PYTHON_FOUND)
+      SEARCH_FOR_BOOST_COMPONENT(${BOOST_PYTHON_COMPONENT} BOOST_PYTHON_FOUND)
       if(BOOST_PYTHON_FOUND)
         set(BOOST_PYTHON_NAME ${BOOST_PYTHON_COMPONENT})
         break()
@@ -138,8 +138,8 @@ macro(SEARCH_FOR_BOOST_PYTHON)
   endif()
 
   if(PYTHON_EXPORT_DEPENDENCY)
-    install_jrl_cmakemodules_dir("boost")
-    install_jrl_cmakemodules_file("boost.cmake")
+    INSTALL_JRL_CMAKEMODULES_DIR("boost")
+    INSTALL_JRL_CMAKEMODULES_FILE("boost.cmake")
     set(
       PYTHON_EXPORT_DEPENDENCY_MACROS
       "${PYTHON_EXPORT_DEPENDENCY_MACROS}\nSEARCH_FOR_BOOST_PYTHON(${BOOST_PYTHON_REQUIRED} NAME ${BOOST_PYTHON_NAME})"
@@ -226,7 +226,7 @@ macro(SEARCH_FOR_BOOST)
   list(FIND BOOST_COMPONENTS python PYTHON_IN_BOOST_COMPONENTS)
   if(${PYTHON_IN_BOOST_COMPONENTS} GREATER -1)
     list(REMOVE_AT BOOST_COMPONENTS ${PYTHON_IN_BOOST_COMPONENTS})
-    search_for_boost_python(${BOOST_REQUIRED})
+    SEARCH_FOR_BOOST_PYTHON(${BOOST_REQUIRED})
   endif(${PYTHON_IN_BOOST_COMPONENTS} GREATER -1)
 
   # Make Boost component exportable
@@ -242,8 +242,12 @@ macro(SEARCH_FOR_BOOST)
     0
     "SET(Boost_USE_STATIC_LIBS OFF);SET(Boost_USE_MULTITHREADED ON)"
   )
-  add_project_dependency(Boost ${BOOST_REQUIRED} COMPONENTS ${BOOST_COMPONENTS}
-                         REQUIRED
+  ADD_PROJECT_DEPENDENCY(
+    Boost
+    ${BOOST_REQUIRED}
+    COMPONENTS
+    ${BOOST_COMPONENTS}
+    REQUIRED
   )
 
   if(NOT Boost_FOUND)
@@ -254,7 +258,7 @@ macro(SEARCH_FOR_BOOST)
     )
   endif(NOT Boost_FOUND)
 
-  pkg_config_append_cflags("-I${Boost_INCLUDE_DIR}")
+  PKG_CONFIG_APPEND_CFLAGS("-I${Boost_INCLUDE_DIR}")
 
   list(
     APPEND
@@ -376,7 +380,7 @@ endmacro(TARGET_LINK_BOOST_PYTHON)
 # PKG_CONFIG_APPEND_BOOST_LIBS(system filesystem)
 #
 macro(PKG_CONFIG_APPEND_BOOST_LIBS)
-  pkg_config_append_library_dir("${Boost_LIBRARY_DIRS}")
+  PKG_CONFIG_APPEND_LIBRARY_DIR("${Boost_LIBRARY_DIRS}")
 
   foreach(COMPONENT ${ARGN})
     string(TOUPPER ${COMPONENT} UPPERCOMPONENT)
@@ -397,17 +401,17 @@ macro(PKG_CONFIG_APPEND_BOOST_LIBS)
       get_filename_component(LIB_NAME ${LIB_PATH} NAME_WE)
       string(REGEX REPLACE "^lib" "" LIB_NAME "${LIB_NAME}")
       if("${LOWERCOMPONENT}" MATCHES "python")
-        pkg_config_append_libs_raw(-Wl,-undefined,dynamic_lookup,-l${LIB_NAME})
+        PKG_CONFIG_APPEND_LIBS_RAW(-Wl,-undefined,dynamic_lookup,-l${LIB_NAME})
       else("${LOWERCOMPONENT}" MATCHES "python")
-        pkg_config_append_libs_raw(-l${LIB_NAME})
+        PKG_CONFIG_APPEND_LIBS_RAW(-l${LIB_NAME})
       endif("${LOWERCOMPONENT}" MATCHES "python")
     elseif(WIN32)
       get_filename_component(LIB_NAME ${LIB_PATH} NAME)
-      pkg_config_append_libs_raw("-l${LIB_NAME}")
+      PKG_CONFIG_APPEND_LIBS_RAW("-l${LIB_NAME}")
     else()
       get_filename_component(LIB_NAME ${LIB_PATH} NAME_WE)
       string(REGEX REPLACE "^lib" "" LIB_NAME "${LIB_NAME}")
-      pkg_config_append_libs_raw("-l${LIB_NAME}")
+      PKG_CONFIG_APPEND_LIBS_RAW("-l${LIB_NAME}")
     endif(APPLE)
   endforeach()
 endmacro(PKG_CONFIG_APPEND_BOOST_LIBS)

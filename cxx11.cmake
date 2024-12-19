@@ -25,5 +25,5 @@ macro(PROJECT_USE_CXX11)
     DEPRECATION
     "This macro is deprecated. Use CHECK_MINIMAL_CXX_STANDARD instead."
   )
-  check_minimal_cxx_standard(11 REQUIRED)
+  CHECK_MINIMAL_CXX_STANDARD(11 REQUIRED)
 endmacro(PROJECT_USE_CXX11)
