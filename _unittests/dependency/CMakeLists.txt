@@ -10,10 +10,10 @@ include(../macros.cmake)
 
 include(../../base.cmake)
 
-compute_project_args(PROJECT_ARGS LANGUAGES CXX)
+COMPUTE_PROJECT_ARGS(PROJECT_ARGS LANGUAGES CXX)
 project(${PROJECT_NAME} ${PROJECT_ARGS})
 
-add_project_dependency(jrl-cmakemodules-cpp REQUIRED)
+ADD_PROJECT_DEPENDENCY(jrl-cmakemodules-cpp REQUIRED)
 
 check_exist_target(jrl-cmakemodules-cpp::jrl_cmakemodule_lib "")
 

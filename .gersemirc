@@ -1,2 +1,3 @@
+definitions: [./]
 indent: 2
 warn_about_unknown_commands: false

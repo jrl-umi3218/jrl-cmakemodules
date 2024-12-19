@@ -81,8 +81,8 @@ macro(SEARCH_FOR_GEOMETRIC_TOOLS)
   include_directories(SYSTEM ${GEOMETRIC_TOOLS_INCLUDEDIR})
   link_directories(${GEOMETRIC_TOOLS_LIBRARYDIR})
 
-  pkg_config_append_cflags("-isystem ${GEOMETRIC_TOOLS_INCLUDEDIR}")
-  pkg_config_append_library_dir("${GEOMETRIC_TOOLS_LIBRARYDIR}")
+  PKG_CONFIG_APPEND_CFLAGS("-isystem ${GEOMETRIC_TOOLS_INCLUDEDIR}")
+  PKG_CONFIG_APPEND_LIBRARY_DIR("${GEOMETRIC_TOOLS_LIBRARYDIR}")
 
   message(STATUS "Module geometric-tools has been detected with success.")
 endmacro(SEARCH_FOR_GEOMETRIC_TOOLS)

@@ -8,7 +8,7 @@ set(PROJECT_USE_CMAKE_EXPORT TRUE)
 
 include(../../base.cmake)
 
-compute_project_args(PROJECT_ARGS LANGUAGES CXX)
+COMPUTE_PROJECT_ARGS(PROJECT_ARGS LANGUAGES CXX)
 project(${PROJECT_NAME} ${PROJECT_ARGS})
 
 set(${PROJECT_NAME}_HEADERS include/jrl_cmakemodule/lib.hh)

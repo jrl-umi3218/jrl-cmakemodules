@@ -46,7 +46,7 @@ macro(PYTHON_INSTALL MODULE FILE DEST)
     set(_COMPONENT_NAME ${CMAKE_INSTALL_DEFAULT_COMPONENT_NAME})
   endif()
 
-  python_build("${MODULE}" "${FILE}")
+  PYTHON_BUILD("${MODULE}" "${FILE}")
 
   install(
     FILES "${CMAKE_CURRENT_SOURCE_DIR}/${MODULE}/${FILE}"
@@ -86,8 +86,11 @@ macro(PYTHON_INSTALL_ON_SITE MODULE FILE)
     set(_COMPONENT_NAME ${CMAKE_INSTALL_DEFAULT_COMPONENT_NAME})
   endif()
 
-  python_install("${MODULE}" "${FILE}" ${PYTHON_SITELIB} COMPONENT
-                 ${_COMPONENT_NAME}
+  PYTHON_INSTALL(
+    "${MODULE}"
+    "${FILE}"
+    ${PYTHON_SITELIB}
+    COMPONENT ${_COMPONENT_NAME}
   )
 endmacro()
 
@@ -120,7 +123,7 @@ endfunction(PYTHON_BUILD_GET_TARGET NAME)
 #
 macro(PYTHON_BUILD MODULE FILE)
   set(python_build_target "")
-  python_build_get_target(python_build_target)
+  PYTHON_BUILD_GET_TARGET(python_build_target)
 
   set(INPUT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/${MODULE}/${FILE}")
 
@@ -140,7 +143,7 @@ macro(PYTHON_BUILD MODULE FILE)
     COMMAND ${CMAKE_COMMAND} -E make_directory "${OUTPUT_FILE_DIR}"
   )
 
-  python_build_file(${INPUT_FILE} ${OUTPUT_FILE})
+  PYTHON_BUILD_FILE(${INPUT_FILE} ${OUTPUT_FILE})
 endmacro()
 
 # PYTHON_BUILD_FILE(FILE [OUTPUT_FILE])
@@ -150,7 +153,7 @@ endmacro()
 #
 macro(PYTHON_BUILD_FILE FILE)
   set(python_build_target "")
-  python_build_get_target(python_build_target)
+  PYTHON_BUILD_GET_TARGET(python_build_target)
 
   set(extra_var "${ARGV1}")
   if(NOT extra_var STREQUAL "")

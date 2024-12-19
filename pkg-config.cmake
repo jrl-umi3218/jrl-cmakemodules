@@ -58,7 +58,7 @@ set(
 #
 macro(_SETUP_PROJECT_PKG_CONFIG)
   # Pkg-config related commands.
-  rel_install_path("${CMAKE_INSTALL_LIBDIR}/pkgconfig" _PC_REL_INSTALL_PATH)
+  REL_INSTALL_PATH("${CMAKE_INSTALL_LIBDIR}/pkgconfig" _PC_REL_INSTALL_PATH)
   set(
     _PKG_CONFIG_PREFIX
     "\${pcfiledir}/${_PC_REL_INSTALL_PATH}"
@@ -308,17 +308,17 @@ macro(_SETUP_PROJECT_PKG_CONFIG_FINALIZE)
   if(DEFINED CMAKE_BUILD_TYPE)
     string(TOLOWER "${CMAKE_BUILD_TYPE}" cmake_build_type)
     if(${cmake_build_type} MATCHES debug)
-      _setup_project_pkg_config_finalize_debug()
+      _SETUP_PROJECT_PKG_CONFIG_FINALIZE_DEBUG()
     else()
-      _setup_project_pkg_config_finalize_optimized()
+      _SETUP_PROJECT_PKG_CONFIG_FINALIZE_OPTIMIZED()
     endif()
     # Multiple build types generator
   else()
     if(DEFINED PROJECT_DEBUG_POSTFIX)
-      _setup_project_pkg_config_finalize_debug()
-      _setup_project_pkg_config_finalize_optimized()
+      _SETUP_PROJECT_PKG_CONFIG_FINALIZE_DEBUG()
+      _SETUP_PROJECT_PKG_CONFIG_FINALIZE_OPTIMIZED()
     else()
-      _setup_project_pkg_config_finalize_optimized()
+      _SETUP_PROJECT_PKG_CONFIG_FINALIZE_OPTIMIZED()
     endif()
   endif()
 endmacro(_SETUP_PROJECT_PKG_CONFIG_FINALIZE)
@@ -391,12 +391,18 @@ macro(
   PKG_CONFIG_STRING
   PKG_CONFIG_DEBUG_STRING
 )
-  _parse_pkg_config_string("${PKG_CONFIG_STRING}" LIBRARY_NAME PREFIX
-                           PKG_CONFIG_STRING_NOSPACE
+  _PARSE_PKG_CONFIG_STRING(
+    "${PKG_CONFIG_STRING}"
+    LIBRARY_NAME
+    PREFIX
+    PKG_CONFIG_STRING_NOSPACE
   )
   if(NOT ${PKG_CONFIG_DEBUG_STRING} STREQUAL "")
-    _parse_pkg_config_string("${PKG_CONFIG_DEBUG_STRING}" LIBRARY_DEBUG_NAME
-                             ${PREFIX}_DEBUG PKG_CONFIG_DEBUG_STRING_NOSPACE
+    _PARSE_PKG_CONFIG_STRING(
+      "${PKG_CONFIG_DEBUG_STRING}"
+      LIBRARY_DEBUG_NAME
+      ${PREFIX}_DEBUG
+      PKG_CONFIG_DEBUG_STRING_NOSPACE
     )
   endif()
 
@@ -593,11 +599,13 @@ macro(
   if(${PACKAGE_FOUND})
     if(NOT ${COMPILE_TIME_ONLY})
       if(DEFINED PROJECT_DEBUG_POSTFIX AND DEFINED ${PREFIX}_DEBUG)
-        _add_to_list_if_not_present(_PKG_CONFIG_REQUIRES_DEBUG
-                                    "${PKG_CONFIG_DEBUG_STRING}"
+        _ADD_TO_LIST_IF_NOT_PRESENT(
+          _PKG_CONFIG_REQUIRES_DEBUG
+          "${PKG_CONFIG_DEBUG_STRING}"
         )
-        _add_to_list_if_not_present(_PKG_CONFIG_REQUIRES_OPTIMIZED
-                                    "${PKG_CONFIG_STRING}"
+        _ADD_TO_LIST_IF_NOT_PRESENT(
+          _PKG_CONFIG_REQUIRES_OPTIMIZED
+          "${PKG_CONFIG_STRING}"
         )
       else()
         # Warn the user in case he/she is using alternative libraries for debug
@@ -611,11 +619,12 @@ macro(
              debug mode."
           )
         endif()
-        _add_to_list_if_not_present(_PKG_CONFIG_REQUIRES "${PKG_CONFIG_STRING}")
+        _ADD_TO_LIST_IF_NOT_PRESENT(_PKG_CONFIG_REQUIRES "${PKG_CONFIG_STRING}")
       endif()
     else()
-      _add_to_list_if_not_present(_PKG_CONFIG_COMPILE_TIME_REQUIRES
-                                  "${PKG_CONFIG_STRING}"
+      _ADD_TO_LIST_IF_NOT_PRESENT(
+        _PKG_CONFIG_COMPILE_TIME_REQUIRES
+        "${PKG_CONFIG_STRING}"
       )
     endif()
   endif()
@@ -623,7 +632,7 @@ macro(
   # Add the package to the cmake dependency list if cpack has been included.
   # This is likely to disappear when Ubuntu 8.04 will disappear.
   if(COMMAND ADD_CMAKE_DEPENDENCY)
-    add_cmake_dependency(${PKG_CONFIG_STRING})
+    ADD_CMAKE_DEPENDENCY(${PKG_CONFIG_STRING})
   endif(COMMAND ADD_CMAKE_DEPENDENCY)
 
   if(${${PREFIX}_FOUND})
@@ -660,7 +669,7 @@ macro(_GET_PKG_CONFIG_DEBUG_STRING PKG_CONFIG_STRING)
     AND DEFINED PROJECT_DEBUG_POSTFIX
     AND "${PKG_CONFIG_DEBUG_STRING}" STREQUAL ""
   )
-    _parse_pkg_config_string("${PKG_CONFIG_STRING}" LIBRARY_NAME PREFIX)
+    _PARSE_PKG_CONFIG_STRING("${PKG_CONFIG_STRING}" LIBRARY_NAME PREFIX)
     string(
       REGEX REPLACE
       "${LIBRARY_NAME}"
@@ -696,8 +705,8 @@ endmacro(_GET_PKG_CONFIG_DEBUG_STRING)
 macro(ADD_REQUIRED_DEPENDENCY PKG_CONFIG_STRING)
   list(FIND _PKG_CONFIG_REQUIRES "${PKG_CONFIG_STRING}" _index)
   if(${_index} EQUAL -1)
-    _get_pkg_config_debug_string("${PKG_CONFIG_STRING}" ${ARGN})
-    add_dependency(1 0 ${PKG_CONFIG_STRING} "${PKG_CONFIG_DEBUG_STRING}")
+    _GET_PKG_CONFIG_DEBUG_STRING("${PKG_CONFIG_STRING}" ${ARGN})
+    ADD_DEPENDENCY(1 0 ${PKG_CONFIG_STRING} "${PKG_CONFIG_DEBUG_STRING}")
   else()
     # Already found
     message(STATUS "Package ${PKG_CONFIG_STRING} already found.")
@@ -723,8 +732,8 @@ endmacro(ADD_REQUIRED_DEPENDENCY)
 # for debug builds. It should follow the same rule as PKG_CONFIG_STRING.
 #
 macro(ADD_OPTIONAL_DEPENDENCY PKG_CONFIG_STRING)
-  _get_pkg_config_debug_string("${PKG_CONFIG_STRING}" ${ARGN})
-  add_dependency(0 0 ${PKG_CONFIG_STRING} "${PKG_CONFIG_DEBUG_STRING}")
+  _GET_PKG_CONFIG_DEBUG_STRING("${PKG_CONFIG_STRING}" ${ARGN})
+  ADD_DEPENDENCY(0 0 ${PKG_CONFIG_STRING} "${PKG_CONFIG_DEBUG_STRING}")
 endmacro(ADD_OPTIONAL_DEPENDENCY)
 
 # .rst: .. ifmode:: import-advanced
@@ -743,8 +752,8 @@ endmacro(ADD_OPTIONAL_DEPENDENCY)
 # like: ``my-package_d >= 0.5``
 #
 macro(ADD_COMPILE_DEPENDENCY PKG_CONFIG_STRING)
-  _get_pkg_config_debug_string("${PKG_CONFIG_STRING}" ${ARGN})
-  add_dependency(1 1 ${PKG_CONFIG_STRING} "${PKG_CONFIG_DEBUG_STRING}")
+  _GET_PKG_CONFIG_DEBUG_STRING("${PKG_CONFIG_STRING}" ${ARGN})
+  ADD_DEPENDENCY(1 1 ${PKG_CONFIG_STRING} "${PKG_CONFIG_DEBUG_STRING}")
 endmacro(ADD_COMPILE_DEPENDENCY)
 
 # .rst: .. ifmode:: import-advanced
@@ -754,7 +763,7 @@ endmacro(ADD_COMPILE_DEPENDENCY)
 # Alias for :command:`ADD_COMPILE_DEPENDENCY`
 #
 macro(ADD_DOC_DEPENDENCY PKG_CONFIG_STRING)
-  add_compile_dependency(${PKG_CONFIG_STRING})
+  ADD_COMPILE_DEPENDENCY(${PKG_CONFIG_STRING})
 endmacro(ADD_DOC_DEPENDENCY)
 
 # .rst: .. ifmode:: export
@@ -1103,9 +1112,12 @@ macro(
 
   # Update the flags.
   set_target_properties(${TARGET} PROPERTIES LINK_FLAGS${CONFIG} "${LDFLAGS}")
-  _filter_link_flags(${TARGET} ${IS_GENERAL} ${IS_DEBUG} "${${PREFIX}_LDFLAGS}")
-  _filter_link_flags(${TARGET} ${IS_GENERAL} ${IS_DEBUG}
-                     "${${PREFIX}_LDFLAGS_OTHER}"
+  _FILTER_LINK_FLAGS(${TARGET} ${IS_GENERAL} ${IS_DEBUG} "${${PREFIX}_LDFLAGS}")
+  _FILTER_LINK_FLAGS(
+    ${TARGET}
+    ${IS_GENERAL}
+    ${IS_DEBUG}
+    "${${PREFIX}_LDFLAGS_OTHER}"
   )
 endmacro(
   _PKG_CONFIG_MANIPULATE_LDFLAGS
@@ -1128,27 +1140,35 @@ endmacro(
 #
 macro(PKG_CONFIG_USE_LLINK_DEPENDENCY TARGET PREFIX)
   if(NOT DEFINED ${PREFIX}_DEBUG_FOUND)
-    _pkg_config_manipulate_ldflags(${TARGET} ${PREFIX} "" 1 0)
+    _PKG_CONFIG_MANIPULATE_LDFLAGS(${TARGET} ${PREFIX} "" 1 0)
   else()
     # Single build type generators
     if(DEFINED CMAKE_BUILD_TYPE)
       string(TOLOWER "${CMAKE_BUILD_TYPE}" cmake_build_type)
       if("${cmake_build_type}" MATCHES "debug")
-        _pkg_config_manipulate_ldflags(${TARGET} "${PREFIX}_DEBUG" "" 1 0)
+        _PKG_CONFIG_MANIPULATE_LDFLAGS(${TARGET} "${PREFIX}_DEBUG" "" 1 0)
       else()
-        _pkg_config_manipulate_ldflags(${TARGET} ${PREFIX} "" 1 0)
+        _PKG_CONFIG_MANIPULATE_LDFLAGS(${TARGET} ${PREFIX} "" 1 0)
       endif()
       # Multiple build types generators
     else()
       foreach(config ${CMAKE_CONFIGURATION_TYPES})
         string(TOUPPER "_${config}" config_in)
         if(${config_in} MATCHES "_DEBUG")
-          _pkg_config_manipulate_ldflags(${TARGET} "${PREFIX}_DEBUG"
-                                         "${config_in}" 0 1
+          _PKG_CONFIG_MANIPULATE_LDFLAGS(
+            ${TARGET}
+            "${PREFIX}_DEBUG"
+            "${config_in}"
+            0
+            1
           )
         else()
-          _pkg_config_manipulate_ldflags(${TARGET} "${PREFIX}" "${config_in}" 0
-                                         0
+          _PKG_CONFIG_MANIPULATE_LDFLAGS(
+            ${TARGET}
+            "${PREFIX}"
+            "${config_in}"
+            0
+            0
           )
         endif()
       endforeach()
@@ -1213,11 +1233,13 @@ macro(PKG_CONFIG_USE_DEPENDENCY TARGET DEPENDENCY)
     "${multiValueArgs}"
     ${ARGN}
   )
-  build_prefix_for_pkg(${DEPENDENCY} PREFIX)
-  pkg_config_use_lcompile_dependency(
-    ${TARGET} ${PREFIX} ${PKG_CONFIG_USE_DEPENDENCY_NO_INCLUDE_SYSTEM}
+  BUILD_PREFIX_FOR_PKG(${DEPENDENCY} PREFIX)
+  PKG_CONFIG_USE_LCOMPILE_DEPENDENCY(
+    ${TARGET}
+    ${PREFIX}
+    ${PKG_CONFIG_USE_DEPENDENCY_NO_INCLUDE_SYSTEM}
   )
-  pkg_config_use_llink_dependency(${TARGET} ${PREFIX})
+  PKG_CONFIG_USE_LLINK_DEPENDENCY(${TARGET} ${PREFIX})
 endmacro(PKG_CONFIG_USE_DEPENDENCY TARGET DEPENDENCY)
 
 # .rst: .. ifmode:: import-advanced
@@ -1247,9 +1269,11 @@ macro(PKG_CONFIG_USE_COMPILE_DEPENDENCY TARGET DEPENDENCY)
     "${multiValueArgs}"
     ${ARGN}
   )
-  build_prefix_for_pkg(${DEPENDENCY} PREFIX)
-  pkg_config_use_lcompile_dependency(
-    ${TARGET} ${PREFIX} ${PKG_CONFIG_USE_COMPILE_DEPENDENCY_NO_INCLUDE_SYSTEM}
+  BUILD_PREFIX_FOR_PKG(${DEPENDENCY} PREFIX)
+  PKG_CONFIG_USE_LCOMPILE_DEPENDENCY(
+    ${TARGET}
+    ${PREFIX}
+    ${PKG_CONFIG_USE_COMPILE_DEPENDENCY_NO_INCLUDE_SYSTEM}
   )
 endmacro(PKG_CONFIG_USE_COMPILE_DEPENDENCY TARGET DEPENDENCY)
 
@@ -1261,8 +1285,8 @@ endmacro(PKG_CONFIG_USE_COMPILE_DEPENDENCY TARGET DEPENDENCY)
 # shared libraries when using a dependency detected through pkg-config.
 #
 macro(PKG_CONFIG_USE_LINK_DEPENDENCY TARGET DEPENDENCY)
-  build_prefix_for_pkg(${DEPENDENCY} PREFIX)
-  pkg_config_use_llink_dependency(${TARGET} ${PREFIX})
+  BUILD_PREFIX_FOR_PKG(${DEPENDENCY} PREFIX)
+  PKG_CONFIG_USE_LLINK_DEPENDENCY(${TARGET} ${PREFIX})
 endmacro(PKG_CONFIG_USE_LINK_DEPENDENCY TARGET DEPENDENCY)
 
 # .rst: .. ifmode:: import-advanced
@@ -1275,7 +1299,7 @@ endmacro(PKG_CONFIG_USE_LINK_DEPENDENCY TARGET DEPENDENCY)
 # SET_TARGET_PROPERTIES...
 #
 macro(PKG_CONFIG_ADD_COMPILE_OPTIONS COMPILE_OPTIONS DEPENDENCY)
-  build_prefix_for_pkg(${DEPENDENCY} PREFIX)
+  BUILD_PREFIX_FOR_PKG(${DEPENDENCY} PREFIX)
 
   # If there were no previous options
   if(NOT ${COMPILE_OPTIONS})

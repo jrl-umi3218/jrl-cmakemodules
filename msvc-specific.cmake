@@ -136,7 +136,7 @@ endmacro()
 # update the macro and its documentation.
 #
 macro(REQUIRE_MINIMUM_MSVC_VERSION VERSION)
-  get_msvc_tools_version()
+  GET_MSVC_TOOLS_VERSION()
   if(${MSVC_TOOLS_VERSION})
     if(NOT ${MSVC_TOOLS_VERSION} VERSION_GREATER ${VERSION})
       message(
@@ -174,7 +174,7 @@ endmacro(REQUIRE_MINIMUM_MSVC_VERSION)
 #
 macro(GENERATE_MSVC_DOT_USER_FILE)
   if(MSVC)
-    require_minimum_msvc_version("10.0")
+    REQUIRE_MINIMUM_MSVC_VERSION("10.0")
 
     set(
       oneValueArgs
@@ -217,7 +217,7 @@ macro(GENERATE_MSVC_DOT_USER_FILE)
       set(MSVC_DOT_USER_ADDITIONAL_PATH_DOT_USER ";${GMDUT_ADDITIONAL_PATH}")
     endif()
 
-    get_msvc_tools_version()
+    GET_MSVC_TOOLS_VERSION()
     set(
       DOT_USER_TEMPLATE_PATH
       ${PROJECT_JRL_CMAKE_MODULE_DIR}/msvc.vcxproj.user.in

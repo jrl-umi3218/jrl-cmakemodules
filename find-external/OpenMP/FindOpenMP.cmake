@@ -209,9 +209,13 @@ endmacro()
 include(CMakeParseImplicitLinkInfo)
 
 function(_OPENMP_GET_FLAGS LANG FLAG_MODE OPENMP_FLAG_VAR OPENMP_LIB_NAMES_VAR)
-  _openmp_flag_candidates("${LANG}")
-  _openmp_prepare_source("${LANG}" TEST_SOURCE OpenMPTryFlag
-                         _OPENMP_TEST_SRC_NAME _OPENMP_TEST_SRC_CONTENT
+  _OPENMP_FLAG_CANDIDATES("${LANG}")
+  _OPENMP_PREPARE_SOURCE(
+    "${LANG}"
+    TEST_SOURCE
+    OpenMPTryFlag
+    _OPENMP_TEST_SRC_NAME
+    _OPENMP_TEST_SRC_CONTENT
   )
 
   unset(OpenMP_VERBOSE_COMPILE_OPTIONS)
@@ -509,8 +513,12 @@ set(
 )
 
 function(_OPENMP_GET_SPEC_DATE LANG SPEC_DATE)
-  _openmp_prepare_source("${LANG}" CHECK_VERSION_SOURCE OpenMPCheckVersion
-                         _OPENMP_TEST_SRC_NAME _OPENMP_TEST_SRC_CONTENT
+  _OPENMP_PREPARE_SOURCE(
+    "${LANG}"
+    CHECK_VERSION_SOURCE
+    OpenMPCheckVersion
+    _OPENMP_TEST_SRC_NAME
+    _OPENMP_TEST_SRC_CONTENT
   )
 
   unset(_includeDirFlags)
@@ -606,8 +614,11 @@ foreach(LANG IN ITEMS C CXX)
       OR NOT DEFINED OpenMP_${LANG}_LIB_NAMES
       OR "${OpenMP_${LANG}_LIB_NAMES}" STREQUAL "NOTFOUND"
     )
-      _openmp_get_flags("${LANG}" "${LANG}" OpenMP_${LANG}_FLAGS_WORK
-                        OpenMP_${LANG}_LIB_NAMES_WORK
+      _OPENMP_GET_FLAGS(
+        "${LANG}"
+        "${LANG}"
+        OpenMP_${LANG}_FLAGS_WORK
+        OpenMP_${LANG}_LIB_NAMES_WORK
       )
       if(
         NOT DEFINED OpenMP_${LANG}_FLAGS
@@ -647,8 +658,11 @@ if(CMAKE_Fortran_COMPILER_LOADED)
     OR NOT DEFINED OpenMP_Fortran_HAVE_OMPLIB_MODULE
   )
     set(OpenMP_Fortran_INCLUDE_LINE "use omp_lib\n      implicit none")
-    _openmp_get_flags("Fortran" "FortranHeader" OpenMP_Fortran_FLAGS_WORK
-                      OpenMP_Fortran_LIB_NAMES_WORK
+    _OPENMP_GET_FLAGS(
+      "Fortran"
+      "FortranHeader"
+      OpenMP_Fortran_FLAGS_WORK
+      OpenMP_Fortran_LIB_NAMES_WORK
     )
     if(OpenMP_Fortran_FLAGS_WORK)
       set(OpenMP_Fortran_HAVE_OMPLIB_MODULE TRUE CACHE BOOL INTERNAL "")
@@ -689,8 +703,11 @@ if(CMAKE_Fortran_COMPILER_LOADED)
     OR NOT DEFINED OpenMP_Fortran_HAVE_OMPLIB_HEADER
   )
     set(OpenMP_Fortran_INCLUDE_LINE "implicit none\n      include 'omp_lib.h'")
-    _openmp_get_flags("Fortran" "FortranModule" OpenMP_Fortran_FLAGS_WORK
-                      OpenMP_Fortran_LIB_NAMES_WORK
+    _OPENMP_GET_FLAGS(
+      "Fortran"
+      "FortranModule"
+      OpenMP_Fortran_FLAGS_WORK
+      OpenMP_Fortran_LIB_NAMES_WORK
     )
     if(OpenMP_Fortran_FLAGS_WORK)
       set(OpenMP_Fortran_HAVE_OMPLIB_HEADER TRUE CACHE BOOL INTERNAL "")
@@ -742,7 +759,7 @@ include(FindPackageHandleStandardArgs)
 foreach(LANG IN LISTS OpenMP_FINDLIST)
   if(CMAKE_${LANG}_COMPILER_LOADED)
     if(NOT OpenMP_${LANG}_SPEC_DATE AND OpenMP_${LANG}_FLAGS)
-      _openmp_get_spec_date("${LANG}" OpenMP_${LANG}_SPEC_DATE_INTERNAL)
+      _OPENMP_GET_SPEC_DATE("${LANG}" OpenMP_${LANG}_SPEC_DATE_INTERNAL)
       set(
         OpenMP_${LANG}_SPEC_DATE
         "${OpenMP_${LANG}_SPEC_DATE_INTERNAL}"
@@ -750,7 +767,7 @@ foreach(LANG IN LISTS OpenMP_FINDLIST)
         "${LANG} compiler's OpenMP specification date"
       )
     endif()
-    _openmp_set_version_by_spec_date("${LANG}")
+    _OPENMP_SET_VERSION_BY_SPEC_DATE("${LANG}")
 
     set(OpenMP_${LANG}_FIND_QUIETLY ${OpenMP_FIND_QUIETLY})
     set(OpenMP_${LANG}_FIND_REQUIRED ${OpenMP_FIND_REQUIRED})

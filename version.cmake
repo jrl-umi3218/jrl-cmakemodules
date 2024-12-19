@@ -212,11 +212,11 @@ macro(VERSION_COMPUTE)
   foreach(_computation_method ${PROJECT_VERSION_COMPUTATION_METHODS})
     if(NOT PROJECT_VERSION)
       if(${_computation_method} STREQUAL "DOT_VERSION_FILE")
-        _compute_version_from_dot_version_file()
+        _COMPUTE_VERSION_FROM_DOT_VERSION_FILE()
       elseif(${_computation_method} STREQUAL "GIT_DESCRIBE")
-        _compute_version_from_git_describe()
+        _COMPUTE_VERSION_FROM_GIT_DESCRIBE()
       elseif(${_computation_method} STREQUAL "ROS_PACKAGE_XML_FILE")
-        _compute_version_from_ros_package_xml_file()
+        _COMPUTE_VERSION_FROM_ROS_PACKAGE_XML_FILE()
       else()
         message(
           AUTHOR_WARNING
@@ -239,8 +239,11 @@ macro(VERSION_COMPUTE)
       AND NOT DEFINED PROJECT_VERSION_MINOR
       AND NOT DEFINED PROJECT_VERSION_PATCH
     )
-      split_version_number(${PROJECT_VERSION} PROJECT_VERSION_MAJOR
-                           PROJECT_VERSION_MINOR PROJECT_VERSION_PATCH
+      SPLIT_VERSION_NUMBER(
+        ${PROJECT_VERSION}
+        PROJECT_VERSION_MAJOR
+        PROJECT_VERSION_MINOR
+        PROJECT_VERSION_PATCH
       )
     endif()
   endif()

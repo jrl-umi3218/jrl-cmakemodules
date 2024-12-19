@@ -59,13 +59,10 @@ macro(_SETUP_PROJECT_WARNINGS)
     /wd4355
   )
 
-  cxx_flags_by_compiler_frontend(
-    GNU
-    ${GNU_FLAGS}
-    MSVC
-    ${MSVC_FLAGS}
-    OUTPUT
-    WARNING_CXX_FLAGS_LIST
+  CXX_FLAGS_BY_COMPILER_FRONTEND(
+    GNU ${GNU_FLAGS}
+    MSVC ${MSVC_FLAGS}
+    OUTPUT WARNING_CXX_FLAGS_LIST
     FILTER
   )
   string(REPLACE ";" " " WARNING_CXX_FLAGS "${WARNING_CXX_FLAGS_LIST}")

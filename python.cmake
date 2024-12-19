@@ -178,7 +178,7 @@ macro(FINDPYTHON)
       set(Python${_PYTHON_VERSION_MAJOR}_INCLUDE_DIR ${PYTHON_INCLUDE_DIR})
 
       if(SEARCH_FOR_NUMPY)
-        find_numpy()
+        FIND_NUMPY()
         set(Python_NumPy_INCLUDE_DIR ${NUMPY_INCLUDE_DIRS})
       endif()
 
@@ -390,8 +390,8 @@ macro(FINDPYTHON)
   endif()
 
   if(PYTHON_EXPORT_DEPENDENCY)
-    install_jrl_cmakemodules_file("python.cmake")
-    install_jrl_cmakemodules_file("python-helpers.cmake")
+    INSTALL_JRL_CMAKEMODULES_FILE("python.cmake")
+    INSTALL_JRL_CMAKEMODULES_FILE("python-helpers.cmake")
     string(
       CONCAT
       PYTHON_EXPORT_DEPENDENCY_MACROS
@@ -404,7 +404,7 @@ macro(FINDPYTHON)
   endif()
 
   if(SEARCH_FOR_NUMPY)
-    find_numpy()
+    FIND_NUMPY()
     if(PYTHON_EXPORT_DEPENDENCY)
       set(
         PYTHON_EXPORT_DEPENDENCY_MACROS
@@ -515,7 +515,7 @@ macro(DYNAMIC_GRAPH_PYTHON_MODULE SUBMODULENAME LIBRARYNAME TARGETNAME)
     ${PYTHON_MODULE}
     PUBLIC ${LIBRARYNAME} dynamic-graph::dynamic-graph
   )
-  target_link_boost_python(${PYTHON_MODULE} PUBLIC)
+  TARGET_LINK_BOOST_PYTHON(${PYTHON_MODULE} PUBLIC)
   if(PROJECT_NAME STREQUAL "dynamic-graph-python")
     target_link_libraries(${PYTHON_MODULE} PUBLIC dynamic-graph-python)
   else()

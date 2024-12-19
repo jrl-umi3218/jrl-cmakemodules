@@ -130,8 +130,8 @@ macro(ADD_ROSPACK_DEPENDENCY PKG_ROS)
   string(REPLACE "\n" "" ${PKG}_ROS_PREFIX "${${PKG}_ROS_PREFIX}")
 
   # Add flags to package pkg-config file.
-  pkg_config_append_cflags("${${PREFIX}_CFLAGS}")
-  pkg_config_append_libs_raw("${${PREFIX}_LIBS}")
+  PKG_CONFIG_APPEND_CFLAGS("${${PREFIX}_CFLAGS}")
+  PKG_CONFIG_APPEND_LIBS_RAW("${${PREFIX}_LIBS}")
 endmacro()
 
 macro(ROSPACK_USE_DEPENDENCY TARGET PKG)

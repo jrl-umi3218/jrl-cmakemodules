@@ -38,8 +38,8 @@ macro(KINEO_ADDON MODULE_NAME)
   string(REPLACE "\n" "" UNAME_N "${UNAME_N}")
 
   set(ADDON_INSTALLDIR lib/modules/${UNAME_N})
-  pkg_config_append_library_dir(${CMAKE_INSTALL_PREFIX}/${ADDON_INSTALLDIR})
-  pkg_config_append_libs(${PROJECT_NAME})
+  PKG_CONFIG_APPEND_LIBRARY_DIR(${CMAKE_INSTALL_PREFIX}/${ADDON_INSTALLDIR})
+  PKG_CONFIG_APPEND_LIBS(${PROJECT_NAME})
   add_library(${MODULE_NAME} SHARED ${KINEO_ADDON_SOURCES})
   set_target_properties(
     ${MODULE_NAME}

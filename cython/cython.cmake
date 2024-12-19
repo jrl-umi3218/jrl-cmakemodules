@@ -421,7 +421,7 @@ macro(ADD_CYTHON_BINDINGS PACKAGE)
   foreach(TGT ${CYTHON_BINDINGS_TARGETS})
     _is_interface_library(${TGT} IS_INTERFACE)
     if(${IS_INTERFACE})
-      _cython_dummy_target(${TGT})
+      _CYTHON_DUMMY_TARGET(${TGT})
       list(
         APPEND
         CYTHON_BINDINGS_COMPILE_DEFINITIONS
@@ -506,32 +506,47 @@ macro(ADD_CYTHON_BINDINGS PACKAGE)
     )
   endforeach()
   if(${PYTHON_BINDING_BUILD_PYTHON2_AND_PYTHON3})
-    _add_cython_bindings_targets(
-      "python2" ${PACKAGE} "${CYTHON_BINDINGS_SOURCES}"
-      "${CYTHON_BINDINGS_GENERATE_SOURCES}" "${CYTHON_BINDINGS_TARGETS}"
+    _ADD_CYTHON_BINDINGS_TARGETS(
+      "python2"
+      ${PACKAGE}
+      "${CYTHON_BINDINGS_SOURCES}"
+      "${CYTHON_BINDINGS_GENERATE_SOURCES}"
+      "${CYTHON_BINDINGS_TARGETS}"
       ${WITH_TESTS}
     )
-    _add_cython_bindings_targets(
-      "python3" ${PACKAGE} "${CYTHON_BINDINGS_SOURCES}"
-      "${CYTHON_BINDINGS_GENERATE_SOURCES}" "${CYTHON_BINDINGS_TARGETS}"
+    _ADD_CYTHON_BINDINGS_TARGETS(
+      "python3"
+      ${PACKAGE}
+      "${CYTHON_BINDINGS_SOURCES}"
+      "${CYTHON_BINDINGS_GENERATE_SOURCES}"
+      "${CYTHON_BINDINGS_TARGETS}"
       ${WITH_TESTS}
     )
   elseif(${PYTHON_BINDING_FORCE_PYTHON3})
-    _add_cython_bindings_targets(
-      "python3" ${PACKAGE} "${CYTHON_BINDINGS_SOURCES}"
-      "${CYTHON_BINDINGS_GENERATE_SOURCES}" "${CYTHON_BINDINGS_TARGETS}"
+    _ADD_CYTHON_BINDINGS_TARGETS(
+      "python3"
+      ${PACKAGE}
+      "${CYTHON_BINDINGS_SOURCES}"
+      "${CYTHON_BINDINGS_GENERATE_SOURCES}"
+      "${CYTHON_BINDINGS_TARGETS}"
       ${WITH_TESTS}
     )
   elseif(${PYTHON_BINDING_FORCE_PYTHON2})
-    _add_cython_bindings_targets(
-      "python2" ${PACKAGE} "${CYTHON_BINDINGS_SOURCES}"
-      "${CYTHON_BINDINGS_GENERATE_SOURCES}" "${CYTHON_BINDINGS_TARGETS}"
+    _ADD_CYTHON_BINDINGS_TARGETS(
+      "python2"
+      ${PACKAGE}
+      "${CYTHON_BINDINGS_SOURCES}"
+      "${CYTHON_BINDINGS_GENERATE_SOURCES}"
+      "${CYTHON_BINDINGS_TARGETS}"
       ${WITH_TESTS}
     )
   else()
-    _add_cython_bindings_targets(
-      "python" ${PACKAGE} "${CYTHON_BINDINGS_SOURCES}"
-      "${CYTHON_BINDINGS_GENERATE_SOURCES}" "${CYTHON_BINDINGS_TARGETS}"
+    _ADD_CYTHON_BINDINGS_TARGETS(
+      "python"
+      ${PACKAGE}
+      "${CYTHON_BINDINGS_SOURCES}"
+      "${CYTHON_BINDINGS_GENERATE_SOURCES}"
+      "${CYTHON_BINDINGS_TARGETS}"
       ${WITH_TESTS}
     )
   endif()
@@ -572,7 +587,7 @@ macro(_MAKE_CYTHON_LIBRARY PACKAGE PYTHON PYTHON_B OUT)
 endmacro()
 
 macro(_APPEND_CYTHON_LIBRARY PACKAGE PYTHON PYTHON_B OUT)
-  _make_cython_library(${PACKAGE} ${PYTHON} ${PYTHON_B} LIB)
+  _MAKE_CYTHON_LIBRARY(${PACKAGE} ${PYTHON} ${PYTHON_B} LIB)
   list(APPEND ${OUT} ${LIB})
 endmacro()
 
@@ -591,12 +606,12 @@ macro(GET_CYTHON_LIBRARIES PACKAGE VAR)
   endif()
   set(${VAR})
   if(${PYTHON_BINDING_BUILD_PYTHON2_AND_PYTHON3})
-    _append_cython_library(${PACKAGE} Python2 python2 ${VAR})
-    _append_cython_library(${PACKAGE} Python3 python3 ${VAR})
+    _APPEND_CYTHON_LIBRARY(${PACKAGE} Python2 python2 ${VAR})
+    _APPEND_CYTHON_LIBRARY(${PACKAGE} Python3 python3 ${VAR})
   elseif(${PYTHON_BINDING_FORCE_PYTHON2})
-    _append_cython_library(${PACKAGE} Python2 python2 ${VAR})
+    _APPEND_CYTHON_LIBRARY(${PACKAGE} Python2 python2 ${VAR})
   elseif(${PYTHON_BINDING_FORCE_PYTHON3})
-    _append_cython_library(${PACKAGE} Python3 python3 ${VAR})
+    _APPEND_CYTHON_LIBRARY(${PACKAGE} Python3 python3 ${VAR})
   else()
     execute_process(
       COMMAND python -c "import sys; print(sys.version_info.major);"
@@ -604,7 +619,7 @@ macro(GET_CYTHON_LIBRARIES PACKAGE VAR)
       OUTPUT_STRIP_TRAILING_WHITESPACE
     )
     if("${PYTHON_MAJOR}" STREQUAL "2" OR "${PYTHON_MAJOR}" STREQUAL "3")
-      _append_cython_library(${PACKAGE} Python${PYTHON_MAJOR} python ${VAR})
+      _APPEND_CYTHON_LIBRARY(${PACKAGE} Python${PYTHON_MAJOR} python ${VAR})
     else()
       message(
         FATAL_ERROR
