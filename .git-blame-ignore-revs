@@ -3,3 +3,5 @@ a7abe2312a94b28f01173d6db5f74bb26c934e10
 # switch to gersemi and pre-commit run -a (ManifoldFR, 2024-10-23)
 f743a57ca5b83cc19669cac3d3541c23ea89a74a
 ad86c1842091800eeff5fdcb32e766ac2338e50c
+# add ./ to gersemi defs and pre-commit run -a (ManifoldFR, 2024-12-19)
+c37b94e619480d12a68d1f045df184534025b7ef
