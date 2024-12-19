@@ -318,7 +318,12 @@ macro(HEADER_INSTALL)
     string(REGEX REPLACE "include(/|$)" "" DIR "${DIR}")
     if(CMAKE_VERSION` VERSION_GREATER 3.20)
       # workaround CMP0177
-      cmake_path(SET INSTALL_PATH NORMALIZE "${CMAKE_INSTALL_INCLUDEDIR}/${DIR}")
+      cmake_path(
+        SET
+        INSTALL_PATH
+        NORMALIZE
+        "${CMAKE_INSTALL_INCLUDEDIR}/${DIR}"
+      )
     else()
       set(INSTALL_PATH "${CMAKE_INSTALL_INCLUDEDIR}/${DIR}")
     endif()
