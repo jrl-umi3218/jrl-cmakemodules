@@ -1,4 +1,4 @@
-# Copyright (C) 2008-2019 LAAS-CNRS, JRL AIST-CNRS, INRIA.
+# Copyright (C) 2008-2024 LAAS-CNRS, JRL AIST-CNRS, INRIA.
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -316,9 +316,20 @@ macro(HEADER_INSTALL)
     string(REGEX REPLACE "${CMAKE_BINARY_DIR}" "" DIR "${DIR}")
     string(REGEX REPLACE "${PROJECT_SOURCE_DIR}" "" DIR "${DIR}")
     string(REGEX REPLACE "include(/|$)" "" DIR "${DIR}")
+    if(CMAKE_VERSION` VERSION_GREATER 3.20)
+      # workaround CMP0177
+      cmake_path(
+        SET
+        INSTALL_PATH
+        NORMALIZE
+        "${CMAKE_INSTALL_INCLUDEDIR}/${DIR}"
+      )
+    else()
+      set(INSTALL_PATH "${CMAKE_INSTALL_INCLUDEDIR}/${DIR}")
+    endif()
     install(
       FILES ${FILE}
-      DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${DIR}"
+      DESTINATION ${INSTALL_PATH}
       PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_WRITE
       COMPONENT ${_COMPONENT_NAME}
     )
