@@ -11,10 +11,10 @@ include(../macros.cmake)
 include(../../base.cmake)
 include(../../python.cmake)
 
-compute_project_args(PROJECT_ARGS)
+COMPUTE_PROJECT_ARGS(PROJECT_ARGS)
 project(${PROJECT_NAME} ${PROJECT_ARGS})
-findpython()
+FINDPYTHON()
 
 check_exist_variable(PYTHON_SITELIB "")
 
-python_install_on_site(jrl_cmakemodule python.py)
+PYTHON_INSTALL_ON_SITE(jrl_cmakemodule python.py)

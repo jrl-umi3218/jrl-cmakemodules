@@ -15,7 +15,7 @@ macro(ADD_SWIG_PYTHON_BINDING FILENAME DIRECTORY)
   if(${SWIG} STREQUAL SWIG-NOTFOUND)
     message(FATAL_ERROR "Cannot find swig")
   endif()
-  generate_include_flags()
+  GENERATE_INCLUDE_FLAGS()
   set(outname ${CMAKE_BINARY_DIR}/${DIRECTORY}/${FILENAME}_wrap.cxx)
   add_custom_command(
     OUTPUT ${outname}

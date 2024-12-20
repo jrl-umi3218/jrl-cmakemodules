@@ -207,15 +207,18 @@ message(STATUS "Configuring \"${PROJECT_NAME}\" (${PROJECT_URL})")
 
 # If the project version number is not set, compute it automatically.
 if(NOT DEFINED PROJECT_VERSION)
-  version_compute()
+  VERSION_COMPUTE()
 else()
   if(
     NOT DEFINED PROJECT_VERSION_MAJOR
     AND NOT DEFINED PROJECT_VERSION_MINOR
     AND NOT DEFINED PROJECT_VERSION_PATCH
   )
-    split_version_number(${PROJECT_VERSION} PROJECT_VERSION_MAJOR
-                         PROJECT_VERSION_MINOR PROJECT_VERSION_PATCH
+    SPLIT_VERSION_NUMBER(
+      ${PROJECT_VERSION}
+      PROJECT_VERSION_MAJOR
+      PROJECT_VERSION_MINOR
+      PROJECT_VERSION_PATCH
     )
   endif()
 endif()
@@ -258,7 +261,7 @@ if(PROJECT_AUTO_RUN_FINALIZE)
         JRL_CMAKEMODULE_LOGGING_FILENAME
         "${PROJECT_JRL_CMAKE_BINARY_DIR}/config.log"
       )
-      setup_project_finalize()
+      SETUP_PROJECT_FINALIZE()
       set(CMAKE_CURRENT_LIST_DIR "") # restore value
       set(JRL_CMAKEMODULE_LOGGING_FILENAME "") # restore value
     endif()
@@ -309,7 +312,7 @@ endmacro(_ADD_TO_LIST_IF_NOT_PRESENT LIST VALUE)
 #
 macro(_CONCATENATE_ARGUMENTS OUTPUT SEPARATOR)
   foreach(I RANGE 2 ${ARGC})
-    _add_to_list("${OUTPUT}" "${ARGV${I}}" "${SEPARATOR}")
+    _ADD_TO_LIST("${OUTPUT}" "${ARGV${I}}" "${SEPARATOR}")
   endforeach(I RANGE 2 ${ARGC})
   message(${${OUTPUT}})
 endmacro(_CONCATENATE_ARGUMENTS OUTPUT)
@@ -348,19 +351,19 @@ endmacro(SETUP_PROJECT)
 #
 macro(SETUP_PROJECT_FINALIZE)
   if(INSTALL_PKG_CONFIG_FILE)
-    _setup_project_pkg_config_finalize()
+    _SETUP_PROJECT_PKG_CONFIG_FINALIZE()
   endif(INSTALL_PKG_CONFIG_FILE)
-  _setup_project_documentation_finalize()
-  _setup_project_header_finalize()
-  _setup_coverage_finalize()
-  _setup_debian()
+  _SETUP_PROJECT_DOCUMENTATION_FINALIZE()
+  _SETUP_PROJECT_HEADER_FINALIZE()
+  _SETUP_COVERAGE_FINALIZE()
+  _SETUP_DEBIAN()
   # Install data if needed
-  _install_project_data()
+  _INSTALL_PROJECT_DATA()
   _install_project_ros2_ament_files()
 
-  logging_finalize()
+  LOGGING_FINALIZE()
   if(PROJECT_USE_CMAKE_EXPORT)
-    setup_project_package_finalize()
+    SETUP_PROJECT_PACKAGE_FINALIZE()
   endif()
 endmacro(SETUP_PROJECT_FINALIZE)
 

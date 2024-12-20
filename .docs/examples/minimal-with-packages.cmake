@@ -13,11 +13,17 @@ include(cmake/base.cmake)
 project(${PROJECT_NAME} CXX)
 
 # Add a required dependency
-add_project_dependency(MyDependency REQUIRED)
+ADD_PROJECT_DEPENDENCY(MyDependency REQUIRED)
 
 # Another example to show that arguments can be passed down to the underlying
 # find_package call
-add_project_dependency(Boost 1.50 REQUIRED COMPONENT timer)
+ADD_PROJECT_DEPENDENCY(
+  Boost
+  1.50
+  REQUIRED
+  COMPONENT
+  timer
+)
 
 add_library(myLibrary ${MY_SOURCES})
 target_link_libraries(myLibrary MyDependency::MyAwesomeLib Boost::timer)
