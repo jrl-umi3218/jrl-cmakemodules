@@ -171,13 +171,12 @@ macro(
   if(DEFINED CMAKE_BUILD_TYPE)
     file(
       MAKE_DIRECTORY
-      "${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE}/${PYTHON}/${CMAKE_BUILD_TYPE}"
+        "${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE}/${PYTHON}/${CMAKE_BUILD_TYPE}"
     )
   else()
     foreach(CFG ${CMAKE_CONFIGURATION_TYPES})
       file(
-        MAKE_DIRECTORY
-        "${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE}/${PYTHON}/${CFG}"
+        MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE}/${PYTHON}/${CFG}"
       )
     endforeach()
   endif()
