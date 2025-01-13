@@ -297,7 +297,7 @@ macro(FINDPYTHON)
     # directory
     option(PYTHON_DEB_LAYOUT "Enable Debian-style Python package layout" OFF)
     # ref. https://docs.python.org/3/library/site.html
-    option(PYTHON_STANDARD_LAYOUT "Enable standard Python package layout" OFF)
+    option(PYTHON_STANDARD_LAYOUT "Enable standard Python package layout" ON)
 
     if(PYTHON_STANDARD_LAYOUT)
       set(
