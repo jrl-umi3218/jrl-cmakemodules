@@ -13,6 +13,8 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
+option(BUILDING_ROS2_PACKAGE "Install ament specific files" ON)
+
 # This macro creates 3 files which are allowing a package to be found using the
 # AMENT system present in ros 2 Setting BUILDING_ROS2_PACKAGE is enough to
 # trigger this behavior. _install_project_ros2_ament_files()
