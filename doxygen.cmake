@@ -556,52 +556,6 @@ macro(_SETUP_PROJECT_DOCUMENTATION)
     endif(MSVC)
     add_dependencies(doc ${PROJECT_NAME}-doc)
 
-    if(DOXYGEN_USE_TEMPLATE_CSS)
-      if(NOT TARGET generate-template-css)
-        add_custom_target(generate-template-css)
-      endif()
-      add_custom_target(
-        ${PROJECT_NAME}-generate-template-css
-        COMMAND
-          ${DOXYGEN_EXECUTABLE} -w html ${PROJECT_BINARY_DIR}/doc/header.html
-          ${PROJECT_BINARY_DIR}/doc/footer.html
-          ${PROJECT_BINARY_DIR}/doc/doxygen.css
-        BYPRODUCTS
-          ${PROJECT_BINARY_DIR}/doc/header.html
-          ${PROJECT_BINARY_DIR}/doc/footer.html
-          ${PROJECT_BINARY_DIR}/doc/doxygen.css
-      )
-      add_dependencies(
-        generate-template-css
-        ${PROJECT_NAME}-generate-template-css
-      )
-      add_dependencies(
-        ${PROJECT_NAME}-doc
-        ${PROJECT_NAME}-generate-template-css
-      )
-      _set_if_undefined(
-        DOXYGEN_HTML_HEADER
-        "${PROJECT_BINARY_DIR}/doc/header.html"
-      )
-      _set_if_undefined(
-        DOXYGEN_HTML_FOOTER
-        "${PROJECT_BINARY_DIR}/doc/footer.html"
-      )
-      _set_if_undefined(
-        DOXYGEN_HTML_STYLESHEET
-        "${PROJECT_BINARY_DIR}/doc/doxygen.css"
-      )
-    else(DOXYGEN_USE_TEMPLATE_CSS)
-      _set_if_undefined(
-        DOXYGEN_HTML_FOOTER
-        "${PROJECT_JRL_CMAKE_MODULE_DIR}/doxygen/footer.html"
-      )
-      _set_if_undefined(
-        DOXYGEN_HTML_STYLESHEET
-        "${PROJECT_JRL_CMAKE_MODULE_DIR}/doxygen/doxygen.css"
-      )
-    endif(DOXYGEN_USE_TEMPLATE_CSS)
-
     add_custom_command(
       OUTPUT
         ${PROJECT_BINARY_DIR}/doc/${PROJECT_NAME}.doxytag
