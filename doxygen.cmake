@@ -254,6 +254,7 @@ macro(_SETUP_DOXYGEN_CONFIG_FILE configfile)
     MATHJAX_RELPATH
     MATHJAX_EXTENSIONS
     MATHJAX_CODEFILE
+    MATHJAX_VERSION
     SEARCHENGINE
     SERVER_BASED_SEARCH
     EXTERNAL_SEARCH
@@ -442,6 +443,7 @@ macro(_SETUP_DOXYGEN_DEFAULT_OPTIONS)
   # ---------------------------------------------------------------------------
   _set_if_undefined(DOXYGEN_HTML_OUTPUT doxygen-html)
   _set_if_undefined(DOXYGEN_GENERATE_TREEVIEW YES)
+  _set_if_undefined(DOXYGEN_MATHJAX_VERSION MathJax_3)
   # ---------------------------------------------------------------------------
   # Configuration options related to the LaTeX output
   # ---------------------------------------------------------------------------
@@ -590,6 +592,21 @@ macro(_SETUP_PROJECT_DOCUMENTATION)
       file(
         COPY ${PROJECT_JRL_CMAKE_MODULE_DIR}/doxygen/MathJax
         DESTINATION ${PROJECT_BINARY_DIR}/doc/doxygen-html
+      )
+    endif()
+
+    if(
+      DOXYGEN_USE_MATHJAX
+      AND
+        (
+          NOT DEFINED DOXYGEN_MATHJAX_VERSION
+          OR DOXYGEN_MATHJAX_VERSION EQUAL "MathJax_3"
+        )
+    )
+      message(
+        STATUS
+        "MathJax version 3 will be used; if MATHJAX_RELPATH is unset we will use the vendored MathJax. "
+        "If you have set it, check if you are pointing the right version of MathJax."
       )
     endif()
 
