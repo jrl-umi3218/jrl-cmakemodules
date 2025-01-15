@@ -600,21 +600,16 @@ macro(_SETUP_PROJECT_DOCUMENTATION)
         COPY ${PROJECT_JRL_CMAKE_MODULE_DIR}/doxygen/MathJax
         DESTINATION ${PROJECT_BINARY_DIR}/doc/doxygen-html
       )
-    endif()
-
-    if(
-      DOXYGEN_USE_MATHJAX
-      AND
-        (
-          NOT DEFINED DOXYGEN_MATHJAX_VERSION
-          OR DOXYGEN_MATHJAX_VERSION EQUAL "MathJax_3"
-        )
-    )
-      message(
-        STATUS
-        "MathJax version 3 will be used; if MATHJAX_RELPATH is unset we will use the vendored MathJax. "
-        "If you have set it, check if you are pointing the right version of MathJax."
+      if(
+        NOT DEFINED DOXYGEN_MATHJAX_VERSION
+        OR DOXYGEN_MATHJAX_VERSION STREQUAL "MathJax_3"
       )
+        message(
+          STATUS
+          "MathJax version 3 will be used; if MATHJAX_RELPATH is unset we will use the vendored MathJax. "
+          "If you have set it, check if you are pointing the right version of MathJax."
+        )
+      endif()
     endif()
 
     # Install generated files.
