@@ -687,19 +687,6 @@ macro(_SETUP_PROJECT_DOCUMENTATION_FINALIZE)
         set(DOXYGEN_USE_MATHJAX "YES")
       endif()
     endif()
-
-    if("${DOXYGEN_USE_MATHJAX}" STREQUAL "YES")
-      message(STATUS "Doxygen rendering: using MathJax backend")
-      set(DOXYGEN_HEADER_NAME "header-mathjax.html")
-    else()
-      message(STATUS "Doxygen rendering: using LaTeX backend")
-      set(DOXYGEN_HEADER_NAME "header.html")
-    endif()
-    _set_if_undefined(
-      DOXYGEN_HTML_HEADER
-      "${PROJECT_JRL_CMAKE_MODULE_DIR}/doxygen/${DOXYGEN_HEADER_NAME}"
-    )
-
     if(INSTALL_DOCUMENTATION)
       # Find doxytag files To ignore this list of tag files, set variable
       # DOXYGEN_TAGFILES
