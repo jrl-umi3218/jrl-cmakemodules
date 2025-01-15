@@ -576,7 +576,16 @@ macro(_SETUP_PROJECT_DOCUMENTATION)
           ${PROJECT_BINARY_DIR}/doc/doxygen-html
     )
 
-    # Install MathJax minimal version.
+    if(DEFINED DOXYGEN_HTML_STYLESHEET)
+      message(
+        WARNING
+        "The CMake variable DOXYGEN_HTML_STYLESHEET is defined, which sets the "
+        "deprecated Doxygen option HTML_STYLESHEET. It may be broken in the future."
+        " Set HTML_STYLESHEET instead."
+      )
+    endif()
+
+    # Copy our vendored MathJax.
     if("${DOXYGEN_USE_MATHJAX}" STREQUAL "YES")
       file(
         COPY ${PROJECT_JRL_CMAKE_MODULE_DIR}/doxygen/MathJax
