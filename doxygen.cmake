@@ -556,52 +556,6 @@ macro(_SETUP_PROJECT_DOCUMENTATION)
     endif(MSVC)
     add_dependencies(doc ${PROJECT_NAME}-doc)
 
-    if(DOXYGEN_USE_TEMPLATE_CSS)
-      if(NOT TARGET generate-template-css)
-        add_custom_target(generate-template-css)
-      endif()
-      add_custom_target(
-        ${PROJECT_NAME}-generate-template-css
-        COMMAND
-          ${DOXYGEN_EXECUTABLE} -w html ${PROJECT_BINARY_DIR}/doc/header.html
-          ${PROJECT_BINARY_DIR}/doc/footer.html
-          ${PROJECT_BINARY_DIR}/doc/doxygen.css
-        BYPRODUCTS
-          ${PROJECT_BINARY_DIR}/doc/header.html
-          ${PROJECT_BINARY_DIR}/doc/footer.html
-          ${PROJECT_BINARY_DIR}/doc/doxygen.css
-      )
-      add_dependencies(
-        generate-template-css
-        ${PROJECT_NAME}-generate-template-css
-      )
-      add_dependencies(
-        ${PROJECT_NAME}-doc
-        ${PROJECT_NAME}-generate-template-css
-      )
-      _set_if_undefined(
-        DOXYGEN_HTML_HEADER
-        "${PROJECT_BINARY_DIR}/doc/header.html"
-      )
-      _set_if_undefined(
-        DOXYGEN_HTML_FOOTER
-        "${PROJECT_BINARY_DIR}/doc/footer.html"
-      )
-      _set_if_undefined(
-        DOXYGEN_HTML_STYLESHEET
-        "${PROJECT_BINARY_DIR}/doc/doxygen.css"
-      )
-    else(DOXYGEN_USE_TEMPLATE_CSS)
-      _set_if_undefined(
-        DOXYGEN_HTML_FOOTER
-        "${PROJECT_JRL_CMAKE_MODULE_DIR}/doxygen/footer.html"
-      )
-      _set_if_undefined(
-        DOXYGEN_HTML_STYLESHEET
-        "${PROJECT_JRL_CMAKE_MODULE_DIR}/doxygen/doxygen.css"
-      )
-    endif(DOXYGEN_USE_TEMPLATE_CSS)
-
     add_custom_command(
       OUTPUT
         ${PROJECT_BINARY_DIR}/doc/${PROJECT_NAME}.doxytag
@@ -622,7 +576,16 @@ macro(_SETUP_PROJECT_DOCUMENTATION)
           ${PROJECT_BINARY_DIR}/doc/doxygen-html
     )
 
-    # Install MathJax minimal version.
+    if(DEFINED DOXYGEN_HTML_STYLESHEET)
+      message(
+        WARNING
+        "The CMake variable DOXYGEN_HTML_STYLESHEET is defined, which sets the "
+        "deprecated Doxygen option HTML_STYLESHEET. It may be broken in the future."
+        " Set HTML_STYLESHEET instead."
+      )
+    endif()
+
+    # Copy our vendored MathJax.
     if("${DOXYGEN_USE_MATHJAX}" STREQUAL "YES")
       file(
         COPY ${PROJECT_JRL_CMAKE_MODULE_DIR}/doxygen/MathJax
@@ -733,19 +696,6 @@ macro(_SETUP_PROJECT_DOCUMENTATION_FINALIZE)
         set(DOXYGEN_USE_MATHJAX "YES")
       endif()
     endif()
-
-    if("${DOXYGEN_USE_MATHJAX}" STREQUAL "YES")
-      message(STATUS "Doxygen rendering: using MathJax backend")
-      set(DOXYGEN_HEADER_NAME "header-mathjax.html")
-    else()
-      message(STATUS "Doxygen rendering: using LaTeX backend")
-      set(DOXYGEN_HEADER_NAME "header.html")
-    endif()
-    _set_if_undefined(
-      DOXYGEN_HTML_HEADER
-      "${PROJECT_JRL_CMAKE_MODULE_DIR}/doxygen/${DOXYGEN_HEADER_NAME}"
-    )
-
     if(INSTALL_DOCUMENTATION)
       # Find doxytag files To ignore this list of tag files, set variable
       # DOXYGEN_TAGFILES
