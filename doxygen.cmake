@@ -674,19 +674,6 @@ macro(_SETUP_PROJECT_DOCUMENTATION)
   endif(NOT DOXYGEN_FOUND)
 endmacro(_SETUP_PROJECT_DOCUMENTATION)
 
-# REMOVE_DUPLICATES
-# -----------------
-#
-# Remove duplicate values from a space separated list
-function(REMOVE_DUPLICATES ARG_STR OUTPUT)
-  set(ARG_LIST ${ARG_STR})
-  separate_arguments(ARG_LIST)
-  list(REMOVE_DUPLICATES ARG_LIST)
-  string(REGEX REPLACE "([^\\]|^);" "\\1 " _TMP_STR "${ARG_LIST}")
-  string(REGEX REPLACE "[\\](.)" "\\1" _TMP_STR "${_TMP_STR}") # fixes escaping
-  set(${OUTPUT} "${_TMP_STR}" PARENT_SCOPE)
-endfunction()
-
 # _DOXYTAG_ENTRIES_FROM_CMAKE_DEPENDENCIES
 # ----------------------------------------
 #
@@ -699,9 +686,11 @@ macro(_DOXYTAG_ENTRIES_FROM_CMAKE_DEPENDENCIES DEPENDENCIES VAR_OUT)
       DEFINED ${PREFIX}_DOXYGENDOCDIR
       AND EXISTS ${${PREFIX}_DOXYGENDOCDIR}/${PREFIX}.doxytag
     )
-      set(
+      get_filename_component(DEP_DOCDIR "${${PREFIX}_DOXYGENDOCDIR}" ABSOLUTE)
+      list(
+        APPEND
         ${VAR_OUT}
-        "${${VAR_OUT}} \"${${PREFIX}_DOXYGENDOCDIR}/${PREFIX}.doxytag = ${${PREFIX}_DOXYGENDOCDIR}\""
+        "\"${${PREFIX}_DOXYGENDOCDIR}/${PREFIX}.doxytag = ${DEP_DOCDIR}\""
       )
     endif()
     if(DEFINED ${PREFIX}_DEPENDENCIES)
@@ -741,9 +730,9 @@ macro(_SETUP_PROJECT_DOCUMENTATION_FINALIZE)
       endif()
     endif()
     if(INSTALL_DOCUMENTATION)
-      # Find doxytag files To ignore this list of tag files, set variable
-      # DOXYGEN_TAGFILES
-      set(_TAGFILES_FROM_DEPENDENCIES "${DOXYGEN_TAGFILES_FROM_DEPENDENCIES}")
+      # Find doxytag files. To ignore this list of tag files,
+      # set the DOXYGEN_TAGFILES CMake variable or TAGFILES in doc/Doxyfile.extra.in.
+      set(_TAGFILES_FROM_DEPENDENCIES ${DOXYGEN_TAGFILES_FROM_DEPENDENCIES})
       set(PKG_REQUIRES ${_PKG_CONFIG_REQUIRES})
       list(APPEND PKG_REQUIRES ${_PKG_CONFIG_COMPILE_TIME_REQUIRES})
       foreach(PKG_CONFIG_STRING ${PKG_REQUIRES})
@@ -758,16 +747,16 @@ macro(_SETUP_PROJECT_DOCUMENTATION_FINALIZE)
           DEFINED ${PREFIX}_DOXYGENDOCDIR
           AND EXISTS ${${PREFIX}_DOXYGENDOCDIR}/${LIBRARY_NAME}.doxytag
         )
-          file(
-            RELATIVE_PATH
+          # always use absolute path
+          get_filename_component(
             DEP_DOCDIR
-            ${CMAKE_INSTALL_FULL_DOCDIR}
-            ${${PREFIX}_DOXYGENDOCDIR}
+            "${${PREFIX}_DOXYGENDOCDIR}"
+            ABSOLUTE
           )
-
-          set(
+          list(
+            APPEND
             _TAGFILES_FROM_DEPENDENCIES
-            "${_TAGFILES_FROM_DEPENDENCIES} \"${${PREFIX}_DOXYGENDOCDIR}/${LIBRARY_NAME}.doxytag = ${DEP_DOCDIR}\""
+            "\"${${PREFIX}_DOXYGENDOCDIR}/${LIBRARY_NAME}.doxytag = ${DEP_DOCDIR}\""
           )
         endif()
       endforeach()
@@ -776,9 +765,15 @@ macro(_SETUP_PROJECT_DOCUMENTATION_FINALIZE)
         _TAGFILES_FROM_DEPENDENCIES
       )
       if(_TAGFILES_FROM_DEPENDENCIES)
-        REMOVE_DUPLICATES(
-          ${_TAGFILES_FROM_DEPENDENCIES}
+        # use native deduplication routine for comma-separated lists, then
+        # convert comma-separated list to space-separated list string.
+        list(REMOVE_DUPLICATES _TAGFILES_FROM_DEPENDENCIES)
+        string(
+          REPLACE
+          ";"
+          " "
           DOXYGEN_TAGFILES_FROM_DEPENDENCIES
+          "${_TAGFILES_FROM_DEPENDENCIES}"
         )
       endif()
     endif()
