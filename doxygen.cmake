@@ -1,4 +1,4 @@
-# Copyright (C) 2008-2023 LAAS-CNRS, JRL AIST-CNRS, INRIA.
+# Copyright (C) 2008-2025 LAAS-CNRS, JRL AIST-CNRS, INRIA.
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -444,6 +444,13 @@ macro(_SETUP_DOXYGEN_DEFAULT_OPTIONS)
   _set_if_undefined(DOXYGEN_HTML_OUTPUT doxygen-html)
   _set_if_undefined(DOXYGEN_GENERATE_TREEVIEW YES)
   _set_if_undefined(DOXYGEN_MATHJAX_VERSION MathJax_3)
+  if("${DOXYGEN_MATHJAX_VERSION}" STREQUAL "MathJax_3")
+    # If using MathJax 3, use our vendored version by fault.
+    _set_if_undefined(
+      DOXYGEN_MATHJAX_RELPATH
+      ${PROJECT_JRL_CMAKE_MODULE_DIR}/doxygen/MathJax
+    )
+  endif()
   # ---------------------------------------------------------------------------
   # Configuration options related to the LaTeX output
   # ---------------------------------------------------------------------------
