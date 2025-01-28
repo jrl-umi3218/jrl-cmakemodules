@@ -398,6 +398,39 @@ macro(_set_if_undefined variable)
   endif()
 endmacro()
 
+# _SETUP_MATHJAX_DEFAULTS
+# ----------------------------
+#
+# Set MathJax defaults depending on the current version of Doxygen and whether
+# some flags were already set.
+#
+# If the Doxygen version is less than 1.9.2, the DOXYGEN_MATHJAX_VERSION option will be unset.
+# If a path to MathJax is not provided, we will either:
+#   - point to our local vendored version of MathJax 3
+#   - unset the MathJax path; the Doxygen HTML header will point to the MathJax 2 CDN.
+macro(_SETUP_MATHJAX_DEFAULTS)
+  if(DOXYGEN_VERSION VERSION_GREATER_EQUAL 1.9.2)
+    _set_if_undefined(DOXYGEN_MATHJAX_VERSION MathJax_3)
+  else()
+    # remove unsupported option
+    unset(DOXYGEN_MATHJAX_VERSION)
+    message(
+      STATUS
+      "Doxygen version inferior to 1.9.2. If MathJax is enabled, v2.7 will be used."
+    )
+    # set to empty string to use the MathJax CDN
+  endif()
+  if("${DOXYGEN_MATHJAX_VERSION}" STREQUAL "MathJax_3")
+    # If using MathJax 3, use our vendored version by default.
+    _set_if_undefined(
+      DOXYGEN_MATHJAX_RELPATH
+      ${PROJECT_JRL_CMAKE_MODULE_DIR}/doxygen/MathJax
+    )
+  else()
+    _set_if_undefined(DOXYGEN_MATHJAX_RELPATH)
+  endif()
+endmacro(_SETUP_MATHJAX_DEFAULTS)
+
 # _SETUP_DOXYGEN_DEFAULT_OPTIONS
 # ----------------------------
 #
@@ -443,14 +476,7 @@ macro(_SETUP_DOXYGEN_DEFAULT_OPTIONS)
   # ---------------------------------------------------------------------------
   _set_if_undefined(DOXYGEN_HTML_OUTPUT doxygen-html)
   _set_if_undefined(DOXYGEN_GENERATE_TREEVIEW YES)
-  _set_if_undefined(DOXYGEN_MATHJAX_VERSION MathJax_3)
-  if("${DOXYGEN_MATHJAX_VERSION}" STREQUAL "MathJax_3")
-    # If using MathJax 3, use our vendored version by fault.
-    _set_if_undefined(
-      DOXYGEN_MATHJAX_RELPATH
-      ${PROJECT_JRL_CMAKE_MODULE_DIR}/doxygen/MathJax
-    )
-  endif()
+  _SETUP_MATHJAX_DEFAULTS()
   # ---------------------------------------------------------------------------
   # Configuration options related to the LaTeX output
   # ---------------------------------------------------------------------------
@@ -600,14 +626,13 @@ macro(_SETUP_PROJECT_DOCUMENTATION)
         COPY ${PROJECT_JRL_CMAKE_MODULE_DIR}/doxygen/MathJax
         DESTINATION ${PROJECT_BINARY_DIR}/doc/doxygen-html
       )
-      if(
-        NOT DEFINED DOXYGEN_MATHJAX_VERSION
-        OR DOXYGEN_MATHJAX_VERSION STREQUAL "MathJax_3"
-      )
+      # the variable is unset if Doxygen version < 1.9.2
+      # otherwise, MathJax_3 is the default.
+      if(DOXYGEN_MATHJAX_VERSION STREQUAL "MathJax_3")
         message(
           STATUS
-          "MathJax version 3 will be used; if MATHJAX_RELPATH is unset we will use the vendored MathJax. "
-          "If you have set it, check if you are pointing the right version of MathJax."
+          "MathJax version 3 will be used. If MATHJAX_RELPATH is unset we will use the vendored MathJax. "
+          "If you have set it, check that it's pointing at a MathJax 3 distribution."
         )
       endif()
     endif()
