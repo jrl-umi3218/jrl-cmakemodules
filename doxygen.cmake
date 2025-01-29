@@ -514,7 +514,10 @@ macro(_SETUP_DOXYGEN_DEFAULT_OPTIONS)
   # ---------------------------------------------------------------------------
   # Configuration options related to external references
   # ---------------------------------------------------------------------------
-  _set_if_undefined(DOXYGEN_GENERATE_TAGFILE "${PROJECT_NAME}.doxytag")
+  _set_if_undefined(
+    DOXYGEN_GENERATE_TAGFILE
+    "doxygen-html/${PROJECT_NAME}.doxytag"
+  )
   # ---------------------------------------------------------------------------
   # Configuration options related to the dot tool
   # ---------------------------------------------------------------------------
@@ -592,9 +595,7 @@ macro(_SETUP_PROJECT_DOCUMENTATION)
     add_dependencies(doc ${PROJECT_NAME}-doc)
 
     add_custom_command(
-      OUTPUT
-        ${PROJECT_BINARY_DIR}/doc/${PROJECT_NAME}.doxytag
-        ${PROJECT_BINARY_DIR}/doc/doxygen-html
+      OUTPUT ${PROJECT_BINARY_DIR}/doc/doxygen-html
       COMMAND ${DOXYGEN_EXECUTABLE} ${JRL_CMAKEMODULE_DOXYFILE_PATH}
       WORKING_DIRECTORY doc
       COMMENT "Generating Doxygen documentation"
@@ -606,7 +607,6 @@ macro(_SETUP_PROJECT_DOCUMENTATION)
       APPEND
       PROPERTY
         ADDITIONAL_MAKE_CLEAN_FILES
-          ${PROJECT_BINARY_DIR}/doc/${PROJECT_NAME}.doxytag
           ${PROJECT_BINARY_DIR}/doc/doxygen.log
           ${PROJECT_BINARY_DIR}/doc/doxygen-html
     )
@@ -639,12 +639,6 @@ macro(_SETUP_PROJECT_DOCUMENTATION)
 
     # Install generated files.
     if(INSTALL_DOCUMENTATION)
-      if(EXISTS ${PROJECT_BINARY_DIR}/doc/${PROJECT_NAME}.doxytag)
-        install(
-          FILES ${PROJECT_BINARY_DIR}/doc/${PROJECT_NAME}.doxytag
-          DESTINATION ${CMAKE_INSTALL_FULL_DOCDIR}/doxygen-html
-        )
-      endif()
       install(
         DIRECTORY ${PROJECT_BINARY_DIR}/doc/doxygen-html
         DESTINATION ${CMAKE_INSTALL_FULL_DOCDIR}
