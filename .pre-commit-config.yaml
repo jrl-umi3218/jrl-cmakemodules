@@ -45,4 +45,4 @@ repos:
   hooks:
   - id: check-hooks-apply
   - id: check-useless-excludes
-exclude: \.js$
+exclude: (\.js$|^doxygen/MathJax/)
