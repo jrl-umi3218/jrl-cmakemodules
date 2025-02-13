@@ -90,7 +90,7 @@
 # .. variable:: PROJECT_USE_CMAKE_EXPORT
 #
 # This tells jrl-cmakemodules that you are using export functionalities so it
-# will hook the installation of your configuration files. Defaults to false
+# will hook the installation of your configuration files. Defaults to true
 #
 # .. variable:: PROJECT_EXPORT_NO_TARGET
 #
