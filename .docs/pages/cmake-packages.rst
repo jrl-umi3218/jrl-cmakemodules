@@ -24,7 +24,7 @@ appended to the end of the config script.
 Consuming packages
 ==================
 
-.. cmake-module:: ../../package-config.cmake
+.. cmakemodule:: ../../package-config.cmake
 
 Minimal working example with CMake packages
 ===========================================

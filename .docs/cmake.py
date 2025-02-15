@@ -767,7 +767,7 @@ class CMakeDomain(Domain):
 
 
 def setup(app):
-    app.add_directive("cmake-module", CMakeModule)
+    app.add_directive("cmakemodule", CMakeModule)
     app.add_transform(CMakeTransform)
     app.add_transform(CMakeXRefTransform)
     app.add_domain(CMakeDomain)
