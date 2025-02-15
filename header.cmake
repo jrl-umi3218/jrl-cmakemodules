@@ -60,7 +60,6 @@
 # :command:`HEADER_INSTALL`
 #
 
-
 macro(_SETUP_PROJECT_HEADER)
   # Install project headers.
   if(DEFINED PROJECT_CUSTOM_HEADER_DIR)

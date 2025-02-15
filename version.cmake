@@ -10,7 +10,7 @@
 # The system then tries to create a compressed tar file.
 # It is then build, and install.
 # If this is working a signature is created.
-# 
+#
 
 # Copyright (C) 2008-2019 LAAS-CNRS, JRL AIST-CNRS, INRIA.
 #

@@ -141,7 +141,6 @@
 
 # ------ # README # ------ #
 
-
 if(CMAKE_MINIMUM_REQUIRED_VERSION VERSION_LESS 3.10)
   message(
     FATAL_ERROR
