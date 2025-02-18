@@ -3,26 +3,26 @@ Other commands
 
 Unit-testing
 ============
-.. cmake-module:: ../../test.cmake
-.. cmake-module:: ../../gtest.cmake
+.. cmakemodule:: ../../test.cmake
+.. cmakemodule:: ../../gtest.cmake
 
 Xacro
 =====
-.. cmake-module:: ../../xacro.cmake
+.. cmakemodule:: ../../xacro.cmake
 
 IDL
 ===
-.. cmake-module:: ../../idl.cmake
+.. cmakemodule:: ../../idl.cmake
 
 Version script
 ==============
 
-.. cmake-module:: ../../version-script.cmake
+.. cmakemodule:: ../../version-script.cmake
 
 Cython
 ======
 
-.. cmake-module:: ../../cython/cython.cmake
+.. cmakemodule:: ../../cython/cython.cmake
 
 Make targets
 ============
@@ -33,6 +33,6 @@ The following macros define targets which are added to the Makefile:
 - :ref:`distcheck <target-distcheck>`: checks the generated tarball;
 - :ref:`release <target-release>`: releases a stable version of the current package.
 
-.. cmake-module:: ../../dist.cmake
-.. cmake-module:: ../../distcheck.cmake
-.. cmake-module:: ../../release.cmake
+.. cmakemodule:: ../../dist.cmake
+.. cmakemodule:: ../../distcheck.cmake
+.. cmakemodule:: ../../release.cmake

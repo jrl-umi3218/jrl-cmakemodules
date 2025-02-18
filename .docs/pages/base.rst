@@ -1,23 +1,15 @@
 Basics
 ******
 
-Setup the project
-=================
-.. cmake-module:: ../../base.cmake
+.. cmakemodule:: ../../base.cmake
 
-C++ Headers
-===========
-.. cmake-module:: ../../header.cmake
+.. cmakemodule:: ../../header.cmake
 
-Version
-===========
 .. setmode:: user
 
-.. cmake-module:: ../../version.cmake
+.. cmakemodule:: ../../version.cmake
 
-Set a minimal C++ standard
-==========================
-.. cmake-module:: ../../cxx-standard.cmake
+.. cmakemodule:: ../../cxx-standard.cmake
 
 .. _minimal-working-example:
 
@@ -29,4 +21,4 @@ Minimal working example
 
 Code documentation using Doxygen
 ================================
-.. cmake-module:: ../../doxygen.cmake
+.. cmakemodule:: ../../doxygen.cmake

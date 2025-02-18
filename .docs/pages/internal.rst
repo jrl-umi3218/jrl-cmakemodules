@@ -3,11 +3,11 @@ Internal commands
 
 .. setmode:: internal
 
-.. cmake-module:: ../../version.cmake
-.. cmake-module:: ../../pkg-config.cmake
-.. cmake-module:: ../../header.cmake
-.. cmake-module:: ../../cxx-standard.cmake
+.. cmakemodule:: ../../version.cmake
+.. cmakemodule:: ../../pkg-config.cmake
+.. cmakemodule:: ../../header.cmake
+.. cmakemodule:: ../../cxx-standard.cmake
 
 Doxygen related
 ===============
-.. cmake-module:: ../../doxygen.cmake
+.. cmakemodule:: ../../doxygen.cmake

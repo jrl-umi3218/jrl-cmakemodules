@@ -9,9 +9,9 @@ These macros are used in packages of the
 
 .. setmode:: hpp
 
-.. cmake-module:: ../../hpp.cmake
+.. cmakemodule:: ../../hpp.cmake
 
-.. cmake-module:: ../../hpp/doc.cmake
+.. cmakemodule:: ../../hpp/doc.cmake
 
 Stack of Tasks
 ==============

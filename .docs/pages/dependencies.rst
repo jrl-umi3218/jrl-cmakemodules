@@ -10,14 +10,14 @@ flags. In particular, it allows to specify dependencies towards other projects b
 
 .. setmode:: import
 
-.. cmake-module:: ../../pkg-config.cmake
+.. cmakemodule:: ../../pkg-config.cmake
 
 pkg-config generation
 =====================
 
 .. setmode:: export
 
-.. cmake-module:: ../../pkg-config.cmake
+.. cmakemodule:: ../../pkg-config.cmake
 
 .. setmode:: user
 
@@ -26,13 +26,13 @@ External dependencies
 
 Eigen
 -----
-.. cmake-module:: ../../eigen.cmake
+.. cmakemodule:: ../../eigen.cmake
 Boost
 -----
-.. cmake-module:: ../../boost.cmake
+.. cmakemodule:: ../../boost.cmake
 Python
 ------
-.. cmake-module:: ../../python.cmake
+.. cmakemodule:: ../../python.cmake
 
 Advanced
 ========
@@ -42,13 +42,13 @@ pkg-config dependencies
 
 .. setmode:: import-advanced
 
-.. cmake-module:: ../../pkg-config.cmake
+.. cmakemodule:: ../../pkg-config.cmake
 
 pkg-config generation
 ---------------------
 
 .. setmode:: export-advanced
 
-.. cmake-module:: ../../pkg-config.cmake
+.. cmakemodule:: ../../pkg-config.cmake
 
 .. setmode:: user

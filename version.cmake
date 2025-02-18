@@ -1,3 +1,17 @@
+#.rst:
+# Version
+# -----
+# The version of the project is defined directly from git.
+# If you wish to create a release :
+#.. code-block:: bash
+#
+#  make release VERSION=X.Y.Z
+#
+# The system then tries to create a compressed tar file.
+# It is then build, and install.
+# If this is working a signature is created.
+#
+
 # Copyright (C) 2008-2019 LAAS-CNRS, JRL AIST-CNRS, INRIA.
 #
 # This program is free software: you can redistribute it and/or modify it under
