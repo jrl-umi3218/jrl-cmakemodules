@@ -1,4 +1,5 @@
 # Copyright (C) 2008-2014 LAAS-CNRS, JRL AIST-CNRS.
+# Copyright (C) 2025 INRIA.
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -145,7 +146,7 @@ macro(DISTCHECK_SETUP)
         ${BUILD_CMD} clean || (echo "ERROR: the clean target failed." && false)
           &&
         cd ${CMAKE_BINARY_DIR}/${PROJECT_NAME}${PROJECT_SUFFIX}-${PROJECT_VERSION} &&
-        chmod u+w -R . _build _inst &&
+        chmod -R u+w . _build _inst &&
         rm -rf _build _inst &&
         find . -type d -print0 | xargs -0 chmod u+w &&
         echo "==============================================================" &&
