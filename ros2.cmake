@@ -22,35 +22,39 @@ macro(_install_project_ros2_ament_files)
   if(BUILDING_ROS2_PACKAGE)
     message(STATUS "Create files for AMENT (ROS 2)")
     # Allows Colcon to find non-Ament packages when using workspace underlays
-    file(
-      WRITE
-      ${CMAKE_CURRENT_BINARY_DIR}/share/ament_index/resource_index/packages/${PROJECT_NAME}
-      ""
-    )
-    install(
-      FILES
+    if(NOT BUILD_ONLY_PYTHON_INTERFACE)
+      file(
+        WRITE
         ${CMAKE_CURRENT_BINARY_DIR}/share/ament_index/resource_index/packages/${PROJECT_NAME}
-      DESTINATION share/ament_index/resource_index/packages
-    )
-    file(
-      WRITE
-      ${CMAKE_CURRENT_BINARY_DIR}/share/${PROJECT_NAME}/hook/ament_prefix_path.dsv
-      "prepend-non-duplicate;AMENT_PREFIX_PATH;"
-    )
-    install(
-      FILES
+        ""
+      )
+      install(
+        FILES
+          ${CMAKE_CURRENT_BINARY_DIR}/share/ament_index/resource_index/packages/${PROJECT_NAME}
+        DESTINATION share/ament_index/resource_index/packages
+      )
+      file(
+        WRITE
         ${CMAKE_CURRENT_BINARY_DIR}/share/${PROJECT_NAME}/hook/ament_prefix_path.dsv
-      DESTINATION share/${PROJECT_NAME}/hook
-    )
-    file(
-      WRITE
-      ${CMAKE_CURRENT_BINARY_DIR}/share/${PROJECT_NAME}/hook/python_path.dsv
-      "prepend-non-duplicate;PYTHONPATH;${PYTHON_SITELIB}"
-    )
-    install(
-      FILES
+        "prepend-non-duplicate;AMENT_PREFIX_PATH;"
+      )
+      install(
+        FILES
+          ${CMAKE_CURRENT_BINARY_DIR}/share/${PROJECT_NAME}/hook/ament_prefix_path.dsv
+        DESTINATION share/${PROJECT_NAME}/hook
+      )
+    endif()
+    if(BUILD_PYTHON_INTERFACE)
+      file(
+        WRITE
         ${CMAKE_CURRENT_BINARY_DIR}/share/${PROJECT_NAME}/hook/python_path.dsv
-      DESTINATION share/${PROJECT_NAME}/hook
-    )
+        "prepend-non-duplicate;PYTHONPATH;${PYTHON_SITELIB}"
+      )
+      install(
+        FILES
+          ${CMAKE_CURRENT_BINARY_DIR}/share/${PROJECT_NAME}/hook/python_path.dsv
+        DESTINATION share/${PROJECT_NAME}/hook
+      )
+    endif()
   endif(BUILDING_ROS2_PACKAGE)
 endmacro(_install_project_ros2_ament_files)
