@@ -30,7 +30,7 @@ macro(_install_project_ros2_ament_files)
     install(
       FILES
         ${CMAKE_CURRENT_BINARY_DIR}/share/ament_index/resource_index/packages/${PROJECT_NAME}
-      DESTINATION share/ament_index/resource_index/packages
+      DESTINATION ${CMAKE_INSTALL_DATADIR}/ament_index/resource_index/packages
     )
     file(
       WRITE
@@ -40,7 +40,7 @@ macro(_install_project_ros2_ament_files)
     install(
       FILES
         ${CMAKE_CURRENT_BINARY_DIR}/share/${PROJECT_NAME}/hook/ament_prefix_path.dsv
-      DESTINATION share/${PROJECT_NAME}/hook
+      DESTINATION ${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME}/hook
     )
     file(
       WRITE
@@ -50,7 +50,13 @@ macro(_install_project_ros2_ament_files)
     install(
       FILES
         ${CMAKE_CURRENT_BINARY_DIR}/share/${PROJECT_NAME}/hook/python_path.dsv
-      DESTINATION share/${PROJECT_NAME}/hook
+      DESTINATION ${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME}/hook
     )
+    if(EXISTS "${CMAKE_SOURCE_DIR}/package.xml")
+      install(
+        FILES "${CMAKE_SOURCE_DIR}/package.xml"
+        DESTINATION ${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME}
+      )
+    endif()
   endif(BUILDING_ROS2_PACKAGE)
 endmacro(_install_project_ros2_ament_files)
