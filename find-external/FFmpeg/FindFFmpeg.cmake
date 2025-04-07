@@ -23,13 +23,11 @@ string(REPLACE ";" " " _ffmpeg_components "${FFmpeg_FIND_COMPONENTS}")
 message(STATUS "Looking for FFmpeg with components ${_ffmpeg_components}")
 unset(_ffmpeg_components)
 
-add_library(FFmpeg INTERFACE IMPORTED GLOBAL)
 foreach(_comp IN LISTS FFmpeg_FIND_COMPONENTS)
   pkg_check_modules(pc_${_comp} IMPORTED_TARGET lib${_comp})
   set(FFmpeg_${_comp}_FOUND ${pc_${_comp}_FOUND})
 
   if(${FFmpeg_${_comp}_FOUND})
-    target_link_libraries(FFmpeg INTERFACE PkgConfig::pc_${_comp})
     add_library(FFmpeg::${_comp} ALIAS PkgConfig::pc_${_comp})
     message(STATUS "  - found component ${_comp}")
     get_target_property(
