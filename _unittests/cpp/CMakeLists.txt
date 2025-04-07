@@ -24,8 +24,7 @@ target_include_directories(
 install(
   TARGETS jrl_cmakemodule_lib
   EXPORT ${TARGETS_EXPORT_NAME}
-  DESTINATION
-  lib
+  DESTINATION lib
 )
 
 add_executable(jrl_cmakemodule_main src/main.cc)
