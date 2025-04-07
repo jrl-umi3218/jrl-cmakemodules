@@ -10,7 +10,6 @@ Provides the following variables:
 
 #]=====]
 find_package(PkgConfig QUIET REQUIRED)
-include(FindPackageHandleStandardArgs)
 
 if(DEFINED FFmpeg_FIND_COMPONENTS)
   if(NOT "avutil" IN_LIST FFmpeg_FIND_COMPONENTS)
@@ -69,6 +68,7 @@ if(TARGET FFmpeg::avutil)
   unset(_ffmpeg_version_header_path)
 endif()
 
+include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(
   FFmpeg
   HANDLE_VERSION_RANGE
