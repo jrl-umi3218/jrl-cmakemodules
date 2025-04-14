@@ -14,10 +14,14 @@ except ImportError as e:
 def update_pixi_version(version):
     with open("pixi.toml") as f:
         doc = tomlkit.load(f)
-    if "project" not in doc or "version" not in doc["project"]:
-        print("pixi.toml doesn't contain project / version")
+    possible_keys = {"project", "workspace"}
+    keys = possible_keys.intersection(set(doc.keys()))
+    keys = [key for key in keys if "version" in doc[key]]
+    if len(keys) == 0:
+        print("pixi.toml doesn't contain [project.version] or [workpace.version] keys")
         return
-    doc["project"]["version"] = version
+    for key in keys:
+        doc[key]["version"] = version
     with open("pixi.toml", "w") as f:
         tomlkit.dump(doc, f)
 
