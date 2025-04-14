@@ -37,24 +37,16 @@ macro(create_simple_controller CONTROLLER_NAME)
   set(controller_install_path lib/openhrp/controller/${CONTROLLER_NAME})
 
   install(
-    TARGETS
-      ${CONTROLLER_NAME}
-      ${CONTROLLER_NAME}Comp
-      DESTINATION
-      ${controller_install_path}
-      CONFIGURATIONS
-      Release
+    TARGETS ${CONTROLLER_NAME} ${CONTROLLER_NAME}Comp
+    DESTINATION ${controller_install_path}
+    CONFIGURATIONS Release
   )
 
   if(WIN32)
     install(
-      TARGETS
-        ${CONTROLLER_NAME}
-        ${CONTROLLER_NAME}Comp
-        DESTINATION
-        ${PROJECT_SOURCE_DIR}
-        CONFIGURATIONS
-        Release
+      TARGETS ${CONTROLLER_NAME} ${CONTROLLER_NAME}Comp
+      DESTINATION ${PROJECT_SOURCE_DIR}
+      CONFIGURATIONS Release
     )
   endif()
 

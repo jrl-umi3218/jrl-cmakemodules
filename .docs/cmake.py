@@ -188,7 +188,7 @@ class CMakeModule(Directive):
                 # Line mode: check for .rst start (bracket or line)
                 m = self.re_start.match(line)
                 if m:
-                    rst = f']{m.group("eq")}]'
+                    rst = f"]{m.group('eq')}]"
                     line = ""
                 elif line == "#.rst:":
                     rst = "#"
