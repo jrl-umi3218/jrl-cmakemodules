@@ -157,7 +157,7 @@ function(COMPUTE_PYTHONPATH result)
 
   # get path separator to join those paths
   execute_process(
-    COMMAND "${PYTHON_EXECUTABLE}" "-c" "import os; print(os.pathsep)"
+    COMMAND "${Python_EXECUTABLE}" "-c" "import os; print(os.pathsep)"
     OUTPUT_VARIABLE PATHSEP
     OUTPUT_STRIP_TRAILING_WHITESPACE
   )
@@ -194,7 +194,7 @@ macro(ADD_PYTHON_UNIT_TEST NAME SOURCE)
       NAME ${NAME}
       COMMAND
         ${KCOV} --include-path=${CMAKE_SOURCE_DIR} ${KCOV_DIR}/${NAME}
-        ${PYTHON_EXECUTABLE} "${PROJECT_SOURCE_DIR}/${SOURCE}"
+        ${Python_EXECUTABLE} "${PROJECT_SOURCE_DIR}/${SOURCE}"
     )
     # run this python test again, but this time to gather python coverage
     add_test(
@@ -206,7 +206,7 @@ macro(ADD_PYTHON_UNIT_TEST NAME SOURCE)
   else()
     add_test(
       NAME ${NAME}
-      COMMAND ${PYTHON_EXECUTABLE} "${PROJECT_SOURCE_DIR}/${SOURCE}"
+      COMMAND ${Python_EXECUTABLE} "${PROJECT_SOURCE_DIR}/${SOURCE}"
     )
   endif()
 

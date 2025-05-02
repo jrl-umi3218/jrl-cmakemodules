@@ -166,7 +166,7 @@ macro(PYTHON_BUILD_FILE FILE)
     TARGET ${python_build_target}
     PRE_BUILD
     COMMAND
-      "${PYTHON_EXECUTABLE}" -c
+      "${Python_EXECUTABLE}" -c
       "import py_compile; py_compile.compile(\"${FILE}\",\"${OUTPUT_FILE}\")"
     VERBATIM
   )
