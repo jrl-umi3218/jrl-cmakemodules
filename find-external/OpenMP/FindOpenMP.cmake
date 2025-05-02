@@ -103,9 +103,9 @@ function(_OPENMP_FLAG_CANDIDATES LANG)
       "-fopenmp=libomp"
       "-fopenmp=libiomp5"
       "-fopenmp"
-      "-Xclang -fopenmp"
+      "-Xpreprocessor -fopenmp"
     )
-    set(OMP_FLAG_AppleClang "-Xclang -fopenmp")
+    set(OMP_FLAG_AppleClang "-Xpreprocessor -fopenmp")
     set(OMP_FLAG_HP "+Oopenmp")
     if(WIN32)
       set(OMP_FLAG_Intel "-Qopenmp")
