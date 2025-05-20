@@ -5,7 +5,7 @@
 # This file is a "template" file used by various FindPython modules.
 #
 
-cmake_policy (VERSION 3.10)
+cmake_policy (VERSION 3.22)
 
 #
 # Initial configuration
