@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.22)
 
 set(PROJECT_NAME jrl-cmakemodules-cpp)
 set(PROJECT_VERSION 0.0.0)

@@ -141,10 +141,10 @@
 
 # ------ # README # ------ #
 
-if(CMAKE_MINIMUM_REQUIRED_VERSION VERSION_LESS 3.10)
+if(CMAKE_MINIMUM_REQUIRED_VERSION VERSION_LESS 3.22)
   message(
     FATAL_ERROR
-    "JRL-CMakemodules require CMake >= 3.10. Please update your main 'cmake_minimum_required'"
+    "JRL-CMakemodules require CMake >= 3.22. Please update your main 'cmake_minimum_required'"
   )
 endif()
 

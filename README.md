@@ -22,7 +22,7 @@ You can also checkout the more complete [documentation] of the modules.
 
 ## Supported CMake versions
 
-We currently support CMake >= 3.10
+We currently support CMake >= 3.22
 
 ## pre-commit
 
