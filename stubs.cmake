@@ -158,8 +158,9 @@ function(GENERATE_STUBS module_path module_name module_install_dir)
     endif(TARGET ${py_target})
   endforeach()
 
+  string(REPLACE "." "/" module_dir ${module_name})
   install(
-    DIRECTORY ${module_path}/${module_name}
+    DIRECTORY ${module_path}/${module_dir}
     DESTINATION ${module_install_dir}
     FILES_MATCHING
     PATTERN "*.pyi"
