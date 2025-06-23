@@ -73,7 +73,7 @@ cmake_dependent_option(
 cmake_dependent_option(
   PROJECT_USE_CMAKE_EXPORT
   "Generate and install CMake exports"
-  ON
+  OFF
   "NOT BUILD_ONLY_PYTHON_INTERFACE"
   OFF
 )
