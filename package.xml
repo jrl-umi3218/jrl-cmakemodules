@@ -3,16 +3,109 @@
   <name>jrl-cmakemodules</name>
   <version>0.0.0</version>
   <description>CMake utility toolbox</description>
+  <url type="website">https://github.com/jrl-umi3218/jrl-cmakemodules</url>
 
   <maintainer email="guilhem.saurel@laas.fr">Guilhem Saurel</maintainer>
   <author>Justin Carpentier</author>
   <author>Pierre Gergondet</author>
 
-  <license>BSD-2</license>
-  <url type="website">https://github.com/jrl-umi3218/jrl-cmakemodules</url>
+  <license>GPL-3.0</license>
+  <!-- GPL-3.0 files:
+        - xacro.cmake
+        - compiler.cmake
+        - idlrtc.cmake
+        - idl.cmake
+        - gtest.cmake
+        - debian.cmake
+        - distcheck.cmake
+        - cmake_uninstall.cmake.in
+        - cxx11.cmake
+        - image/visp.cmake
+        - test.cmake
+        - openrtm.cmake
+        - python-helpers.cmake
+        - msvc-specific.cmake
+        - version-script.cmake
+        - createshexe.cmake
+        - doxygen.cmake
+        - uninstall.cmake
+        - sphinx.cmake
+        - metapodfromurdf.cmake
+        - fix-license.sh
+        - oscheck.cmake
+        - dist.cmake
+        - python.cmake
+        - boost.cmake
+        - announce-gen
+        - ros.cmake
+        - ide.cmake
+        - stubs.cmake
+        - apple.cmake
+        - version.cmake
+        - gitlog-to-changelog
+        - man.cmake
+        - geometric-tools.cmake
+        - catkin.cmake
+        - eigen.cmake
+        - ros2.cmake
+        - find-external/CDD/FindCDD.cmake
+        - openhrpcontroller.cmake
+        - find-external/CLP/FindCLP.cmake
+        - cython/cython.cmake
+        - install-helpers.cmake
+        - base.cmake
+        - pthread.cmake
+        - portability.cmake
+        - release.cmake
+        - header.cmake
+        - github/update-doxygen-doc.sh
+        - find-external/glpk/Findglpk.cmake
+        - install-data.cmake
+        - logging.cmake
+        - memorycheck_unit_test.cmake.in
+        - shared-library.cmake
+        - lapack.cmake
+        - openhrp.cmake
+        - kineo.cmake
+        - package-config.cmake
+        - git-archive-all.sh
+        - pkg-config.cmake
+        - cpack.cmake
+  -->
+
+  <license>LGPL-3.0</license>
+  <!-- LGPL-3.0 files:
+        - tracy.cmake
+        - find-external/CoinUtils/FindCoinUtils.cmake
+        - find-external/TinyXML/FindTinyXML.cmake
+        - find-external/Ipopt/FindIpopt.cmake
+        - find-external/qpOASES/FindqpOASES.cmake
+        - dynamic_graph/python-module-py.cc.in
+        - dynamic_graph/submodule/__init__.py.cmake
+  -->
+  <license>BSD-3-Clause</license>
+  <!-- BSD-3-Clause files:
+        - GNUInstallDirs.cmake
+        - find-external/OpenMP/FindOpenMP.cmake
+        - cython/python/FindPython3.cmake
+        - boost/FindBoost.cmake
+        - cython/python/FindPython2.cmake
+        - cython/python/FindPython.cmake
+        - cython/python/FindPython/Support.cmake
+        - find-external/MPFR/FindMPFR.cmake
+  -->
+
+  <license>MIT</license>
+  <!-- MIT files:
+        - git-archive-all.py
+  -->
+
+  <license>Apache-2.0</license>
+  <!-- Apache-2.0 files:
+        - doxygen/MathJax/*
+  -->
 
   <buildtool_depend>cmake</buildtool_depend>
-
   <!-- The export tag contains other, unspecified, tags -->
   <export>
     <!-- Other tools can request additional information be placed here -->
