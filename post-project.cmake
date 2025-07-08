@@ -47,8 +47,36 @@ cmake_dependent_option(
   BUILD_DOCUMENTATION
   OFF
 )
-option(INSTALL_GENERATED_HEADERS "Generate and install standard headers" ON)
-option(INSTALL_PKG_CONFIG_FILE "Generate and install standard .pc file" ON)
+
+option(BUILD_PYTHON_INTERFACE "Build the python bindings" ON)
+cmake_dependent_option(
+  BUILD_STANDALONE_PYTHON_INTERFACE
+  "Build only the python bindings. Require the main part of the project to be already installed"
+  OFF
+  BUILD_PYTHON_INTERFACE
+  OFF
+)
+cmake_dependent_option(
+  INSTALL_GENERATED_HEADERS
+  "Generate and install standard headers"
+  ON
+  "NOT BUILD_STANDALONE_PYTHON_INTERFACE"
+  OFF
+)
+cmake_dependent_option(
+  INSTALL_PKG_CONFIG_FILE
+  "Generate and install standard .pc file"
+  ON
+  "NOT BUILD_STANDALONE_PYTHON_INTERFACE"
+  OFF
+)
+cmake_dependent_option(
+  PROJECT_USE_CMAKE_EXPORT
+  "Generate and install CMake exports"
+  OFF
+  "NOT BUILD_STANDALONE_PYTHON_INTERFACE"
+  OFF
+)
 
 include(CTest)
 enable_testing()
