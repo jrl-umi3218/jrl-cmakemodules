@@ -317,12 +317,7 @@ macro(HEADER_INSTALL)
     string(REPLACE "${PROJECT_SOURCE_DIR}" "" DIR "${DIR}")
     string(REPLACE "include" "" DIR "${DIR}")
     # workaround CMP0177
-    cmake_path(
-      SET
-      INSTALL_PATH
-      NORMALIZE
-      "${CMAKE_INSTALL_INCLUDEDIR}/${DIR}"
-    )
+    cmake_path(SET INSTALL_PATH NORMALIZE "${CMAKE_INSTALL_INCLUDEDIR}/${DIR}")
     install(
       FILES ${FILE}
       DESTINATION ${INSTALL_PATH}
