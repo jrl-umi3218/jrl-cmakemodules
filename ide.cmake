@@ -42,14 +42,14 @@ function(ADD_GROUP GROUP_NAME FILENAMES)
     get_filename_component(filenamePath ${filename} PATH)
     get_filename_component(filenameName ${filename} NAME)
     string(
-      REGEX REPLACE
+      REPLACE
       "${PROJECT_BINARY_DIR}/"
       ""
       filenamePath
       "${filenamePath}/"
     )
     string(
-      REGEX REPLACE
+      REPLACE
       "${PROJECT_SOURCE_DIR}/"
       ""
       filenamePath
@@ -80,10 +80,10 @@ function(ADD_GROUP GROUP_NAME FILENAMES)
     list(GET ${FILENAMES} ${id} filename)
     list(GET REDUCED_FILENAMES ${id} filenamePath)
     if(NOT ("${prefix}" STREQUAL ""))
-      string(REGEX REPLACE "${prefix}" "" filenamePath "${filenamePath}")
+      string(REPLACE "${prefix}" "" filenamePath "${filenamePath}")
     endif()
     if(NOT ("${filenamePath}" STREQUAL ""))
-      string(REGEX REPLACE "/" "\\\\" filenamePath ${filenamePath})
+      string(REPLACE "/" "\\\\" filenamePath ${filenamePath})
       source_group("${GROUP_NAME}\\${filenamePath}" FILES ${filename})
     else()
       source_group("${GROUP_NAME}" FILES ${filename})
