@@ -140,13 +140,7 @@ macro(FINDPYTHON)
       if(NOT "${_PYTHON_VERSION_RESULT_VARIABLE}" STREQUAL "0")
         message(FATAL_ERROR "${PYTHON_EXECUTABLE} --version did not succeed.")
       endif()
-      string(
-        REPLACE
-        "Python "
-        ""
-        _PYTHON_VERSION
-        ${_PYTHON_VERSION_OUTPUT}
-      )
+      string(REPLACE "Python " "" _PYTHON_VERSION ${_PYTHON_VERSION_OUTPUT})
       string(REGEX REPLACE "\\." ";" _PYTHON_VERSION ${_PYTHON_VERSION})
       list(GET _PYTHON_VERSION 0 _PYTHON_VERSION_MAJOR)
 
