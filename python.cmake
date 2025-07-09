@@ -141,7 +141,7 @@ macro(FINDPYTHON)
         message(FATAL_ERROR "${PYTHON_EXECUTABLE} --version did not succeed.")
       endif()
       string(
-        REGEX REPLACE
+        REPLACE
         "Python "
         ""
         _PYTHON_VERSION

@@ -71,7 +71,7 @@ macro(ADD_ROSPACK_DEPENDENCY PKG_ROS)
     OUTPUT_VARIABLE ${PKG}_ROSVERSION_TMP
     ERROR_QUIET
   )
-  string(REGEX REPLACE "\n" "" ${PKG}_ROSVERSION ${${PKG}_ROSVERSION_TMP})
+  string(REPLACE "\n" "" ${PKG}_ROSVERSION ${${PKG}_ROSVERSION_TMP})
 
   # check whether the version satisfies the constraint
   if(NOT "${SIGN}" STREQUAL "")
