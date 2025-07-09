@@ -313,20 +313,11 @@ macro(HEADER_INSTALL)
 
   foreach(FILE ${FILES})
     get_filename_component(DIR "${FILE}" PATH)
-    string(REGEX REPLACE "${CMAKE_BINARY_DIR}" "" DIR "${DIR}")
-    string(REGEX REPLACE "${PROJECT_SOURCE_DIR}" "" DIR "${DIR}")
-    string(REGEX REPLACE "include(/|$)" "" DIR "${DIR}")
-    if(CMAKE_VERSION` VERSION_GREATER 3.20)
-      # workaround CMP0177
-      cmake_path(
-        SET
-        INSTALL_PATH
-        NORMALIZE
-        "${CMAKE_INSTALL_INCLUDEDIR}/${DIR}"
-      )
-    else()
-      set(INSTALL_PATH "${CMAKE_INSTALL_INCLUDEDIR}/${DIR}")
-    endif()
+    string(REPLACE "${PROJECT_BINARY_DIR}" "" DIR "${DIR}")
+    string(REPLACE "${PROJECT_SOURCE_DIR}" "" DIR "${DIR}")
+    string(REPLACE "include" "" DIR "${DIR}")
+    # workaround CMP0177
+    cmake_path(SET INSTALL_PATH NORMALIZE "${CMAKE_INSTALL_INCLUDEDIR}/${DIR}")
     install(
       FILES ${FILE}
       DESTINATION ${INSTALL_PATH}
