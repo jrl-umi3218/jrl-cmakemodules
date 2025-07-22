@@ -56,7 +56,7 @@ endmacro(_SETUP_PROJECT_PACKAGE_INIT)
 # ~~~
 #
 # This is a wrapper around find_package to add correct find_dependency calls in
-# the generated config script.
+# the generated config script if the dependency is found.
 #
 # Packages not in the PROJECT_PACKAGES_IN_WORKSPACE are searched with
 # find_package.
@@ -81,77 +81,91 @@ macro(ADD_PROJECT_DEPENDENCY)
     ""
     ${ARGN}
   )
-  if(PARSED_ARGN_PKG_CONFIG_REQUIRES)
-    _ADD_TO_LIST_IF_NOT_PRESENT(
-      _PKG_CONFIG_REQUIRES
-      "${PARSED_ARGN_PKG_CONFIG_REQUIRES}"
-    )
-    _ADD_TO_LIST_IF_NOT_PRESENT(
-      _PKG_CONFIG_DEP_NOT_FOR_CONFIG_CMAKE
-      "${PARSED_ARGN_PKG_CONFIG_REQUIRES}"
-    )
-  endif()
-  if(PARSED_ARGN_FOR_COMPONENT)
-    set(component "_${PARSED_ARGN_FOR_COMPONENT}")
-  endif(PARSED_ARGN_FOR_COMPONENT)
-  if(PARSED_ARGN_FIND_EXTERNAL)
-    set(_ext "find-external/${PARSED_ARGN_FIND_EXTERNAL}")
-    set(
-      CMAKE_MODULE_PATH
-      "${PROJECT_JRL_CMAKE_MODULE_DIR}/${_ext}"
-      ${CMAKE_MODULE_PATH}
-    )
-    set(_ext_path "${CONFIG_INSTALL_DIR}/${_ext}")
-    if(NOT IS_ABSOLUTE ${_ext_path})
-      set(_ext_path "\${PACKAGE_PREFIX_DIR}/${_ext_path}")
-    endif()
-    set(
-      _PACKAGE_CONFIG_DEPENDENCIES_FIND_EXTERNAL
-      "${_PACKAGE_CONFIG_DEPENDENCIES_FIND_EXTERNAL}\n  ${_ext_path}"
-    )
-    install(
-      DIRECTORY "${PROJECT_JRL_CMAKE_MODULE_DIR}/${_ext}"
-      DESTINATION "${CONFIG_INSTALL_DIR}/find-external"
-    )
-  endif()
-  _ADD_TO_LIST_IF_NOT_PRESENT(
-    _PACKAGE_CONFIG${component}_DEPENDENCIES_PROJECTS
-    "${ARGV0}"
-  )
 
-  string(REPLACE ";" " " PACKAGE_ARGS "${PARSED_ARGN_UNPARSED_ARGUMENTS}")
-  _ADD_TO_LIST_IF_NOT_PRESENT(
-    _PACKAGE_CONFIG${component}_DEPENDENCIES_FIND_PACKAGE
-    "find_package(${PACKAGE_ARGS})"
-  )
-  _ADD_TO_LIST_IF_NOT_PRESENT(
-    _PACKAGE_CONFIG${component}_DEPENDENCIES_FIND_DEPENDENCY
-    "find_dependency(${PACKAGE_ARGS})"
-  )
   list(GET PARSED_ARGN_UNPARSED_ARGUMENTS 0 _package_name)
   if(NOT ${_package_name} IN_LIST PROJECT_PACKAGES_IN_WORKSPACE)
     find_package(${PARSED_ARGN_UNPARSED_ARGUMENTS})
+  else()
+    set(${_package_name}_FOUND TRUE)
   endif()
 
-  # Propagate variables changes to the cached values
-  set(
-    _PACKAGE_CONFIG${component}_DEPENDENCIES_PROJECTS
-    "${_PACKAGE_CONFIG${component}_DEPENDENCIES_PROJECTS}"
-    CACHE INTERNAL
-    ""
-  )
-  set(
-    _PACKAGE_CONFIG${component}_DEPENDENCIES_FIND_PACKAGE
-    "${_PACKAGE_CONFIG${component}_DEPENDENCIES_FIND_PACKAGE}"
-    CACHE INTERNAL
-    ""
-  )
-  set(
-    _PACKAGE_CONFIG${component}_DEPENDENCIES_FIND_DEPENDENCY
-    "${_PACKAGE_CONFIG${component}_DEPENDENCIES_FIND_DEPENDENCY}"
-    CACHE INTERNAL
-    ""
-  )
+  # Only modify the the generated CMake module if the package is found
+  if(${_package_name}_FOUND)
+    # Manage .pc file
+    if(PARSED_ARGN_PKG_CONFIG_REQUIRES)
+      _ADD_TO_LIST_IF_NOT_PRESENT(
+        _PKG_CONFIG_REQUIRES
+        "${PARSED_ARGN_PKG_CONFIG_REQUIRES}"
+      )
+      _ADD_TO_LIST_IF_NOT_PRESENT(
+        _PKG_CONFIG_DEP_NOT_FOR_CONFIG_CMAKE
+        "${PARSED_ARGN_PKG_CONFIG_REQUIRES}"
+      )
+    endif()
+
+    if(PARSED_ARGN_FOR_COMPONENT)
+      set(component "_${PARSED_ARGN_FOR_COMPONENT}")
+    endif(PARSED_ARGN_FOR_COMPONENT)
+
+    # Manage find-external
+    if(PARSED_ARGN_FIND_EXTERNAL)
+      set(_ext "find-external/${PARSED_ARGN_FIND_EXTERNAL}")
+      set(
+        CMAKE_MODULE_PATH
+        "${PROJECT_JRL_CMAKE_MODULE_DIR}/${_ext}"
+        ${CMAKE_MODULE_PATH}
+      )
+      set(_ext_path "${CONFIG_INSTALL_DIR}/${_ext}")
+      if(NOT IS_ABSOLUTE ${_ext_path})
+        set(_ext_path "\${PACKAGE_PREFIX_DIR}/${_ext_path}")
+      endif()
+      set(
+        _PACKAGE_CONFIG_DEPENDENCIES_FIND_EXTERNAL
+        "${_PACKAGE_CONFIG_DEPENDENCIES_FIND_EXTERNAL}\n  ${_ext_path}"
+      )
+      install(
+        DIRECTORY "${PROJECT_JRL_CMAKE_MODULE_DIR}/${_ext}"
+        DESTINATION "${CONFIG_INSTALL_DIR}/find-external"
+      )
+    endif()
+
+    # Manage PROJECT_DEPENDENCIES list
+    _ADD_TO_LIST_IF_NOT_PRESENT(
+      _PACKAGE_CONFIG${component}_DEPENDENCIES_PROJECTS
+      "${ARGV0}"
+    )
+
+    # Manage find_package and find dependency
+    string(REPLACE ";" " " PACKAGE_ARGS "${PARSED_ARGN_UNPARSED_ARGUMENTS}")
+    _ADD_TO_LIST_IF_NOT_PRESENT(
+      _PACKAGE_CONFIG${component}_DEPENDENCIES_FIND_PACKAGE
+      "find_package(${PACKAGE_ARGS})"
+    )
+    _ADD_TO_LIST_IF_NOT_PRESENT(
+      _PACKAGE_CONFIG${component}_DEPENDENCIES_FIND_DEPENDENCY
+      "find_dependency(${PACKAGE_ARGS})"
+    )
+
+    # Propagate variables changes to the cached values
+    set(
+      _PACKAGE_CONFIG${component}_DEPENDENCIES_PROJECTS
+      "${_PACKAGE_CONFIG${component}_DEPENDENCIES_PROJECTS}"
+      CACHE INTERNAL
+      ""
+    )
+    set(
+      _PACKAGE_CONFIG${component}_DEPENDENCIES_FIND_PACKAGE
+      "${_PACKAGE_CONFIG${component}_DEPENDENCIES_FIND_PACKAGE}"
+      CACHE INTERNAL
+      ""
+    )
+    set(
+      _PACKAGE_CONFIG${component}_DEPENDENCIES_FIND_DEPENDENCY
+      "${_PACKAGE_CONFIG${component}_DEPENDENCIES_FIND_DEPENDENCY}"
+      CACHE INTERNAL
+      ""
+    )
+  endif()
 endmacro()
 
 # .rst:
