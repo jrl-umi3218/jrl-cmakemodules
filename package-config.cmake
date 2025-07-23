@@ -97,6 +97,18 @@ macro(ADD_PROJECT_DEPENDENCY)
     ${ARGN}
   )
 
+  # Update the CMAKE_MODULE_PATH if FIND_EXTERNAL is setup.
+  # If the package is not found, CMAKE_MODULE_PATH will be reseted.
+  set(_CMAKE_MODULE_PATH_BACKUP "${CMAKE_MODULE_PATH}")
+  if(PARSED_ARGN_FIND_EXTERNAL)
+    set(_ext "find-external/${PARSED_ARGN_FIND_EXTERNAL}")
+    set(
+      CMAKE_MODULE_PATH
+      "${PROJECT_JRL_CMAKE_MODULE_DIR}/${_ext}"
+      ${CMAKE_MODULE_PATH}
+    )
+  endif()
+
   list(GET PARSED_ARGN_UNPARSED_ARGUMENTS 0 _package_name)
   if(NOT ${_package_name} IN_LIST PROJECT_PACKAGES_IN_WORKSPACE)
     find_package(${PARSED_ARGN_UNPARSED_ARGUMENTS})
@@ -124,12 +136,6 @@ macro(ADD_PROJECT_DEPENDENCY)
 
     # Manage find-external
     if(PARSED_ARGN_FIND_EXTERNAL)
-      set(_ext "find-external/${PARSED_ARGN_FIND_EXTERNAL}")
-      set(
-        CMAKE_MODULE_PATH
-        "${PROJECT_JRL_CMAKE_MODULE_DIR}/${_ext}"
-        ${CMAKE_MODULE_PATH}
-      )
       set(_ext_path "${CONFIG_INSTALL_DIR}/${_ext}")
       if(NOT IS_ABSOLUTE ${_ext_path})
         set(_ext_path "\${PACKAGE_PREFIX_DIR}/${_ext_path}")
@@ -180,6 +186,9 @@ macro(ADD_PROJECT_DEPENDENCY)
       CACHE INTERNAL
       ""
     )
+  else()
+    # If not found we reset CMAKE_MODULE_PATH
+    set(CMAKE_MODULE_PATH "${_CMAKE_MODULE_PATH_BACKUP}")
   endif()
 endmacro()
 
