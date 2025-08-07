@@ -13,8 +13,10 @@ jobs:
     - name: Install rosdep
       run: |
         sudo apt-get update
-        sudo apt-get install -y python3-rosdep
-        sudo rosdep init
+        sudo apt-get install -y python3-pip
+        python3 -m pip3 install -U pip
+        python3 -m pip3 install -U rosdep
+        sudo rosdep init || true
         rosdep update
 
     - name: Install dependencies
