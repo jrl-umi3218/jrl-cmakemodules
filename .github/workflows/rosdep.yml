@@ -14,9 +14,9 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y python3-pip
-        python3 -m pip install -U pip
-        python3 -m pip install -U rosdep
-        sudo PYTHONPATH=$PYTHONPATH rosdep init || true
+        sudo pip3 install -U pip
+        sudo pip3 install -U rosdep
+        sudo rosdep init
         rosdep update
 
     - name: Install dependencies
