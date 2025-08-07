@@ -13,6 +13,14 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# .rst: .. ifmode:: internal
+#
+# .. variable::AUTO_UNINTSALL
+#
+# When this is ON, the install target will start by uninstalling
+
+option(AUTO_UNINSTALL "Enable auto-uninstall on install" ON)
+
 # _SETUP_PROJECT_UNINSTALL
 # ------------------------
 #
@@ -92,7 +100,9 @@ endmacro(_SETUP_PROJECT_UNINSTALL)
 if(DEFINED CMAKE_CONFIGURATION_TYPES)
   set(UNINSTALL_CONFIG_ARG "--config \${CMAKE_INSTALL_CONFIG_NAME}")
 endif()
-install(
-  CODE
-    "execute_process(COMMAND \"${CMAKE_COMMAND}\" --build \"${PROJECT_BINARY_DIR}\" ${UNINSTALL_CONFIG_ARG} --target uninstall)"
-)
+if(AUTO_UNINTSALL)
+  install(
+    CODE
+      "execute_process(COMMAND \"${CMAKE_COMMAND}\" --build \"${PROJECT_BINARY_DIR}\" ${UNINSTALL_CONFIG_ARG} --target uninstall)"
+  )
+endif()
