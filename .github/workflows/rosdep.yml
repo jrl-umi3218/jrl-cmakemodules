@@ -14,8 +14,8 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y python3-pip
-        python3 -m pip3 install -U pip
-        python3 -m pip3 install -U rosdep
+        python3 -m pip install -U pip
+        python3 -m pip install -U rosdep
         sudo rosdep init || true
         rosdep update
 
