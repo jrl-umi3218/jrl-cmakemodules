@@ -1,0 +1,28 @@
+name: rosdep CI of jrl-cmakemodules
+
+on: [push,pull_request]
+
+jobs:
+  test-rosdep:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install rosdep
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y python3-pip
+        sudo pip3 install -U rosdep
+        sudo rosdep init
+        rosdep update
+
+    - name: Install dependencies
+      run: |
+        rosdep install --from-paths . --ignore-src -r -y
+
+    - name: Run tests
+      run: |
+        # Add commands to run your tests here
+        echo "Running tests..."
