@@ -110,12 +110,6 @@
   <!-- Dependency for the documentation building. -->
   <depend>doxygen</depend>
 
-<<<<<<< HEAD
-  <!-- Dependency for the code coverage. -->
-  <depend>kcov</depend>
-
-=======
->>>>>>> 2150ad5 (Remove kcov as not in https://github.com/ros/rosdistro/blob/master/rosdep/base.yaml)
   <!-- Handles some search through pkg-config. -->
   <depend>pkg-config</depend>
 
