@@ -112,7 +112,7 @@
 
   <!-- Dependency for the code coverage. -->
   <depend>kcov</depend>
-  
+
   <!-- Handles some search through pkg-config. -->
   <depend>pkg-config</depend>
 
