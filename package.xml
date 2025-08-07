@@ -106,6 +106,16 @@
   -->
 
   <buildtool_depend>cmake</buildtool_depend>
+
+  <!-- Dependency for the documentation building. -->
+  <depend>doxygen</depend>
+
+  <!-- Dependency for the code coverage. -->
+  <depend>kcov</depend>
+  
+  <!-- Handles some search through pkg-config. -->
+  <depend>pkg-config</depend>
+
   <!-- The export tag contains other, unspecified, tags -->
   <export>
     <!-- Other tools can request additional information be placed here -->
