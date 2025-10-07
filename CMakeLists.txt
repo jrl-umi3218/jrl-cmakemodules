@@ -38,10 +38,22 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     DESTINATION ${INSTALL_DIR}
   )
 
-  # find . -maxdepth 1 -type f ! -path './.*' | sort
+  # find . -maxdepth 1 -type f ! -perm 111 ! -path './.*' | sort
+  install(
+    PROGRAMS
+      ./announce-gen
+      ./fix-license.sh
+      ./git-archive-all.py
+      ./git-archive-all.sh
+      ./gitlog-to-changelog
+      ./pixi.py
+      ./pyproject.py
+    DESTINATION ${INSTALL_DIR}
+  )
+
+  # find . -maxdepth 1 -type f ! -perm /111 ! -path './.*' | sort
   install(
     FILES
-      ./announce-gen
       ./apple.cmake
       ./base.cmake
       ./boost.cmake
@@ -66,11 +78,9 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
       ./doxygen.cmake
       ./eigen.cmake
       ./filefilter.txt
-      ./fix-license.sh
+      ./flake.lock
+      ./flake.nix
       ./geometric-tools.cmake
-      ./git-archive-all.py
-      ./git-archive-all.sh
-      ./gitlog-to-changelog
       ./GNUInstallDirs.cmake
       ./gtest.cmake
       ./header.cmake
@@ -97,13 +107,11 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
       ./oscheck.cmake
       ./package-config.cmake
       ./package.xml
-      ./pixi.py
       ./pkg-config.cmake
       ./pkg-config.pc.cmake
       ./portability.cmake
       ./post-project.cmake
       ./pthread.cmake
-      ./pyproject.py
       ./python.cmake
       ./python-helpers.cmake
       ./qhull.cmake
