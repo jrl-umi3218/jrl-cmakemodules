@@ -183,7 +183,8 @@ endfunction()
 #
 # Add a test called `NAME` that runs an equivalent of ``python ${SOURCE}``,
 # optionnaly with a `PYTHONPATH` set to `PROJECT_BINARY_DIR/MODULE_PATH` for
-# each MODULES `SOURCE` is relative to `PROJECT_SOURCE_DIR`
+# each MODULES `SOURCE` is relative to `PROJECT_SOURCE_DIR` and any other
+# arguments are passed as environment variables to the test.
 #
 # .. note:: :command:`FINDPYTHON` should have been called first.
 #
@@ -210,15 +211,29 @@ macro(ADD_PYTHON_UNIT_TEST NAME SOURCE)
     )
   endif()
 
-  set(MODULES "${ARGN}") # ARGN is not a variable
-  set(PYTHONPATH)
-  COMPUTE_PYTHONPATH(ENV_VARIABLES ${MODULES})
-  set_tests_properties(${NAME} PROPERTIES ENVIRONMENT "${ENV_VARIABLES}")
-  if(ENABLE_COVERAGE)
-    set_tests_properties(
-      ${NAME}-pycov
-      PROPERTIES ENVIRONMENT "${ENV_VARIABLES}"
-    )
+  # Split ARGN into module paths vs VAR=VALUE env pairs
+  set(_MODULES)
+  set(_ENV_PAIRS)
+  foreach(_e ${ARGN})                 # expands "a;b;X=1" into a b X=1
+    if(_e MATCHES "^[^=]+=")
+      list(APPEND _ENV_PAIRS "${_e}")
+    else()
+      list(APPEND _MODULES "${_e}")
+    endif()
+  endforeach()
+  # Build PYTHONPATH entry via your helper (produces ENV_VARIABLES list incl. "PYTHONPATH=...")
+  COMPUTE_PYTHONPATH(ENV_VARIABLES ${_MODULES})
+  # Append additional env pairs without touching PYTHONPATH
+  foreach(_kv IN LISTS _ENV_PAIRS)
+    list(APPEND ENV_VARIABLES "${_kv}")
+  endforeach()
+  # Preserve any ENVIRONMENT already on the test (append behavior)
+  get_test_property(_old_env ${NAME} ENVIRONMENT)
+  if(_old_env)
+    list(APPEND _old_env ${ENV_VARIABLES})
+    set_tests_properties(${NAME} PROPERTIES ENVIRONMENT "${_old_env}")
+  else()
+    set_tests_properties(${NAME} PROPERTIES ENVIRONMENT "${ENV_VARIABLES}")
   endif()
 endmacro(ADD_PYTHON_UNIT_TEST NAME SOURCE)
 
