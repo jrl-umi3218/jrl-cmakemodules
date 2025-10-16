@@ -214,7 +214,7 @@ macro(ADD_PYTHON_UNIT_TEST NAME SOURCE)
   # Split ARGN into module paths vs VAR=VALUE env pairs
   set(_MODULES)
   set(_ENV_PAIRS)
-  foreach(_e ${ARGN})                 # expands "a;b;X=1" into a b X=1
+  foreach(_e ${ARGN}) # expands "a;b;X=1" into a b X=1
     if(_e MATCHES "^[^=]+=")
       list(APPEND _ENV_PAIRS "${_e}")
     else()
