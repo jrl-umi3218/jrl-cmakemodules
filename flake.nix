@@ -22,11 +22,15 @@
               };
 
               # TODO: remove all this once it is in nixpkgs
+              patches = [ ];
               postPatch = ''
                 patchShebangs _unittests/run_unit_tests.sh
               '';
 
-              outputs = [ "out" "doc" ];
+              outputs = [
+                "out"
+                "doc"
+              ];
               nativeBuildInputs = super.nativeBuildInputs ++ [
                 pkgs.sphinxHook
               ];
