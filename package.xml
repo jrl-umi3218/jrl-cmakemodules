@@ -117,5 +117,6 @@
   <export>
     <!-- Other tools can request additional information be placed here -->
     <build_type>cmake</build_type>
+    <architecture_independent/>
   </export>
 </package>
