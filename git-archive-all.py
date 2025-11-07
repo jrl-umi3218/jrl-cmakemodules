@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 # This file comes originally from: https://github.com/Kentzo/git-archive-all
 #
 # coding=utf-8
