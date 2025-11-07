@@ -138,6 +138,18 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     DESTINATION ${INSTALL_DIR}
   )
 
+  # This package is architecture independent. Dont allow ROS to think otherwise
+  # and break everything by installing in lib/x86_64-linux-gnu, which does prevent
+  # find_package(jrl-cmakemodules) to work before a call to project().
+  # share is fine.
+  set(
+    CMAKE_INSTALL_LIBDIR
+    "${CMAKE_INSTALL_DATAROOTDIR}"
+    CACHE PATH
+    "Install exports in share, not lib"
+    FORCE
+  )
+
   install(TARGETS ${PROJECT_NAME} EXPORT ${TARGETS_EXPORT_NAME})
 
   SETUP_PROJECT_PACKAGE_FINALIZE()
