@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="3">
   <name>jrl_cmakemodules</name>
-  <version>1.1.1</version>
+  <version>1.1.2</version>
   <description>CMake utility toolbox</description>
   <url type="website">https://github.com/jrl-umi3218/jrl-cmakemodules</url>
 
