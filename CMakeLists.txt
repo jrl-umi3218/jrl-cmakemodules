@@ -6,7 +6,11 @@ set(PROJECT_URL "http://github.com/jrl-umi3218/${PROJECT_NAME}")
 
 project(${PROJECT_NAME} DESCRIPTION ${PROJECT_DESCRIPTION} LANGUAGES CXX)
 
-if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+# Avoid project to be installed when it's not the top-level cmake.
+# First detect super project, second one detect fetch content.
+# The seconde one is needed because jrl-cmakemodules are included
+# before top-level cmake project definition.
+if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND NOT ${PROJECT_NAME}_POPULATED)
   set(PROJECT_JRL_CMAKE_MODULE_DIR ${CMAKE_CURRENT_LIST_DIR})
   include(base.cmake)
   COMPUTE_PROJECT_ARGS(PROJECT_ARGS LANGUAGES CXX)
