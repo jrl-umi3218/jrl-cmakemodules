@@ -126,9 +126,9 @@ macro(RELEASE_SETUP)
 
     # gersemi: off
     add_custom_target(
-      ${PROJECT_NAME}-release_pixi_toml
+      ${PROJECT_NAME}-release_pixi_toml_version
       WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-      COMMENT "Update pixi.toml and pixi.lock for ${PROJECT_NAME}"
+      COMMENT "Update pixi.toml for ${PROJECT_NAME}"
       COMMAND
       ${PYTHON_EXECUTABLE} ${PROJECT_JRL_CMAKE_MODULE_DIR}/pixi.py $$VERSION
       && if ! (git diff --quiet pixi.toml) ; then
@@ -137,34 +137,53 @@ macro(RELEASE_SETUP)
         ${GIT} commit -m "release: Update pixi.toml version to $$VERSION" &&
         echo "Updated pixi.toml and committed";
         ) ; fi
-        # Some packages have dependencies on themselves in certain pixi environments (e.g., for testing pixi builds)
-        # Therefore, the pixi lockfile needs to be updated with the new package version
-        # Note: Only the package version should be updated, not its dependencies, as this could break the package
-        # If pixi is installed, this operation is performed automatically (otherwise, instructions are printed for manual execution)
-        && if ([ "empty_${PIXI}" != "empty_" ] && command -v "${PIXI}" >/dev/null 2>&1) ; then
-        (
-          echo "pixi found: updating pixi.lock" &&
-          "${PIXI}" update ${PROJECT_NAME} &&
-          if ! (git diff --quiet pixi.lock) ; then
-          (
-            ${GIT} add pixi.lock &&
-            ${GIT} commit -m "release: Update pixi.lock with ${PROJECT_NAME} version to $$VERSION" &&
-            echo "Updated pixi.lock and committed";
-          ) ; fi
-        )
-        else
-        (
-          echo "===========================================" &&
-          echo "= pixi not found! Unable to update lockfile" &&
-          echo "= The following commands were not executed:" &&
-          echo "=   pixi update ${PROJECT_NAME}" &&
-          echo "=   ${GIT} add pixi.lock" &&
-          echo "=   ${GIT} commit -m \"release: Update pixi.lock with ${PROJECT_NAME} version to $$VERSION\"" &&
-          echo "===========================================";
-        ) ; fi
     )
     # gersemi: on
+
+    # Some packages have dependencies on themselves in certain pixi environments (e.g., for testing pixi builds)
+    # Therefore, the pixi lockfile needs to be updated with the new package version
+    # If pixi is installed, this operation is performed automatically (otherwise, instructions are printed for manual execution)
+    if(EXISTS ${PIXI})
+      # gersemi: off
+      add_custom_target(
+        ${PROJECT_NAME}-release_pixi_toml
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+        COMMENT "Update pixi.lock for ${PROJECT_NAME}"
+        COMMAND
+          # Note: Only the package version should be updated, not its dependencies, as this could break the package
+            echo "pixi found: updating pixi.lock" &&
+            "${PIXI}" update ${PROJECT_NAME} &&
+            if ! (git diff --quiet pixi.lock) ; then
+            (
+              ${GIT} add pixi.lock &&
+              ${GIT} commit -m "release: Update pixi.lock with ${PROJECT_NAME} version to $$VERSION" &&
+              echo "Updated pixi.lock and committed";
+            ) ; fi
+      )
+      # gersemi: on
+    else()
+      # gersemi: off
+      add_custom_target(
+        ${PROJECT_NAME}-release_pixi_toml
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+        COMMENT "Cannot update pixi.lock automatically for ${PROJECT_NAME}"
+        COMMAND
+            echo "===========================================" &&
+            echo "= pixi not found! Unable to update lockfile" &&
+            echo "= The following commands were not executed:" &&
+            echo "=   pixi update ${PROJECT_NAME}" &&
+            echo "=   ${GIT} add pixi.lock" &&
+            echo "=   ${GIT} commit -m \"release: Update pixi.lock with ${PROJECT_NAME} version to $$VERSION\"" &&
+            echo "===========================================";
+      )
+      # gersemi: on
+    endif()
     add_dependencies(release_pixi_toml ${PROJECT_NAME}-release_pixi_toml)
+
+    add_dependencies(
+      ${PROJECT_NAME}-release_pixi_toml
+      ${PROJECT_NAME}-release_pixi_toml_version
+    )
 
     if(NOT TARGET release_citation_cff)
       add_custom_target(release_citation_cff COMMENT "Update CITATION.cff")
