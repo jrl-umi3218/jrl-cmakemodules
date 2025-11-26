@@ -143,7 +143,7 @@ macro(RELEASE_SETUP)
     # Some packages have dependencies on themselves in certain pixi environments (e.g., for testing pixi builds)
     # Therefore, the pixi lockfile needs to be updated with the new package version
     # If pixi is installed, this operation is performed automatically (otherwise, instructions are printed for manual execution)
-    if(EXISTS ${PIXI})
+    if(PIXI)
       # gersemi: off
       add_custom_target(
         ${PROJECT_NAME}-release_pixi_toml
