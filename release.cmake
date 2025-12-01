@@ -135,7 +135,7 @@ macro(RELEASE_SETUP)
       (
         ${GIT} add pixi.toml &&
         ${GIT} commit -m "release: Update pixi.toml version to $$VERSION" &&
-        echo "Updated pixi.toml and committed";
+        echo "Updated pixi.toml and committed"
         ) ; fi
     )
     # gersemi: on
@@ -157,7 +157,7 @@ macro(RELEASE_SETUP)
             (
               ${GIT} add pixi.lock &&
               ${GIT} commit -m "release: Update pixi.lock with ${PROJECT_NAME} version to $$VERSION" &&
-              echo "Updated pixi.lock and committed";
+              echo "Updated pixi.lock and committed"
             ) ; fi
       )
       # gersemi: on
@@ -174,7 +174,7 @@ macro(RELEASE_SETUP)
             echo "=   pixi update ${PROJECT_NAME}" &&
             echo "=   ${GIT} add pixi.lock" &&
             echo "=   ${GIT} commit -m \"release: Update pixi.lock with ${PROJECT_NAME} version to $$VERSION\"" &&
-            echo "===========================================";
+            echo "==========================================="
       )
       # gersemi: on
     endif()
