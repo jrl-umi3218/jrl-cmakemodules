@@ -1,5 +1,10 @@
 cmake_minimum_required(VERSION 3.22)
 
+if(JRL_CMAKEMODULES_USE_V2)
+  add_subdirectory(v2)
+  return()
+endif()
+
 set(PROJECT_NAME "jrl-cmakemodules")
 set(PROJECT_DESCRIPTION "CMake utility toolbox")
 set(PROJECT_URL "http://github.com/jrl-umi3218/${PROJECT_NAME}")
