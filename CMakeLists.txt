@@ -47,6 +47,15 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND NOT ${PROJECT_NAME}_POPULATED)
     DESTINATION ${INSTALL_DIR}
   )
 
+  install(
+    DIRECTORY
+      ./v2/jrl-cmakemodules-v2/external-modules
+      ./v2/jrl-cmakemodules-v2/find-modules
+      ./v2/jrl-cmakemodules-v2/modules
+      ./v2/jrl-cmakemodules-v2/templates
+    DESTINATION ${INSTALL_DIR}/v2/jrl-cmakemodules-v2
+  )
+
   # find . -maxdepth 1 -type f ! -perm 111 ! -path './.*' | sort
   install(
     PROGRAMS
