@@ -1,5 +1,10 @@
 cmake_minimum_required(VERSION 3.22)
 
+if(JRL_CMAKEMODULES_USE_V2)
+  add_subdirectory(v2)
+  return()
+endif()
+
 set(PROJECT_NAME "jrl-cmakemodules")
 set(PROJECT_DESCRIPTION "CMake utility toolbox")
 set(PROJECT_URL "http://github.com/jrl-umi3218/${PROJECT_NAME}")
@@ -40,6 +45,15 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND NOT ${PROJECT_NAME}_POPULATED)
       ./stubgen
       ./_unittests
     DESTINATION ${INSTALL_DIR}
+  )
+
+  install(
+    DIRECTORY
+      ./v2/jrl-cmakemodules-v2/external-modules
+      ./v2/jrl-cmakemodules-v2/find-modules
+      ./v2/jrl-cmakemodules-v2/modules
+      ./v2/jrl-cmakemodules-v2/templates
+    DESTINATION ${INSTALL_DIR}/v2/jrl-cmakemodules-v2
   )
 
   # find . -maxdepth 1 -type f ! -perm 111 ! -path './.*' | sort
@@ -155,6 +169,16 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND NOT ${PROJECT_NAME}_POPULATED)
   )
 
   install(TARGETS ${PROJECT_NAME} EXPORT ${TARGETS_EXPORT_NAME})
+
+  set(
+    PACKAGE_TOP_MACROS
+    [[
+if(JRL_CMAKEMODULES_USE_V2)
+  add_subdirectory(v2)
+  return()
+endif()
+    ]]
+  )
 
   SETUP_PROJECT_PACKAGE_FINALIZE()
 endif()
