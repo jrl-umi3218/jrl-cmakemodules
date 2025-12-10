@@ -1,5 +1,7 @@
 @PACKAGE_INIT@
 
+@PACKAGE_TOP_MACROS@
+
 set(skip_this_file TRUE)
 if(NOT @PROJECT_NAME@_FOUND)
   set(skip_this_file FALSE)
