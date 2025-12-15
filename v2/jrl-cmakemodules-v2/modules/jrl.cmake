@@ -1064,9 +1064,11 @@ endfunction()
 #   HEADERS <list_of_headers>
 #   BASE_DIRS <list_of_base_dirs> # Optional, default is empty
 # )
-# Declare headers for target (to be installed later)
-# This will populate the _jrl_install_headers and _jrl_install_headers_base_dirs properties of the target.
-# In CMake 3.23, we will use FILE_SETS instead of this trick.
+# Declare headers for target to be installed later.
+# * This function does not target_include_directories(), only stores them for installation.
+# * Only PUBLIC and INTERFACE will be installed.
+# * It populates the _jrl_install_headers and _jrl_install_headers_base_dirs properties of the target.
+# * In CMake 3.23, we will use FILE_SETS instead of this trick.
 # cf: https://cmake.org/cmake/help/latest/command/target_sources.html#file-sets
 function(jrl_target_headers target visibility)
     set(options)
