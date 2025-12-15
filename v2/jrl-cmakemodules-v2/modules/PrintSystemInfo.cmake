@@ -1,3 +1,5 @@
+# Copyright 2025-2026 Inria
+
 function(jrl_print_full_system_and_compiler_info loglevel)
     set(log_msg "")
 

@@ -1,3 +1,5 @@
+# Copyright 2025-2026 Inria
+
 cmake_minimum_required(VERSION 3.22...4.1)
 
 function(_jrl_integrate_modules)
