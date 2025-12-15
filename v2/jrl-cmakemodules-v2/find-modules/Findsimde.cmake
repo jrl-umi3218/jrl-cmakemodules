@@ -1,3 +1,5 @@
+# Copyright 2025-2026 Inria
+
 find_path(simde_INCLUDE_DIR NAMES simde/simde-common.h)
 
 # Read the version number from simde-common.h

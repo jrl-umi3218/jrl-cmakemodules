@@ -1,3 +1,5 @@
+# Copyright 2025-2026 Inria
+
 find_library(matio_LIBRARY NAMES matio libmatio REQUIRED)
 find_path(matio_INCLUDE_DIR matio.h matio_pubconf.h REQUIRED)
 

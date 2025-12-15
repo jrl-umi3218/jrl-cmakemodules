@@ -1,3 +1,5 @@
+# Copyright 2025-2026 Inria
+
 if(NOT TARGET Python::Interpreter)
     message(
         FATAL_ERROR
