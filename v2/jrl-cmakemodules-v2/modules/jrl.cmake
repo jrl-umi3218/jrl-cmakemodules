@@ -45,9 +45,10 @@ function(jrl_configure_copy_compile_commands_in_source_dir)
             "Configuring copy of compile_commands.json to source directory (CMAKE_SOURCE_DIR=${CMAKE_SOURCE_DIR}) at end of configuration step."
         )
         cmake_language(
-            DEFER ID ${call_id} DIRECTORY ${CMAKE_SOURCE_DIR}
-            CALL copy_compile_commands_in_source_dir
-            ()
+            DEFER
+            ID ${call_id}
+            DIRECTORY ${CMAKE_SOURCE_DIR}
+            CALL copy_compile_commands_in_source_dir ()
         )
     endif()
 endfunction()
@@ -978,7 +979,8 @@ function(jrl_export_dependencies)
     endif()
 
     file(
-        GENERATE OUTPUT ${GEN_DIR}/imported-libraries.cmake
+        GENERATE OUTPUT
+        ${GEN_DIR}/imported-libraries.cmake
         CONTENT
             "
 # Generated file - do not edit
@@ -1123,7 +1125,7 @@ function(jrl_target_install_headers target)
 
     file(
         GENERATE OUTPUT
-            ${CMAKE_CURRENT_BINARY_DIR}/generated/cmake/${PROJECT_NAME}/${target}-install-headers.cmake
+        ${CMAKE_CURRENT_BINARY_DIR}/generated/cmake/${PROJECT_NAME}/${target}-install-headers.cmake
         CONTENT
             "
 # Generated file - do not edit
