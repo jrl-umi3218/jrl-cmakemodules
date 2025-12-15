@@ -1,4 +1,7 @@
-# jrl_boostpy_add_module(name [sources...])
+# Usage: jrl_boostpy_add_module(name [sources...])
+# Creates a Boost.Python module with the given name and sources.
+# The library name will be in the form <name>-<SOABI>.so, where <SOABI> is the
+# Python SOABI tag (e.g., cp39-cp39m-linux_x86_64).
 function(jrl_boostpy_add_module name)
     if(NOT COMMAND python_add_library)
         message(
@@ -6,7 +9,7 @@ function(jrl_boostpy_add_module name)
             "
         python_add_library(<name>) command not found.
             It is available in the FindPython module shipped with CMake.
-            Please use find_package(Python REQUIRED) before calling jrl_boostpy_add_module.
+            Please use (jrl_)find_package(Python REQUIRED) before calling jrl_boostpy_add_module.
             Doc: https://cmake.org/cmake/help/latest/module/FindPython.html
         "
         )
