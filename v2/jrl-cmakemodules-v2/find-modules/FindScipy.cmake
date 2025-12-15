@@ -1,3 +1,5 @@
+# Copyright 2025-2026 Inria
+
 if(NOT DEFINED Python_EXECUTABLE)
     message(
         FATAL_ERROR

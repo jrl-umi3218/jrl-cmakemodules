@@ -1,3 +1,5 @@
+# Copyright 2025-2026 Inria
+
 # Checks the Python module name inside a compiled extension module file.
 # Usage:
 # add_custom_command(
