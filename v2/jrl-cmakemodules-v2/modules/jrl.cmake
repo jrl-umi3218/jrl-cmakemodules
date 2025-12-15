@@ -1072,7 +1072,7 @@ endfunction()
 # cf: https://cmake.org/cmake/help/latest/command/target_sources.html#file-sets
 function(jrl_target_headers target visibility)
     set(options)
-    set(oneValueArgs GENERATED_DIR)
+    set(oneValueArgs)
     set(multiValueArgs HEADERS BASE_DIRS)
     cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
