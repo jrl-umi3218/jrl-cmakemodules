@@ -1,5 +1,17 @@
 # jrl_boostpy_add_module(name [sources...])
 function(jrl_boostpy_add_module name)
+    if(NOT COMMAND python_add_library)
+        message(
+            FATAL_ERROR
+            "
+        python_add_library(<name>) command not found.
+            It is available in the FindPython module shipped with CMake.
+            Please use find_package(Python REQUIRED) before calling jrl_boostpy_add_module.
+            Doc: https://cmake.org/cmake/help/latest/module/FindPython.html
+        "
+        )
+    endif()
+
     python_add_library(${name} MODULE WITH_SOABI ${ARGN})
     target_link_libraries(${name} PRIVATE Boost::python)
 endfunction()
