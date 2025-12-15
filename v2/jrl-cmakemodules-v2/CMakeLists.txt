@@ -3,7 +3,8 @@ project(jrl-cmakemodules-v2 VERSION 2.0.0)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/modules/jrl.cmake)
 
-if(CMAKE_UTILS_BUILD_TESTS)
+option(JRL_CMAKEMODULES_V2_BUILD_TESTS "Build the tests for jrl-cmakemodules-v2" OFF)
+if(JRL_CMAKEMODULES_V2_BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)
 endif()
