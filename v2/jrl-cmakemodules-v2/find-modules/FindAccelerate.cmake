@@ -1,3 +1,5 @@
+# Copyright 2025-2026 Inria
+
 if(NOT APPLE)
     message(WARNING "Accelerate support is only available on APPLE systems")
 endif()
