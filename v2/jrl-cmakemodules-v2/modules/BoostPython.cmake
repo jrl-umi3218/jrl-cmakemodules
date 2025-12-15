@@ -12,6 +12,16 @@ function(jrl_boostpy_add_module name)
         )
     endif()
 
+    if(NOT TARGET Boost::python)
+        message(
+            FATAL_ERROR
+            "
+        Boost::python target not found.
+            Make sure you have Boost.Python using (jrl_)find_package(Boost REQUIRED COMPONENTS python).
+        "
+        )
+    endif()
+
     python_add_library(${name} MODULE WITH_SOABI ${ARGN})
     target_link_libraries(${name} PRIVATE Boost::python)
 endfunction()
