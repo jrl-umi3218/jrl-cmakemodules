@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 
+option(JRL_CMAKEMODULES_USE_V2 "Use jrl-cmakemodules v2 API (bypasses v1 completely)" OFF)
 if(JRL_CMAKEMODULES_USE_V2)
   add_subdirectory(v2)
   return()
