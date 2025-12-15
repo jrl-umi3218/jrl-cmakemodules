@@ -1,7 +1,8 @@
 import os
 import platform
+import contextlib
 
-class DllDirectoryManager():
+class DllDirectoryManager(contextlib.AbstractContextManager):
     """Context manager for managing DLL directories on Windows.
     On Windows with Python 3.8+, Python doesn't search DLL in PATH anymore
     We must specify DLL search path manually with `os.add_dll_directory`
@@ -13,24 +14,24 @@ class DllDirectoryManager():
 
     def safe_add_dll_directory(self, dll_dir: str):
         """Add a DLL directory to the search path, if path exists."""
-        # Check if the directory exists
         if os.path.isdir(dll_dir):
             self.dll_dirs.append(os.add_dll_directory(dll_dir))
 
-    def __init__(self):
+    def __enter__(self):
         self.dll_dirs = []
+        return self
 
-    def __del__(self):
+    def __exit__(self, *exc_details):
         for d in self.dll_dirs:
             d.close()
 
 if platform.system() == 'Windows':
-    mgr = DllDirectoryManager()
-    module_path = os.path.dirname(__file__)
-    mgr.safe_add_dll_directory(os.path.join(module_path, '..', '..', '..', 'bin'))
-    dll_dirs = @__DLL_DIRS__@
-    for dll_dir in dll_dirs:
-        mgr.safe_add_dll_directory(os.path.join(module_path, dll_dir))
+    with DllDirectoryManager() as mgr:
+        module_path = os.path.dirname(__file__)
+        mgr.safe_add_dll_directory(os.path.join(module_path, '..', '..', '..', 'bin'))
+        dll_dirs = @__DLL_DIRS__@
+        for dll_dir in dll_dirs:
+            mgr.safe_add_dll_directory(os.path.join(module_path, dll_dir))
 
 from .@__MODULE_NAME__@ import *  # noqa
 if hasattr(@__MODULE_NAME__@, "__version__"):
