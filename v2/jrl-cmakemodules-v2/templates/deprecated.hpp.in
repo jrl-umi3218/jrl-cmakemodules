@@ -1,4 +1,4 @@
-/// Copyright 2026 Inria. All rights reserved.
+/// Copyright 2025-2026 Inria. All rights reserved.
 #pragma once
 
 // Define a suffix which can be used to tag a type, a function or a a
