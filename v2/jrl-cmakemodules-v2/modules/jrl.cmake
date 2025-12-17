@@ -1499,7 +1499,7 @@ function(jrl_print_options_summary)
 
     _log("--------------------------------------------------------------------------------------------------")
     _log("")
-    _log(STATUS "${log_msg}")
+    message(STATUS "${log_msg}")
 endfunction()
 
 # Shortcut to find Python package and check main variables
