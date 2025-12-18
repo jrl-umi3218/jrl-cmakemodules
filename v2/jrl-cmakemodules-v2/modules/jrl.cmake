@@ -8,7 +8,6 @@ function(_jrl_integrate_modules)
 
     # Adding the pytest_discover_tests function for pytest
     # repo: https://github.com/python-cmake/pytest-cmake
-    include(${utils_ROOT}/external-modules/pytest-cmake/PytestAddTests.cmake)
     include(${utils_ROOT}/external-modules/pytest-cmake/PytestDiscoverTests.cmake)
 
     # Adding the boosttest_discover_tests function for Boost Unit Testing
