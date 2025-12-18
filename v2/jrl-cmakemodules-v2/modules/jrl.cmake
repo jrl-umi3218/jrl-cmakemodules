@@ -876,6 +876,9 @@ function(jrl_cmake_print_properties)
 
                 if(propertySet)
                     get_property(property ${keyword} ${item} PROPERTY "${prop}")
+                    # Convert paths containing \ to / (Windows)
+                    cmake_path(CONVERT "${property}" TO_CMAKE_PATH_LIST property)
+
                     #   string(APPEND msg "   ${item}.${prop} = \"${property}\"\n")
                     _pad_string("${prop}"      40 _prop)
                     string(APPEND msg "   ${_prop} = ${property}\n")
