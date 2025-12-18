@@ -23,7 +23,7 @@ endfunction()
 _jrl_integrate_modules()
 
 # Copy compile_commands.json from the binary dir to the upper source directory for clangd support
-function(copy_compile_commands_in_source_dir)
+function(jrl_copy_compile_commands_in_source_dir)
     set(source ${CMAKE_BINARY_DIR}/compile_commands.json)
     set(destination ${CMAKE_SOURCE_DIR}/compile_commands.json)
 
@@ -47,7 +47,7 @@ function(jrl_configure_copy_compile_commands_in_source_dir)
             DEFER
             ID ${call_id}
             DIRECTORY ${CMAKE_SOURCE_DIR}
-            CALL copy_compile_commands_in_source_dir ()
+            CALL jrl_copy_compile_commands_in_source_dir ()
         )
     endif()
 endfunction()
