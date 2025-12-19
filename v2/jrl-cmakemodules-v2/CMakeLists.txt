@@ -1,8 +1,9 @@
 # Copyright 2025-2026 Inria
 
 cmake_minimum_required(VERSION 3.22...4.2)
-project(jrl-cmakemodules-v2 VERSION 2.0.0)
+project(jrl-cmakemodules VERSION 2.0.0)
 
+set(jrl-cmakemodules_VERSION ${PROJECT_VERSION} CACHE STRING "Version of jrl-cmakemodules")
 include(${CMAKE_CURRENT_SOURCE_DIR}/modules/jrl.cmake)
 
 option(JRL_CMAKEMODULES_V2_BUILD_TESTS "Build the tests for jrl-cmakemodules-v2" OFF)
