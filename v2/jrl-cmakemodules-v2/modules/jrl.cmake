@@ -1043,7 +1043,8 @@ function(jrl_add_export_component)
 
     message(
         STATUS
-        "Adding export component '${arg_NAME}' with targets: ${arg_TARGETS} (${PROJECT_NAME}-${arg_NAME})"
+        "Adding export component '${arg_NAME}' with targets: ${arg_TARGETS} (export name: ${PROJECT_NAME}::${arg_NAME})"
+        "It makes this component available via: find_package(${PROJECT_NAME} CONFIG REQUIRED COMPONENTS ${arg_NAME})"
     )
 
     # This option associates the installed target files with an export, without installing anything.
