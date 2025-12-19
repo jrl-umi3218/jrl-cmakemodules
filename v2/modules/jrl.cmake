@@ -1856,10 +1856,10 @@ import sys
 import sysconfig
 from pathlib import Path
 
-if '${python_env_name}' != 'system':
-    print(sysconfig.get_path('purelib'))
-else:
+if '${python_env_name}' == 'system' or '${python_env_name}' == 'nix':
     print(Path(sysconfig.get_path('purelib')).relative_to(sysconfig.get_path('data')))
+else:
+    print(sysconfig.get_path('purelib'))
 "
         OUTPUT_VARIABLE python_install_dir
         ERROR_VARIABLE error
