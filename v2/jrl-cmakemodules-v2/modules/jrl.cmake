@@ -95,6 +95,27 @@ macro(jrl_include_ctest)
     include(CTest)
 endmacro()
 
+function(jrl_cmakemodules_get_version output_var)
+    jrl_check_var_defined(jrl-cmakemodules_VERSION
+        "jrl-cmakemodules_VERSION variable is not defined."
+        "It is defined when adding the top-level jrl-cmakemodules project or when found via find_package."
+    )
+    set(${output_var} ${jrl-cmakemodules_VERSION} PARENT_SCOPE)
+endfunction()
+
+function(jrl_print_banner)
+    jrl_cmakemodules_get_version(v)
+    message(
+        STATUS
+        "
+        🚧 Welcome to JRL CMake Modules v${v}.
+        🚧 Loaded from: ${CMAKE_CURRENT_FUNCTION_LIST_FILE}
+        🚧 This version is still under heavy development.
+        🚧 API may change without notice.
+    "
+    )
+endfunction()
+
 # Usage: jrl_configure_default_build_type(<build_type>)
 # Usual values for <build_type> are: Debug, Release, MinSizeRel, RelWithDebInfo
 # Example: jrl_configure_default_build_type(RelWithDebInfo)
