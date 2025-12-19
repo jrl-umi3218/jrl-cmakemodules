@@ -6,7 +6,7 @@ option(
   OFF
 )
 if(JRL_CMAKEMODULES_USE_V2)
-  add_subdirectory(v2/jrl-cmakemodules-v2)
+  add_subdirectory(v2)
   jrl_print_banner()
   return()
 endif()
@@ -55,11 +55,11 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND NOT ${PROJECT_NAME}_POPULATED)
 
   install(
     DIRECTORY
-      ./v2/jrl-cmakemodules-v2/external-modules
-      ./v2/jrl-cmakemodules-v2/find-modules
-      ./v2/jrl-cmakemodules-v2/modules
-      ./v2/jrl-cmakemodules-v2/templates
-    DESTINATION ${INSTALL_DIR}/v2/jrl-cmakemodules-v2
+      ./v2/external-modules
+      ./v2/find-modules
+      ./v2/modules
+      ./v2/templates
+    DESTINATION ${INSTALL_DIR}/v2
   )
 
   # find . -maxdepth 1 -type f ! -perm 111 ! -path './.*' | sort
