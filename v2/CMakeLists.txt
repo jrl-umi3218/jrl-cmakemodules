@@ -6,7 +6,17 @@ project(jrl-cmakemodules VERSION 2.0.0)
 set(jrl-cmakemodules_VERSION ${PROJECT_VERSION} CACHE STRING "Version of jrl-cmakemodules")
 include(${CMAKE_CURRENT_SOURCE_DIR}/modules/jrl.cmake)
 
-jrl_configure_default_install_dirs()
+option(JRL_CMAKEMODULES_V2_BUILD_TESTS "Build the tests for jrl-cmakemodules-v2" OFF)
+if(JRL_CMAKEMODULES_V2_BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
+endif()
+
+if(NOT PROJECT_IS_TOP_LEVEL)
+    return()
+endif()
+
+include(GNUInstallDirs)
 
 # Where to install the <project>-config.cmake and related files
 # Here we choose <prefix>/share/cmake/<project>
