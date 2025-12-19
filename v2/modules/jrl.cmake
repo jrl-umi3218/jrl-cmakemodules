@@ -1812,8 +1812,6 @@ import os
 
 if os.path.exists(os.path.join(sys.prefix, 'conda-meta')):
     print('conda')
-    return
-
 else:
     print('system')
 "
