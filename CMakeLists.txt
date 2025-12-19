@@ -6,7 +6,8 @@ option(
   OFF
 )
 if(JRL_CMAKEMODULES_USE_V2)
-  add_subdirectory(v2)
+  add_subdirectory(v2/jrl-cmakemodules-v2)
+  jrl_print_banner()
   return()
 endif()
 
