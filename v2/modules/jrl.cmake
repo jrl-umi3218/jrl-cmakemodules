@@ -1064,13 +1064,14 @@ function(jrl_add_export_component)
 
     message(
         STATUS
-        "Adding export component '${arg_NAME}' with targets: ${arg_TARGETS} (export name: ${PROJECT_NAME}::${arg_NAME})"
-        "It makes this component available via: find_package(${PROJECT_NAME} CONFIG REQUIRED COMPONENTS ${arg_NAME})"
+        "Adding export component '${arg_NAME}' with targets: ${arg_TARGETS} (export name: ${PROJECT_NAME}::${arg_NAME})
+        It makes this component available via: find_package(${PROJECT_NAME} CONFIG REQUIRED COMPONENTS ${arg_NAME})
+        "
     )
 
-    # This option associates the installed target files with an export, without installing anything.
-    # TODO: Declare exports first like that, split the jrl_export_package() with a generation and an install step.
+    # Despite its signature, the following commented line associates the installed target files with an export, without installing anything.
     # install(TARGETS ${arg_TARGETS} EXPORT ${PROJECT_NAME}-${arg_NAME})
+    # TODO: Declare exports first like that, then split the jrl_export_package() with a generation and an install step.
 
     set_property(GLOBAL PROPERTY _jrl_${PROJECT_NAME}_export_components ${arg_NAME} APPEND)
     set_property(GLOBAL PROPERTY _jrl_${PROJECT_NAME}_${arg_NAME}_targets ${arg_TARGETS})
@@ -1361,7 +1362,7 @@ function(jrl_export_package)
             INSTALL_DESTINATION ${CMAKE_FILES_INSTALL_DIR}/${component}
         )
         # Create the export for the component targets
-        # And the install rules for the targets
+        # AND the install rules for the targets (see jrl_add_export_component() comment)
         install(
             TARGETS ${targets}
             EXPORT ${PROJECT_NAME}-${component}
