@@ -181,6 +181,7 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND NOT ${PROJECT_NAME}_POPULATED)
     [[
 if(JRL_CMAKEMODULES_USE_V2)
   add_subdirectory(v2)
+  jrl_print_banner()
   return()
 endif()
     ]]
