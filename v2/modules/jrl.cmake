@@ -1758,6 +1758,38 @@ function(jrl_check_python_module module_name)
     endif()
 endfunction()
 
+# .rst:
+# .. command:: jrl_python_compute_install_dir
+#
+#   .. code-block:: cmake
+#
+#     jrl_python_compute_install_dir(<output>)
+#
+#   Compute the installation directory for Python bindings.
+#
+#   This function determines the correct relative path for installing Python
+#   packages or modules based on the current system configuration and Python
+#   version. It handles differences between Debian-based systems (using `dist-packages`)
+#   and standard Python installations (using `site-packages`).
+#
+#   It detects the following environments and adjusts the path accordingly:
+#
+#   - **Isolated Environments** (Conda, Virtualenv, Pipenv, Poetry, Pyenv, Homebrew, Nix, Spack):
+#     Returns an absolute path to the site-packages directory.
+#     - Linux: ``/path/to/env/lib/python3.10/site-packages``
+#     - Mac: ``/path/to/env/lib/python3.10/site-packages``
+#     - Windows: ``C:/path/to/env/Lib/site-packages``
+#
+#   - **System Python**:
+#     Returns a relative path to the installation prefix.
+#     - Linux: ``lib/python3.10/site-packages`` (or ``dist-packages`` on Debian)
+#     - Mac: ``lib/python3.10/site-packages``
+#     - Windows: ``Lib/site-packages``
+#
+#   The result is stored in the variable named by ``<output>``.
+#
+#   :param output: The name of the variable where the computed path will be stored.
+#
 function(jrl_python_compute_install_dir output)
     if(DEFINED ${PROJECT_NAME}_PYTHON_INSTALL_DIR)
         message(
@@ -1768,22 +1800,68 @@ function(jrl_python_compute_install_dir output)
         return()
     endif()
 
-    if(NOT Python_EXECUTABLE)
-        message(
-            FATAL_ERROR
-            "Python_EXECUTABLE not defined.
-        Please use jrl_find_package(Python REQUIRED COMPONENT Interpreter)"
-        )
-    endif()
+    jrl_check_target_exists(Python::Interpreter "Python::Interpreter target not found. Please call jrl_find_python() first.")
+    get_target_property(python Python::Interpreter LOCATION)
 
-    # purelib: directory for site-specific, non-platform-specific files (‘pure’ Python).
-    # data: directory for data files (i.e. The root directory of the Python interpreter).
-    # This should return Lib/site-packages on Windows and lib/pythonX.Y/site-packages on Linux
     execute_process(
         COMMAND
-            ${Python_EXECUTABLE} -c
-            "import sysconfig; from pathlib import Path; print(Path(sysconfig.get_path('purelib')).relative_to(sysconfig.get_path('data')))"
-        OUTPUT_VARIABLE relative_python_sitelib_wrt_python_root_dir
+            ${python} -c
+            "
+import sys
+import os
+
+if os.path.exists(os.path.join(sys.prefix, 'conda-meta')):
+    print('conda')
+
+elif sys.base_prefix != sys.prefix:
+    print('virtualenv')
+
+elif 'PIPENV_ACTIVE' in os.environ:
+    print('pipenv')
+
+elif os.path.exists('poetry.lock') or 'POETRY_ACTIVE' in os.environ:
+    print('poetry')
+
+elif 'PYENV_ROOT' in os.environ:
+    print('pyenv')
+
+elif sys.executable.startswith(('/opt/homebrew', '/usr/local')) and os.path.exists('/usr/local/Homebrew'):
+    print('homebrew')
+
+elif 'NIX_STORE' in os.environ:
+    print('nix')
+
+elif 'SPACK_ROOT' in os.environ:
+    print('spack')
+
+else:
+    print('system')
+"
+        OUTPUT_VARIABLE python_env_name
+        ERROR_VARIABLE error
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+
+    if(error)
+        message(WARNING "Error detecting python environment: ${error}")
+    endif()
+
+    message(STATUS "Detected Python environment: ${python_env_name}")
+
+    execute_process(
+        COMMAND
+            ${python} -c
+            "
+import sys
+import sysconfig
+from pathlib import Path
+
+if '${python_env_name}' != 'system':
+    print(sysconfig.get_path('purelib'))
+else:
+    print(Path(sysconfig.get_path('purelib')).relative_to(sysconfig.get_path('data')))
+"
+        OUTPUT_VARIABLE python_install_dir
         ERROR_VARIABLE error
         OUTPUT_STRIP_TRAILING_WHITESPACE
     )
@@ -1795,11 +1873,11 @@ function(jrl_python_compute_install_dir output)
         )
     endif()
 
-    set(${output} "${relative_python_sitelib_wrt_python_root_dir}" PARENT_SCOPE)
+    set(${output} "${python_install_dir}" PARENT_SCOPE)
 
     message(
-        DEBUG
-        "Computed python install dir ${output}=${relative_python_sitelib_wrt_python_root_dir}"
+        STATUS
+        "Computed python install destination ${python_install_dir} (Use install(DESTINATION \${${output}} ...))"
     )
 endfunction()
 
