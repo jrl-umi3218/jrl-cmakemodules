@@ -53,14 +53,7 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND NOT ${PROJECT_NAME}_POPULATED)
     DESTINATION ${INSTALL_DIR}
   )
 
-  install(
-    DIRECTORY
-      ./v2/external-modules
-      ./v2/find-modules
-      ./v2/modules
-      ./v2/templates
-    DESTINATION ${INSTALL_DIR}/v2
-  )
+  install(DIRECTORY ./v2 DESTINATION ${INSTALL_DIR})
 
   # find . -maxdepth 1 -type f ! -perm 111 ! -path './.*' | sort
   install(
@@ -180,7 +173,7 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND NOT ${PROJECT_NAME}_POPULATED)
     PACKAGE_TOP_MACROS
     [[
 if(JRL_CMAKEMODULES_USE_V2)
-  add_subdirectory(v2)
+  add_subdirectory(${PACKAGE_PREFIX_DIR}/share/jrl-cmakemodules/v2)
   jrl_print_banner()
   return()
 endif()
