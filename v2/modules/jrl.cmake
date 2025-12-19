@@ -1812,27 +1812,7 @@ import os
 
 if os.path.exists(os.path.join(sys.prefix, 'conda-meta')):
     print('conda')
-
-elif sys.base_prefix != sys.prefix:
-    print('virtualenv')
-
-elif 'PIPENV_ACTIVE' in os.environ:
-    print('pipenv')
-
-elif os.path.exists('poetry.lock') or 'POETRY_ACTIVE' in os.environ:
-    print('poetry')
-
-elif 'PYENV_ROOT' in os.environ:
-    print('pyenv')
-
-elif sys.executable.startswith(('/opt/homebrew', '/usr/local')) and os.path.exists('/usr/local/Homebrew'):
-    print('homebrew')
-
-elif 'NIX_STORE' in os.environ:
-    print('nix')
-
-elif 'SPACK_ROOT' in os.environ:
-    print('spack')
+    return
 
 else:
     print('system')
@@ -1856,7 +1836,7 @@ import sys
 import sysconfig
 from pathlib import Path
 
-if '${python_env_name}' == 'system' or '${python_env_name}' == 'nix':
+if '${python_env_name}' == 'system':
     print(Path(sysconfig.get_path('purelib')).relative_to(sysconfig.get_path('data')))
 else:
     print(sysconfig.get_path('purelib'))
