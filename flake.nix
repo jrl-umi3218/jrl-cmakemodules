@@ -8,52 +8,39 @@
 
   outputs =
     inputs:
-    inputs.flake-parts.lib.mkFlake { inherit inputs; } {
-      systems = inputs.nixpkgs.lib.systems.flakeExposed;
-      perSystem =
-        { pkgs, self', ... }:
-        {
-          packages = {
-            default = self'.packages.jrl-cmakemodules;
-            jrl-cmakemodules = pkgs.jrl-cmakemodules.overrideAttrs (super: {
-              src = pkgs.lib.fileset.toSource {
+    inputs.flake-parts.lib.mkFlake { inherit inputs; } (
+      { self, lib, ... }:
+      {
+        systems = lib.systems.flakeExposed;
+        flake.overlays = {
+          default = final: prev: {
+            jrl-cmakemodules = prev.jrl-cmakemodules.overrideAttrs {
+              src = lib.fileset.toSource {
                 root = ./.;
-                fileset = pkgs.lib.fileset.gitTracked ./.;
+                fileset = lib.fileset.gitTracked ./.;
               };
-
-              # TODO: remove all this once it is in nixpkgs
-              patches = [ ];
-              postPatch = ''
-                patchShebangs _unittests/run_unit_tests.sh
-              '';
-
-              outputs = [
-                "out"
-                "doc"
-              ];
-              nativeBuildInputs = super.nativeBuildInputs ++ [
-                pkgs.sphinxHook
-              ];
-              sphinxRoot = "../.docs";
-
-              doCheck = true;
-              checkInputs = [
-                pkgs.python3
-              ];
-              checkPhase = ''
-                runHook preCheck
-
-                pushd ../_unittests
-                ./run_unit_tests.sh
-                cmake -P test_pkg-config.cmake
-
-                rm -rf build install
-                popd
-
-                runHook postCheck
-              '';
-            });
+            };
           };
         };
-    };
+        perSystem =
+          {
+            pkgs,
+            self',
+            system,
+            ...
+          }:
+          {
+            _module.args = {
+              pkgs = import inputs.nixpkgs {
+                inherit system;
+                overlays = [ self.overlays.default ];
+              };
+            };
+            packages = {
+              default = self'.packages.jrl-cmakemodules;
+              jrl-cmakemodules = pkgs.jrl-cmakemodules;
+            };
+          };
+      }
+    );
 }
