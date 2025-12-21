@@ -1,5 +1,7 @@
 # Copyright 2025-2026 Inria
 
+cmake_minimum_required(VERSION 3.22)
+
 # Checks the Python module name inside a compiled extension module file.
 # Usage:
 # add_custom_command(
