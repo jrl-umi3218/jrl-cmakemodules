@@ -1788,38 +1788,20 @@ function(jrl_check_python_module module_name)
     endif()
 endfunction()
 
-# .rst:
-# .. command:: jrl_python_compute_install_dir
+# jrl_python_compute_install_dir(<output>)
 #
-#   .. code-block:: cmake
+# Compute the installation directory for Python bindings.
+#  * If ${PROJECT_NAME}_PYTHON_INSTALL_DIR is defined, its value is used.
+#  * Otherwise, if running inside a Conda environment on Windows, an
+#    absolute path to `sysconfig.get_path('purelib')` is returned.
+#  * In all other cases, the relative path of `purelib` with respect to
+#    `sysconfig.get_path('data')` is returned.
 #
-#     jrl_python_compute_install_dir(<output>)
-#
-#   Compute the installation directory for Python bindings.
-#
-#   This function determines the correct relative path for installing Python
-#   packages or modules based on the current system configuration and Python
-#   version. It handles differences between Debian-based systems (using `dist-packages`)
-#   and standard Python installations (using `site-packages`).
-#
-#   It detects the following environments and adjusts the path accordingly:
-#
-#   - **Isolated Environments** (Conda, Virtualenv, Pipenv, Poetry, Pyenv, Homebrew, Nix, Spack):
-#     Returns an absolute path to the site-packages directory.
-#     - Linux: ``/path/to/env/lib/python3.10/site-packages``
-#     - Mac: ``/path/to/env/lib/python3.10/site-packages``
-#     - Windows: ``C:/path/to/env/Lib/site-packages``
-#
-#   - **System Python**:
-#     Returns a relative path to the installation prefix.
-#     - Linux: ``lib/python3.10/site-packages`` (or ``dist-packages`` on Debian)
-#     - Mac: ``lib/python3.10/site-packages``
-#     - Windows: ``Lib/site-packages``
-#
-#   The result is stored in the variable named by ``<output>``.
-#
-#   :param output: The name of the variable where the computed path will be stored.
-#
+# Example:
+# ```cmake
+#   jrl_python_compute_install_dir(python_install_dir)
+#   install(TARGETS my_python_module DESTINATION ${python_install_dir} ...)
+# ```
 function(jrl_python_compute_install_dir output)
     if(DEFINED ${PROJECT_NAME}_PYTHON_INSTALL_DIR)
         message(
@@ -1837,37 +1819,16 @@ function(jrl_python_compute_install_dir output)
         COMMAND
             ${python} -c
             "
-import sys
-import os
-
-if os.path.exists(os.path.join(sys.prefix, 'conda-meta')):
-    print('conda')
-else:
-    print('system')
-"
-        OUTPUT_VARIABLE python_env_name
-        ERROR_VARIABLE error
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-
-    if(error)
-        message(WARNING "Error detecting python environment: ${error}")
-    endif()
-
-    message(STATUS "Detected Python environment: ${python_env_name}")
-
-    execute_process(
-        COMMAND
-            ${python} -c
-            "
-import sys
-import sysconfig
+import sys, os, sysconfig
 from pathlib import Path
 
-if '${python_env_name}' == 'system':
-    print(Path(sysconfig.get_path('purelib')).relative_to(sysconfig.get_path('data')))
-else:
+is_conda = os.path.exists(os.path.join(sys.prefix, 'conda-meta'))
+is_windows = sys.platform.startswith('win')
+
+if is_conda and is_windows:
     print(sysconfig.get_path('purelib'))
+else:
+    print(Path(sysconfig.get_path('purelib')).relative_to(sysconfig.get_path('data')))
 "
         OUTPUT_VARIABLE python_install_dir
         ERROR_VARIABLE error
@@ -1882,7 +1843,6 @@ else:
     endif()
 
     set(${output} "${python_install_dir}" PARENT_SCOPE)
-
     message(
         STATUS
         "Computed python install destination ${python_install_dir} (Use install(DESTINATION \${${output}} ...))"
