@@ -226,6 +226,26 @@ function(jrl_configure_defaults)
     jrl_configure_copy_compile_commands_in_source_dir()
 endfunction()
 
+# jrl_get_cxx_compiler_id(output_var)
+# Get the CMAKE_CXX_COMPILER_ID variable, but also handles clang-cl and AppleClang exceptions.
+# clang-cl is considered as MSVC, AppleClang as Clang.
+# In CMake >= 3.26, use CMAKE_CXX_COMPILER_FRONTEND_VARIANT
+# ref: https://cmake.org/cmake/help/latest/variable/CMAKE_LANG_COMPILER_FRONTEND_VARIANT.html
+# ref: https://gitlab.kitware.com/cmake/cmake/-/issues/19724
+function(jrl_get_cxx_compiler_id output_var)
+    jrl_check_var_defined(CMAKE_CXX_COMPILER_ID)
+
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC")
+        set(cxx_compiler_id "MSVC")
+    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+        set(cxx_compiler_id "Clang")
+    else()
+        set(cxx_compiler_id ${CMAKE_CXX_COMPILER_ID})
+    endif()
+
+    set(${output_var} ${cxx_compiler_id} PARENT_SCOPE)
+endfunction()
+
 # Enable the most common warnings for MSVC, GCC and Clang
 # Adding some extra warning on msvc to mimic gcc/clang behavior
 # Usage: jrl_target_set_default_compile_options(<target_name> <visibility>)
@@ -235,18 +255,9 @@ function(jrl_target_set_default_compile_options target_name visibility)
     jrl_check_target_exists(${target_name})
     jrl_check_valid_visibility(${visibility})
 
-    # In CMake >= 3.26, use CMAKE_CXX_COMPILER_FRONTEND_VARIANT
-    # ref: https://cmake.org/cmake/help/latest/variable/CMAKE_LANG_COMPILER_FRONTEND_VARIANT.html
-    # ref: https://gitlab.kitware.com/cmake/cmake/-/issues/19724
-    if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC")
-        set(CMAKE_CXX_COMPILER_ID "MSVC")
-    endif()
+    jrl_get_cxx_compiler_id(cxx_compiler_id)
 
-    if(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
-        set(CMAKE_CXX_COMPILER_ID "Clang")
-    endif()
-
-    if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    if(cxx_compiler_id STREQUAL "MSVC")
         target_compile_options(
             ${target_name}
             ${visibility}
@@ -258,7 +269,7 @@ function(jrl_target_set_default_compile_options target_name visibility)
             /we4834 # discarding return value of function with 'nodiscard' attribute
             /we4062 # enumerator 'xyz' in switch of enum 'abc' is not handled
         )
-    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    elseif(cxx_compiler_id STREQUAL "GNU" OR cxx_compiler_id STREQUAL "Clang")
         target_compile_options(
             ${target_name}
             ${visibility}
@@ -268,25 +279,20 @@ function(jrl_target_set_default_compile_options target_name visibility)
             -Wpedantic # Warn on non-standard C++ usage
         )
     else()
-        message(
-            WARNING
-            "Unknown compiler '${CMAKE_CXX_COMPILER_ID}'. No default compile options set."
-        )
+        message(WARNING "Unknown compiler '${cxx_compiler_id}'. No default compile options set.")
     endif()
 endfunction()
 
 # Description: Enforce MSVC c++ conformance mode so msvc behaves more like gcc and clang
+# If the compiler id is not MSVC, this function does nothing.
 # Usage: jrl_target_enforce_msvc_conformance(<target_name> <visibility>)
 # visibility is either PRIVATE, PUBLIC or INTERFACE
 # Example: jrl_target_enforce_msvc_conformance(my_target INTERFACE)
 function(jrl_target_enforce_msvc_conformance target_name visibility)
     jrl_check_valid_visibility(${visibility})
 
-    if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC")
-        set(CMAKE_CXX_COMPILER_ID "MSVC")
-    endif()
-
-    if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    jrl_get_cxx_compiler_id(cxx_compiler_id)
+    if(NOT cxx_compiler_id STREQUAL "MSVC")
         return()
     endif()
 
@@ -301,7 +307,7 @@ function(jrl_target_enforce_msvc_conformance target_name visibility)
 endfunction()
 
 # Description: Treat all warnings as errors for a targets (/WX for MSVC, -Werror for GCC/Clang)
-# Can be disabled by on the cmake cli with --compile-no-warning-as-error
+# Can be disabled on the cmake cli with --compile-no-warning-as-error
 # ref: https://cmake.org/cmake/help/latest/manual/cmake.1.html#cmdoption-cmake-compile-no-warning-as-error
 # Usage: jrl_target_treat_all_warnings_as_errors(<target_name> <visibility>)
 # visibility is either PRIVATE, PUBLIC or INTERFACE
@@ -310,23 +316,14 @@ endfunction()
 function(jrl_target_treat_all_warnings_as_errors target_name visibility)
     jrl_check_valid_visibility(${visibility})
 
-    if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC")
-        set(CMAKE_CXX_COMPILER_ID "MSVC")
-    endif()
+    jrl_get_cxx_compiler_id(cxx_compiler_id)
 
-    if(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
-        set(CMAKE_CXX_COMPILER_ID "Clang")
-    endif()
-
-    if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    if(cxx_compiler_id STREQUAL "MSVC")
         target_compile_options(${target_name} ${visibility} /WX)
-    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    elseif(cxx_compiler_id STREQUAL "GNU" OR cxx_compiler_id STREQUAL "Clang")
         target_compile_options(${target_name} ${visibility} -Werror)
     else()
-        message(
-            WARNING
-            "Unknown compiler '${CMAKE_CXX_COMPILER_ID}'. No warning as error flag set."
-        )
+        message(WARNING "Unknown compiler '${cxx_compiler_id}'. No warning as error flag set.")
     endif()
 endfunction()
 
