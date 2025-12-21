@@ -358,7 +358,6 @@ function(jrl_target_generate_header target_name visibility)
     cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     jrl_check_var_defined(PROJECT_NAME)
-    jrl_check_var_defined(CMAKE_CURRENT_BINARY_DIR)
     jrl_check_var_defined(CMAKE_INSTALL_INCLUDEDIR)
     jrl_check_target_exists(${target_name})
     jrl_check_valid_visibility(${visibility})
