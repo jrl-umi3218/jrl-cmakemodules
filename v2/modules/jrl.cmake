@@ -23,6 +23,7 @@ endfunction()
 _jrl_integrate_modules()
 
 # Copy compile_commands.json from the binary dir to the upper source directory for clangd support
+# This is only useful when the build directory is not <source_dir>/build
 function(jrl_copy_compile_commands_in_source_dir)
     set(source ${CMAKE_BINARY_DIR}/compile_commands.json)
     set(destination ${CMAKE_SOURCE_DIR}/compile_commands.json)
