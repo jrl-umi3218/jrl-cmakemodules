@@ -154,6 +154,18 @@ function(jrl_configure_default_binary_dirs)
     endforeach()
 endfunction()
 
+# jrl_target_set_output_directory(<target_name> OUTPUT_DIRECTORY <dir>)
+# This function configures the `ARCHIVE_OUTPUT_DIRECTORY`,
+# `LIBRARY_OUTPUT_DIRECTORY`, and `RUNTIME_OUTPUT_DIRECTORY` properties
+# for the specified target.
+# This is useful for python modules that need to be placed in a specific directory.
+# In this module we use it to place python modules in ${CMAKE_BINARY_DIR}/lib/site-packages
+# To mimic the installation layout.
+# Otherwise, the python modules being a RUMTIME target, would be placed in ${CMAKE_BINARY_DIR}/bin
+# Example:
+# ```cmake
+#   jrl_target_set_output_directory(my_python_module_target OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/site-packages)
+# ```
 function(jrl_target_set_output_directory target_name)
     set(options)
     set(oneValueArgs OUTPUT_DIRECTORY)
