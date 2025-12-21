@@ -1,5 +1,7 @@
 # Copyright 2025-2026 Inria
 
+cmake_minimum_required(VERSION 3.22)
+
 # Usage: jrl_boostpy_add_module(name [sources...])
 # Creates a Boost.Python module with the given name and sources.
 # The library name will be in the form <name>-<SOABI>.so, where <SOABI> is the

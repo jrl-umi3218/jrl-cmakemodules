@@ -1,5 +1,7 @@
 # Copyright 2025-2026 Inria
 
+cmake_minimum_required(VERSION 3.22)
+
 function(jrl_print_full_system_and_compiler_info loglevel)
     set(log_msg "")
 
