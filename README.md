@@ -5,8 +5,8 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 
-This repository is meant to be used as a submodule for any project
-from CNRS LAAS/HPP or JRL.
+This repository is meant to be used as a submodule (or via FetchContent) for any project
+at CNRS, LAAS/HPP, JRL and Inria.
 
 It factorizes CMake mechanisms to provide a uniform look'n feel for
 all packages.
