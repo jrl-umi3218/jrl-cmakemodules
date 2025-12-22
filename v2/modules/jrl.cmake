@@ -1593,6 +1593,10 @@ macro(jrl_find_nanobind)
     )
     unset(args_pp)
 
+    if("REQUIRED" IN_LIST ARGN)
+        set(is_required True)
+    endif()
+
     # Detect the installed nanobind package and import it into CMake
     # ref: https://nanobind.readthedocs.io/en/latest/building.html#finding-nanobind
     execute_process(
@@ -1604,28 +1608,33 @@ macro(jrl_find_nanobind)
 
     if(nanobind_error)
         unset(nanobind_ROOT)
-
-        # On Ubuntu 24.04, nanobind installed via apt is located in /usr/share/nanobind
-        find_path(nanobind_INCLUDE_DIR NAMES nanobind/nanobind.h HINTS /usr/share/nanobind/include)
-        if(nanobind_INCLUDE_DIR)
-            set(nanobind_ROOT ${nanobind_INCLUDE_DIR}/../cmake)
-            cmake_path(CONVERT ${nanobind_ROOT} TO_CMAKE_PATH_LIST nanobind_ROOT NORMALIZE)
-        endif()
     endif()
 
-    if(NOT nanobind_ROOT)
-        message(FATAL_ERROR "Failed to find nanobind package: ${nanobind_error}")
+    if(NOT nanobind_ROOT AND is_required)
+        message(
+            SEND_ERROR
+            "Failed to find nanobind package via 'python -m nanobind --cmake_dir': ${nanobind_error}"
+        )
     endif()
 
     jrl_find_package(nanobind ${ARGN})
 
-    message(STATUS "   Nanobind CMake directory: ${nanobind_ROOT}")
-
     if(nanobind_FOUND)
+        if(nanobind_ROOT)
+            message(STATUS "   Nanobind CMake Root: ${nanobind_ROOT}")
+        endif()
+
+        if(nanobind_DIR)
+            # Installed via homebrew on macOS, brew install nanobind
+            # This will give /opt/homebrew/share/nanobind/cmake
+            message(STATUS "   Nanobind CMake dir: ${nanobind_DIR}")
+        endif()
         # If you install nanobind with pip, it will include tsl-robin-map in <nanobind>/ext/robin_map
         # On macOS, brew install nanobind will not include tsl-robin-map, we need to install it via: brew install robin-map
         # Naturally, find_package(nanobind CONFIG REQUIRED) will succeed (nanobind_FOUND -> True), but the tsl-robin-map dependency will be missing, causing build errors.
         # So let's check if the headers are available, otherwise require tsl-robin-map explicitly.
+        # UPDATE: fixed in https://github.com/Homebrew/homebrew-core/commit/bf0095fdd7e03bd3239afda4584951ee9305dc40
+        # brew install nanobind now includes robin-map as a dependency.
         if(EXISTS "${nanobind_ROOT}/../ext/robin_map/include/tsl/robin_map.h")
             message(
                 STATUS
