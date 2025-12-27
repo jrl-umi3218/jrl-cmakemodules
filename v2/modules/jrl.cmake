@@ -1927,6 +1927,11 @@ else:
         )
     endif()
 
+    # On Windows, convert to CMake path list (backslashes to slashes)
+    if(WIN32)
+        cmake_path(CONVERT "${python_install_dir}" TO_CMAKE_PATH_LIST python_install_dir)
+    endif()
+
     set(${output} "${python_install_dir}" PARENT_SCOPE)
     message(
         STATUS
