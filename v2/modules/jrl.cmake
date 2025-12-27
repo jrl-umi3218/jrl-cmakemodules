@@ -2,22 +2,106 @@
 
 cmake_minimum_required(VERSION 3.22...4.1)
 
+# Usage: jrl_check_var_defined(<var> [<message>])
+# Example: jrl_check_var_defined(MY_VAR "MY_VAR must be set to build this project")
+# Example: jrl_check_var_defined(MY_VAR) # Will print "MY_VAR is not defined."
+function(jrl_check_var_defined var)
+    if(NOT DEFINED ${var})
+        if(ARGC EQUAL 1)
+            set(msg "Required variable '${ARGV0}' is not defined.")
+        else()
+            set(msg "${ARGV1}")
+        endif()
+        message(FATAL_ERROR "${msg}")
+    endif()
+endfunction()
+
+# Check if a directory exists, otherwise raise a fatal error
+function(jrl_check_dir_exists dirpath)
+    if(NOT IS_DIRECTORY ${dirpath})
+        message(FATAL_ERROR "Directory '${dirpath}' does not exist.")
+    endif()
+endfunction()
+
+# Check if a target exists, otherwise raise a fatal error
+function(jrl_check_target_exists target_name)
+    if(NOT TARGET ${target_name})
+        message(FATAL_ERROR "Target '${target_name}' does not exist.")
+    endif()
+endfunction()
+
+# Check if the visibility argument is valid (PRIVATE, PUBLIC or INTERFACE)
+# Otherwise raise a fatal error
+function(jrl_check_valid_visibility visibility)
+    set(vs PRIVATE PUBLIC INTERFACE)
+    if(NOT ${visibility} IN_LIST vs)
+        message(
+            FATAL_ERROR
+            "visibility (${visibility}) must be one of PRIVATE, PUBLIC or INTERFACE"
+        )
+    endif()
+endfunction()
+
+# Check if a file exists, otherwise raise a fatal error
+function(jrl_check_file_exists filepath)
+    if(NOT EXISTS ${filepath})
+        message(FATAL_ERROR "File '${filepath}' does not exist.")
+    endif()
+endfunction()
+
+# Get the top-level directory of the jrl-cmakemodules v2 repository
+# Usage: _jrl_top_dir(<output_var>)
+# Example: _jrl_top_dir(TOP_DIR)
+function(_jrl_top_dir output_var)
+    cmake_path(CONVERT "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/.." TO_CMAKE_PATH_LIST top_dir NORMALIZE)
+    jrl_check_dir_exists(${top_dir})
+    set(${output_var} ${top_dir} PARENT_SCOPE)
+endfunction()
+
+# Get the templates directory of the jrl-cmakemodules v2 repository
+# Usage: _jrl_templates_dir(<output_var>)
+# Example: _jrl_templates_dir(TEMPLATES_DIR)
+function(_jrl_templates_dir output_var)
+    _jrl_top_dir(top_dir)
+    set(templates_dir ${top_dir}/templates)
+    jrl_check_dir_exists(${templates_dir})
+    set(${output_var} ${templates_dir} PARENT_SCOPE)
+endfunction()
+
+# Get the external-modules directory of the jrl-cmakemodules v2 repository
+# Usage: _jrl_external_modules_dir(<output_var>)
+# Example: _jrl_external_modules_dir(EXTERNAL_MODULES_DIR)
+function(_jrl_external_modules_dir output_var)
+    _jrl_top_dir(top_dir)
+    set(external_modules_dir ${top_dir}/external-modules)
+    jrl_check_dir_exists(${external_modules_dir})
+    set(${output_var} ${external_modules_dir} PARENT_SCOPE)
+endfunction()
+
+# Get the find-modules directory of the jrl-cmakemodules v2 repository
+# Usage: _jrl_find_modules_dir(<output_var>)
+# Example: _jrl_find_modules_dir(FIND_MODULES_DIR)
+function(_jrl_find_modules_dir output_var)
+    _jrl_top_dir(top_dir)
+    set(find_modules_dir ${top_dir}/find-modules)
+    jrl_check_dir_exists(${find_modules_dir})
+    set(${output_var} ${find_modules_dir} PARENT_SCOPE)
+endfunction()
+
 function(_jrl_integrate_modules)
-    set(utils_ROOT ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/..)
-    cmake_path(CONVERT "${utils_ROOT}" TO_CMAKE_PATH_LIST utils_ROOT NORMALIZE)
+    _jrl_external_modules_dir(external_modules_dir)
 
     # Adding the pytest_discover_tests function for pytest
     # repo: https://github.com/python-cmake/pytest-cmake
-    include(${utils_ROOT}/external-modules/pytest-cmake/PytestDiscoverTests.cmake)
-
+    include(${external_modules_dir}/pytest-cmake/PytestDiscoverTests.cmake)
     # Adding the boosttest_discover_tests function for Boost Unit Testing
     # repo: https://github.com/DenizThatMenace/cmake-modules
-    include(${utils_ROOT}/external-modules/boost-test/BoostTestDiscoverTests.cmake)
+    include(${external_modules_dir}/boost-test/BoostTestDiscoverTests.cmake)
 
     # jrl_boostpy_add_module and jrl_boostpy_add_stubs
-    include(${utils_ROOT}/modules/BoostPython.cmake)
+    include(${CMAKE_CURRENT_FUNCTION_LIST_DIR}/BoostPython.cmake)
 
-    include(${utils_ROOT}/modules/PrintSystemInfo.cmake)
+    include(${CMAKE_CURRENT_FUNCTION_LIST_DIR}/PrintSystemInfo.cmake)
 endfunction()
 
 _jrl_integrate_modules()
@@ -50,43 +134,6 @@ function(jrl_configure_copy_compile_commands_in_source_dir)
             DIRECTORY ${CMAKE_SOURCE_DIR}
             CALL jrl_copy_compile_commands_in_source_dir ()
         )
-    endif()
-endfunction()
-
-# Usage: jrl_check_var_defined(<var> [<message>])
-# Example: jrl_check_var_defined(MY_VAR "MY_VAR must be set to build this project")
-# Example: jrl_check_var_defined(MY_VAR) # Will print "MY_VAR is not defined."
-function(jrl_check_var_defined var)
-    if(NOT DEFINED ${var})
-        if(ARGC EQUAL 1)
-            set(msg "Required variable '${ARGV0}' is not defined.")
-        else()
-            set(msg "${ARGV1}")
-        endif()
-        message(FATAL_ERROR "${msg}")
-    endif()
-endfunction()
-
-# Check if a target exists, otherwise raise a fatal error
-function(jrl_check_target_exists target_name)
-    if(NOT TARGET ${target_name})
-        message(FATAL_ERROR "Target '${target_name}' does not exist.")
-    endif()
-endfunction()
-
-function(jrl_check_valid_visibility visibility)
-    set(vs PRIVATE PUBLIC INTERFACE)
-    if(NOT ${visibility} IN_LIST vs)
-        message(
-            FATAL_ERROR
-            "visibility (${visibility}) must be one of PRIVATE, PUBLIC or INTERFACE"
-        )
-    endif()
-endfunction()
-
-function(jrl_check_file_exists filepath)
-    if(NOT EXISTS ${filepath})
-        message(FATAL_ERROR "File '${filepath}' does not exist.")
     endif()
 endfunction()
 
@@ -225,11 +272,10 @@ function(jrl_setup_uninstall_target)
         return()
     endif()
 
-    set(utils_ROOT ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/..)
-    cmake_path(CONVERT "${utils_ROOT}" TO_CMAKE_PATH_LIST utils_ROOT NORMALIZE)
+    _jrl_templates_dir(templates_dir)
 
     configure_file(
-        "${utils_ROOT}/templates/cmake-uninstall.cmake.in"
+        "${templates_dir}/cmake-uninstall.cmake.in"
         "${CMAKE_CURRENT_BINARY_DIR}/cmake-uninstall.cmake"
         IMMEDIATE
         @ONLY
@@ -466,10 +512,11 @@ function(jrl_target_generate_warning_header target_name visibility)
         set(skip_install SKIP_INSTALL)
     endif()
 
+    _jrl_templates_dir(templates_dir)
     jrl_target_generate_header(${target_name} ${visibility}
         FILENAME ${filename}
         HEADER_DIR ${header_dir}
-        TEMPLATE_FILE ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/../templates/warning.hpp.in
+        TEMPLATE_FILE ${templates_dir}/warning.hpp.in
         INSTALL_DESTINATION ${install_destination}
         VERSION ${PROJECT_VERSION}
         ${skip_install}
@@ -504,10 +551,11 @@ function(jrl_target_generate_deprecated_header target_name visibility)
         set(skip_install SKIP_INSTALL)
     endif()
 
+    _jrl_templates_dir(templates_dir)
     jrl_target_generate_header(${target_name} ${visibility}
         FILENAME ${filename}
         HEADER_DIR ${header_dir}
-        TEMPLATE_FILE ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/../templates/deprecated.hpp.in
+        TEMPLATE_FILE ${templates_dir}/deprecated.hpp.in
         INSTALL_DESTINATION ${install_destination}
         VERSION ${PROJECT_VERSION}
         ${skip_install}
@@ -546,10 +594,11 @@ function(jrl_target_generate_config_header target_name visibility)
         set(skip_install SKIP_INSTALL)
     endif()
 
+    _jrl_templates_dir(templates_dir)
     jrl_target_generate_header(${target_name} ${visibility}
         FILENAME ${filename}
         HEADER_DIR ${header_dir}
-        TEMPLATE_FILE ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/../templates/config.hpp.in
+        TEMPLATE_FILE ${templates_dir}/config.hpp.in
         INSTALL_DESTINATION ${install_destination}
         VERSION ${arg_VERSION}
         ${skip_install}
@@ -588,10 +637,11 @@ function(jrl_target_generate_tracy_header target_name visibility)
         set(skip_install SKIP_INSTALL)
     endif()
 
+    _jrl_templates_dir(templates_dir)
     jrl_target_generate_header(${target_name} ${visibility}
         FILENAME ${filename}
         HEADER_DIR ${header_dir}
-        TEMPLATE_FILE ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/../templates/tracy.hpp.in
+        TEMPLATE_FILE ${templates_dir}/tracy.hpp.in
         INSTALL_DESTINATION ${install_destination}
         VERSION ${PROJECT_VERSION}
         ${skip_install}
@@ -599,16 +649,18 @@ function(jrl_target_generate_tracy_header target_name visibility)
 endfunction()
 
 # This function searches for a find module named Find<package>.cmake).
-# It iterates over the CMAKE_MODULE_PATH and cmake builtin modules.
+# It iterates over the CMAKE_MODULE_PATH and the find-modules directory.
+# This function is used to determine which module file was used by jrl_find_package.
+# Usage: jrl_search_package_module_file(<package_name> <output_filepath>)
+# Example: jrl_search_package_module_file(Eigen module_file)
 function(jrl_search_package_module_file package_name output_filepath)
     set(module_filename "Find${package_name}.cmake")
     set(found_module_file "")
     # QUESTION: Should we look into cmake builtin modules?
     # set(cmake_builtin_modules_path "${CMAKE_ROOT}/Modules")
-    set(extra_modules_path "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/../find-modules")
-    cmake_path(CONVERT "${extra_modules_path}" TO_CMAKE_PATH_LIST extra_modules_path NORMALIZE)
+    _jrl_find_modules_dir(find_modules_dir)
 
-    foreach(module_path IN LISTS CMAKE_MODULE_PATH extra_modules_path)
+    foreach(module_path IN LISTS CMAKE_MODULE_PATH find_modules_dir)
         set(candidate_filepath "${module_path}/${module_filename}")
         message(DEBUG "        Searching for package module file at: ${candidate_filepath}")
         if(EXISTS ${candidate_filepath})
@@ -1074,8 +1126,9 @@ set(buildsystem_targets [[${buildsystem_targets}]])
 "
     )
     # needs @INSTALL_DESTINATION@
+    _jrl_templates_dir(templates_dir)
     configure_file(
-        ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/../templates/generate-dependencies.cmake.in
+        ${templates_dir}/generate-dependencies.cmake.in
         ${GEN_DIR}/generate-dependencies.cmake
         @ONLY
     )
@@ -1341,9 +1394,8 @@ function(jrl_export_package)
     if(arg_PACKAGE_CONFIG_TEMPLATE)
         set(PACKAGE_CONFIG_TEMPLATE ${arg_PACKAGE_CONFIG_TEMPLATE})
     else()
-        set(PACKAGE_CONFIG_TEMPLATE
-            ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/../templates/config-components.cmake.in
-        )
+        _jrl_templates_dir(templates_dir)
+        set(PACKAGE_CONFIG_TEMPLATE ${templates_dir}/config-components.cmake.in)
         set(using_default_template True)
     endif()
 
@@ -1779,11 +1831,8 @@ function(jrl_python_generate_init_py name)
     # Configure the __init__.py with PYTHON_MODULE_NAME and optional dll_dirs
     set(__MODULE_NAME__ "${name}")
     set(__DLL_DIRS__ "${dll_dirs}")
-    configure_file(
-        ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/../templates/__init__.py.in
-        ${arg_OUTPUT_PATH}
-        @ONLY
-    )
+    _jrl_templates_dir(templates_dir)
+    configure_file(${templates_dir}/__init__.py.in ${arg_OUTPUT_PATH} @ONLY)
 endfunction()
 
 # Find if a python module is available, fills <module_name>_FOUND variable
