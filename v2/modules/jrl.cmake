@@ -216,6 +216,31 @@ function(jrl_configure_default_install_prefix default_install_prefix)
     endif()
 endfunction()
 
+# jrl_setup_uninstall_target()
+# Setup an uninstall target that can be used to uninstall the project
+# Usage: jrl_setup_uninstall_target()
+# And then cmake --build . --target uninstall
+function(jrl_setup_uninstall_target)
+    if(TARGET uninstall)
+        return()
+    endif()
+
+    set(utils_ROOT ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/..)
+    cmake_path(CONVERT "${utils_ROOT}" TO_CMAKE_PATH_LIST utils_ROOT NORMALIZE)
+
+    configure_file(
+        "${utils_ROOT}/templates/cmake-uninstall.cmake.in"
+        "${CMAKE_CURRENT_BINARY_DIR}/cmake-uninstall.cmake"
+        IMMEDIATE
+        @ONLY
+    )
+
+    add_custom_target(
+        uninstall
+        COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake-uninstall.cmake
+    )
+endfunction()
+
 # Setup the default options for a project (opinionated defaults)
 # Usage : jrl_configure_defaults()
 function(jrl_configure_defaults)
@@ -224,6 +249,7 @@ function(jrl_configure_defaults)
     jrl_configure_default_install_dirs()
     jrl_configure_default_install_prefix(${CMAKE_BINARY_DIR}/install)
     jrl_configure_copy_compile_commands_in_source_dir()
+    jrl_setup_uninstall_target()
 endfunction()
 
 # jrl_get_cxx_compiler_id(output_var)
