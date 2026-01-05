@@ -1768,6 +1768,24 @@ macro(jrl_find_nanobind)
     endif()
 endmacro()
 
+# Get the python interpreter path from the Python::Interpreter target
+# Usage: jrl_python_get_interpreter(<output_var>)
+# Example:
+# ```cmake
+# jrl_python_get_interpreter(python_interpreter)
+# execute_process(COMMAND ${python_interpreter} -c "print('Hello from Python!')")
+# ```
+function(jrl_python_get_interpreter output_var)
+    jrl_check_target_exists(Python::Interpreter
+    "
+        Python::Interpreter target not found.
+        Call (jrl_)find_package(Python REQUIRED COMPONENTS Interpreter) first.
+    "
+    )
+    get_target_property(python_interpreter Python::Interpreter LOCATION)
+    set(${output_var} ${python_interpreter} PARENT_SCOPE)
+endfunction()
+
 function(jrl_python_compile_all)
     set(options VERBOSE)
     set(oneValueArgs DIRECTORY)
