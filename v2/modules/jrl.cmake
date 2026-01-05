@@ -2015,6 +2015,8 @@ endfunction()
 
 # Check that the python module defined with NB_MODULE(<module_name>)
 # or BOOST_PYTHON_MODULE(<module_name>) has the same name as the target: <module_name>.cpython-XY.so
+# Otherwise the module will fail to load in Python.
+# NOTE: It verifies that the symbol PyInit_<module_name> exists in the built module.
 # Usage: jrl_check_python_module_name(<module_target>)
 function(jrl_check_python_module_name target)
     jrl_check_target_exists(${target})
@@ -2025,7 +2027,7 @@ function(jrl_check_python_module_name target)
         COMMAND
             ${CMAKE_COMMAND} -DMODULE_FILE=$<TARGET_FILE:${target}> -DEXPECTED_MODULE_NAME=${target}
             -P ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/CheckPythonModuleNameScript.cmake
-        COMMENT "Checking Python module name for ${target}"
+        COMMENT "Checking 'PyInit_${target}' exists"
         VERBATIM
     )
 endfunction()
