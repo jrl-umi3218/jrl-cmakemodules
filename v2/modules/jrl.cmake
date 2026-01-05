@@ -1602,6 +1602,9 @@ function(jrl_option option_name description default_value)
     set_property(GLOBAL PROPERTY _jrl_${PROJECT_NAME}_option_names ${option_name} APPEND)
 endfunction()
 
+# Same as cmake_dependent_option(), but store default value and option name for the jrl_print_options_summary()
+# Usage: jrl_cmake_dependent_option(<option_name> <description> <default_value> <condition> <else_value>)
+# See official documentation: https://cmake.org/cmake/help/latest/module/CMakeDependentOption.html
 function(
     jrl_cmake_dependent_option
     option_name
