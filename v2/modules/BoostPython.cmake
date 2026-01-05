@@ -13,7 +13,7 @@ function(jrl_boostpy_add_module name)
             "
         python_add_library(<name>) command not found.
             It is available in the FindPython module shipped with CMake.
-            Please use (jrl_)find_package(Python REQUIRED) before calling jrl_boostpy_add_module.
+            Use (jrl_)find_package(Python REQUIRED) before calling jrl_boostpy_add_module.
             Doc: https://cmake.org/cmake/help/latest/module/FindPython.html
         "
         )
@@ -68,6 +68,16 @@ function(jrl_boostpy_add_stubs name)
         )
     endif()
     cmake_path(CONVERT ${stubgen_py} TO_CMAKE_PATH_LIST stubgen_py NORMALIZE)
+
+    if(NOT TARGET Python::Interpreter)
+        message(
+            FATAL_ERROR
+            "
+        Python::Interpreter target not found.
+            Use (jrl_)find_package(Python REQUIRED COMPONENTS Interpreter) before calling jrl_boostpy_add_stubs.
+        "
+        )
+    endif()
 
     add_custom_command(
         OUTPUT ${arg_OUTPUT}
