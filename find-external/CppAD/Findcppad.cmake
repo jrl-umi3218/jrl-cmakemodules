@@ -25,8 +25,7 @@ find_library(
 
 if(cppad_INCLUDE_DIR AND EXISTS "${cppad_INCLUDE_DIR}/cppad/configure.hpp")
   file(
-    STRINGS
-    "${cppad_INCLUDE_DIR}/cppad/configure.hpp"
+    STRINGS "${cppad_INCLUDE_DIR}/cppad/configure.hpp"
     cppad_version_str
     REGEX "^# *define[\t ]+CPPAD_PACKAGE_STRING[\t ]+\"cppad-.*\""
   )

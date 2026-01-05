@@ -11,8 +11,7 @@ macro(JULIA_CHECK_PACKAGE PKG_NAME)
     "try\n@eval import ${PKG_NAME}\nprintln(1)\ncatch\nprintln(0)\nend"
   )
   file(
-    WRITE
-    ${PROJECT_SOURCE_DIR}/_tmp_cmake_julia/test_julia_package.jl
+    WRITE ${PROJECT_SOURCE_DIR}/_tmp_cmake_julia/test_julia_package.jl
     ${file_content}
   )
   execute_process(

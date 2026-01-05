@@ -287,13 +287,11 @@ function(_OPENMP_GET_FLAGS LANG FLAG_MODE OPENMP_FLAG_VAR OPENMP_LIB_NAMES_VAR)
           if("${output_lines}" MATCHES ".*\nlibraries:[ \t]+(.*:)\n.*")
             string(REPLACE ":" ";" implicit_dirs_addon "${CMAKE_MATCH_1}")
             list(
-              PREPEND
-              OpenMP_${LANG}_IMPLICIT_LINK_DIRS
+              PREPEND OpenMP_${LANG}_IMPLICIT_LINK_DIRS
               ${implicit_dirs_addon}
             )
             string(
-              APPEND
-              OpenMP_${LANG}_LOG_VAR
+              APPEND OpenMP_${LANG}_LOG_VAR
               "  Extended OpenMP library search paths: [${implicit_dirs}]\n"
             )
           endif()
@@ -780,8 +778,7 @@ foreach(LANG IN LISTS OpenMP_FINDLIST)
     else()
       foreach(_OPENMP_IMPLICIT_LIB IN LISTS OpenMP_${LANG}_LIB_NAMES)
         list(
-          APPEND
-          _OPENMP_${LANG}_REQUIRED_LIB_VARS
+          APPEND _OPENMP_${LANG}_REQUIRED_LIB_VARS
           OpenMP_${_OPENMP_IMPLICIT_LIB}_LIBRARY
         )
       endforeach()
@@ -806,8 +803,7 @@ foreach(LANG IN LISTS OpenMP_FINDLIST)
       set(OpenMP_${LANG}_LIBRARIES "")
       foreach(_OPENMP_IMPLICIT_LIB IN LISTS OpenMP_${LANG}_LIB_NAMES)
         list(
-          APPEND
-          OpenMP_${LANG}_LIBRARIES
+          APPEND OpenMP_${LANG}_LIBRARIES
           "${OpenMP_${_OPENMP_IMPLICIT_LIB}_LIBRARY}"
         )
       endforeach()
