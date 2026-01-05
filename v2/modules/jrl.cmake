@@ -1804,6 +1804,13 @@ function(jrl_python_get_interpreter output_var)
     set(${output_var} ${python_interpreter} PARENT_SCOPE)
 endfunction()
 
+# Compiles all the python files recursively in a given directory, via the compileall module.
+# It creates the corresponding .pyc files in __pycache__ folders.
+# Usage: jrl_python_compile_all(DIRECTORY <directory> [VERBOSE])
+# Example:
+# ```cmake
+# jrl_python_compile_all(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/my_python_package)
+# ```
 function(jrl_python_compile_all)
     set(options VERBOSE)
     set(oneValueArgs DIRECTORY)
