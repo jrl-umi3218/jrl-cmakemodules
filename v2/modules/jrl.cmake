@@ -1,6 +1,6 @@
 # Copyright 2025-2026 Inria
 
-cmake_minimum_required(VERSION 3.22...4.1)
+cmake_minimum_required(VERSION 3.22)
 
 # Usage: jrl_check_var_defined(<var> [<message>])
 # Example: jrl_check_var_defined(MY_VAR "MY_VAR must be set to build this project")
