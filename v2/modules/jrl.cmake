@@ -24,6 +24,8 @@ function(jrl_check_dir_exists dirpath)
 endfunction()
 
 # Check if a target exists, otherwise raise a fatal error
+# Usage: jrl_check_target_exists(<target_name>)
+# Example: jrl_check_target_exists(Python::Interpreter)
 function(jrl_check_target_exists target_name)
     if(NOT TARGET ${target_name})
         message(FATAL_ERROR "Target '${target_name}' does not exist.")
@@ -41,6 +43,12 @@ endfunction()
 
 # Check if the visibility argument is valid (PRIVATE, PUBLIC or INTERFACE)
 # Otherwise raise a fatal error
+# Usage: jrl_check_valid_visibility(<visibility>)
+# Example:
+# ```cmake
+# set(visibility PRIVATE)
+# jrl_check_valid_visibility(${visibility})
+# ```
 function(jrl_check_valid_visibility visibility)
     set(vs PRIVATE PUBLIC INTERFACE)
     if(NOT ${visibility} IN_LIST vs)
@@ -52,6 +60,11 @@ function(jrl_check_valid_visibility visibility)
 endfunction()
 
 # Check if a file exists, otherwise raise a fatal error
+# Usage: jrl_check_file_exists(<filepath>)
+# Example:
+# ```cmake
+# jrl_check_file_exists(${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt)
+# ```
 function(jrl_check_file_exists filepath)
     if(NOT EXISTS ${filepath})
         message(FATAL_ERROR "File '${filepath}' does not exist.")
@@ -60,7 +73,10 @@ endfunction()
 
 # Get the top-level directory of the jrl-cmakemodules v2 repository
 # Usage: _jrl_top_dir(<output_var>)
-# Example: _jrl_top_dir(TOP_DIR)
+# Example:
+# ```cmake
+# _jrl_top_dir(TOP_DIR)
+# ```
 function(_jrl_top_dir output_var)
     cmake_path(CONVERT "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/.." TO_CMAKE_PATH_LIST top_dir NORMALIZE)
     jrl_check_dir_exists(${top_dir})
@@ -69,7 +85,10 @@ endfunction()
 
 # Get the templates directory of the jrl-cmakemodules v2 repository
 # Usage: _jrl_templates_dir(<output_var>)
-# Example: _jrl_templates_dir(TEMPLATES_DIR)
+# Example:
+# ```cmake
+# _jrl_templates_dir(TEMPLATES_DIR)
+# ```
 function(_jrl_templates_dir output_var)
     _jrl_top_dir(top_dir)
     set(templates_dir ${top_dir}/templates)
@@ -79,7 +98,10 @@ endfunction()
 
 # Get the external-modules directory of the jrl-cmakemodules v2 repository
 # Usage: _jrl_external_modules_dir(<output_var>)
-# Example: _jrl_external_modules_dir(EXTERNAL_MODULES_DIR)
+# Example:
+# ```cmake
+# _jrl_external_modules_dir(EXTERNAL_MODULES_DIR)
+# ```
 function(_jrl_external_modules_dir output_var)
     _jrl_top_dir(top_dir)
     set(external_modules_dir ${top_dir}/external-modules)
@@ -89,7 +111,10 @@ endfunction()
 
 # Get the find-modules directory of the jrl-cmakemodules v2 repository
 # Usage: _jrl_find_modules_dir(<output_var>)
-# Example: _jrl_find_modules_dir(FIND_MODULES_DIR)
+# Example:
+# ```cmake
+# _jrl_find_modules_dir(FIND_MODULES_DIR)
+# ```
 function(_jrl_find_modules_dir output_var)
     _jrl_top_dir(top_dir)
     set(find_modules_dir ${top_dir}/find-modules)
@@ -116,7 +141,7 @@ endfunction()
 _jrl_integrate_modules()
 
 # Copy compile_commands.json from the binary dir to the upper source directory for clangd support
-# This is only useful when the build directory is not <source_dir>/build
+# NOTE: This is only useful when the build directory is not <source_dir>/build
 function(jrl_copy_compile_commands_in_source_dir)
     set(source ${CMAKE_BINARY_DIR}/compile_commands.json)
     set(destination ${CMAKE_SOURCE_DIR}/compile_commands.json)
@@ -147,11 +172,19 @@ function(jrl_configure_copy_compile_commands_in_source_dir)
 endfunction()
 
 # Include CTest but simply prevent adding a lot of useless targets. Useful for IDEs.
+# Usage: jrl_include_ctest()
 macro(jrl_include_ctest)
     set_property(GLOBAL PROPERTY CTEST_TARGETS_ADDED 1)
     include(CTest)
 endmacro()
 
+# Get the version of the jrl-cmakemodules package (via the jrl-cmakemodules_VERSION variable)
+# Usage: jrl_cmakemodules_get_version(<output_var>)
+# Example:
+# ```cmake
+# jrl_cmakemodules_get_version(v)
+# message(STATUS "jrl-cmakemodules version: ${v}")
+# ```
 function(jrl_cmakemodules_get_version output_var)
     jrl_check_var_defined(jrl-cmakemodules_VERSION
         "jrl-cmakemodules_VERSION variable is not defined."
@@ -160,6 +193,8 @@ function(jrl_cmakemodules_get_version output_var)
     set(${output_var} ${jrl-cmakemodules_VERSION} PARENT_SCOPE)
 endfunction()
 
+# Print a banner with the jrl-cmakemodules version and some info
+# Usage: jrl_print_banner()
 function(jrl_print_banner)
     jrl_cmakemodules_get_version(v)
     message(
