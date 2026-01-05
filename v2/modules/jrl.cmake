@@ -1843,18 +1843,36 @@ function(jrl_python_compile_all)
     endif()
 endfunction()
 
+# Generates a __init__.py file for a given python module target
+# It computes all the relative paths to dlls it needs to add to os.add_dll_directory based on the target's LINK_LIBRARIES
+# Usage: jrl_python_generate_init_py(<module_target_name> OUTPUT_PATH <output_path> [TEMPLATE_FILE <template_file>])
+# Example:
+# ```cmake
+# nanobind_add_module(coal_pywrap_nb module.cpp)
+# # Link the python module with the main pure c++ shared library 'coal'
+# target_link_libraries(coal_pywrap_nb PRIVATE coal)
+# jrl_target_set_output_directory(coal_pywrap_nb OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/site-packages/coal)
+
+# jrl_python_generate_init_py(
+#     coal_pywrap_nb
+#     OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib/site-packages/coal/__init__.py
+# )
+# ```
+# The generated __init__.py will call the os.add_dll_directory(<relative_path/to/coal.dll>)
 function(jrl_python_generate_init_py name)
     set(options)
-    set(oneValueArgs OUTPUT_PATH)
+    set(oneValueArgs OUTPUT_PATH TEMPLATE_FILE)
     set(multiValueArgs)
     cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-    if(NOT TARGET ${name})
-        message(FATAL_ERROR "Target '${name}' does not exist, cannot generate __init__.py")
-    endif()
+    jrl_check_target_exists(${name})
+    jrl_check_var_defined(arg_OUTPUT_PATH)
 
-    if(NOT DEFINED arg_OUTPUT_PATH)
-        message(FATAL_ERROR "OUTPUT_PATH argument is required")
+    if(arg_TEMPLATE_FILE)
+        set(template_file ${arg_TEMPLATE_FILE})
+    else()
+        _jrl_templates_dir(templates_dir)
+        set(template_file ${templates_dir}/__init__.py.in)
     endif()
 
     get_target_property(python_module_link_libraries ${name} LINK_LIBRARIES)
