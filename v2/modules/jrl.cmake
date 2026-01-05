@@ -30,6 +30,15 @@ function(jrl_check_target_exists target_name)
     endif()
 endfunction()
 
+# Check if a command exists, otherwise raise a fatal error
+# Usage: jrl_check_command_exists(<command_name>)
+# Example: jrl_check_command_exists(find_package)
+function(jrl_check_command_exists command_name)
+    if(NOT COMMAND ${command_name})
+        message(FATAL_ERROR "Command '${command_name}' does not exist.")
+    endif()
+endfunction()
+
 # Check if the visibility argument is valid (PRIVATE, PUBLIC or INTERFACE)
 # Otherwise raise a fatal error
 function(jrl_check_valid_visibility visibility)
