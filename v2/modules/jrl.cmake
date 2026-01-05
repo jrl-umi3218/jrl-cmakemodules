@@ -326,7 +326,8 @@ function(jrl_configure_default_install_prefix default_install_prefix)
 endfunction()
 
 # jrl_setup_uninstall_target()
-# Setup an uninstall target that can be used to uninstall the project
+# Setup an uninstall target that can be used to uninstall the project.
+# It will create a cmake_uninstall.cmake script next to the cmake_install.cmake script in the build directory.
 # Usage: jrl_setup_uninstall_target()
 # And then cmake --build . --target uninstall
 function(jrl_setup_uninstall_target)
@@ -337,15 +338,15 @@ function(jrl_setup_uninstall_target)
     _jrl_templates_dir(templates_dir)
 
     configure_file(
-        "${templates_dir}/cmake-uninstall.cmake.in"
-        "${CMAKE_CURRENT_BINARY_DIR}/cmake-uninstall.cmake"
+        "${templates_dir}/cmake_uninstall.cmake.in"
+        "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
         IMMEDIATE
         @ONLY
     )
 
     add_custom_target(
         uninstall
-        COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake-uninstall.cmake
+        COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake
     )
 endfunction()
 
