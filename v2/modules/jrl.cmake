@@ -24,20 +24,38 @@ function(jrl_check_dir_exists dirpath)
 endfunction()
 
 # Check if a target exists, otherwise raise a fatal error
-# Usage: jrl_check_target_exists(<target_name>)
-# Example: jrl_check_target_exists(Python::Interpreter)
+# Usage: jrl_check_target_exists(<target_name> [<message>])
+# Example:
+# ```cmake
+# jrl_check_target_exists(Python::Interpreter)
+# jrl_check_target_exists(Python::Interpreter "Call find_package(Python REQUIRED COMPONENTS Interpreter) first.")
+# ```
 function(jrl_check_target_exists target_name)
     if(NOT TARGET ${target_name})
-        message(FATAL_ERROR "Target '${target_name}' does not exist.")
+        if(ARGC EQUAL 1)
+            set(msg "Target '${target_name}' does not exist.")
+        else()
+            set(msg "${ARGV1}")
+        endif()
+        message(FATAL_ERROR "${msg}")
     endif()
 endfunction()
 
 # Check if a command exists, otherwise raise a fatal error
-# Usage: jrl_check_command_exists(<command_name>)
-# Example: jrl_check_command_exists(find_package)
+# Usage: jrl_check_command_exists(<command_name> [<message>])
+# Example:
+# ```cmake
+# jrl_check_command_exists(nanobind_add_stubs)
+# jrl_check_command_exists(nanobind_add_stubs "nanobind_add_stubs command not found. Call find_package(nanobind 2.5.0 REQUIRED) first.")
+# ```
 function(jrl_check_command_exists command_name)
     if(NOT COMMAND ${command_name})
-        message(FATAL_ERROR "Command '${command_name}' does not exist.")
+        if(ARGC EQUAL 1)
+            set(msg "Command '${command_name}' does not exist.")
+        else()
+            set(msg "${ARGV1}")
+        endif()
+        message(FATAL_ERROR "${msg}")
     endif()
 endfunction()
 
@@ -1793,6 +1811,7 @@ function(jrl_python_compile_all)
     cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     jrl_check_var_defined(arg_DIRECTORY)
+    jrl_python_get_interpreter(python)
 
     if(arg_VERBOSE)
         message(STATUS "Compiling all Python files in directory '${arg_DIRECTORY}'")
@@ -1805,7 +1824,7 @@ function(jrl_python_compile_all)
 
     execute_process(
         COMMAND
-            ${Python_EXECUTABLE} -c
+            ${python} -c
             "import compileall; compileall.compile_dir(r'${arg_DIRECTORY}', workers=0, quiet=${quiet_flag})"
         RESULT_VARIABLE result
         ERROR_VARIABLE error
@@ -1907,16 +1926,10 @@ function(jrl_check_python_module module_name)
     set(multiValueArgs)
     cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-    if(NOT Python_EXECUTABLE)
-        message(
-            FATAL_ERROR
-            "Python_EXECUTABLE not defined.
-        Please use jrl_find_package(Python REQUIRED COMPONENT Interpreter)"
-        )
-    endif()
+    jrl_python_get_interpreter(python)
 
     execute_process(
-        COMMAND ${Python_EXECUTABLE} -c "import ${module_name}"
+        COMMAND ${python} -c "import ${module_name}"
         RESULT_VARIABLE module_found
         ERROR_QUIET
     )
@@ -1959,8 +1972,7 @@ function(jrl_python_compute_install_dir output)
         return()
     endif()
 
-    jrl_check_target_exists(Python::Interpreter "Python::Interpreter target not found. Please call jrl_find_python() first.")
-    get_target_property(python Python::Interpreter LOCATION)
+    jrl_python_get_interpreter(python)
 
     execute_process(
         COMMAND
