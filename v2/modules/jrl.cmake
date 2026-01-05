@@ -1072,7 +1072,7 @@ function(jrl_cmake_print_properties)
                         cmake_path(CONVERT "${property}" TO_CMAKE_PATH_LIST property)
                     endif()
                     #   string(APPEND msg "   ${item}.${prop} = \"${property}\"\n")
-                    _pad_string("${prop}"      40 _prop)
+                    _jrl_pad_string("${prop}"      40 _prop)
                     string(APPEND msg "   ${_prop} = ${property}\n")
                 else()
                     # EDIT: Do not print unset properties
@@ -1621,7 +1621,7 @@ function(
 endfunction()
 
 # Helper function: pad or truncate a string to a fixed width
-function(_pad_string input width output_var)
+function(_jrl_pad_string input width output_var)
     string(LENGTH "${input}" _len)
     if(_len GREATER width)
         # Truncate if too long
@@ -1658,11 +1658,11 @@ function(jrl_print_options_summary)
     _log("================= Configuration Summary ==========================================================")
     _log("")
 
-    _pad_string("Option"      40 _menu_option)
-    _pad_string("Type"        8  _menu_type)
-    _pad_string("Value"       5  _menu_value)
-    _pad_string("Default"     5  _menu_default)
-    _pad_string("Description (default)" 25 _menu_description)
+    _jrl_pad_string("Option"      40 _menu_option)
+    _jrl_pad_string("Type"        8  _menu_type)
+    _jrl_pad_string("Value"       5  _menu_value)
+    _jrl_pad_string("Default"     5  _menu_default)
+    _jrl_pad_string("Description (default)" 25 _menu_description)
     _log("${_menu_option} | ${_menu_type} | ${_menu_value} | ${_menu_description}")
     _log("--------------------------------------------------------------------------------------------------")
 
@@ -1681,11 +1681,11 @@ function(jrl_print_options_summary)
             PROPERTY _jrl_${PROJECT_NAME}_option_${option_name}_compat_option
         )
 
-        _pad_string("${option_name}"      40 _name)
-        _pad_string("${_type}"     8 _type)
-        _pad_string("${_val}"      5 _val)
-        _pad_string("${_help}"     30 _help)
-        _pad_string("${_default}"  3 _default)
+        _jrl_pad_string("${option_name}"      40 _name)
+        _jrl_pad_string("${_type}"     8 _type)
+        _jrl_pad_string("${_val}"      5 _val)
+        _jrl_pad_string("${_help}"     30 _help)
+        _jrl_pad_string("${_default}"  3 _default)
 
         _log("${_name} | ${_type} | ${_val} | ${_help} (${_default})")
         if(_compat_option)
