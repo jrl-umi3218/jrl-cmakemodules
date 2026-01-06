@@ -150,9 +150,6 @@ function(_jrl_integrate_modules)
     # repo: https://github.com/DenizThatMenace/cmake-modules
     include(${external_modules_dir}/boost-test/BoostTestDiscoverTests.cmake)
 
-    # jrl_boostpy_add_module and jrl_boostpy_add_stubs
-    include(${CMAKE_CURRENT_FUNCTION_LIST_DIR}/BoostPython.cmake)
-
     include(${CMAKE_CURRENT_FUNCTION_LIST_DIR}/PrintSystemInfo.cmake)
 endfunction()
 
@@ -2108,4 +2105,73 @@ function(jrl_check_python_module_name target)
         COMMENT "Checking 'PyInit_${target}' exists"
         VERBATIM
     )
+endfunction()
+
+# Usage: jrl_boostpy_add_module(name [sources...])
+# Creates a Boost.Python module with the given name and sources.
+# The library name will be in the form <name>-<SOABI>.so, where <SOABI> is the
+# Python SOABI tag (e.g., cp39-cp39m-linux_x86_64).
+function(jrl_boostpy_add_module name)
+    jrl_check_command_exists(python_add_library
+        "
+    python_add_library(<name>) command not found.
+    It is available in the FindPython module shipped with CMake.
+    Use (jrl_)find_package(Python REQUIRED) before calling jrl_boostpy_add_module.
+    Doc: https://cmake.org/cmake/help/latest/module/FindPython.html
+    "
+    )
+
+    jrl_check_target_exists(Boost::python
+        "
+    Boost::python target not found.
+    Make sure you have Boost.Python using (jrl_)find_package(Boost REQUIRED COMPONENTS python).
+    "
+    )
+
+    python_add_library(${name} MODULE WITH_SOABI ${ARGN})
+    target_link_libraries(${name} PRIVATE Boost::python)
+endfunction()
+
+# jrl_boostpy_add_stubs(stubs_target_name MODULE module_name PYTHON_PATH path DEPENDS target [VERBOSE])
+function(jrl_boostpy_add_stubs name)
+    set(options VERBOSE)
+    set(oneValueArgs MODULE OUTPUT PYTHON_PATH DEPENDS)
+    set(multiValueArgs)
+    cmake_parse_arguments(PARSE_ARGV 1 arg "${options}" "${oneValueArgs}" "${multiValueArgs}")
+
+    jrl_check_var_defined(arg_MODULE)
+    jrl_check_var_defined(arg_OUTPUT)
+
+    if(NOT arg_PYTHON_PATH)
+        set(pythonpath "")
+    else()
+        set(pythonpath "PYTHONPATH=${arg_PYTHON_PATH}")
+    endif()
+
+    if(arg_VERBOSE)
+        set(loglevel "--log-level=DEBUG")
+    endif()
+
+    _jrl_external_modules_dir(external_modules_dir)
+    set(stubgen_py ${external_modules_dir}/pybind11-stubgen-e48d1f1/pybind11_stubgen.py)
+    cmake_path(CONVERT ${stubgen_py} TO_CMAKE_PATH_LIST stubgen_py NORMALIZE)
+    jrl_check_file_exists(${stubgen_py})
+
+    jrl_python_get_interpreter(python)
+
+    add_custom_command(
+        OUTPUT ${arg_OUTPUT}
+        COMMAND
+            ${CMAKE_COMMAND} -E env ${pythonpath} ${python} ${stubgen_py} --output-dir ${arg_OUTPUT}
+            ${arg_MODULE} ${loglevel} --boost-python --ignore-invalid=signature --no-setup-py
+            --no-root-module-suffix
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        DEPENDS ${arg_DEPENDS}
+        VERBATIM
+        COMMENT "Generating boost python stubs for module '${arg_MODULE}'"
+    )
+    add_custom_target(${name} ALL DEPENDS ${arg_OUTPUT})
+    if(arg_DEPENDS)
+        add_dependencies(${name} ${arg_DEPENDS})
+    endif()
 endfunction()
