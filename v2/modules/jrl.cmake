@@ -2034,10 +2034,21 @@ endfunction()
 # ```
 function(jrl_python_compute_install_dir output)
     if(DEFINED ${PROJECT_NAME}_PYTHON_INSTALL_DIR)
+        # On Windows, convert to CMake path list (backslashes to slashes)
+        if(WIN32)
+            cmake_path(
+                CONVERT
+                "${${PROJECT_NAME}_PYTHON_INSTALL_DIR}"
+                TO_CMAKE_PATH_LIST ${PROJECT_NAME}_PYTHON_INSTALL_DIR
+                NORMALIZE
+            )
+        endif()
+
         message(
             STATUS
             "${PROJECT_NAME}_PYTHON_INSTALL_DIR is defined, using its value: ${${PROJECT_NAME}_PYTHON_INSTALL_DIR} as python install dir"
         )
+
         set(${output} ${${PROJECT_NAME}_PYTHON_INSTALL_DIR} PARENT_SCOPE)
         return()
     endif()
