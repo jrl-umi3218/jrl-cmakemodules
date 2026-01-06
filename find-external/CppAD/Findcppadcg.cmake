@@ -20,8 +20,7 @@ if(
   AND EXISTS "${cppadcg_INCLUDE_DIR}/cppad/cg/configure.hpp"
 )
   file(
-    STRINGS
-    "${cppadcg_INCLUDE_DIR}/cppad/cg/configure.hpp"
+    STRINGS "${cppadcg_INCLUDE_DIR}/cppad/cg/configure.hpp"
     cppadcg_version_str
     REGEX "^#define[\t ]+CPPAD_CG_VERSION[\t ]+\"cppadcg-.*\""
   )

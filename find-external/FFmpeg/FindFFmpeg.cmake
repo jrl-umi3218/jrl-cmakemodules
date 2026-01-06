@@ -47,8 +47,7 @@ if(TARGET FFmpeg::avutil)
   message(STATUS "FFmpeg version header is at ${_ffmpeg_version_header_path}")
   if(EXISTS "${_ffmpeg_version_header_path}")
     file(
-      STRINGS
-      "${_ffmpeg_version_header_path}"
+      STRINGS "${_ffmpeg_version_header_path}"
       _ffmpeg_version
       REGEX "FFMPEG_VERSION"
     )

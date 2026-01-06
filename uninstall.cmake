@@ -79,7 +79,7 @@ macro(_SETUP_PROJECT_UNINSTALL)
   endif(DEFINED CMAKE_BUILD_TYPE)
   file(
     GENERATE OUTPUT
-    "${PROJECT_BINARY_DIR}/cmake/$<CONFIGURATION>/cmake_reinstall.cmake"
+      "${PROJECT_BINARY_DIR}/cmake/$<CONFIGURATION>/cmake_reinstall.cmake"
     INPUT "${PROJECT_BINARY_DIR}/cmake/cmake_reinstall.cmake.configured"
   )
 

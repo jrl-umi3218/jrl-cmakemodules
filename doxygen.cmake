@@ -653,8 +653,7 @@ macro(_SETUP_PROJECT_DOCUMENTATION)
     endif(INSTALL_DOCUMENTATION)
 
     list(
-      APPEND
-      LOGGING_WATCHED_VARIABLES
+      APPEND LOGGING_WATCHED_VARIABLES
       DOXYGEN_SKIP_DOT
       DOXYGEN_EXECUTABLE
       DOXYGEN_FOUND
@@ -682,8 +681,7 @@ macro(_DOXYTAG_ENTRIES_FROM_CMAKE_DEPENDENCIES DEPENDENCIES VAR_OUT)
     )
       get_filename_component(DEP_DOCDIR "${${PREFIX}_DOXYGENDOCDIR}" ABSOLUTE)
       list(
-        APPEND
-        ${VAR_OUT}
+        APPEND ${VAR_OUT}
         "\"${${PREFIX}_DOXYGENDOCDIR}/${PREFIX}.doxytag = ${DEP_DOCDIR}\""
       )
     endif()
@@ -748,8 +746,7 @@ macro(_SETUP_PROJECT_DOCUMENTATION_FINALIZE)
             ABSOLUTE
           )
           list(
-            APPEND
-            _TAGFILES_FROM_DEPENDENCIES
+            APPEND _TAGFILES_FROM_DEPENDENCIES
             "\"${${PREFIX}_DOXYGENDOCDIR}/${LIBRARY_NAME}.doxytag = ${DEP_DOCDIR}\""
           )
         endif()

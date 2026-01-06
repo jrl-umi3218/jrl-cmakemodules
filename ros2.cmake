@@ -25,7 +25,7 @@ macro(_install_project_ros2_ament_files)
     if(NOT BUILD_STANDALONE_PYTHON_INTERFACE)
       file(
         WRITE
-        ${CMAKE_CURRENT_BINARY_DIR}/share/ament_index/resource_index/packages/${PROJECT_NAME}
+          ${CMAKE_CURRENT_BINARY_DIR}/share/ament_index/resource_index/packages/${PROJECT_NAME}
         ""
       )
       install(
@@ -35,7 +35,7 @@ macro(_install_project_ros2_ament_files)
       )
       file(
         WRITE
-        ${CMAKE_CURRENT_BINARY_DIR}/share/${PROJECT_NAME}/hook/ament_prefix_path.dsv
+          ${CMAKE_CURRENT_BINARY_DIR}/share/${PROJECT_NAME}/hook/ament_prefix_path.dsv
         "prepend-non-duplicate;AMENT_PREFIX_PATH;"
       )
       install(
@@ -47,7 +47,7 @@ macro(_install_project_ros2_ament_files)
     if(BUILD_PYTHON_INTERFACE)
       file(
         WRITE
-        ${CMAKE_CURRENT_BINARY_DIR}/share/${PROJECT_NAME}/hook/python_path.dsv
+          ${CMAKE_CURRENT_BINARY_DIR}/share/${PROJECT_NAME}/hook/python_path.dsv
         "prepend-non-duplicate;PYTHONPATH;${PYTHON_SITELIB}"
       )
       install(
