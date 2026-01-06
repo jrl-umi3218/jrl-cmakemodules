@@ -1804,6 +1804,9 @@ function(jrl_python_get_interpreter output_var)
     "
     )
     get_target_property(python_interpreter Python::Interpreter LOCATION)
+    if(WIN32)
+        cmake_path(CONVERT "${python_interpreter}" TO_CMAKE_PATH_LIST python_interpreter)
+    endif()
     set(${output_var} ${python_interpreter} PARENT_SCOPE)
 endfunction()
 
