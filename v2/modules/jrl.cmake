@@ -211,14 +211,53 @@ function(jrl_cmakemodules_get_version output_var)
     set(${output_var} ${jrl-cmakemodules_VERSION} PARENT_SCOPE)
 endfunction()
 
+# Get the git commit hash of the jrl-cmakemodules repository, if available.
+# Usage: jrl_cmakemodules_get_commit(<output_var>)
+# Example:
+# ```cmake
+# jrl_cmakemodules_get_commit(commit)
+# message(STATUS "jrl-cmakemodules commit: ${commit}")
+# ```
+function(jrl_cmakemodules_get_commit output_var)
+    find_program(GIT git QUIET)
+
+    if(NOT GIT)
+        message(DEBUG "Git executable not found, cannot get jrl-cmakemodules commit hash.")
+        return()
+    endif()
+
+    _jrl_top_dir(top_dir)
+
+    execute_process(
+        COMMAND ${GIT} rev-parse HEAD
+        WORKING_DIRECTORY ${top_dir}
+        OUTPUT_VARIABLE git_commit
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        ERROR_QUIET
+    )
+
+    # It might not be a git repository (e.g. downloaded zip archive)
+    if(NOT git_commit)
+        message(DEBUG "Could not get jrl-cmakemodules commit hash.")
+        return()
+    endif()
+
+    set(${output_var} ${git_commit} PARENT_SCOPE)
+endfunction()
+
 # Print a banner with the jrl-cmakemodules version and some info
 # Usage: jrl_print_banner()
 function(jrl_print_banner)
     jrl_cmakemodules_get_version(v)
+    jrl_cmakemodules_get_commit(commit)
+    if(commit)
+        set(commit_msg "(commit: ${commit})")
+    endif()
+
     message(
         STATUS
         "
-        🚧 Welcome to JRL CMake Modules v${v}.
+        🚧 Welcome to JRL CMake Modules v${v} ${commit_msg}
         🚧 Loaded from: ${CMAKE_CURRENT_FUNCTION_LIST_FILE}
         🚧 This version is still under heavy development.
         🚧 API may change without notice.
