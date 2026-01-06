@@ -2,6 +2,11 @@
 
 cmake_minimum_required(VERSION 3.22)
 
+# Normalize install() DESTINATION paths to avoid backslash escape issues on Windows
+if(POLICY CMP0177)
+    cmake_policy(SET CMP0177 NEW)
+endif()
+
 # Usage: jrl_check_var_defined(<var> [<message>])
 # Example: jrl_check_var_defined(MY_VAR "MY_VAR must be set to build this project")
 # Example: jrl_check_var_defined(MY_VAR) # Will print "MY_VAR is not defined."
