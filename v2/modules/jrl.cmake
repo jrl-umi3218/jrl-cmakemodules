@@ -1676,14 +1676,29 @@ function(_jrl_pad_string input width output_var)
     set(${output_var} "${_padded}" PARENT_SCOPE)
 endfunction()
 
+# Clear the current log buffer
+function(_jrl_log_clear)
+    set_property(GLOBAL PROPERTY _jrl_log_messages "")
+endfunction()
+
+# Log a message to the internal log buffer
+# Does not print anything to the console.
+function(_jrl_log msg)
+    get_property(existing_msgs GLOBAL PROPERTY _jrl_log_messages)
+    string(APPEND existing_msgs "${msg}\n")
+    set_property(GLOBAL PROPERTY _jrl_log_messages "${existing_msgs}")
+endfunction()
+
+# Get the current log buffer.
+function(_jrl_log_get output_var)
+    get_property(log_msgs GLOBAL PROPERTY _jrl_log_messages)
+    set(${output_var} "${log_msgs}" PARENT_SCOPE)
+endfunction()
+
 # Print all options defined via jrl_option() in a nice table
 # Usage: jrl_print_options_summary()
 function(jrl_print_options_summary)
-    set(log_msg "")
-
-    macro(_log msg)
-        string(APPEND log_msg "${msg}\n")
-    endmacro()
+    _jrl_log_clear()
 
     get_property(option_names GLOBAL PROPERTY _jrl_${PROJECT_NAME}_option_names)
     if(NOT option_names)
@@ -1691,17 +1706,17 @@ function(jrl_print_options_summary)
         return()
     endif()
 
-    _log("")
-    _log("================= Configuration Summary ==========================================================")
-    _log("")
+    _jrl_log("")
+    _jrl_log("================= Configuration Summary ==========================================================")
+    _jrl_log("")
 
     _jrl_pad_string("Option"      40 _menu_option)
     _jrl_pad_string("Type"        8  _menu_type)
     _jrl_pad_string("Value"       5  _menu_value)
     _jrl_pad_string("Default"     5  _menu_default)
     _jrl_pad_string("Description (default)" 25 _menu_description)
-    _log("${_menu_option} | ${_menu_type} | ${_menu_value} | ${_menu_description}")
-    _log("--------------------------------------------------------------------------------------------------")
+    _jrl_log("${_menu_option} | ${_menu_type} | ${_menu_value} | ${_menu_description}")
+    _jrl_log("--------------------------------------------------------------------------------------------------")
 
     foreach(option_name ${option_names})
         get_property(_type CACHE ${option_name} PROPERTY TYPE)
@@ -1724,15 +1739,17 @@ function(jrl_print_options_summary)
         _jrl_pad_string("${_help}"     30 _help)
         _jrl_pad_string("${_default}"  3 _default)
 
-        _log("${_name} | ${_type} | ${_val} | ${_help} (${_default})")
+        _jrl_log("${_name} | ${_type} | ${_val} | ${_help} (${_default})")
         if(_compat_option)
-            _log("  (Compatibility option: ${_compat_option})")
+            _jrl_log("  (Compatibility option: ${_compat_option})")
         endif()
     endforeach()
 
-    _log("--------------------------------------------------------------------------------------------------")
-    _log("")
-    message(STATUS "${log_msg}")
+    _jrl_log("--------------------------------------------------------------------------------------------------")
+    _jrl_log("")
+
+    _jrl_log_get(log_msgs)
+    message(STATUS "${log_msgs}")
 endfunction()
 
 # Shortcut to find Python package and check main variables
