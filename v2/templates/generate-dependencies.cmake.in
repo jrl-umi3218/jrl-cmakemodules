@@ -38,8 +38,11 @@ foreach(imported_lib IN LISTS imported_libraries)
         endif()
     endforeach()
 
+    # TODO: in order to handle generator expressions, the imported libraries variable
+    # Also contains buildsystems targets. So we should not issue a warning here.
+    # Later, we should filter them out before processing and displaying a warning if the info is missing.
     if(NOT package_json)
-        message(WARNING "Could not find package dependency information for imported target: ${imported_lib}")
+        message(DEBUG "Could not find package dependency information for imported target: ${imported_lib}")
         continue()
     endif()
 
