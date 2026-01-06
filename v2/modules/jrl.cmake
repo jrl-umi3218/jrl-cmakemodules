@@ -1153,22 +1153,12 @@ function(jrl_export_dependencies)
         set(FILENAME ${PROJECT_NAME}-dependencies.cmake)
     endif()
 
-    # Get all BUILDSYSTEM_TARGETS of the current project (i.e. added via add_library/add_executable)
-    # We need this to filter out internal targets when analyzing link libraries
-    get_property(
-        buildsystem_targets
-        DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        PROPERTY BUILDSYSTEM_TARGETS
-    )
-    foreach(target ${arg_TARGETS})
-        if(NOT target IN_LIST buildsystem_targets)
-            message(
-                FATAL_ERROR
-                "Target '${target}' is not a buildsystem target of the current project. Cannot export dependencies for it."
-            )
-        endif()
-    endforeach()
-
+    # TODO: filter the buildsystems targets of the INTERFACE_LINK_LIBRARIES.
+    # First, get a list of all the buildsystem targets, and filter them
+    # in generate-dependencies.cmake.in (not here, because of generator expressions).
+    # Note that:
+    # get_property(buildsystem_targets DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY BUILDSYSTEM_TARGETS)
+    # only get the buildsystems targets difined in the current directory. It's difficult to get the full complete list.
     set(all_imported_libraries "")
     foreach(target ${arg_TARGETS})
         get_target_property(interface_link_libraries ${target} INTERFACE_LINK_LIBRARIES)
@@ -1177,10 +1167,6 @@ function(jrl_export_dependencies)
             continue()
         endif()
         foreach(lib ${interface_link_libraries})
-            if(lib IN_LIST buildsystem_targets)
-                continue()
-            endif()
-
             if(lib IN_LIST all_imported_libraries)
                 continue()
             endif()
