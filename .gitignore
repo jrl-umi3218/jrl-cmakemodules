@@ -4,3 +4,4 @@ _unittests/build/
 _unittests/install/
 build*/
 install*/
+.DS_Store
