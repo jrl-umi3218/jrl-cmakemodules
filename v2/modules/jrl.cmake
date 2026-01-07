@@ -659,6 +659,58 @@ function(jrl_target_generate_deprecated_header target_name visibility)
     )
 endfunction()
 
+#[=[
+jrl_target_generate_config_header(<target_name> <visibility>
+    [SKIP_INSTALL]
+    [FILENAME <filename>]
+    [HEADER_DIR <header_dir>]
+    [INSTALL_DESTINATION <install_destination>]
+    [VERSION <version>]
+)
+
+Generate a config header file for a target.
+
+This function creates a CMake-generated header file containing configuration
+information for the specified target. The header is automatically configured
+with version information and other relevant settings. It will be added to the
+include directories of the target with the specified visibility, and installed
+automatically (using jrl_target_headers) unless SKIP_INSTALL is specified.
+
+Arguments:
+    target_name (required)
+        The name of the target for which to generate the config header.
+
+    visibility (required)
+        The visibility scope for the generated header (e.g., PUBLIC, PRIVATE, INTERFACE).
+
+Options:
+    SKIP_INSTALL
+        If specified, the generated header will not be installed.
+
+Named Arguments:
+    FILENAME
+        The name of the output header file to generate. Not the full path, just the filename.
+
+    HEADER_DIR
+        The directory where the header file will be generated. The generated header will be at HEADER_DIR/FILENAME.
+
+    INSTALL_DESTINATION
+        The installation path for the generated header file (relative to CMAKE_INSTALL_PREFIX).
+
+    VERSION
+        The version string to include in the generated header. If not provided, the target's VERSION property will be used.
+        Usually this is set as the PROJECT_VERSION.
+
+Example:
+```cmake
+    jrl_target_generate_config_header(my_target PUBLIC
+        FILENAME my_config.hpp
+        HEADER_DIR ${CMAKE_CURRENT_BINARY_DIR}/include
+        INSTALL_DESTINATION include
+        VERSION 1.0.0
+    )
+```
+#]=]
 function(jrl_target_generate_config_header target_name visibility)
     set(options SKIP_INSTALL)
     set(oneValueArgs FILENAME HEADER_DIR INSTALL_DESTINATION VERSION)
