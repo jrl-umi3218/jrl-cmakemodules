@@ -185,6 +185,25 @@ function(jrl_configure_copy_compile_commands_in_source_dir)
     endif()
 endfunction()
 
+# Clear the current log buffer
+function(_jrl_log_clear)
+    set_property(GLOBAL PROPERTY _jrl_log_messages "")
+endfunction()
+
+# Log a message to the internal log buffer
+# Does not print anything to the console.
+function(_jrl_log msg)
+    get_property(existing_msgs GLOBAL PROPERTY _jrl_log_messages)
+    string(APPEND existing_msgs "${msg}\n")
+    set_property(GLOBAL PROPERTY _jrl_log_messages "${existing_msgs}")
+endfunction()
+
+# Get the current log buffer.
+function(_jrl_log_get output_var)
+    get_property(log_msgs GLOBAL PROPERTY _jrl_log_messages)
+    set(${output_var} "${log_msgs}" PARENT_SCOPE)
+endfunction()
+
 # Include CTest but simply prevent adding a lot of useless targets. Useful for IDEs.
 # Usage: jrl_include_ctest()
 macro(jrl_include_ctest)
@@ -966,11 +985,7 @@ endmacro()
 # jrl_print_dependencies_summary()
 # Print a summary of all dependencies found via jrl_find_package, and some properties of their imported targets.
 function(jrl_print_dependencies_summary)
-    set(log_msg "")
-
-    macro(_log msg)
-        string(APPEND log_msg "${msg}\n")
-    endmacro()
+    _jrl_log_clear()
 
     get_property(deps GLOBAL PROPERTY _jrl_${PROJECT_NAME}_package_dependencies)
     if(NOT deps)
@@ -978,13 +993,13 @@ function(jrl_print_dependencies_summary)
         return()
     endif()
 
-    _log("")
-    _log("================= External Dependencies ======================================")
-    _log("")
+    _jrl_log("")
+    _jrl_log("================= External Dependencies ======================================")
+    _jrl_log("")
 
     string(JSON num_deps LENGTH "${deps}" "package_dependencies")
     math(EXPR max_idx "${num_deps} - 1")
-    _log("${num_deps} dependencies declared jrl_find_package: ")
+    _jrl_log("${num_deps} dependencies declared jrl_find_package: ")
     foreach(i RANGE 0 ${max_idx})
         string(JSON package_name GET "${deps}" "package_dependencies" ${i} "package_name")
         string(JSON package_targets GET "${deps}" "package_dependencies" ${i} "package_targets")
@@ -992,7 +1007,7 @@ function(jrl_print_dependencies_summary)
         # Replace ; by , for better readability
         string(REPLACE ";" ", " package_targets_pp "${package_targets}")
         math(EXPR i "${i} + 1")
-        _log("${i}/${num_deps} Package [${package_name}] imported targets [${package_targets_pp}]")
+        _jrl_log("${i}/${num_deps} Package [${package_name}] imported targets [${package_targets_pp}]")
 
         # Print target properties
         if(package_targets STREQUAL "")
@@ -1024,8 +1039,10 @@ function(jrl_print_dependencies_summary)
                 CXX_EXTENSIONS
                 CXX_STANDARD_REQUIRED
         )
-        _log("${props_msg}")
+        _jrl_log("${props_msg}")
     endforeach()
+
+    _jrl_log_get(log_msg)
     message(STATUS "${log_msg}")
 endfunction()
 
@@ -1712,25 +1729,6 @@ function(_jrl_pad_string input width output_var)
         set(_padded "${input}${_spaces}")
     endif()
     set(${output_var} "${_padded}" PARENT_SCOPE)
-endfunction()
-
-# Clear the current log buffer
-function(_jrl_log_clear)
-    set_property(GLOBAL PROPERTY _jrl_log_messages "")
-endfunction()
-
-# Log a message to the internal log buffer
-# Does not print anything to the console.
-function(_jrl_log msg)
-    get_property(existing_msgs GLOBAL PROPERTY _jrl_log_messages)
-    string(APPEND existing_msgs "${msg}\n")
-    set_property(GLOBAL PROPERTY _jrl_log_messages "${existing_msgs}")
-endfunction()
-
-# Get the current log buffer.
-function(_jrl_log_get output_var)
-    get_property(log_msgs GLOBAL PROPERTY _jrl_log_messages)
-    set(${output_var} "${log_msgs}" PARENT_SCOPE)
 endfunction()
 
 # Print all options defined via jrl_option() in a nice table
