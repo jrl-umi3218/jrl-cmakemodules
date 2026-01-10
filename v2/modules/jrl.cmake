@@ -2035,6 +2035,7 @@ function(jrl_python_generate_init_py name)
 endfunction()
 
 # Find if a python module is available, fills <module_name>_FOUND variable
+# Also fills <module_name>_VERSION variable if the module has a __version__ attribute
 # Displays messages based on REQUIRED and QUIET options
 # Usage: jrl_check_python_module(<module_name> [REQUIRED] [QUIET])
 # Example: jrl_check_python_module(numpy REQUIRED)
@@ -2047,14 +2048,26 @@ function(jrl_check_python_module module_name)
     jrl_python_get_interpreter(python)
 
     execute_process(
-        COMMAND ${python} -c "import ${module_name}"
+        COMMAND
+            ${python} -c
+            "import ${module_name}; print(getattr(${module_name}, '__version__', ''), end='')"
         RESULT_VARIABLE module_found
+        OUTPUT_VARIABLE module_version
         ERROR_QUIET
+        OUTPUT_STRIP_TRAILING_WHITESPACE
     )
+
     if(module_found STREQUAL 0)
         set(${module_name}_FOUND true PARENT_SCOPE)
-        if(NOT arg_QUIET)
-            message(STATUS "Python module '${module_name}' found.")
+        if(module_version)
+            set(${module_name}_VERSION "${module_version}" PARENT_SCOPE)
+            if(NOT arg_QUIET)
+                message(STATUS "Python module '${module_name}' found (version: ${module_version}).")
+            endif()
+        else()
+            if(NOT arg_QUIET)
+                message(STATUS "Python module '${module_name}' found.")
+            endif()
         endif()
     else()
         set(${module_name}_FOUND false PARENT_SCOPE)
