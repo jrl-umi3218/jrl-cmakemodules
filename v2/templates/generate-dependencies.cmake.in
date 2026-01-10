@@ -5,6 +5,7 @@ cmake_minimum_required(VERSION 3.22)
 
 include("${CMAKE_CURRENT_LIST_DIR}/imported-libraries.cmake")
 
+# Check if the required variables are defined
 if(NOT DEFINED imported_libraries)
     message(FATAL_ERROR "imported_libraries variable is not defined in @IMPORTED_LIBRARIES_TO_EXPORT_FILE@.")
 endif()
@@ -13,6 +14,9 @@ if(NOT DEFINED package_dependencies_json_content)
     message(FATAL_ERROR "package_dependencies_json_content variable is not defined in @IMPORTED_LIBRARIES_TO_EXPORT_FILE@.")
 endif()
 
+# Parse the 'package_dependencies_json_content' JSON content
+# NOTE: 'package_dependencies_json_content' can be defined but empty
+# if not call to jrl_find_package() has been made in the project.
 if(package_dependencies_json_content)
     string(JSON package_dependencies GET "${package_dependencies_json_content}" "package_dependencies")
     string(JSON num_deps LENGTH "${package_dependencies}")
