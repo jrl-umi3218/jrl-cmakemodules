@@ -85,7 +85,12 @@ endfunction()
 # ```
 function(jrl_check_file_exists filepath)
     if(NOT EXISTS ${filepath})
-        message(FATAL_ERROR "File '${filepath}' does not exist.")
+        if(ARGC EQUAL 1)
+            set(msg "File '${filepath}' does not exist.")
+        else()
+            set(msg "${ARGV1}")
+        endif()
+        message(FATAL_ERROR "${msg}")
     endif()
 endfunction()
 
@@ -554,10 +559,7 @@ function(jrl_target_generate_header target_name visibility)
     jrl_check_var_defined(arg_HEADER_DIR)
     jrl_check_var_defined(arg_TEMPLATE_FILE)
     jrl_check_var_defined(arg_INSTALL_DESTINATION)
-
-    if(NOT EXISTS ${arg_TEMPLATE_FILE})
-        message(FATAL_ERROR "Input file ${arg_TEMPLATE_FILE} does not exist.")
-    endif()
+    jrl_check_file_exists(${arg_TEMPLATE_FILE})
 
     set(output_file ${arg_HEADER_DIR}/${arg_FILENAME})
 
@@ -882,14 +884,11 @@ macro(jrl_find_package)
     # Handle custom module file
     if(arg_MODULE_PATH)
         set(module_file "${arg_MODULE_PATH}/Find${package_name}.cmake")
-        if(NOT EXISTS ${module_file})
-            message(
-                FATAL_ERROR
-                "Custom module file provided with MODULE_PATH ${module_file} does not exist."
-            )
-        endif()
+        jrl_check_file_exists(${module_file}
+            "Custom module file provided with MODULE_PATH does not exist: ${module_file}"
+        )
     else()
-        # search for the module file only is CONFIG is not in the find_package args
+        # search for the module file only if CONFIG is not in the find_package args
         if(NOT "CONFIG" IN_LIST find_package_args)
             jrl_search_package_module_file(${package_name} module_file)
         endif()
