@@ -940,7 +940,7 @@ macro(jrl_find_package)
     if(package_variables)
         message(DEBUG "   New variables detected: ${package_variables_pp}")
     else()
-        message(STATUS "   No new variables detected.")
+        message(DEBUG "   No new variables detected.")
     endif()
 
     string(REPLACE ";" ", " package_targets_pp "${package_targets}")
