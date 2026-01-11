@@ -1052,6 +1052,7 @@ endfunction()
 # jrl_cmake_print_properties
 # Usage: jrl_cmake_print_properties(<mode> <items> PROPERTIES <property1> <property2> ... [VERBOSITY <verbosity_level>] [OUTPUT_VARIABLE <var_name>])
 # This is taken and adapted from cmake's own cmake_print_properties function to add verbosity control and print only found properties.
+# ref: https://github.com/Kitware/CMake/blob/master/Modules/CMakePrintHelpers.cmake
 # If OUTPUT_VARIABLE is provided, the output will be stored in the variable instead of printed to the console.
 function(jrl_cmake_print_properties)
     set(options)
