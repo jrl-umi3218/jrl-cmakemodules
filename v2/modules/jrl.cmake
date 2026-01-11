@@ -845,19 +845,19 @@ endfunction()
 # jrl_find_package(<PackageName> [version] [COMPONENTS <comp>...] [REQUIRED] MODULE_PATH <path_to_find_module>)
 #
 # Wrapper around CMake's find_package used for dependency tracking and logging.
-# It delegates the arguments provided to the standard CMake find_package, while recording everything in a global property for later introspection.
-# It record, the find_package arguments, the variables and imported targets created by the package, and the module file used (if any).
+# It forwards the arguments provided to the standard CMake find_package, while adding some new arguments.
+# It records the find_package arguments, the variables created, the imported targets, and the module file used (if any).
+# All that info is used for later introspection and analysis. It is very useful for exporting package dependencies (see jrl_export_package()).
 # After the jrl_find_package calls, use jrl_print_dependencies_summary() for printing an extensive analysis.
 #
-# Parameters:
-#   <PackageName>  - Name of the package to locate (forwarded to find_package).
-#   version        - Optional version requirement forwarded to find_package.
-#   COMPONENTS ... - Optional list of components forwarded to find_package.
+# Arguments:
+# <PackageName> [<version>] [REQUIRED] [COMPONENTS <components>...] - The same as find_package
+#                            see https://cmake.org/cmake/help/latest/command/find_package.html
+# Added Arguments:
 #   MODULE_PATH    - Optional path to a custom Find<PackageName>.cmake module file.
 #                    If specified, only this path is used, and the file must be at <path_to_find_module>/Find<PackageName>.cmake
-#   All other options are forwarded to find_package as-is.
 #
-# Examples:
+# Example:
 # ```cmake
 #   jrl_find_package(Eigen 3.3 REQUIRED)
 #   jrl_find_package(Boost REQUIRED COMPONENTS filesystem system)
@@ -867,7 +867,7 @@ endfunction()
 #   * This macro is a convenience wrapper and does not change the fundamental semantics of find_package.
 #   * Prefer using REQUIRED to ensure missing packages are caught early. Don't react to missing packages manually.
 #   * This needs to be a macro so find_package can leak variables (like Python_SITELIB)
-# See also: jrl_dump_package_dependencies_json(), jrl_export_package()
+# See also: jrl_dump_package_dependencies_json(), jrl_export_package(), jrl_print_dependencies_summary()
 macro(jrl_find_package)
     set(options)
     set(oneValueArgs MODULE_PATH)
