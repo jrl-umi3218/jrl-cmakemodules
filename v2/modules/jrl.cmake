@@ -842,7 +842,7 @@ function(jrl_search_package_module_file package_name output_filepath)
     set(${output_filepath} ${found_module_file} PARENT_SCOPE)
 endfunction()
 
-# jrl_find_package(<PackageName> [version] [COMPONENTS <comp>...] [REQUIRED] MODULE_PATH <path_to_find_module>)
+# jrl_find_package(<PackageName> [version] [COMPONENTS <comp>...] [REQUIRED] [MODULE_PATH <path_to_find_module>])
 #
 # Wrapper around CMake's find_package used for dependency tracking and logging.
 # It forwards the arguments provided to the standard CMake find_package, while adding some new arguments.
@@ -853,9 +853,8 @@ endfunction()
 # Arguments:
 # <PackageName> [<version>] [REQUIRED] [COMPONENTS <components>...] - The same as find_package
 #                            see https://cmake.org/cmake/help/latest/command/find_package.html
-# Added Arguments:
-#   MODULE_PATH    - Optional path to a custom Find<PackageName>.cmake module file.
-#                    If specified, only this path is used, and the file must be at <path_to_find_module>/Find<PackageName>.cmake
+# Added Arguments (optional):
+#   MODULE_PATH    - Path to a dir containing a custom Find<PackageName>.cmake module file.
 #
 # Example:
 # ```cmake
