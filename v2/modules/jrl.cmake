@@ -1197,7 +1197,7 @@ function(jrl_cmake_print_properties)
     endif()
 endfunction()
 
-# Usage: jrl_export_dependencies(TARGETS [target1...] GEN_DIR <gen_dir> INSTALL_DESTINATION <destination>)
+# Usage: jrl_export_dependencies(TARGETS [target1...] [GEN_DIR <gen_dir>] [INSTALL_DESTINATION <destination>])
 # This function analyzes the link libraries of the provided targets,
 # determines which packages are needed and generates a <export_name>-dependencies.cmake file
 function(jrl_export_dependencies)
