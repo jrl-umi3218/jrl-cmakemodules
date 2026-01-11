@@ -904,7 +904,6 @@ macro(jrl_find_package)
     # Call find_package with the provided arguments
     string(REPLACE ";" " " fp_pp "${find_package_args}")
     message(STATUS "   Executing find_package(${fp_pp})")
-    unset(fp_pp)
 
     # Saving the list of imported targets and variables BEFORE the call to find_package
     get_property(
@@ -956,6 +955,7 @@ macro(jrl_find_package)
         string(JSON deps SET "{}" "package_dependencies" "[]")
     endif()
 
+    # Save the information about this package in a json object
     set(package_json "{}")
     string(REPLACE ";" " " find_package_args "${find_package_args}")
     string(JSON package_json SET "${package_json}" "package_name" "\"${package_name}\"")
@@ -966,8 +966,13 @@ macro(jrl_find_package)
     string(JSON deps_length LENGTH "${deps}" "package_dependencies")
     string(JSON deps SET "${deps}" "package_dependencies" ${deps_length} "${package_json}")
 
+    # Save the JSON object in a global property for later use
+    # See jrl_print_dependencies_summary, jrl_export_package, etc.
     set_property(GLOBAL PROPERTY _jrl_${PROJECT_NAME}_package_dependencies "${deps}")
 
+    # Unset temporary variables
+    # jrl_find_package is a macro, so temporary variables leak into the caller scope
+    unset(fp_pp)
     unset(package_targets)
     unset(package_targets_pp)
     unset(package_variables)
