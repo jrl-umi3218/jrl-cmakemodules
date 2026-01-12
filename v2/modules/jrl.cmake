@@ -2083,21 +2083,184 @@ function(jrl_check_python_module module_name)
     endif()
 endfunction()
 
-# jrl_python_compute_install_dir(<output>)
-#
-# Compute the installation directory for Python bindings.
-#  * If ${PROJECT_NAME}_PYTHON_INSTALL_DIR is defined, its value is used.
-#  * Otherwise, if running inside a Conda environment on Windows, an
-#    absolute path to `sysconfig.get_path('purelib')` is returned.
-#  * In all other cases, the relative path of `purelib` with respect to
-#    `sysconfig.get_path('data')` is returned.
-#
-# Example:
-# ```cmake
-#   jrl_python_compute_install_dir(python_install_dir)
-#   install(TARGETS my_python_module DESTINATION ${python_install_dir} ...)
-# ```
+#[============================================================================[
+jrl_python_relative_site_packages(<output>)
+
+Description:
+  Compute the relative path of the Python site-packages directory with respect to
+  the Python data directory. It is the result of:
+  ```python
+    sysconfig.get_path('purelib')).relative_to(sysconfig.get_path('data')
+  ```
+
+  This function is used to compute the installation directory for Python bindings in
+  in jrl_python_compute_install_dir(<output>), and for ros2 package files.
+
+  NOTE: For installing Python bindings, use jrl_python_compute_install_dir() instead.
+
+Arguments:
+  <output> - Name of the variable to store the result.
+
+Example:
+```cmake
+    jrl_python_relative_site_packages(python_relative_site_packages)
+    message(STATUS "Python relative site-packages: ${python_relative_site_packages}")
+```
+
+#]============================================================================]
+function(jrl_python_relative_site_packages output)
+    jrl_python_get_interpreter(python)
+
+    execute_process(
+        COMMAND
+            ${python} -c
+            "
+import sysconfig
+from pathlib import Path
+print(Path(sysconfig.get_path('purelib')).relative_to(sysconfig.get_path('data')))
+            "
+        OUTPUT_VARIABLE python_relative_site_packages
+        ERROR_VARIABLE error
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+
+    if(error)
+        message(
+            FATAL_ERROR
+            "Error while trying to compute the python relative site-packages: ${error}"
+        )
+    endif()
+
+    # On Windows, convert to CMake path list (backslashes to slashes)
+    if(WIN32)
+        cmake_path(
+            CONVERT "${python_relative_site_packages}"
+            TO_CMAKE_PATH_LIST python_relative_site_packages
+        )
+    endif()
+
+    set(${output} "${python_relative_site_packages}" PARENT_SCOPE)
+endfunction()
+
+#[============================================================================[
+jrl_python_absolute_site_packages(<output>)
+
+Description:
+  Compute the absolute path of the Python site-packages directory with respect to
+  the Python data directory. It is the result of:
+  ```python
+    sysconfig.get_path('purelib')
+  ```
+
+  This function is used to compute the installation directory for Python bindings in
+  in jrl_python_compute_install_dir(<output>).
+
+  NOTE: For installing Python bindings, use jrl_python_compute_install_dir() instead.
+
+Arguments:
+  <output> - Name of the variable to store the result.
+
+Example:
+```cmake
+    jrl_python_absolute_site_packages(python_absolute_site_packages)
+    message(STATUS "Python absolute site-packages: ${python_absolute_site_packages}")
+```
+
+#]============================================================================]
+function(jrl_python_absolute_site_packages output)
+    jrl_python_get_interpreter(python)
+
+    execute_process(
+        COMMAND
+            ${python} -c
+            "
+import sysconfig
+from pathlib import Path
+print(Path(sysconfig.get_path('purelib')))
+            "
+        OUTPUT_VARIABLE python_absolute_site_packages
+        ERROR_VARIABLE error
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+
+    if(error)
+        message(
+            FATAL_ERROR
+            "Error while trying to compute the python absolute site-packages: ${error}"
+        )
+    endif()
+
+    # On Windows, convert to CMake path list (backslashes to slashes)
+    if(WIN32)
+        cmake_path(
+            CONVERT "${python_absolute_site_packages}"
+            TO_CMAKE_PATH_LIST python_absolute_site_packages
+        )
+    endif()
+
+    set(${output} "${python_absolute_site_packages}" PARENT_SCOPE)
+endfunction()
+
+#[============================================================================[
+jrl_python_compute_install_dir(<output>)
+
+Compute the installation directory for Python bindings.
+ * If ${PROJECT_NAME}_PYTHON_INSTALL_DIR is defined, its value is used.
+ * Otherwise, if running inside a Conda environment on Windows, an
+   absolute path to `sysconfig.get_path('purelib')` is returned.
+ * In all other cases, the relative path to site-packages is returned.
+
+### Windows Layout
+
+On conda, the site-packages is located in the `Lib\site-packages` folder,
+but the conda native libraries (DLLs) are located in the `Library\bin` folder.
+CMAKE_INSTALL_PREFIX is set to CMAKE_INSTALL_PREFIX=%PREFIX%\Library.
+But the python libraries are installed in %PREFIX%\Lib\site-packages.
+
+```
+C:\Users\You\Miniconda3\envs\myenv\
+├── python.exe                  # The Python Interpreter
+├── pythonw.exe
+├── DLLs\                       # Standard Python DLLs
+├── Lib\
+│   └── site-packages\          # <--- PURELIB IS HERE
+│       ├── pandas\
+│       ├── requests\
+│       └── ...
+├── Scripts\                    # Python Entry points (pip.exe, jupyter.exe)
+├── Library\                    # <--- CONDA SPECIFIC FOLDER
+│   ├── bin\                    # Native DLLs (libssl-1_1-x64.dll, mkl.dll)
+│   ├── include\                # C Headers (.h files)
+│   └── lib\                    # Link libraries (.lib)
+└── ...
+```
+
+### Linux & macOS Layout (Unix)
+
+```
+/home/user/miniconda3/envs/myenv/
+├── bin/                        # Executables (python, pip, jupyter)
+├── include/                    # C Headers
+├── lib/
+│   ├── libssl.so               # Native shared libraries
+│   └── python3.11/
+│       └── site-packages/      # <--- PURELIB IS HERE
+│           ├── pandas/
+│           └── ...
+└── ...
+```
+
+Arguments:
+  <output> - Name of the variable to store the result.
+
+Example:
+```cmake
+  jrl_python_compute_install_dir(python_install_dir)
+  install(TARGETS my_python_module DESTINATION ${python_install_dir} ...)
+```
+#]============================================================================]
 function(jrl_python_compute_install_dir output)
+    # Case 1: Use user-defined install dir via the <PROJECT_NAME>_PYTHON_INSTALL_DIR variable
     if(DEFINED ${PROJECT_NAME}_PYTHON_INSTALL_DIR)
         # On Windows, convert to CMake path list (backslashes to slashes)
         if(WIN32)
@@ -2117,45 +2280,29 @@ function(jrl_python_compute_install_dir output)
         return()
     endif()
 
-    jrl_python_get_interpreter(python)
+    # Case 2: Conda environment on Windows specific case, use absolute site-packages path
+    if(WIN32 AND DEFINED ENV{CONDA_PREFIX})
+        jrl_python_absolute_site_packages(python_absolute_site_packages)
 
-    execute_process(
-        COMMAND
-            ${python} -c
-            "
-import sys, os, sysconfig
-from pathlib import Path
-
-is_conda = os.path.exists(os.path.join(sys.prefix, 'conda-meta'))
-is_windows = sys.platform.startswith('win')
-
-if is_conda and is_windows:
-    print(sysconfig.get_path('purelib'))
-else:
-    print(Path(sysconfig.get_path('purelib')).relative_to(sysconfig.get_path('data')))
-"
-        OUTPUT_VARIABLE python_install_dir
-        ERROR_VARIABLE error
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-
-    if(error)
         message(
-            FATAL_ERROR
-            "Error while trying to compute the python binding install dir: ${error}"
+            STATUS
+            "Detected Conda environment on Windows (\$ENV{CONDA_PREFIX}=$ENV{CONDA_PREFIX}), using absolute python site-packages: ${python_absolute_site_packages}"
         )
+
+        set(${output} "${python_absolute_site_packages}" PARENT_SCOPE)
+        return()
     endif()
 
-    # On Windows, convert to CMake path list (backslashes to slashes)
-    if(WIN32)
-        cmake_path(CONVERT "${python_install_dir}" TO_CMAKE_PATH_LIST python_install_dir)
-    endif()
+    # Case 3: Default case, use the relative site-packages path
+    jrl_python_relative_site_packages(python_relative_site_packages)
 
-    set(${output} "${python_install_dir}" PARENT_SCOPE)
     message(
         STATUS
-        "Computed python install destination ${python_install_dir} (Use install(DESTINATION \${${output}} ...))"
+        "Computed python install destination ${python_relative_site_packages} (default site-packages).
+        Use install(DESTINATION \${${output}} ...)"
     )
+
+    set(${output} "${python_relative_site_packages}" PARENT_SCOPE)
 endfunction()
 
 # Check that the python module defined with NB_MODULE(<module_name>)
