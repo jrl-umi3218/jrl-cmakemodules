@@ -377,7 +377,7 @@ function(jrl_configure_default_install_prefix default_install_prefix)
         set(CMAKE_INSTALL_PREFIX
             ${default_install_prefix}
             CACHE PATH
-            "Install path prefix, prepended onto install directories."
+            "Install path prefix, prepended onto relative install directories."
             FORCE
         )
         mark_as_advanced(CMAKE_INSTALL_PREFIX)
@@ -2248,15 +2248,16 @@ function(jrl_boostpy_add_module name)
     target_link_libraries(${name} PRIVATE Boost::python)
 endfunction()
 
-# jrl_boostpy_add_stubs(stubs_target_name MODULE module_name PYTHON_PATH path DEPENDS target [VERBOSE])
+# jrl_boostpy_add_stubs(name MODULE <module_path> OUTPUT_PATH <output_path> [PYTHON_PATH <python_path>] [DEPENDS <dep1> <dep2> ...] [VERBOSE])
+# Generates Boost.Python stubs for the given module using the pybind11-stubgen fork included in this repo.
 function(jrl_boostpy_add_stubs name)
     set(options VERBOSE)
-    set(oneValueArgs MODULE OUTPUT PYTHON_PATH DEPENDS)
+    set(oneValueArgs MODULE OUTPUT_PATH PYTHON_PATH DEPENDS)
     set(multiValueArgs)
-    cmake_parse_arguments(PARSE_ARGV 1 arg "${options}" "${oneValueArgs}" "${multiValueArgs}")
+    cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     jrl_check_var_defined(arg_MODULE)
-    jrl_check_var_defined(arg_OUTPUT)
+    jrl_check_var_defined(arg_OUTPUT_PATH)
 
     if(NOT arg_PYTHON_PATH)
         set(pythonpath "")
@@ -2275,18 +2276,23 @@ function(jrl_boostpy_add_stubs name)
 
     jrl_python_get_interpreter(python)
 
+    string(REPLACE "." "/" module_subpath ${arg_MODULE})
+    # The stubs will be generated in <arg_OUTPUT_PATH>/<module_subpath>/__init__.pyi
+    # Example: for module 'coal.coal_pywrap', the stubs will be in <arg_OUTPUT_PATH>/coal/coal_pywrap/__init__.pyi
+    set(stub_output ${arg_OUTPUT_PATH}/${module_subpath}/__init__.pyi)
+
     add_custom_command(
-        OUTPUT ${arg_OUTPUT}
+        OUTPUT ${stub_output}
         COMMAND
-            ${CMAKE_COMMAND} -E env ${pythonpath} ${python} ${stubgen_py} --output-dir ${arg_OUTPUT}
-            ${arg_MODULE} ${loglevel} --boost-python --ignore-invalid=signature --no-setup-py
-            --no-root-module-suffix
+            ${CMAKE_COMMAND} -E env ${pythonpath} ${python} ${stubgen_py} --output-dir
+            ${arg_OUTPUT_PATH} ${arg_MODULE} ${loglevel} --boost-python --ignore-invalid=signature
+            --no-setup-py --no-root-module-suffix
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         DEPENDS ${arg_DEPENDS}
         VERBATIM
-        COMMENT "Generating boost python stubs for module '${arg_MODULE}'"
+        COMMENT "Generating Boost.Python stubs for module '${arg_MODULE}'"
     )
-    add_custom_target(${name} ALL DEPENDS ${arg_OUTPUT})
+    add_custom_target(${name} ALL DEPENDS ${stub_output})
     if(arg_DEPENDS)
         add_dependencies(${name} ${arg_DEPENDS})
     endif()
