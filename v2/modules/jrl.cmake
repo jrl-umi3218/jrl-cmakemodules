@@ -2444,3 +2444,170 @@ function(jrl_boostpy_add_stubs name)
         add_dependencies(${name} ${arg_DEPENDS})
     endif()
 endfunction()
+
+#[============================================================================[
+jrl_generate_ros2_package_files(
+    [INSTALL_CPP_PACKAGE_FILES <ON|OFF>] (default: ON)
+    [INSTALL_PYTHON_PACKAGE_FILES <ON|OFF>] (default: ON)
+    [DESTINATION <install destination>] (default: CMAKE_INSTALL_DATAROOTDIR)
+    [GEN_DIR <gen_dir>]
+    [SKIP_INSTALL]
+)
+
+Description:
+  Generates the necessary files for a ROS 2 package to be discoverable by ament.
+  It creates the following files:
+   - ${GEN_DIR}/share/ament_index/resource_index/packages/<PROJECT_NAME>
+   - ${GEN_DIR}/share/<PROJECT_NAME>/hook/ament_prefix_path.dsv
+   - ${GEN_DIR}/share/<PROJECT_NAME>/hook/python_path.dsv
+
+  By default, it installs all generated files to the CMAKE_INSTALL_DATAROOTDIR directory.
+  You can override the installation destination using the DESTINATION argument.
+
+Arguments:
+    INSTALL_CPP_PACKAGE_FILES - Whether to install the C++ package files (default: ON).
+    INSTALL_PYTHON_PACKAGE_FILES - Whether to install the Python package files (default: ON).
+    DESTINATION - Installation destination for the generated files (default: CMAKE_INSTALL_DATAROOTDIR).
+    GEN_DIR - Directory where to generate the files (default: ${CMAKE_BINARY_DIR}/generated/ros2/${PROJECT_NAME}/ros2).
+    SKIP_INSTALL - If set, skips the installation of the generated files.
+
+Example:
+```cmake
+jrl_generate_ros2_package_files()
+
+jrl_generate_ros2_package_files(
+    INSTALL_CPP_PACKAGE_FILES "NOT BUILD_STANDALONE_PYTHON_BINDINGS"
+)
+```
+#]============================================================================]
+function(jrl_generate_ros2_package_files)
+    set(options SKIP_INSTALL)
+    set(oneValueArgs
+        INSTALL_CPP_PACKAGE_FILES
+        INSTALL_PYTHON_PACKAGE_FILES
+        PACKAGE_XML_PATH
+        DESTINATION
+        GEN_DIR
+    )
+    set(multiValueArgs)
+    cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+    message(STATUS "[${PROJECT_NAME}] Generating files for ament (ROS 2)")
+
+    if(arg_INSTALL_CPP_PACKAGE_FILES)
+        cmake_language(
+            EVAL CODE
+                "
+            if(${arg_INSTALL_CPP_PACKAGE_FILES})
+                set(install_cpp_package_files True)
+            else()
+                set(install_cpp_package_files False)
+            endif()
+        "
+        )
+    else()
+        set(install_cpp_package_files True)
+    endif()
+
+    if(arg_INSTALL_PYTHON_PACKAGE_FILES)
+        cmake_language(
+            EVAL CODE
+                "
+            if(${arg_INSTALL_PYTHON_PACKAGE_FILES})
+                set(install_python_package_files True)
+            else()
+                set(install_python_package_files False)
+            endif()
+        "
+        )
+    else()
+        set(install_python_package_files True)
+    endif()
+
+    if(install_cpp_package_files)
+        if(arg_PACKAGE_XML_PATH)
+            jrl_check_file_exists(${CMAKE_CURRENT_SOURCE_DIR}/${arg_PACKAGE_XML_PATH}
+                "
+            PACKAGE_XML_PATH file '${arg_PACKAGE_XML_PATH}' does not exist.
+            Please provide a valid path to the package.xml file of your ROS 2 package.
+            "
+            )
+            set(package_xml_path ${CMAKE_CURRENT_SOURCE_DIR}/${arg_PACKAGE_XML_PATH})
+        else()
+            set(package_xml_path ${CMAKE_CURRENT_SOURCE_DIR}/package.xml)
+            jrl_check_file_exists(${package_xml_path}
+                "
+                package.xml file not found at default location: '${package_xml_path}'.
+                Please provide a valid path to the package.xml file of your ROS 2 package
+                using the PACKAGE_XML_PATH argument.
+                "
+            )
+        endif()
+    endif()
+
+    if(arg_GEN_DIR)
+        set(GEN_DIR ${arg_GEN_DIR})
+    else()
+        set(GEN_DIR ${CMAKE_BINARY_DIR}/generated/ros2)
+    endif()
+
+    if(arg_DESTINATION)
+        set(install_destination ${arg_DESTINATION})
+    else()
+        jrl_check_var_defined(CMAKE_INSTALL_DATAROOTDIR
+        "
+        CMAKE_INSTALL_DATAROOTDIR is not defined.
+        Did you call either jrl_configure_defaults(), or jrl_configure_default_install_dirs(), or include(GNUInstallDirs) ?
+        "
+        )
+        set(install_destination ${CMAKE_INSTALL_DATAROOTDIR})
+    endif()
+
+    file(
+        GENERATE OUTPUT ${GEN_DIR}/share/ament_index/resource_index/packages/${PROJECT_NAME}
+        CONTENT ""
+    )
+
+    file(
+        GENERATE OUTPUT ${GEN_DIR}/share/${PROJECT_NAME}/hook/ament_prefix_path.dsv
+        CONTENT "prepend-non-duplicate;AMENT_PREFIX_PATH;"
+    )
+
+    jrl_python_relative_site_packages(python_relative_site_packages)
+    file(
+        GENERATE OUTPUT ${GEN_DIR}/share/${PROJECT_NAME}/hook/python_path.dsv
+        CONTENT "prepend-non-duplicate;PYTHONPATH;${python_relative_site_packages}"
+    )
+
+    configure_file(${package_xml_path} ${GEN_DIR}/share/${PROJECT_NAME}/package.xml COPYONLY)
+
+    if(arg_SKIP_INSTALL)
+        message(
+            STATUS
+            "[${PROJECT_NAME}] Skipping installation of ROS 2 package files as SKIP_INSTALL is set."
+        )
+        return()
+    endif()
+
+    if(install_cpp_package_files)
+        install(
+            FILES ${GEN_DIR}/share/ament_index/resource_index/packages/${PROJECT_NAME}
+            DESTINATION ${install_destination}/ament_index/resource_index/packages
+        )
+        install(
+            FILES ${GEN_DIR}/share/${PROJECT_NAME}/hook/ament_prefix_path.dsv
+            DESTINATION ${install_destination}/${PROJECT_NAME}/hook
+        )
+        install(
+            FILES ${GEN_DIR}/share/${PROJECT_NAME}/package.xml
+            DESTINATION ${install_destination}/${PROJECT_NAME}
+        )
+    endif()
+
+    if(install_python_package_files)
+        install(
+            FILES ${GEN_DIR}/share/${PROJECT_NAME}/hook/python_path.dsv
+            DESTINATION ${install_destination}/${PROJECT_NAME}/hook
+        )
+    endif()
+endfunction()
