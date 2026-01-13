@@ -2573,11 +2573,13 @@ function(jrl_generate_ros2_package_files)
         CONTENT "prepend-non-duplicate;AMENT_PREFIX_PATH;"
     )
 
-    jrl_python_relative_site_packages(python_relative_site_packages)
-    file(
-        GENERATE OUTPUT ${GEN_DIR}/share/${PROJECT_NAME}/hook/python_path.dsv
-        CONTENT "prepend-non-duplicate;PYTHONPATH;${python_relative_site_packages}"
-    )
+    if(install_python_package_files)
+        jrl_python_relative_site_packages(python_relative_site_packages)
+        file(
+            GENERATE OUTPUT ${GEN_DIR}/share/${PROJECT_NAME}/hook/python_path.dsv
+            CONTENT "prepend-non-duplicate;PYTHONPATH;${python_relative_site_packages}"
+        )
+    endif()
 
     configure_file(${package_xml_path} ${GEN_DIR}/share/${PROJECT_NAME}/package.xml COPYONLY)
 
