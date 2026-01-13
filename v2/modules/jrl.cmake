@@ -2563,15 +2563,18 @@ function(jrl_generate_ros2_package_files)
         set(install_destination ${CMAKE_INSTALL_DATAROOTDIR})
     endif()
 
-    file(
-        GENERATE OUTPUT ${GEN_DIR}/share/ament_index/resource_index/packages/${PROJECT_NAME}
-        CONTENT ""
-    )
+    if(install_cpp_package_files)
+        file(
+            GENERATE OUTPUT ${GEN_DIR}/share/ament_index/resource_index/packages/${PROJECT_NAME}
+            CONTENT ""
+        )
 
-    file(
-        GENERATE OUTPUT ${GEN_DIR}/share/${PROJECT_NAME}/hook/ament_prefix_path.dsv
-        CONTENT "prepend-non-duplicate;AMENT_PREFIX_PATH;"
-    )
+        file(
+            GENERATE OUTPUT ${GEN_DIR}/share/${PROJECT_NAME}/hook/ament_prefix_path.dsv
+            CONTENT "prepend-non-duplicate;AMENT_PREFIX_PATH;"
+        )
+        configure_file(${package_xml_path} ${GEN_DIR}/share/${PROJECT_NAME}/package.xml COPYONLY)
+    endif()
 
     if(install_python_package_files)
         jrl_python_relative_site_packages(python_relative_site_packages)
@@ -2580,8 +2583,6 @@ function(jrl_generate_ros2_package_files)
             CONTENT "prepend-non-duplicate;PYTHONPATH;${python_relative_site_packages}"
         )
     endif()
-
-    configure_file(${package_xml_path} ${GEN_DIR}/share/${PROJECT_NAME}/package.xml COPYONLY)
 
     if(arg_SKIP_INSTALL)
         message(
