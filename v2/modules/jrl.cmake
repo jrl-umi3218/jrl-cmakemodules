@@ -2494,7 +2494,7 @@ function(jrl_generate_ros2_package_files)
 
     message(STATUS "[${PROJECT_NAME}] Generating files for ament (ROS 2)")
 
-    if(arg_INSTALL_CPP_PACKAGE_FILES)
+    if(DEFINED arg_INSTALL_CPP_PACKAGE_FILES)
         cmake_language(
             EVAL CODE
                 "
@@ -2509,7 +2509,7 @@ function(jrl_generate_ros2_package_files)
         set(install_cpp_package_files True)
     endif()
 
-    if(arg_INSTALL_PYTHON_PACKAGE_FILES)
+    if(DEFINED arg_INSTALL_PYTHON_PACKAGE_FILES)
         cmake_language(
             EVAL CODE
                 "
