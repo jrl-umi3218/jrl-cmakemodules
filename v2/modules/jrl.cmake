@@ -1406,10 +1406,11 @@ function(jrl_target_install_headers target)
 
     jrl_check_target_exists(${target})
 
-    if(NOT arg_DESTINATION)
-        set(install_destination ${CMAKE_INSTALL_INCLUDEDIR})
-    else()
+    if(arg_DESTINATION)
         set(install_destination ${arg_DESTINATION})
+    else()
+        jrl_check_var_defined(CMAKE_INSTALL_INCLUDEDIR)
+        set(install_destination ${CMAKE_INSTALL_INCLUDEDIR})
     endif()
 
     get_target_property(headers ${target} _jrl_install_headers)
@@ -1420,10 +1421,8 @@ function(jrl_target_install_headers target)
         return()
     endif()
 
-    file(
-        GENERATE OUTPUT
-            ${CMAKE_CURRENT_BINARY_DIR}/generated/cmake/${PROJECT_NAME}/${target}-install-headers.cmake
-        CONTENT
+    install(
+        CODE
             "
 # Generated file - do not edit
 # This file contains the list of headers declared for target '${target}' with visibility '${visibility}'
@@ -1433,8 +1432,8 @@ foreach(header \${headers})
     foreach(base_dir \${base_dirs})
         string(FIND \${header} \${base_dir} pos)
         if(pos EQUAL 0)
-            string(REPLACE \${base_dir} \"\" relative_path \${header})
-            string(REGEX REPLACE \"^/\" \"\" relative_path \${relative_path})
+            string(REPLACE \${base_dir} \"\" relative_header_path \${header})
+            string(REGEX REPLACE \"^/\" \"\" relative_header_path \${relative_header_path})
             break()
         endif()
     endforeach()
@@ -1445,19 +1444,25 @@ foreach(header \${headers})
         set(header_path ${CMAKE_CURRENT_SOURCE_DIR}/\${header})
     endif()
 
-    if(relative_path)
-        cmake_path(GET relative_path PARENT_PATH header_dir)
-        file(INSTALL DESTINATION \"\${CMAKE_INSTALL_PREFIX}/${install_destination}/\${header_dir}\" TYPE FILE FILES \${header_path})
+    if(relative_header_path)
+        cmake_path(GET relative_header_path PARENT_PATH header_dir)
+    endif()
+
+    if(IS_ABSOLUTE ${install_destination})
+        if(header_dir)
+            file(INSTALL DESTINATION \"${install_destination}/\${header_dir}\" TYPE FILE FILES \${header_path})
+        else()
+            file(INSTALL DESTINATION \"${install_destination}\" TYPE FILE FILES \${header_path})
+        endif()
     else()
-        # No base directory matched, install without subdirectory
-        file(INSTALL DESTINATION \"\${CMAKE_INSTALL_PREFIX}/${install_destination}\" TYPE FILE FILES \${header_path})
+        if(header_dir)
+            file(INSTALL DESTINATION \"\${CMAKE_INSTALL_PREFIX}/${install_destination}/\${header_dir}\" TYPE FILE FILES \${header_path})
+        else()
+            file(INSTALL DESTINATION \"\${CMAKE_INSTALL_PREFIX}/${install_destination}\" TYPE FILE FILES \${header_path})
+        endif()
     endif()
 endforeach()
 "
-    )
-    install(
-        SCRIPT
-            ${CMAKE_CURRENT_BINARY_DIR}/generated/cmake/${PROJECT_NAME}/${target}-install-headers.cmake
     )
 endfunction()
 
