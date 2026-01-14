@@ -1223,6 +1223,7 @@ function(jrl_export_dependencies)
     if(arg_INSTALL_DESTINATION)
         set(INSTALL_DESTINATION ${arg_INSTALL_DESTINATION})
     else()
+        jrl_check_var_defined(CMAKE_INSTALL_LIBDIR)
         set(INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
     endif()
 
