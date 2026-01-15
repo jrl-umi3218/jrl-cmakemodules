@@ -2,9 +2,30 @@
 
 cmake_minimum_required(VERSION 3.22)
 
-# Usage: jrl_check_var_defined(<var> [<message>])
-# Example: jrl_check_var_defined(MY_VAR "MY_VAR must be set to build this project")
-# Example: jrl_check_var_defined(MY_VAR) # Will print "MY_VAR is not defined."
+#[============================================================================[
+jrl_check_var_defined(
+    <var>
+    [<message>]
+)
+
+Type: function
+
+Description:
+  Checks if a variable is defined. If not, it raises a fatal error with the provided message.
+
+Arguments:
+    var - The variable to check.
+    message - Optional error message to display if the variable is not defined.
+
+Example:
+```cmake
+# Will print "MY_VAR is not defined."
+jrl_check_var_defined(MY_VAR)
+
+# Custom message
+jrl_check_var_defined(MY_VAR "MY_VAR must be set to build this project")
+```
+#]============================================================================]
 function(jrl_check_var_defined var)
     if(NOT DEFINED ${var})
         if(ARGC EQUAL 1)
@@ -16,20 +37,49 @@ function(jrl_check_var_defined var)
     endif()
 endfunction()
 
-# Check if a directory exists, otherwise raise a fatal error
+#[============================================================================[
+jrl_check_dir_exists(<dirpath>)
+
+Type: function
+
+Description:
+  Check if a directory exists, otherwise raise a fatal error.
+
+Arguments:
+    dirpath - The directory path to check.
+
+Example:
+```cmake
+jrl_check_dir_exists(${CMAKE_CURRENT_SOURCE_DIR}/include)
+```
+#]============================================================================]
 function(jrl_check_dir_exists dirpath)
     if(NOT IS_DIRECTORY ${dirpath})
         message(FATAL_ERROR "Directory '${dirpath}' does not exist.")
     endif()
 endfunction()
 
-# Check if a target exists, otherwise raise a fatal error
-# Usage: jrl_check_target_exists(<target_name> [<message>])
-# Example:
-# ```cmake
-# jrl_check_target_exists(Python::Interpreter)
-# jrl_check_target_exists(Python::Interpreter "Call find_package(Python REQUIRED COMPONENTS Interpreter) first.")
-# ```
+#[============================================================================[
+jrl_check_target_exists(
+    <target_name>
+    [<message>]
+)
+
+Type: function
+
+Description:
+  Check if a target exists, otherwise raise a fatal error.
+
+Arguments:
+    target_name - The target to check.
+    message - Optional error message to display if the target does not exist.
+
+Example:
+```cmake
+jrl_check_target_exists(Python::Interpreter)
+jrl_check_target_exists(Python::Interpreter "Call find_package(Python REQUIRED COMPONENTS Interpreter) first.")
+```
+#]============================================================================]
 function(jrl_check_target_exists target_name)
     if(NOT TARGET ${target_name})
         if(ARGC EQUAL 1)
@@ -41,13 +91,27 @@ function(jrl_check_target_exists target_name)
     endif()
 endfunction()
 
-# Check if a command exists, otherwise raise a fatal error
-# Usage: jrl_check_command_exists(<command_name> [<message>])
-# Example:
-# ```cmake
-# jrl_check_command_exists(nanobind_add_stubs)
-# jrl_check_command_exists(nanobind_add_stubs "nanobind_add_stubs command not found. Call find_package(nanobind 2.5.0 REQUIRED) first.")
-# ```
+#[============================================================================[
+jrl_check_command_exists(
+    <command_name>
+    [<message>]
+)
+
+Type: function
+
+Description:
+  Check if a command exists, otherwise raise a fatal error.
+
+Arguments:
+    command_name - The command to check.
+    message - Optional error message to display if the command does not exist.
+
+Example:
+```cmake
+jrl_check_command_exists(nanobind_add_stubs)
+jrl_check_command_exists(nanobind_add_stubs "nanobind_add_stubs command not found. Call find_package(nanobind 2.5.0 REQUIRED) first.")
+```
+#]============================================================================]
 function(jrl_check_command_exists command_name)
     if(NOT COMMAND ${command_name})
         if(ARGC EQUAL 1)
@@ -59,14 +123,24 @@ function(jrl_check_command_exists command_name)
     endif()
 endfunction()
 
-# Check if the visibility argument is valid (PRIVATE, PUBLIC or INTERFACE)
-# Otherwise raise a fatal error
-# Usage: jrl_check_valid_visibility(<visibility>)
-# Example:
-# ```cmake
-# set(visibility PRIVATE)
-# jrl_check_valid_visibility(${visibility})
-# ```
+#[============================================================================[
+jrl_check_valid_visibility(<visibility>)
+
+Type: function
+
+Description:
+  Check if the visibility argument is valid (PRIVATE, PUBLIC or INTERFACE).
+  Otherwise raise a fatal error.
+
+Arguments:
+    visibility - The visibility keyword to check.
+
+Example:
+```cmake
+set(visibility PRIVATE)
+jrl_check_valid_visibility(${visibility})
+```
+#]============================================================================]
 function(jrl_check_valid_visibility visibility)
     set(vs PRIVATE PUBLIC INTERFACE)
     if(NOT ${visibility} IN_LIST vs)
@@ -77,12 +151,26 @@ function(jrl_check_valid_visibility visibility)
     endif()
 endfunction()
 
-# Check if a file exists, otherwise raise a fatal error
-# Usage: jrl_check_file_exists(<filepath>)
-# Example:
-# ```cmake
-# jrl_check_file_exists(${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt)
-# ```
+#[============================================================================[
+jrl_check_file_exists(
+    <filepath>
+    [<message>]
+)
+
+Type: function
+
+Description:
+  Check if a file exists, otherwise raise a fatal error.
+
+Arguments:
+    filepath - The file path to check.
+    message - Optional error message to display if the file does not exist.
+
+Example:
+```cmake
+jrl_check_file_exists(${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt)
+```
+#]============================================================================]
 function(jrl_check_file_exists filepath)
     if(NOT EXISTS ${filepath})
         if(ARGC EQUAL 1)
@@ -94,24 +182,44 @@ function(jrl_check_file_exists filepath)
     endif()
 endfunction()
 
-# Get the top-level directory of the jrl-cmakemodules v2 repository
-# Usage: _jrl_top_dir(<output_var>)
-# Example:
-# ```cmake
-# _jrl_top_dir(TOP_DIR)
-# ```
+#[============================================================================[
+_jrl_top_dir(<output_var>)
+
+Type: function
+
+Description:
+  Get the top-level directory of the jrl-cmakemodules v2 repository.
+
+Arguments:
+    output_var - Variable to store the top-level directory path.
+
+Example:
+```cmake
+_jrl_top_dir(TOP_DIR)
+```
+#]============================================================================]
 function(_jrl_top_dir output_var)
     cmake_path(CONVERT "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/.." TO_CMAKE_PATH_LIST top_dir NORMALIZE)
     jrl_check_dir_exists(${top_dir})
     set(${output_var} ${top_dir} PARENT_SCOPE)
 endfunction()
 
-# Get the templates directory of the jrl-cmakemodules v2 repository
-# Usage: _jrl_templates_dir(<output_var>)
-# Example:
-# ```cmake
-# _jrl_templates_dir(TEMPLATES_DIR)
-# ```
+#[============================================================================[
+_jrl_templates_dir(<output_var>)
+
+Type: function
+
+Description:
+  Get the templates directory of the jrl-cmakemodules v2 repository.
+
+Arguments:
+    output_var - Variable to store the templates directory path.
+
+Example:
+```cmake
+_jrl_templates_dir(TEMPLATES_DIR)
+```
+#]============================================================================]
 function(_jrl_templates_dir output_var)
     _jrl_top_dir(top_dir)
     set(templates_dir ${top_dir}/templates)
@@ -119,12 +227,22 @@ function(_jrl_templates_dir output_var)
     set(${output_var} ${templates_dir} PARENT_SCOPE)
 endfunction()
 
-# Get the external-modules directory of the jrl-cmakemodules v2 repository
-# Usage: _jrl_external_modules_dir(<output_var>)
-# Example:
-# ```cmake
-# _jrl_external_modules_dir(EXTERNAL_MODULES_DIR)
-# ```
+#[============================================================================[
+_jrl_external_modules_dir(<output_var>)
+
+Type: function
+
+Description:
+  Get the external-modules directory of the jrl-cmakemodules v2 repository.
+
+Arguments:
+    output_var - Variable to store the external-modules directory path.
+
+Example:
+```cmake
+_jrl_external_modules_dir(EXTERNAL_MODULES_DIR)
+```
+#]============================================================================]
 function(_jrl_external_modules_dir output_var)
     _jrl_top_dir(top_dir)
     set(external_modules_dir ${top_dir}/external-modules)
@@ -132,12 +250,22 @@ function(_jrl_external_modules_dir output_var)
     set(${output_var} ${external_modules_dir} PARENT_SCOPE)
 endfunction()
 
-# Get the find-modules directory of the jrl-cmakemodules v2 repository
-# Usage: _jrl_find_modules_dir(<output_var>)
-# Example:
-# ```cmake
-# _jrl_find_modules_dir(FIND_MODULES_DIR)
-# ```
+#[============================================================================[
+_jrl_find_modules_dir(<output_var>)
+
+Type: function
+
+Description:
+  Get the find-modules directory of the jrl-cmakemodules v2 repository.
+
+Arguments:
+    output_var - Variable to store the find-modules directory path.
+
+Example:
+```cmake
+_jrl_find_modules_dir(FIND_MODULES_DIR)
+```
+#]============================================================================]
 function(_jrl_find_modules_dir output_var)
     _jrl_top_dir(top_dir)
     set(find_modules_dir ${top_dir}/find-modules)
@@ -145,6 +273,23 @@ function(_jrl_find_modules_dir output_var)
     set(${output_var} ${find_modules_dir} PARENT_SCOPE)
 endfunction()
 
+#[============================================================================[
+_jrl_integrate_modules()
+
+Type: function
+
+Description:
+  Internal function to integrate external modules and other logic.
+  It is called automatically when the module is loaded.
+
+Arguments:
+  None
+
+Example:
+```cmake
+_jrl_integrate_modules()
+```
+#]============================================================================]
 function(_jrl_integrate_modules)
     _jrl_external_modules_dir(external_modules_dir)
 
@@ -160,8 +305,23 @@ endfunction()
 
 _jrl_integrate_modules()
 
-# Copy compile_commands.json from the binary dir to the upper source directory for clangd support
-# NOTE: This is only useful when the build directory is not <source_dir>/build
+#[============================================================================[
+jrl_copy_compile_commands_in_source_dir()
+
+Type: function
+
+Description:
+  Copy compile_commands.json from the binary dir to the upper source directory for clangd support.
+  This is only useful when the build directory is not <source_dir>/build.
+
+Arguments:
+  None
+
+Example:
+```cmake
+jrl_copy_compile_commands_in_source_dir()
+```
+#]============================================================================]
 function(jrl_copy_compile_commands_in_source_dir)
     set(source ${CMAKE_BINARY_DIR}/compile_commands.json)
     set(destination ${CMAKE_SOURCE_DIR}/compile_commands.json)
@@ -173,7 +333,22 @@ function(jrl_copy_compile_commands_in_source_dir)
     endif()
 endfunction()
 
-# Launch the copy at the end of the configuration step
+#[============================================================================[
+jrl_configure_copy_compile_commands_in_source_dir()
+
+Type: function
+
+Description:
+  Configure copy of compile_commands.json to source directory at end of configuration step.
+
+Arguments:
+  None
+
+Example:
+```cmake
+jrl_configure_copy_compile_commands_in_source_dir()
+```
+#]============================================================================]
 function(jrl_configure_copy_compile_commands_in_source_dir)
     cmake_language(DEFER DIRECTORY ${CMAKE_SOURCE_DIR} GET_CALL_IDS _ids)
     set(call_id 03e6a81d-6918-4da7-a4f4-a3dd74f61cef)
@@ -190,39 +365,108 @@ function(jrl_configure_copy_compile_commands_in_source_dir)
     endif()
 endfunction()
 
-# Clear the current log buffer
+#[============================================================================[
+_jrl_log_clear()
+
+Type: function
+
+Description:
+  Clear the current log buffer.
+
+Arguments:
+  None
+
+Example:
+```cmake
+_jrl_log_clear()
+```
+#]============================================================================]
 function(_jrl_log_clear)
     set_property(GLOBAL PROPERTY _jrl_log_messages "")
 endfunction()
 
-# Log a message to the internal log buffer
-# Does not print anything to the console.
+#[============================================================================[
+_jrl_log(<msg>)
+
+Type: function
+
+Description:
+  Log a message to the internal log buffer.
+  Does not print anything to the console.
+
+Arguments:
+    msg - The message to log.
+
+Example:
+```cmake
+_jrl_log("Something happened")
+```
+#]============================================================================]
 function(_jrl_log msg)
     get_property(existing_msgs GLOBAL PROPERTY _jrl_log_messages)
     string(APPEND existing_msgs "${msg}\n")
     set_property(GLOBAL PROPERTY _jrl_log_messages "${existing_msgs}")
 endfunction()
 
-# Get the current log buffer.
+#[============================================================================[
+_jrl_log_get(<output_var>)
+
+Type: function
+
+Description:
+  Get the current log buffer.
+
+Arguments:
+    output_var - Variable to store the log buffer content.
+
+Example:
+```cmake
+_jrl_log_get(LOG_MSGS)
+```
+#]============================================================================]
 function(_jrl_log_get output_var)
     get_property(log_msgs GLOBAL PROPERTY _jrl_log_messages)
     set(${output_var} "${log_msgs}" PARENT_SCOPE)
 endfunction()
 
-# Include CTest but simply prevent adding a lot of useless targets. Useful for IDEs.
-# Usage: jrl_include_ctest()
+#[============================================================================[
+jrl_include_ctest()
+
+Type: macro
+
+Description:
+  Include CTest but simply prevent adding a lot of useless targets. Useful for IDEs.
+
+Arguments:
+  None
+
+Example:
+```cmake
+jrl_include_ctest()
+```
+#]============================================================================]
 macro(jrl_include_ctest)
     set_property(GLOBAL PROPERTY CTEST_TARGETS_ADDED 1)
     include(CTest)
 endmacro()
 
-# Get the version of the jrl-cmakemodules package (via the jrl-cmakemodules_VERSION variable)
-# Usage: jrl_cmakemodules_get_version(<output_var>)
-# Example:
-# ```cmake
-# jrl_cmakemodules_get_version(v)
-# message(STATUS "jrl-cmakemodules version: ${v}")
-# ```
+#[============================================================================[
+jrl_cmakemodules_get_version(<output_var>)
+
+Type: function
+
+Description:
+  Get the version of the jrl-cmakemodules package (via the jrl-cmakemodules_VERSION variable).
+
+Arguments:
+    output_var - Variable to store the version string.
+
+Example:
+```cmake
+jrl_cmakemodules_get_version(v)
+message(STATUS "jrl-cmakemodules version: ${v}")
+```
+#]============================================================================]
 function(jrl_cmakemodules_get_version output_var)
     jrl_check_var_defined(jrl-cmakemodules_VERSION
         "jrl-cmakemodules_VERSION variable is not defined."
@@ -231,13 +475,23 @@ function(jrl_cmakemodules_get_version output_var)
     set(${output_var} ${jrl-cmakemodules_VERSION} PARENT_SCOPE)
 endfunction()
 
-# Get the git commit hash of the jrl-cmakemodules repository, if available.
-# Usage: jrl_cmakemodules_get_commit(<output_var>)
-# Example:
-# ```cmake
-# jrl_cmakemodules_get_commit(commit)
-# message(STATUS "jrl-cmakemodules commit: ${commit}")
-# ```
+#[============================================================================[
+jrl_cmakemodules_get_commit(<output_var>)
+
+Type: function
+
+Description:
+  Get the git commit hash of the jrl-cmakemodules repository, if available.
+
+Arguments:
+    output_var - Variable to store the commit hash.
+
+Example:
+```cmake
+jrl_cmakemodules_get_commit(commit)
+message(STATUS "jrl-cmakemodules commit: ${commit}")
+```
+#]============================================================================]
 function(jrl_cmakemodules_get_commit output_var)
     find_program(GIT git QUIET)
 
@@ -265,8 +519,22 @@ function(jrl_cmakemodules_get_commit output_var)
     set(${output_var} ${git_commit} PARENT_SCOPE)
 endfunction()
 
-# Print a banner with the jrl-cmakemodules version and some info
-# Usage: jrl_print_banner()
+#[============================================================================[
+jrl_print_banner()
+
+Type: function
+
+Description:
+  Print a banner with the jrl-cmakemodules version and some info.
+
+Arguments:
+  None
+
+Example:
+```cmake
+jrl_print_banner()
+```
+#]============================================================================]
 function(jrl_print_banner)
     jrl_cmakemodules_get_version(v)
     jrl_cmakemodules_get_commit(commit)
@@ -285,9 +553,23 @@ function(jrl_print_banner)
     )
 endfunction()
 
-# Usage: jrl_configure_default_build_type(<build_type>)
-# Usual values for <build_type> are: Debug, Release, MinSizeRel, RelWithDebInfo
-# Example: jrl_configure_default_build_type(RelWithDebInfo)
+#[============================================================================[
+jrl_configure_default_build_type(<build_type>)
+
+Type: function
+
+Description:
+  Configures the default build type if none is specified.
+  Usual values for <build_type> are: Debug, Release, MinSizeRel, RelWithDebInfo.
+
+Arguments:
+    build_type - The default build type to set.
+
+Example:
+```cmake
+jrl_configure_default_build_type(RelWithDebInfo)
+```
+#]============================================================================]
 function(jrl_configure_default_build_type build_type)
     set(standard_build_types Debug Release MinSizeRel RelWithDebInfo)
     if(NOT build_type IN_LIST standard_build_types)
@@ -305,7 +587,22 @@ function(jrl_configure_default_build_type build_type)
     endif()
 endfunction()
 
-# Configures the default output directory for binaries and libraries
+#[============================================================================[
+jrl_configure_default_binary_dirs()
+
+Type: function
+
+Description:
+  Configures the default output directory for binaries and libraries.
+
+Arguments:
+  None
+
+Example:
+```cmake
+jrl_configure_default_binary_dirs()
+```
+#]============================================================================]
 function(jrl_configure_default_binary_dirs)
     # doc: https://cmake.org/cmake/help/v3.22/manual/cmake-buildsystem.7.html#id47
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin CACHE PATH "") # For Unix/MacOS executables, Windows: .exe, .dll, .pyd
@@ -322,18 +619,29 @@ function(jrl_configure_default_binary_dirs)
     endforeach()
 endfunction()
 
-# jrl_target_set_output_directory(<target_name> OUTPUT_DIRECTORY <dir>)
-# This function configures the `ARCHIVE_OUTPUT_DIRECTORY`,
-# `LIBRARY_OUTPUT_DIRECTORY`, and `RUNTIME_OUTPUT_DIRECTORY` properties
-# for the specified target.
-# This is useful for python modules that need to be placed in a specific directory.
-# In this module we use it to place python modules in ${CMAKE_BINARY_DIR}/lib/site-packages
-# To mimic the installation layout.
-# Otherwise, the python modules being a RUMTIME target, would be placed in ${CMAKE_BINARY_DIR}/bin
-# Example:
-# ```cmake
-#   jrl_target_set_output_directory(my_python_module_target OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/site-packages)
-# ```
+#[============================================================================[
+jrl_target_set_output_directory(
+    <target_name>
+    OUTPUT_DIRECTORY <dir>
+)
+
+Type: function
+
+Description:
+  This function configures the `ARCHIVE_OUTPUT_DIRECTORY`,
+  `LIBRARY_OUTPUT_DIRECTORY`, and `RUNTIME_OUTPUT_DIRECTORY` properties
+  for the specified target.
+  This is useful for python modules that need to be placed in a specific directory.
+
+Arguments:
+    target_name - The target to configure.
+    OUTPUT_DIRECTORY - The directory where to put the output artifacts.
+
+Example:
+```cmake
+jrl_target_set_output_directory(my_python_module_target OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/site-packages)
+```
+#]============================================================================]
 function(jrl_target_set_output_directory target_name)
     set(options)
     set(oneValueArgs OUTPUT_DIRECTORY)
@@ -364,13 +672,43 @@ function(jrl_target_set_output_directory target_name)
     endforeach()
 endfunction()
 
-# Configures the default install directories using GNUInstallDirs (bin, lib, include, etc.)
-# Works on all platforms
+#[============================================================================[
+jrl_configure_default_install_dirs()
+
+Type: function
+
+Description:
+  Configures the default install directories using GNUInstallDirs (bin, lib, include, etc.).
+  Works on all platforms.
+
+Arguments:
+  None
+
+Example:
+```cmake
+jrl_configure_default_install_dirs()
+```
+#]============================================================================]
 function(jrl_configure_default_install_dirs)
     include(GNUInstallDirs)
 endfunction()
 
-# If not provided by the user, set a default CMAKE_INSTALL_PREFIX. Useful for IDEs.
+#[============================================================================[
+jrl_configure_default_install_prefix(<default_install_prefix>)
+
+Type: function
+
+Description:
+  If not provided by the user, set a default CMAKE_INSTALL_PREFIX. Useful for IDEs.
+
+Arguments:
+    default_install_prefix - The default install prefix to set.
+
+Example:
+```cmake
+jrl_configure_default_install_prefix(/opt/my_project)
+```
+#]============================================================================]
 function(jrl_configure_default_install_prefix default_install_prefix)
     if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
         message(STATUS "Setting default install prefix to '${default_install_prefix}'")
@@ -384,11 +722,24 @@ function(jrl_configure_default_install_prefix default_install_prefix)
     endif()
 endfunction()
 
-# jrl_configure_uninstall_target()
-# Setup an uninstall target that can be used to uninstall the project.
-# It will create a cmake_uninstall.cmake script next to the cmake_install.cmake script in the build directory.
-# Usage: jrl_configure_uninstall_target()
+#[============================================================================[
+jrl_configure_uninstall_target()
+
+Type: function
+
+Description:
+  Setup an uninstall target that can be used to uninstall the project.
+  It will create a cmake_uninstall.cmake script next to the cmake_install.cmake script in the build directory.
+
+Arguments:
+  None
+
+Example:
+```cmake
+jrl_configure_uninstall_target()
 # And then cmake --build . --target uninstall
+```
+#]============================================================================]
 function(jrl_configure_uninstall_target)
     if(TARGET uninstall)
         return()
@@ -408,8 +759,22 @@ function(jrl_configure_uninstall_target)
     )
 endfunction()
 
-# Setup the default options for a project (opinionated defaults)
-# Usage : jrl_configure_defaults()
+#[============================================================================[
+jrl_configure_defaults()
+
+Type: function
+
+Description:
+  Setup the default options for a project (opinionated defaults).
+
+Arguments:
+  None
+
+Example:
+```cmake
+jrl_configure_defaults()
+```
+#]============================================================================]
 function(jrl_configure_defaults)
     jrl_configure_default_build_type(Release)
     jrl_configure_default_binary_dirs()
@@ -419,12 +784,24 @@ function(jrl_configure_defaults)
     jrl_configure_uninstall_target()
 endfunction()
 
-# jrl_get_cxx_compiler_id(output_var)
-# Get the CMAKE_CXX_COMPILER_ID variable, but also handles clang-cl and AppleClang exceptions.
-# clang-cl is considered as MSVC, AppleClang as Clang.
-# In CMake >= 3.26, use CMAKE_CXX_COMPILER_FRONTEND_VARIANT
-# ref: https://cmake.org/cmake/help/latest/variable/CMAKE_LANG_COMPILER_FRONTEND_VARIANT.html
-# ref: https://gitlab.kitware.com/cmake/cmake/-/issues/19724
+#[============================================================================[
+jrl_get_cxx_compiler_id(<output_var>)
+
+Type: function
+
+Description:
+  Get the CMAKE_CXX_COMPILER_ID variable, but also handles clang-cl and AppleClang exceptions.
+  clang-cl is considered as MSVC, AppleClang as Clang.
+
+Arguments:
+    output_var - Variable to store the compiler ID.
+
+Example:
+```cmake
+jrl_get_cxx_compiler_id(cxx_compiler_id)
+message(STATUS "Compiler ID: ${cxx_compiler_id}")
+```
+#]============================================================================]
 function(jrl_get_cxx_compiler_id output_var)
     jrl_check_var_defined(CMAKE_CXX_COMPILER_ID)
 
@@ -445,11 +822,27 @@ function(jrl_get_cxx_compiler_id output_var)
     set(${output_var} ${cxx_compiler_id} PARENT_SCOPE)
 endfunction()
 
-# Enable the most common warnings for MSVC, GCC and Clang
-# Adding some extra warning on msvc to mimic gcc/clang behavior
-# Usage: jrl_target_set_default_compile_options(<target_name> <visibility>)
-# visibility is either PRIVATE, PUBLIC or INTERFACE
-# Example: jrl_target_set_default_compile_options(my_target INTERFACE)
+#[============================================================================[
+jrl_target_set_default_compile_options(
+    <target_name>
+    <visibility>
+)
+
+Type: function
+
+Description:
+  Enable the most common warnings for MSVC, GCC and Clang.
+  Adding some extra warning on msvc to mimic gcc/clang behavior.
+
+Arguments:
+    target_name - The target to modify.
+    visibility - PRIVATE, PUBLIC or INTERFACE.
+
+Example:
+```cmake
+jrl_target_set_default_compile_options(my_target INTERFACE)
+```
+#]============================================================================]
 function(jrl_target_set_default_compile_options target_name visibility)
     jrl_check_target_exists(${target_name})
     jrl_check_valid_visibility(${visibility})
@@ -482,11 +875,27 @@ function(jrl_target_set_default_compile_options target_name visibility)
     endif()
 endfunction()
 
-# Description: Enforce MSVC c++ conformance mode so msvc behaves more like gcc and clang
-# If the compiler id is not MSVC, this function does nothing.
-# Usage: jrl_target_enforce_msvc_conformance(<target_name> <visibility>)
-# visibility is either PRIVATE, PUBLIC or INTERFACE
-# Example: jrl_target_enforce_msvc_conformance(my_target INTERFACE)
+#[============================================================================[
+jrl_target_enforce_msvc_conformance(
+    <target_name>
+    <visibility>
+)
+
+Type: function
+
+Description:
+  Enforce MSVC c++ conformance mode so msvc behaves more like gcc and clang.
+  If the compiler id is not MSVC, this function does nothing.
+
+Arguments:
+    target_name - The target to modify.
+    visibility - PRIVATE, PUBLIC or INTERFACE.
+
+Example:
+```cmake
+jrl_target_enforce_msvc_conformance(my_target INTERFACE)
+```
+#]============================================================================]
 function(jrl_target_enforce_msvc_conformance target_name visibility)
     jrl_check_valid_visibility(${visibility})
 
@@ -505,13 +914,27 @@ function(jrl_target_enforce_msvc_conformance target_name visibility)
     )
 endfunction()
 
-# Description: Treat all warnings as errors for a targets (/WX for MSVC, -Werror for GCC/Clang)
-# Can be disabled on the cmake cli with --compile-no-warning-as-error
-# ref: https://cmake.org/cmake/help/latest/manual/cmake.1.html#cmdoption-cmake-compile-no-warning-as-error
-# Usage: jrl_target_treat_all_warnings_as_errors(<target_name> <visibility>)
-# visibility is either PRIVATE, PUBLIC or INTERFACE
-# Example: jrl_target_treat_all_warnings_as_errors(my_target PRIVATE)
-# NOTE: in CMake 3.24, we have the new CMAKE_COMPILE_WARNING_AS_ERROR option, but for the whole project and subprojects
+#[============================================================================[
+jrl_target_treat_all_warnings_as_errors(
+    <target_name>
+    <visibility>
+)
+
+Type: function
+
+Description:
+  Treat all warnings as errors for a targets (/WX for MSVC, -Werror for GCC/Clang).
+  Can be disabled on the cmake cli with --compile-no-warning-as-error.
+
+Arguments:
+    target_name - The target to modify.
+    visibility - PRIVATE, PUBLIC or INTERFACE.
+
+Example:
+```cmake
+jrl_target_treat_all_warnings_as_errors(my_target PRIVATE)
+```
+#]============================================================================]
 function(jrl_target_treat_all_warnings_as_errors target_name visibility)
     jrl_check_valid_visibility(${visibility})
 
@@ -526,6 +949,31 @@ function(jrl_target_treat_all_warnings_as_errors target_name visibility)
     endif()
 endfunction()
 
+#[============================================================================[
+jrl_make_valid_c_identifier(
+    <INPUT>
+    <OUTPUT_VAR>
+)
+
+Type: function
+
+Description:
+  Creates a valid C identifier from an input string.
+  1. Replace all non-alphanumeric and non-underscore characters with underscores.
+  2. If it starts with a digit, prefix with underscore.
+  3. Collapse multiple consecutive underscores.
+  4. Remove trailing underscores.
+
+Arguments:
+    INPUT - The input string.
+    OUTPUT_VAR - The variable to store the result.
+
+Example:
+```cmake
+jrl_make_valid_c_identifier("my-lib.v1" ID)
+# ID is "my_lib_v1"
+```
+#]============================================================================]
 function(jrl_make_valid_c_identifier INPUT OUTPUT_VAR)
     # 1. Replace all non-alphanumeric and non-underscore characters with underscores
     # 2. If it starts with a digit, prefix with underscore
@@ -544,6 +992,38 @@ function(jrl_make_valid_c_identifier INPUT OUTPUT_VAR)
     set(${OUTPUT_VAR} "${CLEAN}" PARENT_SCOPE)
 endfunction()
 
+#[============================================================================[
+jrl_target_generate_header(
+    <target_name>
+    <visibility>
+    [SKIP_INSTALL]
+    FILENAME <filename>
+    HEADER_DIR <header_dir>
+    TEMPLATE_FILE <template_file>
+    INSTALL_DESTINATION <install_destination>
+    [VERSION <version>]
+)
+
+Type: function
+
+Description:
+  Generate a header file for a target from a template.
+
+Arguments:
+    target_name - The target.
+    visibility - Visibility scope.
+    SKIP_INSTALL - Skip installation.
+    FILENAME - Output filename.
+    HEADER_DIR - Directory where the header is generated.
+    TEMPLATE_FILE - Path to the template file.
+    INSTALL_DESTINATION - Install destination.
+    VERSION - The version string to include in the generated header. Otherwise uses the target's VERSION property, and otherwise the PROJECT_VERSION.
+
+Example:
+```cmake
+jrl_target_generate_header(my_target PUBLIC ...)
+```
+#]============================================================================]
 function(jrl_target_generate_header target_name visibility)
     set(options SKIP_INSTALL)
     set(oneValueArgs
@@ -608,9 +1088,39 @@ function(jrl_target_generate_header target_name visibility)
     jrl_target_headers(${target_name} ${visibility} HEADERS ${output_file} BASE_DIRS ${arg_HEADER_DIR})
 endfunction()
 
+#[============================================================================[
+jrl_target_generate_warning_header(
+    <target_name>
+    <visibility>
+    [SKIP_INSTALL]
+    [FILENAME <filename>]
+    [HEADER_DIR <header_dir>]
+    [INSTALL_DESTINATION <install_destination>]
+    [VERSION <version>]
+)
+
+Type: function
+
+Description:
+  Generate a warning header for a target.
+
+Arguments:
+    target_name - The target.
+    visibility - Visibility scope.
+    SKIP_INSTALL - Skip installation.
+    FILENAME - Output filename (default: <target_name>/warning.hpp).
+    HEADER_DIR - Directory where the header is generated.
+    INSTALL_DESTINATION - Install destination.
+    VERSION - The version string to include in the generated header. Otherwise uses the target's VERSION property, and otherwise the PROJECT_VERSION.
+
+Example:
+```cmake
+jrl_target_generate_warning_header(my_target PUBLIC)
+```
+#]============================================================================]
 function(jrl_target_generate_warning_header target_name visibility)
     set(options SKIP_INSTALL)
-    set(oneValueArgs FILENAME HEADER_DIR INSTALL_DESTINATION)
+    set(oneValueArgs FILENAME HEADER_DIR INSTALL_DESTINATION VERSION)
     set(multiValueArgs)
     cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
@@ -642,14 +1152,44 @@ function(jrl_target_generate_warning_header target_name visibility)
         HEADER_DIR ${header_dir}
         TEMPLATE_FILE ${templates_dir}/warning.hpp.in
         INSTALL_DESTINATION ${install_destination}
-        VERSION ${PROJECT_VERSION}
+        VERSION ${arg_VERSION}
         ${skip_install}
     )
 endfunction()
 
+#[============================================================================[
+jrl_target_generate_deprecated_header(
+    <target_name>
+    <visibility>
+    [SKIP_INSTALL]
+    [FILENAME <filename>]
+    [HEADER_DIR <header_dir>]
+    [INSTALL_DESTINATION <install_destination>]
+    [VERSION <version>]
+)
+
+Type: function
+
+Description:
+  Generate a deprecated header for a target.
+
+Arguments:
+    target_name - The target.
+    visibility - Visibility scope.
+    SKIP_INSTALL - Skip installation.
+    FILENAME - Output filename (default: <target_name>/deprecated.hpp).
+    HEADER_DIR - Directory where the header is generated.
+    INSTALL_DESTINATION - Install destination.
+    VERSION - The version string to include in the generated header. Otherwise uses the target's VERSION property, and otherwise the PROJECT_VERSION.
+
+Example:
+```cmake
+jrl_target_generate_deprecated_header(my_target PUBLIC)
+```
+#]============================================================================]
 function(jrl_target_generate_deprecated_header target_name visibility)
     set(options SKIP_INSTALL)
-    set(oneValueArgs FILENAME HEADER_DIR INSTALL_DESTINATION)
+    set(oneValueArgs FILENAME HEADER_DIR INSTALL_DESTINATION VERSION)
     set(multiValueArgs)
     cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
@@ -681,13 +1221,15 @@ function(jrl_target_generate_deprecated_header target_name visibility)
         HEADER_DIR ${header_dir}
         TEMPLATE_FILE ${templates_dir}/deprecated.hpp.in
         INSTALL_DESTINATION ${install_destination}
-        VERSION ${PROJECT_VERSION}
+        VERSION ${arg_VERSION}
         ${skip_install}
     )
 endfunction()
 
-#[=[
-jrl_target_generate_config_header(<target_name> <visibility>
+#[============================================================================[
+jrl_target_generate_config_header(
+    <target_name>
+    <visibility>
     [SKIP_INSTALL]
     [FILENAME <filename>]
     [HEADER_DIR <header_dir>]
@@ -695,49 +1237,35 @@ jrl_target_generate_config_header(<target_name> <visibility>
     [VERSION <version>]
 )
 
-Generate a config header file for a target.
+Type: function
 
-This function creates a CMake-generated header file containing configuration
-information for the specified target. The header is automatically configured
-with version information and other relevant settings. It will be added to the
-include directories of the target with the specified visibility, and installed
-automatically (using jrl_target_headers) unless SKIP_INSTALL is specified.
+Description:
+  Generate a config header file for a target.
+  This function creates a CMake-generated header file containing configuration
+  information for the specified target. The header is automatically configured
+  with version information and other relevant settings. It will be added to the
+  include directories of the target with the specified visibility, and installed
+  automatically (using jrl_target_headers) unless SKIP_INSTALL is specified.
 
 Arguments:
-    target_name (required)
-        The name of the target for which to generate the config header.
-
-    visibility (required)
-        The visibility scope for the generated header (e.g., PUBLIC, PRIVATE, INTERFACE).
-
-Options:
-    SKIP_INSTALL
-        If specified, the generated header will not be installed.
-
-Named Arguments:
-    FILENAME
-        The name of the output header file to generate. Not the full path, just the filename.
-
-    HEADER_DIR
-        The directory where the header file will be generated. The generated header will be at HEADER_DIR/FILENAME.
-
-    INSTALL_DESTINATION
-        The installation path for the generated header file (relative to CMAKE_INSTALL_PREFIX).
-
-    VERSION
-        The version string to include in the generated header. If not provided, the target's VERSION property will be used.
-        Usually this is set as the PROJECT_VERSION.
+    target_name - The name of the target for which to generate the config header.
+    visibility - The visibility scope for the generated header (e.g., PUBLIC, PRIVATE, INTERFACE).
+    SKIP_INSTALL - If specified, the generated header will not be installed.
+    FILENAME - The name of the output header file to generate. Not the full path, just the filename.
+    HEADER_DIR - The directory where the header file will be generated. The generated header will be at HEADER_DIR/FILENAME.
+    INSTALL_DESTINATION - The installation path for the generated header file (relative to CMAKE_INSTALL_PREFIX).
+    VERSION - The version string to include in the generated header. Otherwise uses the target's VERSION property, and otherwise the PROJECT_VERSION.
 
 Example:
 ```cmake
-    jrl_target_generate_config_header(my_target PUBLIC
-        FILENAME my_config.hpp
-        HEADER_DIR ${CMAKE_CURRENT_BINARY_DIR}/include
-        INSTALL_DESTINATION include
-        VERSION 1.0.0
-    )
+jrl_target_generate_config_header(my_target PUBLIC
+    FILENAME my_config.hpp
+    HEADER_DIR ${CMAKE_CURRENT_BINARY_DIR}/include
+    INSTALL_DESTINATION include
+    VERSION 1.0.0
+)
 ```
-#]=]
+#]============================================================================]
 function(jrl_target_generate_config_header target_name visibility)
     set(options SKIP_INSTALL)
     set(oneValueArgs FILENAME HEADER_DIR INSTALL_DESTINATION VERSION)
@@ -745,10 +1273,6 @@ function(jrl_target_generate_config_header target_name visibility)
     cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     jrl_check_var_defined(CMAKE_INSTALL_INCLUDEDIR)
-    jrl_check_var_defined(PROJECT_VERSION)
-    jrl_check_var_defined(PROJECT_VERSION_MAJOR)
-    jrl_check_var_defined(PROJECT_VERSION_MINOR)
-    jrl_check_var_defined(PROJECT_VERSION_PATCH)
 
     set(filename ${target_name}/config.hpp)
     if(arg_FILENAME)
@@ -781,17 +1305,43 @@ function(jrl_target_generate_config_header target_name visibility)
     )
 endfunction()
 
+#[============================================================================[
+jrl_target_generate_tracy_header(
+    <target_name>
+    <visibility>
+    [SKIP_INSTALL]
+    [FILENAME <filename>]
+    [HEADER_DIR <header_dir>]
+    [INSTALL_DESTINATION <install_destination>]
+    [VERSION <version>]
+)
+
+Type: function
+
+Description:
+  Generate a Tracy header for a target.
+
+Arguments:
+    target_name - The target.
+    visibility - Visibility scope.
+    SKIP_INSTALL - Skip installation.
+    FILENAME - Output filename (default: <target_name>/tracy.hpp).
+    HEADER_DIR - Directory where the header is generated.
+    INSTALL_DESTINATION - Install destination.
+    VERSION - The version string to include in the generated header. Otherwise uses the target's VERSION property, and otherwise the PROJECT_VERSION.
+
+Example:
+```cmake
+jrl_target_generate_tracy_header(my_target PUBLIC)
+```
+#]============================================================================]
 function(jrl_target_generate_tracy_header target_name visibility)
     set(options SKIP_INSTALL)
-    set(oneValueArgs FILENAME HEADER_DIR INSTALL_DESTINATION)
+    set(oneValueArgs FILENAME HEADER_DIR INSTALL_DESTINATION VERSION)
     set(multiValueArgs)
     cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     jrl_check_var_defined(CMAKE_INSTALL_INCLUDEDIR)
-    jrl_check_var_defined(PROJECT_VERSION)
-    jrl_check_var_defined(PROJECT_VERSION_MAJOR)
-    jrl_check_var_defined(PROJECT_VERSION_MINOR)
-    jrl_check_var_defined(PROJECT_VERSION_PATCH)
 
     set(filename ${target_name}/tracy.hpp)
     if(arg_FILENAME)
@@ -819,16 +1369,33 @@ function(jrl_target_generate_tracy_header target_name visibility)
         HEADER_DIR ${header_dir}
         TEMPLATE_FILE ${templates_dir}/tracy.hpp.in
         INSTALL_DESTINATION ${install_destination}
-        VERSION ${PROJECT_VERSION}
+        VERSION ${arg_VERSION}
         ${skip_install}
     )
 endfunction()
 
-# This function searches for a find module named Find<package>.cmake).
-# It iterates over the CMAKE_MODULE_PATH and the find-modules directory.
-# This function is used to determine which module file was used by jrl_find_package.
-# Usage: jrl_search_package_module_file(<package_name> <output_filepath>)
-# Example: jrl_search_package_module_file(Eigen module_file)
+#[============================================================================[
+jrl_search_package_module_file(
+    <package_name>
+    <output_filepath>
+)
+
+Type: function
+
+Description:
+  Searches for a find module named Find<package>.cmake.
+  It iterates over the CMAKE_MODULE_PATH and the find-modules directory.
+  This function is used to determine which module file was used by jrl_find_package.
+
+Arguments:
+    package_name - The package name.
+    output_filepath - Variable to store the found path.
+
+Example:
+```cmake
+jrl_search_package_module_file(Eigen module_file)
+```
+#]============================================================================]
 function(jrl_search_package_module_file package_name output_filepath)
     set(module_filename "Find${package_name}.cmake")
     set(found_module_file "")
@@ -848,31 +1415,34 @@ function(jrl_search_package_module_file package_name output_filepath)
     set(${output_filepath} ${found_module_file} PARENT_SCOPE)
 endfunction()
 
-# jrl_find_package(<PackageName> [version] [COMPONENTS <comp>...] [REQUIRED] [MODULE_PATH <path_to_find_module>])
-#
-# Wrapper around CMake's find_package used for dependency tracking and logging.
-# It forwards the arguments provided to the standard CMake find_package, while adding some new arguments.
-# It records the find_package arguments, the variables created, the imported targets, and the module file used (if any).
-# All that info is used for later introspection and analysis. It is very useful for exporting package dependencies (see jrl_export_package()).
-# After the jrl_find_package calls, use jrl_print_dependencies_summary() for printing an extensive analysis.
-#
-# Arguments:
-# <PackageName> [<version>] [REQUIRED] [COMPONENTS <components>...] - The same as find_package
-#                            see https://cmake.org/cmake/help/latest/command/find_package.html
-# Added Arguments (optional):
-#   MODULE_PATH    - Path to a dir containing a custom Find<PackageName>.cmake module file.
-#
-# Example:
-# ```cmake
-#   jrl_find_package(Eigen 3.3 REQUIRED)
-#   jrl_find_package(Boost REQUIRED COMPONENTS filesystem system)
-# ```
-#
-# Notes:
-#   * This macro is a convenience wrapper and does not change the fundamental semantics of find_package.
-#   * Prefer using REQUIRED to ensure missing packages are caught early. Don't react to missing packages manually.
-#   * This needs to be a macro so find_package can leak variables (like Python_SITELIB)
-# See also: jrl_dump_package_dependencies_json(), jrl_export_package(), jrl_print_dependencies_summary()
+#[============================================================================[
+jrl_find_package(
+    <PackageName>
+    [version]
+    [COMPONENTS <comp>...]
+    [REQUIRED]
+    [MODULE_PATH <path_to_find_module>]
+)
+
+Type: macro
+
+Description:
+  Wrapper around CMake's find_package used for dependency tracking and logging.
+  It forwards the arguments provided to the standard CMake find_package, while adding some new arguments.
+  It records the find_package arguments, the variables created, the imported targets, and the module file used (if any).
+  All that info is used for later introspection and analysis. It is very useful for exporting package dependencies (see jrl_export_package()).
+  After the jrl_find_package calls, use jrl_print_dependencies_summary() for printing an extensive analysis.
+
+Arguments:
+    <PackageName> [<version>] [REQUIRED] [COMPONENTS <components>...] - The same as find_package.
+    MODULE_PATH - Path to a dir containing a custom Find<PackageName>.cmake module file.
+
+Example:
+```cmake
+jrl_find_package(Eigen 3.3 REQUIRED)
+jrl_find_package(Boost REQUIRED COMPONENTS filesystem system)
+```
+#]============================================================================]
 macro(jrl_find_package)
     set(options)
     set(oneValueArgs MODULE_PATH)
@@ -991,8 +1561,22 @@ macro(jrl_find_package)
     unset(deps_length)
 endmacro()
 
-# jrl_print_dependencies_summary()
-# Print a summary of all dependencies found via jrl_find_package, and some properties of their imported targets.
+#[============================================================================[
+jrl_print_dependencies_summary()
+
+Type: function
+
+Description:
+  Print a summary of all dependencies found via jrl_find_package, and some properties of their imported targets.
+
+Arguments:
+  None
+
+Example:
+```cmake
+jrl_print_dependencies_summary()
+```
+#]============================================================================]
 function(jrl_print_dependencies_summary)
     _jrl_log_clear()
 
@@ -1055,11 +1639,32 @@ function(jrl_print_dependencies_summary)
     message(STATUS "${log_msg}")
 endfunction()
 
-# jrl_cmake_print_properties
-# Usage: jrl_cmake_print_properties(<mode> <items> PROPERTIES <property1> <property2> ... [VERBOSITY <verbosity_level>] [OUTPUT_VARIABLE <var_name>])
-# This is taken and adapted from cmake's own cmake_print_properties function to add verbosity control and print only found properties.
-# ref: https://github.com/Kitware/CMake/blob/master/Modules/CMakePrintHelpers.cmake
-# If OUTPUT_VARIABLE is provided, the output will be stored in the variable instead of printed to the console.
+#[============================================================================[
+jrl_cmake_print_properties(
+    <mode> <items>
+    PROPERTIES <property1> <property2> ...
+    [VERBOSITY <verbosity_level>]
+    [OUTPUT_VARIABLE <var_name>]
+)
+
+Type: function
+
+Description:
+  Print properties of targets, sources, tests, directories, or cache entries.
+  This is taken and adapted from cmake's own cmake_print_properties function to add verbosity control and print only found properties.
+
+Arguments:
+    mode - TARGETS, SOURCES, TESTS, DIRECTORIES, or CACHE_ENTRIES.
+    items - List of items to print properties for.
+    PROPERTIES - List of properties to print.
+    VERBOSITY - Verbosity level (default: STATUS).
+    OUTPUT_VARIABLE - Variable to store the output.
+
+Example:
+```cmake
+jrl_cmake_print_properties(TARGETS my_target PROPERTIES NAME VERSION)
+```
+#]============================================================================]
 function(jrl_cmake_print_properties)
     set(options)
     set(oneValueArgs VERBOSITY OUTPUT_VARIABLE)
@@ -1203,9 +1808,29 @@ function(jrl_cmake_print_properties)
     endif()
 endfunction()
 
-# Usage: jrl_export_dependencies(TARGETS [target1...] [GEN_DIR <gen_dir>] [INSTALL_DESTINATION <destination>])
-# This function analyzes the link libraries of the provided targets,
-# determines which packages are needed and generates a <export_name>-dependencies.cmake file
+#[============================================================================[
+jrl_export_dependencies(
+    TARGETS <target1...>
+    [GEN_DIR <gen_dir>]
+    [INSTALL_DESTINATION <destination>]
+)
+
+Type: function
+
+Description:
+  This function analyzes the link libraries of the provided targets,
+  determines which packages are needed and generates a <export_name>-dependencies.cmake file.
+
+Arguments:
+    TARGETS - List of targets to analyze.
+    GEN_DIR - Directory to generate the file.
+    INSTALL_DESTINATION - Directory to install the file.
+
+Example:
+```cmake
+jrl_export_dependencies(TARGETS my_target)
+```
+#]============================================================================]
 function(jrl_export_dependencies)
     set(options)
     set(oneValueArgs INSTALL_DESTINATION GEN_DIR)
@@ -1225,12 +1850,6 @@ function(jrl_export_dependencies)
     else()
         jrl_check_var_defined(CMAKE_INSTALL_LIBDIR)
         set(INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
-    endif()
-
-    if(arg_FILENAME)
-        set(FILENAME ${arg_FILENAME})
-    else()
-        set(FILENAME ${PROJECT_NAME}-dependencies.cmake)
     endif()
 
     # TODO: filter the buildsystems targets of the INTERFACE_LINK_LIBRARIES.
@@ -1297,11 +1916,29 @@ set(buildsystem_targets [[${buildsystem_targets}]])
     install(SCRIPT ${GEN_DIR}/generate-dependencies.cmake)
 endfunction()
 
-# jrl_add_export_component(NAME <component_name> TARGETS <target1> <target2> ...)
-# Add an export component with associated targets that will be exported as a CMake package component.
-# Each export component will have its own <package>-component-<name>-targets.cmake
-# and <package>-component-<name>-dependencies.cmake generated.
-# Components are used with: find_package(<package> CONFIG REQUIRED COMPONENTS <component1> <component2> ...)
+#[============================================================================[
+jrl_add_export_component(
+    NAME <component_name>
+    TARGETS <target1> <target2> ...
+)
+
+Type: function
+
+Description:
+  Add an export component with associated targets that will be exported as a CMake package component.
+  Each export component will have its own <package>-component-<name>-targets.cmake
+  and <package>-component-<name>-dependencies.cmake generated.
+  Components are used with: find_package(<package> CONFIG REQUIRED COMPONENTS <component1> <component2> ...)
+
+Arguments:
+    NAME - The name of the component.
+    TARGETS - The targets to associate with this component.
+
+Example:
+```cmake
+jrl_add_export_component(NAME my_component TARGETS my_target)
+```
+#]============================================================================]
 function(jrl_add_export_component)
     set(options)
     set(oneValueArgs NAME)
@@ -1349,9 +1986,27 @@ function(jrl_add_export_component)
     set_property(GLOBAL PROPERTY _jrl_${PROJECT_NAME}_${arg_NAME}_targets ${arg_TARGETS})
 endfunction()
 
-# jrl_contains_generator_expressions(<input_string> <output_var>)
-# Check if the provided string contains generator expressions.
-# Sets output_var to True or False.
+#[============================================================================[
+jrl_contains_generator_expressions(
+    <input_string>
+    <output_var>
+)
+
+Type: function
+
+Description:
+  Check if the provided string contains generator expressions.
+  Sets output_var to True or False.
+
+Arguments:
+    input_string - The string to check.
+    output_var - The variable to store the result (True/False).
+
+Example:
+```cmake
+jrl_contains_generator_expressions("${some_var}" has_genex)
+```
+#]============================================================================]
 function(jrl_contains_generator_expressions input_string output_var)
     string(GENEX_STRIP "${input_string}" stripped_string)
     if(stripped_string STREQUAL input_string)
@@ -1361,16 +2016,35 @@ function(jrl_contains_generator_expressions input_string output_var)
     endif()
 endfunction()
 
-# jrl_target_headers(<target>
-#   HEADERS <list_of_headers>
-#   BASE_DIRS <list_of_base_dirs> # Optional, default is empty
-# )
-# Declare headers for target to be installed later.
-# * This function does not target_include_directories(), only stores them for installation.
-# * Only PUBLIC and INTERFACE will be installed.
-# * It populates the _jrl_install_headers and _jrl_install_headers_base_dirs properties of the target.
-# * In CMake 3.23, we will use FILE_SETS instead of this trick.
-# cf: https://cmake.org/cmake/help/latest/command/target_sources.html#file-sets
+#[============================================================================[
+jrl_target_headers(
+    <target>
+    <visibility>
+    HEADERS <list_of_headers>
+    [BASE_DIRS <list_of_base_dirs>]
+)
+
+Type: function
+
+Description:
+  Declare headers for target to be installed later.
+  * This function does not target_include_directories(), only stores them for installation.
+  * Only PUBLIC and INTERFACE will be installed.
+  * It populates the _jrl_install_headers and _jrl_install_headers_base_dirs properties of the target.
+  * In CMake 3.23, we will use FILE_SETS instead of this trick.
+  cf: https://cmake.org/cmake/help/latest/command/target_sources.html#file-sets
+
+Arguments:
+    target - The target.
+    visibility - Visibility scope (usually PUBLIC or INTERFACE).
+    HEADERS - List of headers.
+    BASE_DIRS - List of base dirs (Optional, default is empty).
+
+Example:
+```cmake
+jrl_target_headers(my_target PUBLIC HEADERS my_header.hpp)
+```
+#]============================================================================]
 function(jrl_target_headers target visibility)
     set(options)
     set(oneValueArgs)
@@ -1392,12 +2066,28 @@ function(jrl_target_headers target visibility)
     set_property(TARGET ${target} APPEND PROPERTY _jrl_install_headers_base_dirs "${arg_BASE_DIRS}")
 endfunction()
 
-# jrl_target_install_headers(<target>
-#   DESTINATION <destination> # Optional, default is CMAKE_INSTALL_INCLUDEDIR
-# )
-# Install declared header for a given target and solve the relative path using the provided base dirs.
-# It is using the _jrl_install_headers and _jrl_install_headers_base_dirs properties set via jrl_target_headers().
-# For a whole project, use jrl_install_headers() instead (which calls this function for each component, that contains targets).
+#[============================================================================[
+jrl_target_install_headers(
+    <target>
+    [DESTINATION <destination>]
+)
+
+Type: function
+
+Description:
+  Install declared header for a given target and solve the relative path using the provided base dirs.
+  It is using the _jrl_install_headers and _jrl_install_headers_base_dirs properties set via jrl_target_headers().
+  For a whole project, use jrl_install_headers() instead (which calls this function for each component, that contains targets).
+
+Arguments:
+    target - The target.
+    DESTINATION - Install destination (Optional, default is CMAKE_INSTALL_INCLUDEDIR).
+
+Example:
+```cmake
+jrl_target_install_headers(my_target)
+```
+#]============================================================================]
 function(jrl_target_install_headers target)
     set(options)
     set(oneValueArgs DESTINATION)
@@ -1466,12 +2156,27 @@ endforeach()
     )
 endfunction()
 
-# jrl_install_headers(
-#   DESTINATION <destination> # Optional, default is CMAKE_INSTALL_INCLUDEDIR
-#   COMPONENTS <component1> <component2> ... # Optional, default is all declared components
-# )
-# For each component, install declared headers for all targets.
-# See jrl_target_headers() to declare headers for a target.
+#[============================================================================[
+jrl_install_headers(
+    [DESTINATION <destination>]
+    [COMPONENTS <component1> <component2> ...]
+)
+
+Type: function
+
+Description:
+  For each component, install declared headers for all targets.
+  See jrl_target_headers() to declare headers for a target.
+
+Arguments:
+    DESTINATION - Install destination (Optional, default is CMAKE_INSTALL_INCLUDEDIR).
+    COMPONENTS - List of components (Optional, default is all declared components).
+
+Example:
+```cmake
+jrl_install_headers()
+```
+#]============================================================================]
 function(jrl_install_headers)
     set(options)
     set(oneValueArgs DESTINATION)
@@ -1533,16 +2238,36 @@ function(jrl_install_headers)
     endforeach()
 endfunction()
 
-# jrl_export_package()
-# Export the CMake package with all its components (targets, headers, package modules, etc.)
-# Generates and installs CMake package configuration files:
-#  - <INSTALL_DIR>/<package>/<package>-config.cmake
-#  - <INSTALL_DIR>/<package>/<package>-config-version.cmake
-#  - <INSTALL_DIR>/<package>/<package>/<componentA>/targets.cmake
-#  - <INSTALL_DIR>/<package>/<package>/<componentA>/dependencies.cmake
-#  - <INSTALL_DIR>/<package>/<package>/<componentB>/targets.cmake
-#  - <INSTALL_DIR>/<package>/<package>/<componentB>/dependencies.cmake
-# NOTE: This is for CMake package export only. Python bindings are handled separately.
+#[============================================================================[
+jrl_export_package(
+    [PACKAGE_CONFIG_TEMPLATE <template>]
+    [CMAKE_FILES_INSTALL_DIR <dir>]
+    [PACKAGE_CONFIG_EXTRA_CONTENT <content>]
+)
+
+Type: function
+
+Description:
+  Export the CMake package with all its components (targets, headers, package modules, etc.)
+  Generates and installs CMake package configuration files:
+   - <INSTALL_DIR>/<package>/<package>-config.cmake
+   - <INSTALL_DIR>/<package>/<package>-config-version.cmake
+   - <INSTALL_DIR>/<package>/<package>/<componentA>/targets.cmake
+   - <INSTALL_DIR>/<package>/<package>/<componentA>/dependencies.cmake
+   - <INSTALL_DIR>/<package>/<package>/<componentB>/targets.cmake
+   - <INSTALL_DIR>/<package>/<package>/<componentB>/dependencies.cmake
+  NOTE: This is for CMake package export only. Python bindings are handled separately.
+
+Arguments:
+    PACKAGE_CONFIG_TEMPLATE - Custom template for the config file.
+    CMAKE_FILES_INSTALL_DIR - Directory to install the cmake files.
+    PACKAGE_CONFIG_EXTRA_CONTENT - Extra content to append to the config file.
+
+Example:
+```cmake
+jrl_export_package()
+```
+#]============================================================================]
 function(jrl_export_package)
     set(options)
     set(oneValueArgs PACKAGE_CONFIG_TEMPLATE CMAKE_FILES_INSTALL_DIR PACKAGE_CONFIG_EXTRA_CONTENT)
@@ -1656,10 +2381,24 @@ function(jrl_export_package)
     endforeach()
 endfunction()
 
-# jrl_dump_package_dependencies_json()
-# Internal function to dump the package dependencies recorded with jrl_find_package()
-# It is called at the end of the configuration step via cmake_language(DEFER CALL ...)
-# In the function jrl_export_package().
+#[============================================================================[
+jrl_dump_package_dependencies_json(<output>)
+
+Type: function
+
+Description:
+  Internal function to dump the package dependencies recorded with jrl_find_package()
+  It is called at the end of the configuration step via cmake_language(DEFER CALL ...)
+  In the function jrl_export_package().
+
+Arguments:
+    output - The output file path.
+
+Example:
+```cmake
+jrl_dump_package_dependencies_json(my_deps.json)
+```
+#]============================================================================]
 function(jrl_dump_package_dependencies_json output)
     get_property(
         package_dependencies_json
@@ -1674,9 +2413,30 @@ function(jrl_dump_package_dependencies_json output)
     file(WRITE ${output} "${package_dependencies_json}")
 endfunction()
 
-# jrl_option(<option_name> <description> <default_value>)
-# Example: jrl_option(BUILD_TESTING "Build the tests" ON)
-# Override cmake option() to get a nice summary at the end of the configuration step
+#[============================================================================[
+jrl_option(
+    <option_name>
+    <description>
+    <default_value>
+    [COMPATIBILITY_OPTION <compat_opt>]
+)
+
+Type: function
+
+Description:
+  Override cmake option() to get a nice summary at the end of the configuration step
+
+Arguments:
+    option_name - The option name.
+    description - The description.
+    default_value - The default value (ON/OFF).
+    COMPATIBILITY_OPTION - An old option name for compatibility.
+
+Example:
+```cmake
+jrl_option(BUILD_TESTING "Build the tests" ON)
+```
+#]============================================================================]
 function(jrl_option option_name description default_value)
     set(options)
     set(oneValueArgs COMPATIBILITY_OPTION)
@@ -1707,9 +2467,33 @@ function(jrl_option option_name description default_value)
     set_property(GLOBAL PROPERTY _jrl_${PROJECT_NAME}_option_names ${option_name} APPEND)
 endfunction()
 
-# Same as cmake_dependent_option(), but store default value and option name for the jrl_print_options_summary()
-# Usage: jrl_cmake_dependent_option(<option_name> <description> <default_value> <condition> <else_value>)
-# See official documentation: https://cmake.org/cmake/help/latest/module/CMakeDependentOption.html
+#[============================================================================[
+jrl_cmake_dependent_option(
+    <option_name>
+    <description>
+    <default_value>
+    <condition>
+    <else_value>
+)
+
+Type: function
+
+Description:
+  Same as cmake_dependent_option(), but store default value and option name for the jrl_print_options_summary()
+  See official documentation: https://cmake.org/cmake/help/latest/module/CMakeDependentOption.html
+
+Arguments:
+    option_name - The option name.
+    description - The description.
+    default_value - The default value.
+    condition - The condition.
+    else_value - The value if condition is false.
+
+Example:
+```cmake
+jrl_cmake_dependent_option(USE_FOO "Use Foo" ON "USE_BAR;NOT USE_ZOT" OFF)
+```
+#]============================================================================]
 function(
     jrl_cmake_dependent_option
     option_name
@@ -1728,7 +2512,28 @@ function(
     set_property(GLOBAL PROPERTY _jrl_${PROJECT_NAME}_option_names ${option_name} APPEND)
 endfunction()
 
-# Helper function: pad or truncate a string to a fixed width
+#[============================================================================[
+_jrl_pad_string(
+    <input>
+    <width>
+    <output_var>
+)
+
+Type: function
+
+Description:
+  Helper function: pad or truncate a string to a fixed width.
+
+Arguments:
+    input - The input string.
+    width - The target width.
+    output_var - The variable to store the result.
+
+Example:
+```cmake
+_jrl_pad_string("foo" 10 padded_foo)
+```
+#]============================================================================]
 function(_jrl_pad_string input width output_var)
     string(LENGTH "${input}" _len)
     if(_len GREATER width)
@@ -1747,8 +2552,22 @@ function(_jrl_pad_string input width output_var)
     set(${output_var} "${_padded}" PARENT_SCOPE)
 endfunction()
 
-# Print all options defined via jrl_option() in a nice table
-# Usage: jrl_print_options_summary()
+#[============================================================================[
+jrl_print_options_summary()
+
+Type: function
+
+Description:
+  Print all options defined via jrl_option() in a nice table.
+
+Arguments:
+  None
+
+Example:
+```cmake
+jrl_print_options_summary()
+```
+#]============================================================================]
 function(jrl_print_options_summary)
     _jrl_log_clear()
 
@@ -1804,9 +2623,28 @@ function(jrl_print_options_summary)
     message(STATUS "${log_msgs}")
 endfunction()
 
-# Shortcut to find Python package and check main variables
-# Usage: jrl_find_python([version] [REQUIRED] [COMPONENTS ...])
-# Example: jrl_find_python(3.8 REQUIRED COMPONENTS Interpreter Development.Module)
+#[============================================================================[
+jrl_find_python(
+    [version]
+    [REQUIRED]
+    [COMPONENTS ...]
+)
+
+Type: macro
+
+Description:
+  Shortcut to find Python package and check main variables.
+
+Arguments:
+    version - Python version.
+    REQUIRED - If set, the package is required.
+    COMPONENTS - List of components.
+
+Example:
+```cmake
+jrl_find_python(3.8 REQUIRED COMPONENTS Interpreter Development.Module)
+```
+#]============================================================================]
 macro(jrl_find_python)
     jrl_find_package(Python ${ARGN})
 
@@ -1825,8 +2663,24 @@ macro(jrl_find_python)
     message(STATUS "   Python_NumPy_INCLUDE_DIRS: ${Python_NumPy_INCLUDE_DIRS}")
 endmacro()
 
-# Shortcut to find the nanobind package
-# Usage: jrl_find_nanobind()
+#[============================================================================[
+jrl_find_nanobind([<args>...])
+
+Type: macro
+
+Description:
+  Shortcut to find the nanobind package.
+  It forwards all arguments to find_package(nanobind ...).
+
+Arguments:
+  args - Arguments forwarded to find_package(nanobind ...).
+
+Example:
+```cmake
+jrl_find_nanobind(CONFIG REQUIRED)
+jrl_find_nanobind(3.8 CONFIG REQUIRED)
+```
+#]============================================================================]
 macro(jrl_find_nanobind)
     string(REPLACE ";" " " args_pp "${ARGN}")
     jrl_check_var_defined(Python_EXECUTABLE "Python executable not found (variable Python_EXECUTABLE).
@@ -1892,13 +2746,23 @@ macro(jrl_find_nanobind)
     endif()
 endmacro()
 
-# Get the python interpreter path from the Python::Interpreter target
-# Usage: jrl_python_get_interpreter(<output_var>)
-# Example:
-# ```cmake
-# jrl_python_get_interpreter(python_interpreter)
-# execute_process(COMMAND ${python_interpreter} -c "print('Hello from Python!')")
-# ```
+#[============================================================================[
+jrl_python_get_interpreter(<output_var>)
+
+Type: function
+
+Description:
+  Get the python interpreter path from the Python::Interpreter target.
+
+Arguments:
+    output_var - The variable to store the path.
+
+Example:
+```cmake
+jrl_python_get_interpreter(python_interpreter)
+execute_process(COMMAND ${python_interpreter} -c "print('Hello from Python!')")
+```
+#]============================================================================]
 function(jrl_python_get_interpreter output_var)
     jrl_check_target_exists(Python::Interpreter
     "
@@ -1913,13 +2777,27 @@ function(jrl_python_get_interpreter output_var)
     set(${output_var} ${python_interpreter} PARENT_SCOPE)
 endfunction()
 
-# Compiles all the python files recursively in a given directory, via the compileall module.
-# It creates the corresponding .pyc files in __pycache__ folders.
-# Usage: jrl_python_compile_all(DIRECTORY <directory> [VERBOSE])
-# Example:
-# ```cmake
-# jrl_python_compile_all(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/my_python_package)
-# ```
+#[============================================================================[
+jrl_python_compile_all(
+    DIRECTORY <directory>
+    [VERBOSE]
+)
+
+Type: function
+
+Description:
+  Compiles all the python files recursively in a given directory, via the compileall module.
+  It creates the corresponding .pyc files in __pycache__ folders.
+
+Arguments:
+    DIRECTORY - The directory to compile.
+    VERBOSE - If set, print more info.
+
+Example:
+```cmake
+jrl_python_compile_all(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/my_python_package)
+```
+#]============================================================================]
 function(jrl_python_compile_all)
     set(options VERBOSE)
     set(oneValueArgs DIRECTORY)
@@ -1959,22 +2837,38 @@ function(jrl_python_compile_all)
     endif()
 endfunction()
 
-# Generates a __init__.py file for a given python module target
-# It computes all the relative paths to dlls it needs to add to os.add_dll_directory based on the target's LINK_LIBRARIES
-# Usage: jrl_python_generate_init_py(<module_target_name> OUTPUT_PATH <output_path> [TEMPLATE_FILE <template_file>])
-# Example:
-# ```cmake
-# nanobind_add_module(coal_pywrap_nb module.cpp)
-# # Link the python module with the main pure c++ shared library 'coal'
-# target_link_libraries(coal_pywrap_nb PRIVATE coal)
-# jrl_target_set_output_directory(coal_pywrap_nb OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/site-packages/coal)
+#[============================================================================[
+jrl_python_generate_init_py(
+    <module_target_name>
+    OUTPUT_PATH <output_path>
+    [TEMPLATE_FILE <template_file>]
+)
 
-# jrl_python_generate_init_py(
-#     coal_pywrap_nb
-#     OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib/site-packages/coal/__init__.py
-# )
-# ```
-# The generated __init__.py will call the os.add_dll_directory(<relative_path/to/coal.dll>)
+Type: function
+
+Description:
+  Generates a __init__.py file for a given python module target.
+  It computes all the relative paths to dlls it needs to add to os.add_dll_directory based on the target's LINK_LIBRARIES.
+  The generated __init__.py will call the os.add_dll_directory(<relative_path/to/coal.dll>).
+
+Arguments:
+    module_target_name - The python module target name.
+    OUTPUT_PATH - Path where to generate the init file.
+    TEMPLATE_FILE - Custom template file.
+
+Example:
+```cmake
+nanobind_add_module(coal_pywrap_nb module.cpp)
+# Link the python module with the main pure c++ shared library 'coal'
+target_link_libraries(coal_pywrap_nb PRIVATE coal)
+jrl_target_set_output_directory(coal_pywrap_nb OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/site-packages/coal)
+
+jrl_python_generate_init_py(
+    coal_pywrap_nb
+    OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib/site-packages/coal/__init__.py
+)
+```
+#]============================================================================]
 function(jrl_python_generate_init_py name)
     set(options)
     set(oneValueArgs OUTPUT_PATH TEMPLATE_FILE)
@@ -2050,11 +2944,30 @@ function(jrl_python_generate_init_py name)
     configure_file(${templates_dir}/__init__.py.in ${arg_OUTPUT_PATH} @ONLY)
 endfunction()
 
-# Find if a python module is available, fills <module_name>_FOUND variable
-# Also fills <module_name>_VERSION variable if the module has a __version__ attribute
-# Displays messages based on REQUIRED and QUIET options
-# Usage: jrl_check_python_module(<module_name> [REQUIRED] [QUIET])
-# Example: jrl_check_python_module(numpy REQUIRED)
+#[============================================================================[
+jrl_check_python_module(
+    <module_name>
+    [REQUIRED]
+    [QUIET]
+)
+
+Type: function
+
+Description:
+  Find if a python module is available, fills <module_name>_FOUND variable.
+  Also fills <module_name>_VERSION variable if the module has a __version__ attribute.
+  Displays messages based on REQUIRED and QUIET options.
+
+Arguments:
+    module_name - The python module name.
+    REQUIRED - If set, the package is required.
+    QUIET - If set, do not print messages.
+
+Example:
+```cmake
+jrl_check_python_module(numpy REQUIRED)
+```
+#]============================================================================]
 function(jrl_check_python_module module_name)
     set(options REQUIRED QUIET)
     set(oneValueArgs)
@@ -2097,6 +3010,8 @@ endfunction()
 
 #[============================================================================[
 jrl_python_relative_site_packages(<output>)
+
+Type: function
 
 Description:
   Compute the relative path of the Python site-packages directory with respect to
@@ -2157,6 +3072,8 @@ endfunction()
 #[============================================================================[
 jrl_python_absolute_site_packages(<output>)
 
+Type: function
+
 Description:
   Compute the absolute path of the Python site-packages directory with respect to
   the Python data directory. It is the result of:
@@ -2216,7 +3133,10 @@ endfunction()
 #[============================================================================[
 jrl_python_compute_install_dir(<output>)
 
-Compute the installation directory for Python bindings.
+Type: function
+
+Description:
+  Compute the installation directory for Python bindings.
  * If ${PROJECT_NAME}_PYTHON_INSTALL_DIR is defined, its value is used.
  * Otherwise, if running inside a Conda environment on Windows, an
    absolute path to `sysconfig.get_path('purelib')` is returned.
@@ -2317,11 +3237,25 @@ function(jrl_python_compute_install_dir output)
     set(${output} "${python_relative_site_packages}" PARENT_SCOPE)
 endfunction()
 
-# Check that the python module defined with NB_MODULE(<module_name>)
-# or BOOST_PYTHON_MODULE(<module_name>) has the same name as the target: <module_name>.cpython-XY.so
-# Otherwise the module will fail to load in Python.
-# NOTE: It verifies that the symbol PyInit_<module_name> exists in the built module.
-# Usage: jrl_check_python_module_name(<module_target>)
+#[============================================================================[
+jrl_check_python_module_name(<module_target>)
+
+Type: function
+
+Description:
+  Check that the python module defined with NB_MODULE(<module_name>)
+  or BOOST_PYTHON_MODULE(<module_name>) has the same name as the target: <module_name>.cpython-XY.so.
+  Otherwise the module will fail to load in Python.
+  NOTE: It verifies that the symbol PyInit_<module_name> exists in the built module.
+
+Arguments:
+    module_target - The python module target.
+
+Example:
+```cmake
+jrl_check_python_module_name(my_module)
+```
+#]============================================================================]
 function(jrl_check_python_module_name target)
     jrl_check_target_exists(${target})
     set(script ${CMAKE_BINARY_DIR}/generated/cmake/${PROJECT_NAME}/check-python-module-name.cmake)
@@ -2382,10 +3316,28 @@ message(
     )
 endfunction()
 
-# Usage: jrl_boostpy_add_module(name [sources...])
-# Creates a Boost.Python module with the given name and sources.
-# The library name will be in the form <name>-<SOABI>.so, where <SOABI> is the
-# Python SOABI tag (e.g., cp39-cp39m-linux_x86_64).
+#[============================================================================[
+jrl_boostpy_add_module(
+    <name>
+    [sources...]
+)
+
+Type: function
+
+Description:
+  Creates a Boost.Python module with the given name and sources.
+  The library name will be in the form <name>-<SOABI>.so, where <SOABI> is the
+  Python SOABI tag (e.g., cp39-cp39m-linux_x86_64).
+
+Arguments:
+    name - The name of the module.
+    sources - Source files.
+
+Example:
+```cmake
+jrl_boostpy_add_module(my_module module.cpp)
+```
+#]============================================================================]
 function(jrl_boostpy_add_module name)
     jrl_check_command_exists(python_add_library
         "
@@ -2407,8 +3359,34 @@ function(jrl_boostpy_add_module name)
     target_link_libraries(${name} PRIVATE Boost::python)
 endfunction()
 
-# jrl_boostpy_add_stubs(name MODULE <module_path> OUTPUT_PATH <output_path> [PYTHON_PATH <python_path>] [DEPENDS <dep1> <dep2> ...] [VERBOSE])
-# Generates Boost.Python stubs for the given module using the pybind11-stubgen fork included in this repo.
+#[============================================================================[
+jrl_boostpy_add_stubs(
+    <name>
+    MODULE <module_path>
+    OUTPUT_PATH <output_path>
+    [PYTHON_PATH <python_path>]
+    [DEPENDS <dep1> <dep2> ...]
+    [VERBOSE]
+)
+
+Type: function
+
+Description:
+  Generates Boost.Python stubs for the given module using the pybind11-stubgen fork included in this repo.
+
+Arguments:
+    name - The target name.
+    MODULE - The module to generate stubs for.
+    OUTPUT_PATH - Output path.
+    PYTHON_PATH - PYTHONPATH to use (optional).
+    DEPENDS - Dependencies (optional).
+    VERBOSE - Verbose output (optional).
+
+Example:
+```cmake
+jrl_boostpy_add_stubs(my_stubs MODULE my_module OUTPUT_PATH ${CMAKE_BINARY_DIR})
+```
+#]============================================================================]
 function(jrl_boostpy_add_stubs name)
     set(options VERBOSE)
     set(oneValueArgs MODULE OUTPUT_PATH PYTHON_PATH DEPENDS)
@@ -2461,10 +3439,13 @@ endfunction()
 jrl_generate_ros2_package_files(
     [INSTALL_CPP_PACKAGE_FILES <ON|OFF>] (default: ON)
     [INSTALL_PYTHON_PACKAGE_FILES <ON|OFF>] (default: ON)
+    [PACKAGE_XML_PATH <path>] (default: ${CMAKE_CURRENT_SOURCE_DIR}/package.xml)
     [DESTINATION <install destination>] (default: CMAKE_INSTALL_DATAROOTDIR)
     [GEN_DIR <gen_dir>]
     [SKIP_INSTALL]
 )
+
+Type: function
 
 Description:
   Generates the necessary files for a ROS 2 package to be discoverable by ament.
@@ -2479,6 +3460,7 @@ Description:
 Arguments:
     INSTALL_CPP_PACKAGE_FILES - Whether to install the C++ package files (default: ON).
     INSTALL_PYTHON_PACKAGE_FILES - Whether to install the Python package files (default: ON).
+    PACKAGE_XML_PATH - Path to the package.xml file (default: ${CMAKE_CURRENT_SOURCE_DIR}/package.xml).
     DESTINATION - Installation destination for the generated files (default: CMAKE_INSTALL_DATAROOTDIR).
     GEN_DIR - Directory where to generate the files (default: ${CMAKE_BINARY_DIR}/generated/ros2/${PROJECT_NAME}/ros2).
     SKIP_INSTALL - If set, skips the installation of the generated files.
