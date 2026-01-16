@@ -1987,36 +1987,6 @@ function(jrl_add_export_component)
 endfunction()
 
 #[============================================================================[
-jrl_contains_generator_expressions(
-    <input_string>
-    <output_var>
-)
-
-Type: function
-
-Description:
-  Check if the provided string contains generator expressions.
-  Sets output_var to True or False.
-
-Arguments:
-    input_string - The string to check.
-    output_var - The variable to store the result (True/False).
-
-Example:
-```cmake
-jrl_contains_generator_expressions("${some_var}" has_genex)
-```
-#]============================================================================]
-function(jrl_contains_generator_expressions input_string output_var)
-    string(GENEX_STRIP "${input_string}" stripped_string)
-    if(stripped_string STREQUAL input_string)
-        set(${output_var} False PARENT_SCOPE)
-    else()
-        set(${output_var} True PARENT_SCOPE)
-    endif()
-endfunction()
-
-#[============================================================================[
 jrl_target_headers(
     <target>
     <visibility>
