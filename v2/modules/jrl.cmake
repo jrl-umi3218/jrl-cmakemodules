@@ -2086,10 +2086,6 @@ function(jrl_target_headers target visibility)
     _jrl_check_target_exists(${target})
     _jrl_check_valid_visibility(${visibility})
 
-    if(NOT arg_BASE_DIRS)
-        set(arg_BASE_DIRS "")
-    endif()
-
     # Save the headers in a property of the target
     # NOTE: The PUBLIC_HEADER technically works, but does not support base_dirs
     # cf: https://cmake.org/cmake/help/latest/command/install.html#install
