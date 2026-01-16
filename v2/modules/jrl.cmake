@@ -1089,6 +1089,67 @@ function(jrl_target_generate_header target_name visibility)
 endfunction()
 
 #[============================================================================[
+_jrl_normalize_version(<version> <output_var>)
+
+Type: function
+
+Description:
+  Normalizes a version string into a 4-component version string (major.minor.patch.tweak),
+  padding with zeros if necessary. It handles version strings with suffixes by extracting
+  only the leading numeric part.
+  Stops at the first non-numeric/non-dot character (like '-' in '-rc1').
+
+Arguments:
+  version: The version string to normalize.
+  output_var:    The name of the variable to store the normalized version string.
+
+Example:
+```cmake
+_jrl_normalize_version("1.2.3" normalized_version)
+# Examples:
+# 1.2.3       -> 1.2.3.0
+# 1.2         -> 1.2.0.0
+# 4           -> 4.0.0.0
+# 1.0.5.2023  -> 1.0.5.2023
+# ""          -> 0.0.0.0
+# 2.5-rc1     -> 2.5.0.0
+```
+#]============================================================================]
+function(_jrl_normalize_version version output_var)
+    string(REGEX MATCH "^[0-9.]+" _clean_version "${version}")
+
+    string(REPLACE "." ";" _version_components "${_clean_version}")
+
+    list(LENGTH _version_components _len)
+
+    if(_len GREATER 0)
+        list(GET _version_components 0 _major)
+    else()
+        set(_major 0)
+    endif()
+
+    if(_len GREATER 1)
+        list(GET _version_components 1 _minor)
+    else()
+        set(_minor 0)
+    endif()
+
+    if(_len GREATER 2)
+        list(GET _version_components 2 _patch)
+    else()
+        set(_patch 0)
+    endif()
+
+    if(_len GREATER 3)
+        list(GET _version_components 3 _tweak)
+    else()
+        set(_tweak 0)
+    endif()
+
+    set(${output_var} "${_major}.${_minor}.${_patch}.${_tweak}" PARENT_SCOPE)
+endfunction()
+
+#[============================================================================[
 jrl_target_generate_warning_header(
     <target_name>
     <visibility>
