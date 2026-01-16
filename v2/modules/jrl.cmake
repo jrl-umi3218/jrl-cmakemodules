@@ -2254,17 +2254,17 @@ function(jrl_export_package)
     jrl_check_var_defined(CMAKE_INSTALL_INCLUDEDIR)
 
     if(arg_PACKAGE_CONFIG_TEMPLATE)
-        set(PACKAGE_CONFIG_TEMPLATE ${arg_PACKAGE_CONFIG_TEMPLATE})
+        set(package_config_template ${arg_PACKAGE_CONFIG_TEMPLATE})
     else()
         _jrl_templates_dir(templates_dir)
-        set(PACKAGE_CONFIG_TEMPLATE ${templates_dir}/config-components.cmake.in)
+        set(package_config_template ${templates_dir}/config-components.cmake.in)
         set(using_default_template True)
     endif()
 
     if(arg_CMAKE_FILES_INSTALL_DIR)
-        set(CMAKE_FILES_INSTALL_DIR ${arg_CMAKE_FILES_INSTALL_DIR})
+        set(cmake_files_install_dir ${arg_CMAKE_FILES_INSTALL_DIR})
     else()
-        set(CMAKE_FILES_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
+        set(cmake_files_install_dir ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
     endif()
 
     # NOTE: Expose as options if needed
@@ -2298,17 +2298,16 @@ function(jrl_export_package)
     endif()
 
     # <package>-config.cmake
-    # The multi-component needs the variable PROJECT_COMPONENTS
-    set(PACKAGE_CONFIG_EXTRA_CONTENT ${arg_PACKAGE_CONFIG_EXTRA_CONTENT})
-    set(PROJECT_COMPONENTS ${declared_components})
+    set(__JRL_PACKAGE_CONFIG_EXTRA_CONTENT__ ${arg_PACKAGE_CONFIG_EXTRA_CONTENT})
+    set(__JRL_PROJECT_COMPONENTS__ ${declared_components})
     configure_package_config_file(
-        ${PACKAGE_CONFIG_TEMPLATE}
+        ${package_config_template}
         ${GEN_DIR}/${PACKAGE_CONFIG_FILENAME}
-        INSTALL_DESTINATION ${CMAKE_FILES_INSTALL_DIR}
+        INSTALL_DESTINATION ${cmake_files_install_dir}
         ${NO_SET_AND_CHECK_MACRO}
         ${NO_CHECK_REQUIRED_COMPONENTS_MACRO}
     )
-    install(FILES ${GEN_DIR}/${PACKAGE_CONFIG_FILENAME} DESTINATION ${CMAKE_FILES_INSTALL_DIR})
+    install(FILES ${GEN_DIR}/${PACKAGE_CONFIG_FILENAME} DESTINATION ${cmake_files_install_dir})
 
     # <package>-config-version.cmake
     write_basic_package_version_file(
@@ -2317,7 +2316,7 @@ function(jrl_export_package)
         COMPATIBILITY ${PACKAGE_VERSION_COMPATIBILITY}
         ${PACKAGE_VERSION_ARCH_INDEPENDENT}
     )
-    install(FILES ${GEN_DIR}/${PACKAGE_VERSION_FILENAME} DESTINATION ${CMAKE_FILES_INSTALL_DIR})
+    install(FILES ${GEN_DIR}/${PACKAGE_VERSION_FILENAME} DESTINATION ${cmake_files_install_dir})
 
     foreach(component ${declared_components})
         message(STATUS "Generating cmake module files for component '${component}'")
@@ -2330,7 +2329,7 @@ function(jrl_export_package)
         _jrl_export_dependencies(
             TARGETS ${targets}
             GEN_DIR ${GEN_DIR}/${component}
-            INSTALL_DESTINATION ${CMAKE_FILES_INSTALL_DIR}/${component}
+            INSTALL_DESTINATION ${cmake_files_install_dir}/${component}
         )
         # Create the export for the component targets
         # AND the install rules for the targets (see jrl_add_export_component() comment)
@@ -2346,7 +2345,7 @@ function(jrl_export_package)
             EXPORT ${PROJECT_NAME}-${component}
             FILE targets.cmake
             NAMESPACE ${PACKAGE_NAMESPACE}
-            DESTINATION ${CMAKE_FILES_INSTALL_DIR}/${component}
+            DESTINATION ${cmake_files_install_dir}/${component}
         )
     endforeach()
 endfunction()

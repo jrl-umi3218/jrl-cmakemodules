@@ -7,7 +7,7 @@ cmake_minimum_required(VERSION 3.22)
 message(DEBUG "Welcome to @PROJECT_NAME@ !")
 
 # valid components that can be searched for
-set(@PROJECT_NAME@_supported_components @PROJECT_COMPONENTS@)
+set(@PROJECT_NAME@_supported_components @__JRL_PROJECT_COMPONENTS__@)
 message(DEBUG "   Valid components for @PROJECT_NAME@: ${@PROJECT_NAME@_supported_components}")
 message(DEBUG "   User is requesting components: ${@PROJECT_NAME@_FIND_COMPONENTS}")
 
@@ -37,4 +37,4 @@ foreach(component ${@PROJECT_NAME@_FIND_COMPONENTS})
     endif()
 endforeach()
 
-@PACKAGE_CONFIG_EXTRA_CONTENT@
+@__JRL_PACKAGE_CONFIG_EXTRA_CONTENT__@
