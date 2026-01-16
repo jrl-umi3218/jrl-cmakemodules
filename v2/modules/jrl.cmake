@@ -1809,7 +1809,7 @@ function(jrl_cmake_print_properties)
 endfunction()
 
 #[============================================================================[
-jrl_export_dependencies(
+_jrl_export_dependencies(
     TARGETS <target1...>
     [GEN_DIR <gen_dir>]
     [INSTALL_DESTINATION <destination>]
@@ -1828,10 +1828,10 @@ Arguments:
 
 Example:
 ```cmake
-jrl_export_dependencies(TARGETS my_target)
+_jrl_export_dependencies(TARGETS my_target)
 ```
 #]============================================================================]
-function(jrl_export_dependencies)
+function(_jrl_export_dependencies)
     set(options)
     set(oneValueArgs INSTALL_DESTINATION GEN_DIR)
     set(multiValueArgs TARGETS)
@@ -2327,7 +2327,7 @@ function(jrl_export_package)
         jrl_target_install_headers(${targets} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
         # <package>/<component>/dependencies.cmake
-        jrl_export_dependencies(
+        _jrl_export_dependencies(
             TARGETS ${targets}
             GEN_DIR ${GEN_DIR}/${component}
             INSTALL_DESTINATION ${CMAKE_FILES_INSTALL_DIR}/${component}
