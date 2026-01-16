@@ -950,7 +950,7 @@ function(jrl_target_treat_all_warnings_as_errors target_name visibility)
 endfunction()
 
 #[============================================================================[
-jrl_make_valid_c_identifier(
+_jrl_make_valid_c_identifier(
     <INPUT>
     <OUTPUT_VAR>
 )
@@ -970,11 +970,11 @@ Arguments:
 
 Example:
 ```cmake
-jrl_make_valid_c_identifier("my-lib.v1" ID)
+_jrl_make_valid_c_identifier("my-lib.v1" ID)
 # ID is "my_lib_v1"
 ```
 #]============================================================================]
-function(jrl_make_valid_c_identifier INPUT OUTPUT_VAR)
+function(_jrl_make_valid_c_identifier INPUT OUTPUT_VAR)
     # 1. Replace all non-alphanumeric and non-underscore characters with underscores
     # 2. If it starts with a digit, prefix with underscore
     # 3. Optionally collapse multiple consecutive underscores
@@ -1049,7 +1049,7 @@ function(jrl_target_generate_header target_name visibility)
 
     set(output_file ${arg_HEADER_DIR}/${arg_FILENAME})
 
-    jrl_make_valid_c_identifier(${target_name} LIBRARY_NAME)
+    _jrl_make_valid_c_identifier(${target_name} LIBRARY_NAME)
 
     # We need to define LIBRARY_NAME_UPPERCASE, TARGET_NAME, TARGET_VERSION, TARGET_VERSION_MAJOR, TARGET_VERSION_MINOR, TARGET_VERSION_PATCH
     string(TOUPPER ${LIBRARY_NAME} LIBRARY_NAME_UPPERCASE)
