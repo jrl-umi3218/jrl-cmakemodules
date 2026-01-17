@@ -1,5 +1,6 @@
 # Copyright 2025-2026 Inria
 
+include_guard(GLOBAL)
 cmake_minimum_required(VERSION 3.22)
 
 #[============================================================================[
