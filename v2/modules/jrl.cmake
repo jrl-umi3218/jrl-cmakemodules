@@ -950,10 +950,7 @@ function(jrl_target_treat_all_warnings_as_errors target_name visibility)
 endfunction()
 
 #[============================================================================[
-_jrl_make_valid_c_identifier(
-    <INPUT>
-    <OUTPUT_VAR>
-)
+_jrl_make_valid_c_identifier(<input_str> <output_var>)
 
 Type: function
 
@@ -965,8 +962,8 @@ Description:
   4. Remove trailing underscores.
 
 Arguments:
-    INPUT - The input string.
-    OUTPUT_VAR - The variable to store the result.
+    input_str - The input string.
+    output_var - The variable to store the result.
 
 Example:
 ```cmake
@@ -974,134 +971,46 @@ _jrl_make_valid_c_identifier("my-lib.v1" ID)
 # ID is "my_lib_v1"
 ```
 #]============================================================================]
-function(_jrl_make_valid_c_identifier INPUT OUTPUT_VAR)
-    # 1. Replace all non-alphanumeric and non-underscore characters with underscores
-    # 2. If it starts with a digit, prefix with underscore
-    # 3. Optionally collapse multiple consecutive underscores
-    # 4. Remove trailing underscores (optional cosmetic cleanup)
-    # 5. Return result to caller
+function(_jrl_make_valid_c_identifier input_str output_var)
+    string(REGEX REPLACE "[^A-Za-z0-9_]" "_" ci "${input_str}")
 
-    string(REGEX REPLACE "[^A-Za-z0-9_]" "_" CLEAN "${INPUT}")
-
-    string(REGEX MATCH "^[0-9]" STARTS_WITH_DIGIT "${CLEAN}")
+    string(REGEX MATCH "^[0-9]" STARTS_WITH_DIGIT "${ci}")
     if(STARTS_WITH_DIGIT)
-        set(CLEAN "_${CLEAN}")
+        set(ci "_${ci}")
     endif()
-    string(REGEX REPLACE "_+" "_" CLEAN "${CLEAN}")
-    string(REGEX REPLACE "_$" "" CLEAN "${CLEAN}")
-    set(${OUTPUT_VAR} "${CLEAN}" PARENT_SCOPE)
+    string(REGEX REPLACE "_+" "_" ci "${ci}")
+    string(REGEX REPLACE "_$" "" ci "${ci}")
+
+    set(${output_var} "${ci}" PARENT_SCOPE)
 endfunction()
 
 #[============================================================================[
-jrl_target_generate_header(
-    <target_name>
-    <visibility>
-    [SKIP_INSTALL]
-    FILENAME <filename>
-    HEADER_DIR <header_dir>
-    TEMPLATE_FILE <template_file>
-    INSTALL_DESTINATION <install_destination>
-    [VERSION <version>]
+_jrl_normalize_version(
+    <version_str>
+    [VERSION_FULL <var>]
+    [VERSION_FULL_WITH_TWEAK <var>]
+    [VERSION_MAJOR <var>]
+    [VERSION_MINOR <var>]
+    [VERSION_PATCH <var>]
+    [VERSION_TWEAK <var>]
 )
 
 Type: function
 
 Description:
-  Generate a header file for a target from a template.
+    Normalizes a version string into a 3 and 4-component version string (major.minor.patch.tweak),
+    padding with zeros if necessary. It handles version strings with suffixes by extracting
+    only the leading numeric part.
+    Stops at the first non-numeric/non-dot character (like '-' in '-rc1').
 
 Arguments:
-    target_name - The target.
-    visibility - Visibility scope.
-    SKIP_INSTALL - Skip installation.
-    FILENAME - Output filename.
-    HEADER_DIR - Directory where the header is generated.
-    TEMPLATE_FILE - Path to the template file.
-    INSTALL_DESTINATION - Install destination.
-    VERSION - The version string to include in the generated header. Otherwise uses the target's VERSION property, and otherwise the PROJECT_VERSION.
-
-Example:
-```cmake
-jrl_target_generate_header(my_target PUBLIC ...)
-```
-#]============================================================================]
-function(jrl_target_generate_header target_name visibility)
-    set(options SKIP_INSTALL)
-    set(oneValueArgs
-        FILENAME
-        HEADER_DIR
-        TEMPLATE_FILE
-        INSTALL_DESTINATION
-        VERSION
-    )
-    set(multiValueArgs)
-    cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
-
-    _jrl_check_var_defined(PROJECT_NAME)
-    _jrl_check_var_defined(CMAKE_INSTALL_INCLUDEDIR)
-    _jrl_check_target_exists(${target_name})
-    _jrl_check_valid_visibility(${visibility})
-
-    _jrl_check_var_defined(arg_FILENAME)
-    _jrl_check_var_defined(arg_HEADER_DIR)
-    _jrl_check_var_defined(arg_TEMPLATE_FILE)
-    _jrl_check_var_defined(arg_INSTALL_DESTINATION)
-    _jrl_check_file_exists(${arg_TEMPLATE_FILE})
-
-    set(output_file ${arg_HEADER_DIR}/${arg_FILENAME})
-
-    _jrl_make_valid_c_identifier(${target_name} LIBRARY_NAME)
-
-    # We need to define LIBRARY_NAME_UPPERCASE, TARGET_NAME, TARGET_VERSION, TARGET_VERSION_MAJOR, TARGET_VERSION_MINOR, TARGET_VERSION_PATCH
-    string(TOUPPER ${LIBRARY_NAME} LIBRARY_NAME_UPPERCASE)
-
-    if(arg_VERSION)
-        set(LIBRARY_VERSION ${arg_VERSION})
-    else()
-        # Retrieve version from target
-        get_property(LIBRARY_VERSION TARGET ${target_name} PROPERTY VERSION)
-        if(NOT LIBRARY_VERSION)
-            message(
-                WARNING
-                "Target ${target_name} does not have a VERSION property set, using the project version instead (PROJECT_VERSION=${PROJECT_VERSION}).
-            To remove this warning, set the VERSION property on the target using:
-
-                set_target_properties(${target_name} PROPERTIES VERSION \${PROJECT_VERSION})
-            "
-            )
-            set(LIBRARY_VERSION ${PROJECT_VERSION})
-        endif()
-    endif()
-
-    string(REPLACE "." ";" version_parts ${LIBRARY_VERSION})
-    list(GET version_parts 0 LIBRARY_VERSION_MAJOR)
-    list(GET version_parts 1 LIBRARY_VERSION_MINOR)
-    list(GET version_parts 2 LIBRARY_VERSION_PATCH)
-
-    configure_file(${arg_TEMPLATE_FILE} ${output_file} @ONLY)
-
-    target_include_directories(${target_name} ${visibility} $<BUILD_INTERFACE:${arg_HEADER_DIR}>)
-
-    if(arg_SKIP_INSTALL)
-        return()
-    endif()
-
-    jrl_target_headers(${target_name} ${visibility} HEADERS ${output_file} BASE_DIRS ${arg_HEADER_DIR})
-endfunction()
-
-#[============================================================================[
-_jrl_normalize_version(<version> <output_var>)
-
-Type: function
-
-Description:
-  Normalizes a version string into a 4-component version string (major.minor.patch.tweak),
-  padding with zeros if necessary. It handles version strings with suffixes by extracting
-  only the leading numeric part.
-  Stops at the first non-numeric/non-dot character (like '-' in '-rc1').
-
-Arguments:
-  version: The version string to normalize.
-  output_var:    The name of the variable to store the normalized version string.
+    version_str: The version string to normalize.
+    VERSION_FULL: Variable to store the normalized version without tweak (major.minor.patch).
+    VERSION_FULL_WITH_TWEAK: Variable to store the full version with tweak (major.minor.patch.tweak).
+    VERSION_MAJOR: Variable to store the major version component.
+    VERSION_MINOR: Variable to store the minor version component.
+    VERSION_PATCH: Variable to store the patch version component.
+    VERSION_TWEAK: Variable to store the tweak version component.
 
 Example:
 ```cmake
@@ -1115,323 +1024,379 @@ _jrl_normalize_version("1.2.3" normalized_version)
 # 2.5-rc1     -> 2.5.0.0
 ```
 #]============================================================================]
-function(_jrl_normalize_version version output_var)
-    string(REGEX MATCH "^[0-9.]+" _clean_version "${version}")
+function(_jrl_normalize_version version_str)
+    set(options)
+    set(oneValueArgs
+        VERSION_FULL
+        VERSION_FULL_WITH_TWEAK
+        VERSION_MAJOR
+        VERSION_MINOR
+        VERSION_PATCH
+        VERSION_TWEAK
+    )
+    set(multiValueArgs)
+    cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-    string(REPLACE "." ";" _version_components "${_clean_version}")
+    string(REGEX MATCH "^[0-9.]+" clean_version "${version_str}")
 
-    list(LENGTH _version_components _len)
+    string(REPLACE "." ";" version_comp "${clean_version}")
 
-    if(_len GREATER 0)
-        list(GET _version_components 0 _major)
+    list(LENGTH version_comp len)
+
+    if(len GREATER 0)
+        list(GET version_comp 0 major)
     else()
-        set(_major 0)
+        set(major 0)
     endif()
 
-    if(_len GREATER 1)
-        list(GET _version_components 1 _minor)
+    if(len GREATER 1)
+        list(GET version_comp 1 minor)
     else()
-        set(_minor 0)
+        set(minor 0)
     endif()
 
-    if(_len GREATER 2)
-        list(GET _version_components 2 _patch)
+    if(len GREATER 2)
+        list(GET version_comp 2 patch)
     else()
-        set(_patch 0)
+        set(patch 0)
     endif()
 
-    if(_len GREATER 3)
-        list(GET _version_components 3 _tweak)
+    if(len GREATER 3)
+        list(GET version_comp 3 tweak)
     else()
-        set(_tweak 0)
+        set(tweak 0)
     endif()
 
-    set(${output_var} "${_major}.${_minor}.${_patch}.${_tweak}" PARENT_SCOPE)
+    set(version_full "${major}.${minor}.${patch}")
+    set(version_full_with_tweak "${major}.${minor}.${patch}.${tweak}")
+
+    if(arg_VERSION_MAJOR)
+        set(${arg_VERSION_MAJOR} ${major} PARENT_SCOPE)
+    endif()
+
+    if(arg_VERSION_MINOR)
+        set(${arg_VERSION_MINOR} ${minor} PARENT_SCOPE)
+    endif()
+
+    if(arg_VERSION_PATCH)
+        set(${arg_VERSION_PATCH} ${patch} PARENT_SCOPE)
+    endif()
+
+    if(arg_VERSION_TWEAK)
+        set(${arg_VERSION_TWEAK} ${tweak} PARENT_SCOPE)
+    endif()
+
+    if(arg_VERSION_FULL)
+        set(${arg_VERSION_FULL} ${version_full} PARENT_SCOPE)
+    endif()
+
+    if(arg_VERSION_FULL_WITH_TWEAK)
+        set(${arg_VERSION_FULL_WITH_TWEAK} ${version_full_with_tweak} PARENT_SCOPE)
+    endif()
 endfunction()
 
 #[============================================================================[
-jrl_target_generate_warning_header(
+_jrl_target_generate_header(
     <target_name>
     <visibility>
-    [SKIP_INSTALL]
-    [FILENAME <filename>]
-    [HEADER_DIR <header_dir>]
+    FILENAME <header_name>
+    TEMPLATE_FILE <template_file>
+    [LIBRARY_NAME <library_name>]
+    [GEN_DIR <gen_dir>]
     [INSTALL_DESTINATION <install_destination>]
-    [VERSION <version>]
+    [TEMPLATE_VARIABLES <var1> <var2> ...]
+    [SKIP_INSTALL]
 )
 
 Type: function
 
 Description:
-  Generate a warning header for a target.
+    Same as configure_file, but for target-specific generated headers.
+    The generated header is added to the target's include directories and scheduled for installation
+    (unless SKIP_INSTALL is specified).
 
 Arguments:
-    target_name - The target.
-    visibility - Visibility scope.
-    SKIP_INSTALL - Skip installation.
-    FILENAME - Output filename (default: <target_name>/warning.hpp).
-    HEADER_DIR - Directory where the header is generated.
-    INSTALL_DESTINATION - Install destination.
-    VERSION - The version string to include in the generated header. Otherwise uses the target's VERSION property, and otherwise the PROJECT_VERSION.
+    target_name - The target to which the header belongs.
+    visibility - Visibility scope (PRIVATE, PUBLIC, INTERFACE).
+    FILENAME - The relative path/name of the generated header (e.g., "my_project/my_header.hpp").
+                  Must be a relative path. This determines how the file is included (e.g., #include <FILENAME>).
+                  Default: <LIBRARY_NAME>/<header_filename>.hpp
+    TEMPLATE_FILE - Path to the template file.
+    LIBRARY_NAME - Name of the library. Used to create valid C identifiers.
+                   LIBRARY_NAME will be used to create JRL_LIBRARY_NAME and JRL_LIBRARY_NAME_UPPERCASE variables for the template.
+                   Default: <target_name>.
+    GEN_DIR - Directory where the header is generated (default: ${CMAKE_CURRENT_BINARY_DIR}/generated/include).
+              GEN_DIR will be added to the target's include directories with the specified visibility.
+    INSTALL_DESTINATION - Install destination (default: ${CMAKE_INSTALL_INCLUDEDIR}).
+    TEMPLATE_VARIABLES - List of variables to be expanded in the template (they must be defined in the calling scope).
+    SKIP_INSTALL - Do not install the generated header.
 
 Example:
 ```cmake
-jrl_target_generate_warning_header(my_target PUBLIC)
+_jrl_target_generate_header(mylib PUBLIC
+    FILENAME my_project/my_header.hh
+    TEMPLATE_FILE ${CMAKE_CURRENT_SOURCE_DIR}/templates/my_header.hpp.in
+    LIBRARY_NAME my_project
+    TEMPLATE_VARIABLES "VAR1;VAR2"
+    INSTALL_DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
 ```
 #]============================================================================]
-function(jrl_target_generate_warning_header target_name visibility)
+function(_jrl_target_generate_header target_name visibility)
     set(options SKIP_INSTALL)
-    set(oneValueArgs FILENAME HEADER_DIR INSTALL_DESTINATION VERSION)
-    set(multiValueArgs)
+    set(oneValueArgs
+        LIBRARY_NAME
+        FILENAME
+        TEMPLATE_FILE
+        INSTALL_DESTINATION
+        GEN_DIR
+    )
+    set(multiValueArgs TEMPLATE_VARIABLES)
     cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-    _jrl_check_var_defined(CMAKE_INSTALL_INCLUDEDIR)
+    _jrl_check_target_exists(${target_name})
+    _jrl_check_valid_visibility(${visibility})
+    _jrl_check_var_defined(arg_TEMPLATE_FILE)
+    _jrl_check_file_exists(${arg_TEMPLATE_FILE})
 
-    set(filename ${target_name}/warning.hpp)
+    if(arg_LIBRARY_NAME)
+        set(library_name ${arg_LIBRARY_NAME})
+    else()
+        set(library_name ${target_name})
+    endif()
+
+    _jrl_make_valid_c_identifier(${library_name} JRL_LIBRARY_NAME)
+    string(TOUPPER ${JRL_LIBRARY_NAME} JRL_LIBRARY_NAME_UPPERCASE)
+
+    if(arg_TEMPLATE_VARIABLES)
+        set(template_variables ${arg_TEMPLATE_VARIABLES})
+    else()
+        set(template_variables "")
+    endif()
+
+    list(APPEND template_variables JRL_LIBRARY_NAME)
+    list(APPEND template_variables JRL_LIBRARY_NAME_UPPERCASE)
+
     if(arg_FILENAME)
-        set(filename ${arg_FILENAME})
+        if(IS_ABSOLUTE ${arg_FILENAME})
+            message(
+                FATAL_ERROR
+                "FILENAME argument must be a relative path (ex: mylib/myheader.hpp), got absolute path: ${arg_FILENAME}"
+            )
+        endif()
+        set(header_name ${arg_FILENAME})
+    else()
+        # Extract header name from template filename
+        # Ex: /path/to/header_filename.hpp.in -> header_filename.hpp
+        # Ex: header_filename.hpp.in -> header_filename.hpp
+        cmake_path(REMOVE_EXTENSION arg_TEMPLATE_FILE LAST_ONLY OUTPUT_VARIABLE header_filepath)
+        cmake_path(GET header_filepath FILENAME header_filename)
+        set(header_name ${library_name}/${header_filename})
     endif()
 
-    set(header_dir ${CMAKE_CURRENT_BINARY_DIR}/generated/include)
-    if(arg_HEADER_DIR)
-        set(header_dir ${arg_HEADER_DIR})
+    if(arg_GEN_DIR)
+        set(gen_dir ${arg_GEN_DIR})
+    else()
+        set(gen_dir ${CMAKE_CURRENT_BINARY_DIR}/generated/include)
     endif()
 
-    set(install_destination ${CMAKE_INSTALL_INCLUDEDIR}/${target_name})
     if(arg_INSTALL_DESTINATION)
         set(install_destination ${arg_INSTALL_DESTINATION})
+    else()
+        _jrl_check_var_defined(CMAKE_INSTALL_INCLUDEDIR)
+        set(install_destination ${CMAKE_INSTALL_INCLUDEDIR})
     endif()
 
-    set(skip_install "")
+    if(arg_TEMPLATE_VARIABLES)
+        foreach(var_name IN LISTS arg_TEMPLATE_VARIABLES)
+            set(${var_name} ${${var_name}})
+        endforeach()
+    endif()
+
+    set(output_filepath ${gen_dir}/${header_name})
+
+    configure_file(${arg_TEMPLATE_FILE} ${output_filepath} @ONLY)
+
+    target_include_directories(${target_name} ${visibility} $<BUILD_INTERFACE:${gen_dir}>)
+
     if(arg_SKIP_INSTALL)
-        set(skip_install SKIP_INSTALL)
+        return()
     endif()
 
-    _jrl_templates_dir(templates_dir)
-    jrl_target_generate_header(${target_name} ${visibility}
-        FILENAME ${filename}
-        HEADER_DIR ${header_dir}
-        TEMPLATE_FILE ${templates_dir}/warning.hpp.in
+    jrl_target_headers(${target_name} ${visibility}
+        HEADERS ${output_filepath}
+        BASE_DIRS ${gen_dir}
         INSTALL_DESTINATION ${install_destination}
-        VERSION ${arg_VERSION}
-        ${skip_install}
+    )
+endfunction()
+
+#[============================================================================[
+jrl_target_generate_warning_header(
+    [<args>...]
+)
+
+Type: function
+
+Description:
+
+Arguments:
+    <args>... - Additional arguments passed to _jrl_target_generate_header.
+
+Example:
+```cmake
+jrl_target_generate_warning_header(my_target PUBLIC
+    LIBRARY_NAME mylib
+    FILENAME mylib/warning.hh
+)
+```
+#]============================================================================]
+function(jrl_target_generate_warning_header)
+    _jrl_templates_dir(templates_dir)
+    _jrl_target_generate_header(
+        ${ARGV}
+        TEMPLATE_FILE ${templates_dir}/warning.hpp.in
     )
 endfunction()
 
 #[============================================================================[
 jrl_target_generate_deprecated_header(
-    <target_name>
-    <visibility>
-    [SKIP_INSTALL]
-    [FILENAME <filename>]
-    [HEADER_DIR <header_dir>]
-    [INSTALL_DESTINATION <install_destination>]
-    [VERSION <version>]
+    [<args>...]
 )
 
 Type: function
 
 Description:
-  Generate a deprecated header for a target.
+    Generate a <library_name>/deprecated.hpp header for a target.
 
 Arguments:
-    target_name - The target.
-    visibility - Visibility scope.
-    SKIP_INSTALL - Skip installation.
-    FILENAME - Output filename (default: <target_name>/deprecated.hpp).
-    HEADER_DIR - Directory where the header is generated.
-    INSTALL_DESTINATION - Install destination.
-    VERSION - The version string to include in the generated header. Otherwise uses the target's VERSION property, and otherwise the PROJECT_VERSION.
+    <args>... - Additional arguments passed to _jrl_target_generate_header.
 
 Example:
 ```cmake
-jrl_target_generate_deprecated_header(my_target PUBLIC)
+jrl_target_generate_deprecated_header(my_target PUBLIC
+    LIBRARY_NAME mylib
+    FILENAME mylib/deprecated.hh
+)
 ```
 #]============================================================================]
-function(jrl_target_generate_deprecated_header target_name visibility)
-    set(options SKIP_INSTALL)
-    set(oneValueArgs FILENAME HEADER_DIR INSTALL_DESTINATION VERSION)
-    set(multiValueArgs)
-    cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
-
-    _jrl_check_var_defined(CMAKE_INSTALL_INCLUDEDIR)
-
-    set(filename ${target_name}/deprecated.hpp)
-    if(arg_FILENAME)
-        set(filename ${arg_FILENAME})
-    endif()
-
-    set(header_dir ${CMAKE_CURRENT_BINARY_DIR}/generated/include)
-    if(arg_HEADER_DIR)
-        set(header_dir ${arg_HEADER_DIR})
-    endif()
-
-    set(install_destination ${CMAKE_INSTALL_INCLUDEDIR}/${target_name})
-    if(arg_INSTALL_DESTINATION)
-        set(install_destination ${arg_INSTALL_DESTINATION})
-    endif()
-
-    set(skip_install "")
-    if(arg_SKIP_INSTALL)
-        set(skip_install SKIP_INSTALL)
-    endif()
-
+function(jrl_target_generate_deprecated_header)
     _jrl_templates_dir(templates_dir)
-    jrl_target_generate_header(${target_name} ${visibility}
-        FILENAME ${filename}
-        HEADER_DIR ${header_dir}
+    _jrl_target_generate_header(
+        ${ARGV}
         TEMPLATE_FILE ${templates_dir}/deprecated.hpp.in
-        INSTALL_DESTINATION ${install_destination}
-        VERSION ${arg_VERSION}
-        ${skip_install}
-    )
-endfunction()
-
-#[============================================================================[
-jrl_target_generate_config_header(
-    <target_name>
-    <visibility>
-    [SKIP_INSTALL]
-    [FILENAME <filename>]
-    [HEADER_DIR <header_dir>]
-    [INSTALL_DESTINATION <install_destination>]
-    [VERSION <version>]
-)
-
-Type: function
-
-Description:
-  Generate a config header file for a target.
-  This function creates a CMake-generated header file containing configuration
-  information for the specified target. The header is automatically configured
-  with version information and other relevant settings. It will be added to the
-  include directories of the target with the specified visibility, and installed
-  automatically (using jrl_target_headers) unless SKIP_INSTALL is specified.
-
-Arguments:
-    target_name - The name of the target for which to generate the config header.
-    visibility - The visibility scope for the generated header (e.g., PUBLIC, PRIVATE, INTERFACE).
-    SKIP_INSTALL - If specified, the generated header will not be installed.
-    FILENAME - The name of the output header file to generate. Not the full path, just the filename.
-    HEADER_DIR - The directory where the header file will be generated. The generated header will be at HEADER_DIR/FILENAME.
-    INSTALL_DESTINATION - The installation path for the generated header file (relative to CMAKE_INSTALL_PREFIX).
-    VERSION - The version string to include in the generated header. Otherwise uses the target's VERSION property, and otherwise the PROJECT_VERSION.
-
-Example:
-```cmake
-jrl_target_generate_config_header(my_target PUBLIC
-    FILENAME my_config.hpp
-    HEADER_DIR ${CMAKE_CURRENT_BINARY_DIR}/include
-    INSTALL_DESTINATION include
-    VERSION 1.0.0
-)
-```
-#]============================================================================]
-function(jrl_target_generate_config_header target_name visibility)
-    set(options SKIP_INSTALL)
-    set(oneValueArgs FILENAME HEADER_DIR INSTALL_DESTINATION VERSION)
-    set(multiValueArgs)
-    cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
-
-    _jrl_check_var_defined(CMAKE_INSTALL_INCLUDEDIR)
-
-    set(filename ${target_name}/config.hpp)
-    if(arg_FILENAME)
-        set(filename ${arg_FILENAME})
-    endif()
-
-    set(header_dir ${CMAKE_CURRENT_BINARY_DIR}/generated/include)
-    if(arg_HEADER_DIR)
-        set(header_dir ${arg_HEADER_DIR})
-    endif()
-
-    set(install_destination ${CMAKE_INSTALL_INCLUDEDIR}/${target_name})
-    if(arg_INSTALL_DESTINATION)
-        set(install_destination ${arg_INSTALL_DESTINATION})
-    endif()
-
-    set(skip_install "")
-    if(arg_SKIP_INSTALL)
-        set(skip_install SKIP_INSTALL)
-    endif()
-
-    _jrl_templates_dir(templates_dir)
-    jrl_target_generate_header(${target_name} ${visibility}
-        FILENAME ${filename}
-        HEADER_DIR ${header_dir}
-        TEMPLATE_FILE ${templates_dir}/config.hpp.in
-        INSTALL_DESTINATION ${install_destination}
-        VERSION ${arg_VERSION}
-        ${skip_install}
     )
 endfunction()
 
 #[============================================================================[
 jrl_target_generate_tracy_header(
-    <target_name>
-    <visibility>
-    [SKIP_INSTALL]
-    [FILENAME <filename>]
-    [HEADER_DIR <header_dir>]
-    [INSTALL_DESTINATION <install_destination>]
-    [VERSION <version>]
+    [<args>...]
 )
 
 Type: function
 
 Description:
-  Generate a Tracy header for a target.
+    Generate a <library_name>/tracy.hpp header for a target.
 
 Arguments:
-    target_name - The target.
-    visibility - Visibility scope.
-    SKIP_INSTALL - Skip installation.
-    FILENAME - Output filename (default: <target_name>/tracy.hpp).
-    HEADER_DIR - Directory where the header is generated.
-    INSTALL_DESTINATION - Install destination.
-    VERSION - The version string to include in the generated header. Otherwise uses the target's VERSION property, and otherwise the PROJECT_VERSION.
+    <args>... - Additional arguments passed to _jrl_target_generate_header.
 
 Example:
 ```cmake
-jrl_target_generate_tracy_header(my_target PUBLIC)
+jrl_target_generate_tracy_header(my_target PUBLIC
+    LIBRARY_NAME mylib
+    FILENAME mylib/tracy.hh
+)
 ```
 #]============================================================================]
-function(jrl_target_generate_tracy_header target_name visibility)
-    set(options SKIP_INSTALL)
-    set(oneValueArgs FILENAME HEADER_DIR INSTALL_DESTINATION VERSION)
+function(jrl_target_generate_tracy_header)
+    _jrl_templates_dir(templates_dir)
+    _jrl_target_generate_header(
+        ${ARGV}
+        TEMPLATE_FILE ${templates_dir}/tracy.hpp.in
+    )
+endfunction()
+
+#[============================================================================[
+jrl_target_generate_config_header(
+    [VERSION <version>]
+    [<args>...]
+)
+
+Type: function
+
+Description:
+    Generate a config header for a target.
+    The generated header is added to the target's include directories and scheduled for installation
+    (via jrl_export_package()).
+
+Arguments:
+    VERSION - The version string to include in the generated header. Otherwise uses the target's VERSION property, and otherwise the PROJECT_VERSION.
+    <args>... - Additional arguments passed to _jrl_target_generate_header.
+
+
+Example:
+```cmake
+jrl_target_generate_config_header(mylib PUBLIC)
+# Will generate mylib/config.hpp. Use with #include "mylib/config.hpp"
+# This header will be installed automatically with the mylib target (via jrl_export_package()).
+
+jrl_target_generate_config_header(mylib PRIVATE)
+# Will generate mylib/config.hpp. Use with #include "mylib/config.hpp"
+# This header will NOT be installed automatically.
+
+jrl_target_generate_config_header(mylib INTERFACE
+  LIBRARY_NAME myproject
+  VERSION ${PROJECT_VERSION}
+)
+# Will generate myproject/config.hh. Use with #include "myproject/config.hh"
+# Inside you will find MYPROJECT_LIBRARY_VERSION macros (not MYLIB_LIBRARY_VERSION).
+```
+#]============================================================================]
+function(jrl_target_generate_config_header target_name visibility)
+    set(options)
+    set(oneValueArgs VERSION)
     set(multiValueArgs)
     cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-    _jrl_check_var_defined(CMAKE_INSTALL_INCLUDEDIR)
+    _jrl_check_target_exists(${target_name})
+    _jrl_check_valid_visibility(${visibility})
 
-    set(filename ${target_name}/tracy.hpp)
-    if(arg_FILENAME)
-        set(filename ${arg_FILENAME})
+    if(arg_VERSION)
+        set(library_version ${arg_VERSION})
+    else()
+        get_property(library_version TARGET ${target_name} PROPERTY VERSION)
+        if(NOT library_version)
+            message(
+                WARNING
+                "Target ${target_name} does not have a VERSION property set, using the project version instead (PROJECT_VERSION=${PROJECT_VERSION}).
+            To remove this warning, set the VERSION property on the target using:
+
+                set_target_properties(${target_name} PROPERTIES VERSION \${PROJECT_VERSION})
+            "
+            )
+            set(library_version ${PROJECT_VERSION})
+        endif()
     endif()
 
-    set(header_dir ${CMAKE_CURRENT_BINARY_DIR}/generated/include)
-    if(arg_HEADER_DIR)
-        set(header_dir ${arg_HEADER_DIR})
-    endif()
+    _jrl_normalize_version(${library_version}
+        VERSION_FULL JRL_LIBRARY_VERSION
+        VERSION_MAJOR JRL_LIBRARY_VERSION_MAJOR
+        VERSION_MINOR JRL_LIBRARY_VERSION_MINOR
+        VERSION_PATCH JRL_LIBRARY_VERSION_PATCH
+    )
 
-    set(install_destination ${CMAKE_INSTALL_INCLUDEDIR}/${target_name})
-    if(arg_INSTALL_DESTINATION)
-        set(install_destination ${arg_INSTALL_DESTINATION})
-    endif()
-
-    set(skip_install "")
-    if(arg_SKIP_INSTALL)
-        set(skip_install SKIP_INSTALL)
-    endif()
+    set(template_variables
+        JRL_LIBRARY_VERSION
+        JRL_LIBRARY_VERSION_MAJOR
+        JRL_LIBRARY_VERSION_MINOR
+        JRL_LIBRARY_VERSION_PATCH
+    )
 
     _jrl_templates_dir(templates_dir)
-    jrl_target_generate_header(${target_name} ${visibility}
-        FILENAME ${filename}
-        HEADER_DIR ${header_dir}
-        TEMPLATE_FILE ${templates_dir}/tracy.hpp.in
-        INSTALL_DESTINATION ${install_destination}
-        VERSION ${arg_VERSION}
-        ${skip_install}
+    _jrl_target_generate_header(${target_name} ${visibility}
+        ${ARGN}
+        TEMPLATE_FILE ${templates_dir}/config.hpp.in
+        TEMPLATE_VARIABLES ${template_variables}
     )
 endfunction()
 
@@ -2355,8 +2320,8 @@ function(jrl_export_package)
     endif()
 
     # <package>-config.cmake
-    set(__JRL_PACKAGE_CONFIG_EXTRA_CONTENT__ ${arg_PACKAGE_CONFIG_EXTRA_CONTENT})
-    set(__JRL_PROJECT_COMPONENTS__ ${declared_components})
+    set(JRL_PACKAGE_CONFIG_EXTRA_CONTENT ${arg_PACKAGE_CONFIG_EXTRA_CONTENT})
+    set(JRL_PROJECT_COMPONENTS ${declared_components})
     configure_package_config_file(
         ${package_config_template}
         ${GEN_DIR}/${PACKAGE_CONFIG_FILENAME}
