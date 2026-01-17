@@ -291,15 +291,6 @@ _jrl_integrate_modules()
 ```
 #]============================================================================]
 function(_jrl_integrate_modules)
-    _jrl_external_modules_dir(external_modules_dir)
-
-    # Adding the pytest_discover_tests function for pytest
-    # repo: https://github.com/python-cmake/pytest-cmake
-    include(${external_modules_dir}/pytest-cmake/PytestDiscoverTests.cmake)
-    # Adding the boosttest_discover_tests function for Boost Unit Testing
-    # repo: https://github.com/DenizThatMenace/cmake-modules
-    include(${external_modules_dir}/boost-test/BoostTestDiscoverTests.cmake)
-
     include(${CMAKE_CURRENT_FUNCTION_LIST_DIR}/PrintSystemInfo.cmake)
 endfunction()
 
