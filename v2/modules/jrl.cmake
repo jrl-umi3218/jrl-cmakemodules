@@ -250,6 +250,8 @@ _jrl_top_dir(TOP_DIR)
 #]============================================================================]
 function(_jrl_top_dir output_var)
     cmake_path(CONVERT "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/.." TO_CMAKE_PATH_LIST top_dir NORMALIZE)
+    # remove trailing slash if any
+    string(REGEX REPLACE "/$" "" top_dir "${top_dir}")
     _jrl_check_dir_exists(${top_dir})
     set(${output_var} ${top_dir} PARENT_SCOPE)
 endfunction()
