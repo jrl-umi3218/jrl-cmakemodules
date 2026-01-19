@@ -287,6 +287,36 @@ function(_jrl_templates_dir output_var)
 endfunction()
 
 #[============================================================================[
+# `_jrl_docs_dir`
+
+```cpp
+_jrl_docs_dir(<output_var>)
+```
+
+**Type:** function
+
+
+### Description
+  Get the docs directory of the jrl-cmakemodules v2 repository.
+
+
+### Arguments
+* `output_var`: Variable to store the docs directory path.
+
+
+### Example
+```cmake
+_jrl_docs_dir(docs_dir)
+```
+#]============================================================================]
+function(_jrl_docs_dir output_var)
+    _jrl_top_dir(top_dir)
+    set(docs_dir ${top_dir}/docs)
+    _jrl_check_dir_exists(${docs_dir})
+    set(${output_var} ${docs_dir} PARENT_SCOPE)
+endfunction()
+
+#[============================================================================[
 # `_jrl_external_modules_dir`
 
 ```cpp
