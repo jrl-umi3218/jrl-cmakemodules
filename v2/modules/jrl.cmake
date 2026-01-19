@@ -4085,3 +4085,65 @@ function(jrl_generate_ros2_package_files)
         )
     endif()
 endfunction()
+
+#[============================================================================[
+# `_jrl_generate_api_doc`
+
+```cpp
+_jrl_generate_api_doc(
+    <input_file>
+    <output_file>
+)
+```
+
+**Type:** function
+
+
+### Description
+  Parses the input CMake file for documentations block and
+  generates a Markdown file with their content.
+
+
+### Arguments
+* `input_file`: The CMake file to parse.
+* `output_file`: The Markdown file to generate.
+
+
+### Example
+```cmake
+_jrl_generate_api_doc(${CMAKE_CURRENT_LIST_FILE} "API.md")
+# or using the command line:
+cmake -DGENERATE_API_DOC=ON -P v2/modules/jrl.cmake
+```
+#]============================================================================]
+function(_jrl_generate_api_doc input_file output_file)
+    _jrl_check_file_exists(${input_file})
+
+    file(STRINGS "${input_file}" content)
+
+    set(markdown_content "")
+    set(regex_start "^#\\[=+\\[")
+    set(regex_end "#\\]=+\\]$")
+
+    foreach(line IN LISTS content)
+        if(line MATCHES "${regex_start}" AND line MATCHES "${regex_end}")
+            # remove first and last element on the string (the comment delimiters)
+            string(REGEX REPLACE "${regex_start}" "" line "${line}")
+            string(REGEX REPLACE "${regex_end}" "" line "${line}")
+
+            string(REPLACE ";" "\n" doc_block "${line}")
+            string(APPEND markdown_content "${doc_block}\n")
+        endif()
+    endforeach()
+
+    set(JRL_API_DOCUMENTATION "${markdown_content}")
+
+    _jrl_templates_dir(templates_dir)
+    configure_file(${templates_dir}/api.md.in ${output_file} @ONLY)
+    message(STATUS "API documentation generated at '${output_file}'")
+endfunction()
+
+if(GENERATE_API_DOC)
+    _jrl_docs_dir(docs_dir)
+    _jrl_generate_api_doc(${CMAKE_CURRENT_LIST_FILE} ${docs_dir}/api.md)
+endif()
