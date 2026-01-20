@@ -6,8 +6,16 @@ project(jrl-cmakemodules VERSION 2.0.0)
 set(jrl-cmakemodules_VERSION ${PROJECT_VERSION} CACHE STRING "Version of jrl-cmakemodules")
 include(${CMAKE_CURRENT_SOURCE_DIR}/modules/jrl.cmake)
 
-option(JRL_CMAKEMODULES_V2_BUILD_TESTS "Build the tests for jrl-cmakemodules-v2" OFF)
-if(JRL_CMAKEMODULES_V2_BUILD_TESTS)
+option(JRL_GENERATE_DOCUMENTATION "Generate the documentation for jrl-cmakemodules (v2)" OFF)
+if(JRL_GENERATE_DOCUMENTATION)
+    _jrl_generate_api_doc(
+        ${CMAKE_CURRENT_SOURCE_DIR}/modules/jrl.cmake
+        ${CMAKE_CURRENT_SOURCE_DIR}/docs/api.md
+    )
+endif()
+
+option(JRL_CMAKEMODULES_BUILD_TESTS "Build the tests for jrl-cmakemodules (v2)" OFF)
+if(JRL_CMAKEMODULES_BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)
 endif()
