@@ -1053,10 +1053,10 @@ jrl_target_generate_config_header(mylib INTERFACE
 ```
 
 
-# `jrl_search_package_module_file`
+# `_jrl_search_package_module_file`
 
 ```cpp
-jrl_search_package_module_file(
+_jrl_search_package_module_file(
     <package_name>
     <output_filepath>
 )
@@ -1078,7 +1078,7 @@ jrl_search_package_module_file(
 
 ### Example
 ```cmake
-jrl_search_package_module_file(Eigen module_file)
+_jrl_search_package_module_file(Eigen module_file)
 ```
 
 
@@ -1137,39 +1137,6 @@ jrl_print_dependencies_summary()
 ### Example
 ```cmake
 jrl_print_dependencies_summary()
-```
-
-
-# `jrl_cmake_print_properties`
-
-```cpp
-jrl_cmake_print_properties(
-    <mode> <items>
-    PROPERTIES <property1> <property2> ...
-    [VERBOSITY <verbosity_level>]
-    [OUTPUT_VARIABLE <var_name>]
-)
-```
-
-**Type:** function
-
-
-### Description
-  Print properties of targets, sources, tests, directories, or cache entries.
-  This is taken and adapted from cmake's own cmake_print_properties function to add verbosity control and print only found properties.
-
-
-### Arguments
-* `mode`: TARGETS, SOURCES, TESTS, DIRECTORIES, or CACHE_ENTRIES.
-* `items`: List of items to print properties for.
-* `PROPERTIES`: List of properties to print.
-* `VERBOSITY`: Verbosity level (default: STATUS).
-* `OUTPUT_VARIABLE`: Variable to store the output.
-
-
-### Example
-```cmake
-jrl_cmake_print_properties(TARGETS my_target PROPERTIES NAME VERSION)
 ```
 
 
