@@ -1691,10 +1691,10 @@ function(jrl_target_generate_config_header target_name visibility)
 endfunction()
 
 #[============================================================================[
-# `jrl_search_package_module_file`
+# `_jrl_search_package_module_file`
 
 ```cpp
-jrl_search_package_module_file(
+_jrl_search_package_module_file(
     <package_name>
     <output_filepath>
 )
@@ -1716,10 +1716,10 @@ jrl_search_package_module_file(
 
 ### Example
 ```cmake
-jrl_search_package_module_file(Eigen module_file)
+_jrl_search_package_module_file(Eigen module_file)
 ```
 #]============================================================================]
-function(jrl_search_package_module_file package_name output_filepath)
+function(_jrl_search_package_module_file package_name output_filepath)
     set(module_filename "Find${package_name}.cmake")
     set(found_module_file "")
     # QUESTION: Should we look into cmake builtin modules?
@@ -1795,7 +1795,7 @@ macro(jrl_find_package)
     else()
         # search for the module file only if CONFIG is not in the find_package args
         if(NOT "CONFIG" IN_LIST find_package_args)
-            jrl_search_package_module_file(${package_name} module_file)
+            _jrl_search_package_module_file(${package_name} module_file)
         endif()
     endif()
 
