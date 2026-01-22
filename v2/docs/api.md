@@ -1137,16 +1137,23 @@ jrl_python_compute_install_dir(<output>)
 
 
 ### Description
-  Compute the installation directory for Python bindings.
- * If ${PROJECT_NAME}_PYTHON_INSTALL_DIR is defined, its value is used.
- * Otherwise, if running inside a Conda environment on Windows, an
-   absolute path to `sysconfig.get_path('purelib')` is returned.
- * In all other cases, the relative path to site-packages is returned.
+    Compute the installation directory for Python libraries.
+    It chooses the installation based using the following priority:
+ 1. If ${PROJECT_NAME}_PYTHON_INSTALL_DIR is defined, its value is used.
+    Usually passed via CMake command line: -D${PROJECT_NAME}_PYTHON_INSTALL_DIR=<path>
+    It is usually an absolute path to a specific site-packages folder.
+ 2. If ${PROJECT_NAME}_PYTHON_INSTALL_DIR **environment** variable is defined, its value is used.
+ 3. If running inside a Conda environment, on Windows, the absolute path to site-packages is used.
+    It is the return value of: `sysconfig.get_path('purelib')`.
+    Example: `C:/Users/You/Miniconda3/envs/myenv/Lib/site-packages`
+ 4. The relative path to site-packages is used.
+    It is the result of: `sysconfig.get_path('purelib')).relative_to(sysconfig.get_path('data')`
+    Example: `lib/python3.11/site-packages`
 
-### Windows Layout
+#### Conda Windows Layout
 
-On conda, the site-packages is located in the `Lib\site-packages` folder,
-but the conda native libraries (DLLs) are located in the `Library\bin` folder.
+On Conda Windows, the site-packages is located in the `Lib\site-packages` folder,
+but the Conda native libraries (DLLs) are located in the `Library\bin` folder.
 CMAKE_INSTALL_PREFIX is set to CMAKE_INSTALL_PREFIX=%PREFIX%\Library.
 But the python libraries are installed in %PREFIX%\Lib\site-packages.
 
@@ -1175,7 +1182,10 @@ C:\Users\You\Miniconda3\envs\myenv
  ...
 ```
 
-### Linux & macOS Layout (Unix)
+#### Conda Linux & macOS Layout (Unix)
+
+On Unix Conda environments, the site-packages is located in the `lib/pythonX.Y/site-packages` folder,
+and the Conda native libraries are located in the `lib/` folder, just like a standard installation.
 
 ```
 /home/user/miniconda3/envs/myenv/
