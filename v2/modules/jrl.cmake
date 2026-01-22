@@ -2907,6 +2907,7 @@ jrl_find_nanobind([<args>...])
 ### Description
   Shortcut to find the nanobind package.
   It forwards all arguments to find_package(nanobind ...).
+  Needs the python interpreter to be found first via jrl_find_python().
 
 
 ### Arguments
@@ -2915,21 +2916,12 @@ jrl_find_nanobind([<args>...])
 
 ### Example
 ```cmake
-jrl_find_nanobind(CONFIG REQUIRED)
-jrl_find_nanobind(3.8 CONFIG REQUIRED)
+jrl_find_python(3.8 REQUIRED COMPONENTS Interpreter Development.Module)
+jrl_find_nanobind(2.5.0 CONFIG REQUIRED)
 ```
 #]============================================================================]
 macro(jrl_find_nanobind)
-    string(REPLACE ";" " " args_pp "${ARGN}")
-    _jrl_check_var_defined(Python_EXECUTABLE "Python executable not found (variable Python_EXECUTABLE).
-
-    Please call jrl_find_python(<args>) first, e.g.:
-
-        jrl_find_python(3.8 REQUIRED COMPONENTS Interpreter Development.Module)
-        jrl_find_package(nanobind ${args_pp})
-    "
-    )
-    unset(args_pp)
+    jrl_python_get_interpreter(python)
 
     if("REQUIRED" IN_LIST ARGN)
         set(is_required True)
@@ -2938,7 +2930,7 @@ macro(jrl_find_nanobind)
     # Detect the installed nanobind package and import it into CMake
     # ref: https://nanobind.readthedocs.io/en/latest/building.html#finding-nanobind
     execute_process(
-        COMMAND ${Python_EXECUTABLE} -m nanobind --cmake_dir
+        COMMAND ${python} -m nanobind --cmake_dir
         OUTPUT_STRIP_TRAILING_WHITESPACE
         OUTPUT_VARIABLE nanobind_ROOT
         ERROR_VARIABLE nanobind_error
