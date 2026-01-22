@@ -1191,48 +1191,6 @@ function(jrl_target_treat_all_warnings_as_errors target_name visibility)
 endfunction()
 
 #[============================================================================[
-# `_jrl_make_valid_c_identifier`
-
-```cpp
-_jrl_make_valid_c_identifier(<input_str> <output_var>)
-```
-
-**Type:** function
-
-
-### Description
-  Creates a valid C identifier from an input string.
-  1. Replace all non-alphanumeric and non-underscore characters with underscores.
-  2. If it starts with a digit, prefix with underscore.
-  3. Collapse multiple consecutive underscores.
-  4. Remove trailing underscores.
-
-
-### Arguments
-* `input_str`: The input string.
-* `output_var`: The variable to store the result.
-
-
-### Example
-```cmake
-_jrl_make_valid_c_identifier("my-lib.v1" ID)
-# ID is "my_lib_v1"
-```
-#]============================================================================]
-function(_jrl_make_valid_c_identifier input_str output_var)
-    string(REGEX REPLACE "[^A-Za-z0-9_]" "_" ci "${input_str}")
-
-    string(REGEX MATCH "^[0-9]" STARTS_WITH_DIGIT "${ci}")
-    if(STARTS_WITH_DIGIT)
-        set(ci "_${ci}")
-    endif()
-    string(REGEX REPLACE "_+" "_" ci "${ci}")
-    string(REGEX REPLACE "_$" "" ci "${ci}")
-
-    set(${output_var} "${ci}" PARENT_SCOPE)
-endfunction()
-
-#[============================================================================[
 # `_jrl_normalize_version`
 
 ```cpp
@@ -1427,7 +1385,7 @@ function(_jrl_target_generate_header target_name visibility)
         set(library_name ${target_name})
     endif()
 
-    _jrl_make_valid_c_identifier(${library_name} JRL_LIBRARY_NAME)
+    string(MAKE_C_IDENTIFIER ${library_name} JRL_LIBRARY_NAME)
     string(TOUPPER ${JRL_LIBRARY_NAME} JRL_LIBRARY_NAME_UPPERCASE)
 
     if(arg_TEMPLATE_VARIABLES)
