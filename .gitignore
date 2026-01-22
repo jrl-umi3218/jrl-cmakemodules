@@ -5,3 +5,4 @@ _unittests/install/
 build*/
 install*/
 .DS_Store
+.ruff_cache/
