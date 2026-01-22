@@ -4072,28 +4072,47 @@ cmake -DGENERATE_API_DOC=ON -P v2/modules/jrl.cmake
 function(_jrl_generate_api_doc input_file output_file)
     _jrl_check_file_exists(${input_file})
 
-    file(STRINGS "${input_file}" content)
+    file(READ "${input_file}" content_raw)
+    string(REGEX REPLACE "\r" "" content_raw "${content_raw}")
+
+    # Escape semicolons so list operations don't split content.
+    string(REPLACE ";" "\\;" content_escaped "${content_raw}")
+
+    # Mark doc block boundaries.
+    set(doc_start "__JRL_DOC_START__")
+    set(doc_end "__JRL_DOC_END__")
+    string(
+        REGEX REPLACE
+        "(^|\n)[ \t]*#\\[=+\\[[ \t]*\n"
+        "\\1${doc_start}"
+        content_marked
+        "${content_escaped}"
+    )
+    string(REGEX REPLACE "\n[ \t]*#\\]=+\\][ \t]*" "${doc_end}" content_marked "${content_marked}")
+
+    # Split on doc-start token.
+    string(REPLACE "${doc_start}" ";" content_blocks "${content_marked}")
 
     set(markdown_content "")
-    set(regex_start "^#\\[=+\\[")
-    set(regex_end "#\\]=+\\]$")
 
-    foreach(line IN LISTS content)
-        if(line MATCHES "${regex_start}" AND line MATCHES "${regex_end}")
-            # remove first and last element on the string (the comment delimiters)
-            string(REGEX REPLACE "${regex_start}" "" line "${line}")
-            string(REGEX REPLACE "${regex_end}" "" line "${line}")
+    foreach(block IN LISTS content_blocks)
+        string(FIND "${block}" "${doc_end}" end_pos)
+        if(end_pos EQUAL -1)
+            continue()
+        endif()
 
-            string(REPLACE ";" "\n" doc_block "${line}")
-            string(REGEX MATCH "# `([^`]+)`" _ "${doc_block}")
-            if(CMAKE_MATCH_1)
-                set(doc_name "${CMAKE_MATCH_1}")
-                if(doc_name MATCHES "^_")
-                    message(STATUS "Skipping internal documentation for ${doc_name}")
-                else()
-                    message(STATUS "Processing documentation for ${doc_name}")
-                    string(APPEND markdown_content "${doc_block}\n")
-                endif()
+        string(SUBSTRING "${block}" 0 ${end_pos} doc_block)
+        # Restore escaped semicolons.
+        string(REPLACE "\\;" ";" doc_block "${doc_block}")
+
+        string(REGEX MATCH "# `([^`]+)`" _ "${doc_block}")
+        if(CMAKE_MATCH_1)
+            set(doc_name "${CMAKE_MATCH_1}")
+            if(doc_name MATCHES "^_")
+                message(STATUS "Skipping internal documentation for ${doc_name}")
+            else()
+                message(STATUS "Processing documentation for ${doc_name}")
+                string(APPEND markdown_content "${doc_block}\n")
             endif()
         endif()
     endforeach()
