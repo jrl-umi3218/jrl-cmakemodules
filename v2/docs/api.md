@@ -2,7 +2,6 @@
 
 Generated from _jrl_generate_api_doc() in jrl.cmake
 
-
 # `jrl_copy_compile_commands_in_source_dir`
 
 ```cpp
@@ -25,8 +24,6 @@ jrl_copy_compile_commands_in_source_dir()
 ```cmake
 jrl_copy_compile_commands_in_source_dir()
 ```
-
-
 # `jrl_configure_copy_compile_commands_in_source_dir`
 
 ```cpp
@@ -48,8 +45,6 @@ jrl_configure_copy_compile_commands_in_source_dir()
 ```cmake
 jrl_configure_copy_compile_commands_in_source_dir()
 ```
-
-
 # `jrl_include_ctest`
 
 ```cpp
@@ -71,8 +66,6 @@ jrl_include_ctest()
 ```cmake
 jrl_include_ctest()
 ```
-
-
 # `jrl_cmakemodules_get_version`
 
 ```cpp
@@ -95,8 +88,6 @@ jrl_cmakemodules_get_version(<output_var>)
 jrl_cmakemodules_get_version(v)
 message(STATUS "jrl-cmakemodules version: ${v}")
 ```
-
-
 # `jrl_cmakemodules_get_commit`
 
 ```cpp
@@ -119,8 +110,6 @@ jrl_cmakemodules_get_commit(<output_var>)
 jrl_cmakemodules_get_commit(commit)
 message(STATUS "jrl-cmakemodules commit: ${commit}")
 ```
-
-
 # `jrl_print_banner`
 
 ```cpp
@@ -142,8 +131,6 @@ jrl_print_banner()
 ```cmake
 jrl_print_banner()
 ```
-
-
 # `jrl_configure_default_build_type`
 
 ```cpp
@@ -166,8 +153,6 @@ jrl_configure_default_build_type(<build_type>)
 ```cmake
 jrl_configure_default_build_type(RelWithDebInfo)
 ```
-
-
 # `jrl_configure_default_binary_dirs`
 
 ```cpp
@@ -189,8 +174,6 @@ jrl_configure_default_binary_dirs()
 ```cmake
 jrl_configure_default_binary_dirs()
 ```
-
-
 # `jrl_target_set_output_directory`
 
 ```cpp
@@ -219,8 +202,6 @@ jrl_target_set_output_directory(
 ```cmake
 jrl_target_set_output_directory(my_python_module_target OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/site-packages)
 ```
-
-
 # `jrl_configure_default_install_dirs`
 
 ```cpp
@@ -243,8 +224,6 @@ jrl_configure_default_install_dirs()
 ```cmake
 jrl_configure_default_install_dirs()
 ```
-
-
 # `jrl_configure_default_install_prefix`
 
 ```cpp
@@ -266,8 +245,6 @@ jrl_configure_default_install_prefix(<default_install_prefix>)
 ```cmake
 jrl_configure_default_install_prefix(/opt/my_project)
 ```
-
-
 # `jrl_configure_uninstall_target`
 
 ```cpp
@@ -291,8 +268,6 @@ jrl_configure_uninstall_target()
 jrl_configure_uninstall_target()
 # And then cmake --build . --target uninstall
 ```
-
-
 # `jrl_configure_defaults`
 
 ```cpp
@@ -314,8 +289,6 @@ jrl_configure_defaults()
 ```cmake
 jrl_configure_defaults()
 ```
-
-
 # `jrl_get_cxx_compiler_id`
 
 ```cpp
@@ -339,8 +312,6 @@ jrl_get_cxx_compiler_id(<output_var>)
 jrl_get_cxx_compiler_id(cxx_compiler_id)
 message(STATUS "Compiler ID: ${cxx_compiler_id}")
 ```
-
-
 # `jrl_target_set_default_compile_options`
 
 ```cpp
@@ -367,8 +338,6 @@ jrl_target_set_default_compile_options(
 ```cmake
 jrl_target_set_default_compile_options(my_target INTERFACE)
 ```
-
-
 # `jrl_target_enforce_msvc_conformance`
 
 ```cpp
@@ -395,8 +364,6 @@ jrl_target_enforce_msvc_conformance(
 ```cmake
 jrl_target_enforce_msvc_conformance(my_target INTERFACE)
 ```
-
-
 # `jrl_target_treat_all_warnings_as_errors`
 
 ```cpp
@@ -423,8 +390,6 @@ jrl_target_treat_all_warnings_as_errors(
 ```cmake
 jrl_target_treat_all_warnings_as_errors(my_target PRIVATE)
 ```
-
-
 # `jrl_target_generate_warning_header`
 
 ```cpp
@@ -450,8 +415,6 @@ jrl_target_generate_warning_header(my_target PUBLIC
     FILENAME mylib/warning.hh
 )
 ```
-
-
 # `jrl_target_generate_deprecated_header`
 
 ```cpp
@@ -478,8 +441,6 @@ jrl_target_generate_deprecated_header(my_target PUBLIC
     FILENAME mylib/deprecated.hh
 )
 ```
-
-
 # `jrl_target_generate_tracy_header`
 
 ```cpp
@@ -506,8 +467,6 @@ jrl_target_generate_tracy_header(my_target PUBLIC
     FILENAME mylib/tracy.hh
 )
 ```
-
-
 # `jrl_target_generate_config_header`
 
 ```cpp
@@ -549,8 +508,68 @@ jrl_target_generate_config_header(mylib INTERFACE
 # Will generate myproject/config.hh. Use with #include "myproject/config.hh"
 # Inside you will find MYPROJECT_LIBRARY_VERSION macros (not MYLIB_LIBRARY_VERSION).
 ```
+# `jrl_export_dependency`
+
+```cpp
+jrl_export_dependency(
+        PACKAGE_NAME <name>
+        [FIND_PACKAGE_ARGS <args>...]
+        [PACKAGE_VARIABLES <vars>...]
+        [PACKAGE_TARGETS <targets>...]
+        [MODULE_FILE <path>]
+)
+```
+
+**Type:** function
 
 
+### Description
+Records a dependency discovered with `jrl_find_package()` into a JSON array stored in the
+global property `_jrl_${PROJECT_NAME}_package_dependencies`.
+
+The content of this property is later consumed by `jrl_export_package()` to reverse the link
+between link libraries and the `find_package` calls that provided them.
+
+It is called **automatically** by `jrl_find_package()`.
+
+Note that it could also be useful in scenarios where the dependency that was not
+discovered with jrl_find_package(). In that case, only the package name and the targets
+are relevant.
+
+
+### Arguments
+* `PACKAGE_NAME`: Name of the dependency package (e.g., Eigen3).
+* `FIND_PACKAGE_ARGS`: The arguments originally passed to `find_package()` (list).
+* `PACKAGE_VARIABLES`: Variables created by `find_package()` that should be tracked (list).
+* `PACKAGE_TARGETS`: Imported targets created by `find_package()` that should be tracked (list).
+* `MODULE_FILE`: Absolute path to the Find<Package>.cmake module used, if any.
+
+
+### Example
+```cmake
+# Dummy example
+jrl_export_dependency(
+    PACKAGE_NAME Eigen3
+    FIND_PACKAGE_ARGS "Eigen3;3.4;REQUIRED"
+    PACKAGE_VARIABLES "Eigen3_FOUND;Eigen3_VERSION"
+    PACKAGE_TARGETS "Eigen3::Eigen"
+    MODULE_FILE ${CMAKE_CURRENT_LIST_DIR}/FindEigen3.cmake
+)
+
+# Manual export of a dependency not found with jrl_find_package
+jrl_export_dependency(
+    PACKAGE_NAME MyLib
+    FIND_PACKAGE_ARGS "MyLib;REQUIRED"
+    PACKAGE_TARGETS "MyLib::MyLib"
+)
+# If you `target_link_libraries(my_target PUBLIC MyLib::MyLib)`, then jrl_export_package() will
+# know that MyLib is a dependency of your package, and add the following lines to the generated
+# `<project_name>-config.cmake` file:
+
+if(NOT TARGET MyLib::MyLib)
+    find_dependency(MyLib REQUIRED)
+endif()
+```
 # `jrl_find_package`
 
 ```cpp
@@ -584,8 +603,6 @@ jrl_find_package(
 jrl_find_package(Eigen 3.3 REQUIRED)
 jrl_find_package(Boost REQUIRED COMPONENTS filesystem system)
 ```
-
-
 # `jrl_print_dependencies_summary`
 
 ```cpp
@@ -607,8 +624,6 @@ jrl_print_dependencies_summary()
 ```cmake
 jrl_print_dependencies_summary()
 ```
-
-
 # `jrl_add_export_component`
 
 ```cpp
@@ -637,8 +652,6 @@ jrl_add_export_component(
 ```cmake
 jrl_add_export_component(NAME my_component TARGETS my_target)
 ```
-
-
 # `jrl_target_headers`
 
 ```cpp
@@ -673,8 +686,6 @@ jrl_target_headers(
 ```cmake
 jrl_target_headers(my_target PUBLIC HEADERS my_header.hpp)
 ```
-
-
 # `jrl_target_install_headers`
 
 ```cpp
@@ -702,8 +713,6 @@ jrl_target_install_headers(
 ```cmake
 jrl_target_install_headers(my_target)
 ```
-
-
 # `jrl_install_headers`
 
 ```cpp
@@ -730,8 +739,6 @@ jrl_install_headers(
 ```cmake
 jrl_install_headers()
 ```
-
-
 # `jrl_export_package`
 
 ```cpp
@@ -767,8 +774,6 @@ jrl_export_package(
 ```cmake
 jrl_export_package()
 ```
-
-
 # `jrl_dump_package_dependencies_json`
 
 ```cpp
@@ -792,8 +797,6 @@ jrl_dump_package_dependencies_json(<output>)
 ```cmake
 jrl_dump_package_dependencies_json(my_deps.json)
 ```
-
-
 # `jrl_option`
 
 ```cpp
@@ -823,8 +826,6 @@ jrl_option(
 ```cmake
 jrl_option(BUILD_TESTING "Build the tests" ON)
 ```
-
-
 # `jrl_cmake_dependent_option`
 
 ```cpp
@@ -855,11 +856,8 @@ jrl_cmake_dependent_option(
 
 ### Example
 ```cmake
-jrl_cmake_dependent_option(USE_FOO "Use Foo" ON "USE_BAR
-NOT USE_ZOT" OFF)
+jrl_cmake_dependent_option(USE_FOO "Use Foo" ON "USE_BAR;NOT USE_ZOT" OFF)
 ```
-
-
 # `jrl_print_options_summary`
 
 ```cpp
@@ -881,8 +879,6 @@ jrl_print_options_summary()
 ```cmake
 jrl_print_options_summary()
 ```
-
-
 # `jrl_find_python`
 
 ```cpp
@@ -910,8 +906,6 @@ jrl_find_python(
 ```cmake
 jrl_find_python(3.8 REQUIRED COMPONENTS Interpreter Development.Module)
 ```
-
-
 # `jrl_find_nanobind`
 
 ```cpp
@@ -924,6 +918,7 @@ jrl_find_nanobind([<args>...])
 ### Description
   Shortcut to find the nanobind package.
   It forwards all arguments to find_package(nanobind ...).
+  Needs the python interpreter to be found first via jrl_find_python().
 
 
 ### Arguments
@@ -932,11 +927,9 @@ jrl_find_nanobind([<args>...])
 
 ### Example
 ```cmake
-jrl_find_nanobind(CONFIG REQUIRED)
-jrl_find_nanobind(3.8 CONFIG REQUIRED)
+jrl_find_python(3.8 REQUIRED COMPONENTS Interpreter Development.Module)
+jrl_find_nanobind(2.5.0 CONFIG REQUIRED)
 ```
-
-
 # `jrl_python_get_interpreter`
 
 ```cpp
@@ -959,8 +952,6 @@ jrl_python_get_interpreter(<output_var>)
 jrl_python_get_interpreter(python_interpreter)
 execute_process(COMMAND ${python_interpreter} -c "print('Hello from Python!')")
 ```
-
-
 # `jrl_python_compile_all`
 
 ```cpp
@@ -987,8 +978,6 @@ jrl_python_compile_all(
 ```cmake
 jrl_python_compile_all(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/my_python_package)
 ```
-
-
 # `jrl_python_generate_init_py`
 
 ```cpp
@@ -1026,8 +1015,6 @@ jrl_python_generate_init_py(
     OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib/site-packages/coal/__init__.py
 )
 ```
-
-
 # `jrl_check_python_module`
 
 ```cpp
@@ -1057,8 +1044,6 @@ jrl_check_python_module(
 ```cmake
 jrl_check_python_module(numpy REQUIRED)
 ```
-
-
 # `jrl_python_relative_site_packages`
 
 ```cpp
@@ -1090,8 +1075,6 @@ jrl_python_relative_site_packages(<output>)
     jrl_python_relative_site_packages(python_relative_site_packages)
     message(STATUS "Python relative site-packages: ${python_relative_site_packages}")
 ```
-
-
 
 # `jrl_python_absolute_site_packages`
 
@@ -1125,8 +1108,6 @@ jrl_python_absolute_site_packages(<output>)
     message(STATUS "Python absolute site-packages: ${python_absolute_site_packages}")
 ```
 
-
-
 # `jrl_python_compute_install_dir`
 
 ```cpp
@@ -1158,28 +1139,21 @@ CMAKE_INSTALL_PREFIX is set to CMAKE_INSTALL_PREFIX=%PREFIX%\Library.
 But the python libraries are installed in %PREFIX%\Lib\site-packages.
 
 ```
-C:\Users\You\Miniconda3\envs\myenv
- python.exe                  # The Python Interpreter
- pythonw.exe
- DLLs\                       # Standard Python DLLs
- Lib
-   
- site-packages\          # <--- PURELIB IS HERE
-       
- pandas
-       
- requests
-       
- ...
- Scripts\                    # Python Entry points (pip.exe, jupyter.exe)
- Library\                    # <--- CONDA SPECIFIC FOLDER
-   
- bin\                    # Native DLLs (libssl-1_1-x64.dll, mkl.dll)
-   
- include\                # C Headers (.h files)
-   
- lib\                    # Link libraries (.lib)
- ...
+C:\Users\You\Miniconda3\envs\myenv\
+├── python.exe                  # The Python Interpreter
+├── pythonw.exe
+├── DLLs\                       # Standard Python DLLs
+├── Lib\
+│   └── site-packages\          # <--- PURELIB IS HERE
+│       ├── pandas\
+│       ├── requests\
+│       └── ...
+├── Scripts\                    # Python Entry points (pip.exe, jupyter.exe)
+├── Library\                    # <--- CONDA SPECIFIC FOLDER
+│   ├── bin\                    # Native DLLs (libssl-1_1-x64.dll, mkl.dll)
+│   ├── include\                # C Headers (.h files)
+│   └── lib\                    # Link libraries (.lib)
+└── ...
 ```
 
 #### Conda Linux & macOS Layout (Unix)
@@ -1189,20 +1163,15 @@ and the Conda native libraries are located in the `lib/` folder, just like a sta
 
 ```
 /home/user/miniconda3/envs/myenv/
- bin/                        # Executables (python, pip, jupyter)
- include/                    # C Headers
- lib/
-   
- libssl.so               # Native shared libraries
-   
- python3.11/
-       
- site-packages/      # <--- PURELIB IS HERE
-           
- pandas/
-           
- ...
- ...
+├── bin/                        # Executables (python, pip, jupyter)
+├── include/                    # C Headers
+├── lib/
+│   ├── libssl.so               # Native shared libraries
+│   └── python3.11/
+│       └── site-packages/      # <--- PURELIB IS HERE
+│           ├── pandas/
+│           └── ...
+└── ...
 ```
 
 
@@ -1215,8 +1184,6 @@ and the Conda native libraries are located in the `lib/` folder, just like a sta
   jrl_python_compute_install_dir(python_install_dir)
   install(TARGETS my_python_module DESTINATION ${python_install_dir} ...)
 ```
-
-
 # `jrl_check_python_module_name`
 
 ```cpp
@@ -1241,8 +1208,6 @@ jrl_check_python_module_name(<module_target>)
 ```cmake
 jrl_check_python_module_name(my_module)
 ```
-
-
 # `jrl_boostpy_add_module`
 
 ```cpp
@@ -1270,8 +1235,6 @@ jrl_boostpy_add_module(
 ```cmake
 jrl_boostpy_add_module(my_module module.cpp)
 ```
-
-
 # `jrl_boostpy_add_stubs`
 
 ```cpp
@@ -1305,8 +1268,6 @@ jrl_boostpy_add_stubs(
 ```cmake
 jrl_boostpy_add_stubs(my_stubs MODULE my_module OUTPUT_PATH ${CMAKE_BINARY_DIR})
 ```
-
-
 # `jrl_generate_ros2_package_files`
 
 ```cpp
@@ -1351,5 +1312,4 @@ jrl_generate_ros2_package_files(
     INSTALL_CPP_PACKAGE_FILES "NOT BUILD_STANDALONE_PYTHON_BINDINGS"
 )
 ```
-
 
