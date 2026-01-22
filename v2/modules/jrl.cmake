@@ -1943,213 +1943,55 @@ function(jrl_print_dependencies_summary)
         if(package_targets STREQUAL "")
             continue()
         endif()
-        jrl_cmake_print_properties(
-            TARGETS ${package_targets}
-            OUTPUT_VARIABLE props_msg
-            PROPERTIES
-                NAME
-                ALIASED_TARGET
-                TYPE
-                VERSION
-                LOCATION
-                INCLUDE_DIRECTORIES
-                COMPILE_DEFINITIONS
-                COMPILE_OPTIONS
-                COMPILE_FEATURES
-                COMPILE_FLAGS
-                COMPILE_OPTIONS
-                LINK_LIBRARIES
-                LINK_OPTIONS
-                INTERFACE_INCLUDE_DIRECTORIES
-                INTERFACE_COMPILE_DEFINITIONS
-                INTERFACE_COMPILE_OPTIONS
-                INTERFACE_LINK_LIBRARIES
-                INTERFACE_LINK_OPTIONS
-                CXX_STANDARD
-                CXX_EXTENSIONS
-                CXX_STANDARD_REQUIRED
+
+        set(properties_to_print
+            NAME
+            ALIASED_TARGET
+            TYPE VERSION
+            LOCATION
+            INCLUDE_DIRECTORIES
+            COMPILE_DEFINITIONS
+            COMPILE_OPTIONS
+            COMPILE_FEATURES
+            COMPILE_FLAGS
+            COMPILE_OPTIONS
+            LINK_LIBRARIES
+            LINK_OPTIONS
+            INTERFACE_INCLUDE_DIRECTORIES
+            INTERFACE_COMPILE_DEFINITIONS
+            INTERFACE_COMPILE_OPTIONS
+            INTERFACE_LINK_LIBRARIES
+            INTERFACE_LINK_OPTIONS
+            CXX_STANDARD
+            CXX_EXTENSIONS
+            CXX_STANDARD_REQUIRED
         )
-        _jrl_log("${props_msg}")
-    endforeach()
 
-    _jrl_log_get(log_msg)
-    message(STATUS "${log_msg}")
-endfunction()
+        foreach(target IN LISTS package_targets)
+            _jrl_log("")
+            _jrl_log("  Properties for target [${target}]:")
 
-#[============================================================================[
-# `jrl_cmake_print_properties`
+            foreach(prop IN LISTS properties_to_print)
+                get_property(is_property_set TARGET ${target} PROPERTY "${prop}" SET)
 
-```cpp
-jrl_cmake_print_properties(
-    <mode> <items>
-    PROPERTIES <property1> <property2> ...
-    [VERBOSITY <verbosity_level>]
-    [OUTPUT_VARIABLE <var_name>]
-)
-```
+                if(is_property_set)
+                    get_property(property TARGET ${target} PROPERTY "${prop}")
 
-**Type:** function
-
-
-### Description
-  Print properties of targets, sources, tests, directories, or cache entries.
-  This is taken and adapted from cmake's own cmake_print_properties function to add verbosity control and print only found properties.
-
-
-### Arguments
-* `mode`: TARGETS, SOURCES, TESTS, DIRECTORIES, or CACHE_ENTRIES.
-* `items`: List of items to print properties for.
-* `PROPERTIES`: List of properties to print.
-* `VERBOSITY`: Verbosity level (default: STATUS).
-* `OUTPUT_VARIABLE`: Variable to store the output.
-
-
-### Example
-```cmake
-jrl_cmake_print_properties(TARGETS my_target PROPERTIES NAME VERSION)
-```
-#]============================================================================]
-function(jrl_cmake_print_properties)
-    set(options)
-    set(oneValueArgs VERBOSITY OUTPUT_VARIABLE)
-    set(cpp_multiValueArgs PROPERTIES)
-    set(cppmode_multiValueArgs
-        TARGETS
-        SOURCES
-        TESTS
-        DIRECTORIES
-        CACHE_ENTRIES
-    )
-
-    string(JOIN " " _mode_names ${cppmode_multiValueArgs})
-    set(_missing_mode_message
-        "Mode keyword missing in jrl_cmake_print_properties() call, there must be exactly one of ${_mode_names}"
-    )
-
-    cmake_parse_arguments(CPP "${options}" "${oneValueArgs}" "${cpp_multiValueArgs}" ${ARGN})
-
-    if(NOT CPP_PROPERTIES)
-        message(
-            FATAL_ERROR
-            "Required argument PROPERTIES missing in jrl_cmake_print_properties() call"
-        )
-        return()
-    endif()
-
-    set(verbosity STATUS)
-    if(CPP_VERBOSITY)
-        set(verbosity ${CPP_VERBOSITY})
-    endif()
-
-    if(NOT CPP_UNPARSED_ARGUMENTS)
-        message(FATAL_ERROR "${_missing_mode_message}")
-        return()
-    endif()
-
-    cmake_parse_arguments(
-        CPPMODE
-        "${options}"
-        "${oneValueArgs}"
-        "${cppmode_multiValueArgs}"
-        ${CPP_UNPARSED_ARGUMENTS}
-    )
-
-    if(CPPMODE_UNPARSED_ARGUMENTS)
-        message(
-            FATAL_ERROR
-            "Unknown keywords given to cmake_print_properties(): \"${CPPMODE_UNPARSED_ARGUMENTS}\""
-        )
-        return()
-    endif()
-
-    set(mode)
-    set(items)
-    set(keyword)
-
-    if(CPPMODE_TARGETS)
-        set(items ${CPPMODE_TARGETS})
-        set(mode ${mode} TARGETS)
-        set(keyword TARGET)
-    endif()
-
-    if(CPPMODE_SOURCES)
-        set(items ${CPPMODE_SOURCES})
-        set(mode ${mode} SOURCES)
-        set(keyword SOURCE)
-    endif()
-
-    if(CPPMODE_TESTS)
-        set(items ${CPPMODE_TESTS})
-        set(mode ${mode} TESTS)
-        set(keyword TEST)
-    endif()
-
-    if(CPPMODE_DIRECTORIES)
-        set(items ${CPPMODE_DIRECTORIES})
-        set(mode ${mode} DIRECTORIES)
-        set(keyword DIRECTORY)
-    endif()
-
-    if(CPPMODE_CACHE_ENTRIES)
-        set(items ${CPPMODE_CACHE_ENTRIES})
-        set(mode ${mode} CACHE_ENTRIES)
-        # This is a workaround for the fact that passing `CACHE` as an argument to
-        # set() causes a cache variable to be set.
-        set(keyword "")
-        string(APPEND keyword CACHE)
-    endif()
-
-    if(NOT mode)
-        message(FATAL_ERROR "${_missing_mode_message}")
-        return()
-    endif()
-
-    list(LENGTH mode modeLength)
-    if("${modeLength}" GREATER 1)
-        message(
-            FATAL_ERROR
-            "Multiple mode keywords used in cmake_print_properties() call, there must be exactly one of ${_mode_names}."
-        )
-        return()
-    endif()
-
-    set(msg "\n")
-    foreach(item ${items})
-        set(itemExists TRUE)
-        if(keyword STREQUAL "TARGET")
-            if(NOT TARGET ${item})
-                set(itemExists FALSE)
-                string(APPEND msg "\n No such TARGET \"${item}\" !\n\n")
-            endif()
-        endif()
-
-        if(itemExists)
-            string(APPEND msg " Properties for ${keyword} ${item}:\n")
-            foreach(prop ${CPP_PROPERTIES})
-                get_property(propertySet ${keyword} ${item} PROPERTY "${prop}" SET)
-
-                if(propertySet)
-                    get_property(property ${keyword} ${item} PROPERTY "${prop}")
                     # Convert paths containing \ to / (Windows)
                     if(WIN32)
                         cmake_path(CONVERT "${property}" TO_CMAKE_PATH_LIST property NORMALIZE)
                     endif()
-                    #   string(APPEND msg "   ${item}.${prop} = \"${property}\"\n")
+
                     _jrl_pad_string("${prop}"      40 _prop)
-                    string(APPEND msg "   ${_prop} = ${property}\n")
-                else()
-                    # EDIT: Do not print unset properties
-                    # string(APPEND msg "   ${item}.${prop} = <NOTFOUND>\n")
+                    _jrl_log("    ${prop} = ${property}")
                 endif()
             endforeach()
-        endif()
+            _jrl_log("")
+        endforeach()
     endforeach()
 
-    if(CPP_OUTPUT_VARIABLE)
-        set(${CPP_OUTPUT_VARIABLE} "${msg}" PARENT_SCOPE)
-    else()
-        message(${verbosity} "${msg}")
-    endif()
+    _jrl_log_get(log_msg)
+    message(STATUS "${log_msg}")
 endfunction()
 
 #[============================================================================[
