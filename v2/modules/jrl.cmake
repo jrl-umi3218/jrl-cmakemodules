@@ -1739,6 +1739,104 @@ function(_jrl_search_package_module_file package_name output_filepath)
 endfunction()
 
 #[============================================================================[
+# `jrl_export_dependency`
+
+```cpp
+jrl_export_dependency(
+        PACKAGE_NAME <name>
+        [FIND_PACKAGE_ARGS <args>...]
+        [PACKAGE_VARIABLES <vars>...]
+        [PACKAGE_TARGETS <targets>...]
+        [MODULE_FILE <path>]
+)
+```
+
+**Type:** function
+
+
+### Description
+Records a dependency discovered with `jrl_find_package()` into a JSON array stored in the
+global property `_jrl_${PROJECT_NAME}_package_dependencies`.
+
+The content of this property is later consumed by `jrl_export_package()` to reverse the link
+between link libraries and the `find_package` calls that provided them.
+
+It is called **automatically** by `jrl_find_package()`.
+
+Note that it could also be useful in scenarios where the dependency that was not
+discovered with jrl_find_package(). In that case, only the package name and the targets
+are relevant.
+
+
+### Arguments
+* `PACKAGE_NAME`: Name of the dependency package (e.g., Eigen3).
+* `FIND_PACKAGE_ARGS`: The arguments originally passed to `find_package()` (list).
+* `PACKAGE_VARIABLES`: Variables created by `find_package()` that should be tracked (list).
+* `PACKAGE_TARGETS`: Imported targets created by `find_package()` that should be tracked (list).
+* `MODULE_FILE`: Absolute path to the Find<Package>.cmake module used, if any.
+
+
+### Example
+```cmake
+# Dummy example
+jrl_export_dependency(
+    PACKAGE_NAME Eigen3
+    FIND_PACKAGE_ARGS "Eigen3;3.4;REQUIRED"
+    PACKAGE_VARIABLES "Eigen3_FOUND;Eigen3_VERSION"
+    PACKAGE_TARGETS "Eigen3::Eigen"
+    MODULE_FILE ${CMAKE_CURRENT_LIST_DIR}/FindEigen3.cmake
+)
+
+# Manual export of a dependency not found with jrl_find_package
+jrl_export_dependency(
+    PACKAGE_NAME MyLib
+    FIND_PACKAGE_ARGS "MyLib;REQUIRED"
+    PACKAGE_TARGETS "MyLib::MyLib"
+)
+# If you `target_link_libraries(my_target PUBLIC MyLib::MyLib)`, then jrl_export_package() will
+# know that MyLib is a dependency of your package, and add the following lines to the generated
+# `<project_name>-config.cmake` file:
+
+if(NOT TARGET MyLib::MyLib)
+    find_dependency(MyLib REQUIRED)
+endif()
+```
+#]============================================================================]
+function(jrl_export_dependency)
+    set(options)
+    set(oneValueArgs PACKAGE_NAME MODULE_FILE)
+    set(multiValueArgs FIND_PACKAGE_ARGS PACKAGE_VARIABLES PACKAGE_TARGETS)
+    cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+    _jrl_check_var_defined(arg_PACKAGE_NAME)
+
+    get_property(pd_json GLOBAL PROPERTY _jrl_${PROJECT_NAME}_package_dependencies)
+    if(NOT pd_json)
+        string(JSON pd_json SET "{}" "package_dependencies" "[]")
+    endif()
+
+    # Save the information about this package in a json object
+    set(json "{}")
+    string(JSON json SET "${json}" "package_name" "\"${arg_PACKAGE_NAME}\"")
+    string(JSON json SET "${json}" "find_package_args" "\"${arg_FIND_PACKAGE_ARGS}\"")
+    string(JSON json SET "${json}" "package_variables" "\"${arg_PACKAGE_VARIABLES}\"")
+    string(JSON json SET "${json}" "package_targets" "\"${arg_PACKAGE_TARGETS}\"")
+    string(JSON json SET "${json}" "module_file" "\"${arg_MODULE_FILE}\"")
+    string(JSON package_dependencies_length LENGTH "${pd_json}" "package_dependencies")
+    string(
+        JSON pd_json
+        SET "${pd_json}"
+        "package_dependencies"
+        ${package_dependencies_length}
+        "${json}"
+    )
+
+    # Save the JSON object in a global property for later use
+    # See jrl_print_dependencies_summary, jrl_export_package, etc.
+    set_property(GLOBAL PROPERTY _jrl_${PROJECT_NAME}_package_dependencies "${pd_json}")
+endfunction()
+
+#[============================================================================[
 # `jrl_find_package`
 
 ```cpp
@@ -1856,25 +1954,13 @@ macro(jrl_find_package)
         message(STATUS "   No imported targets detected.")
     endif()
 
-    get_property(deps GLOBAL PROPERTY _jrl_${PROJECT_NAME}_package_dependencies)
-    if(NOT deps)
-        string(JSON deps SET "{}" "package_dependencies" "[]")
-    endif()
-
-    # Save the information about this package in a json object
-    set(package_json "{}")
-    string(REPLACE ";" " " find_package_args "${find_package_args}")
-    string(JSON package_json SET "${package_json}" "package_name" "\"${package_name}\"")
-    string(JSON package_json SET "${package_json}" "find_package_args" "\"${find_package_args}\"")
-    string(JSON package_json SET "${package_json}" "package_variables" "\"${package_variables}\"")
-    string(JSON package_json SET "${package_json}" "package_targets" "\"${package_targets}\"")
-    string(JSON package_json SET "${package_json}" "module_file" "\"${module_file}\"")
-    string(JSON deps_length LENGTH "${deps}" "package_dependencies")
-    string(JSON deps SET "${deps}" "package_dependencies" ${deps_length} "${package_json}")
-
-    # Save the JSON object in a global property for later use
-    # See jrl_print_dependencies_summary, jrl_export_package, etc.
-    set_property(GLOBAL PROPERTY _jrl_${PROJECT_NAME}_package_dependencies "${deps}")
+    jrl_export_dependency(
+        PACKAGE_NAME ${package_name}
+        FIND_PACKAGE_ARGS "${find_package_args}"
+        PACKAGE_VARIABLES "${package_variables}"
+        PACKAGE_TARGETS "${package_targets}"
+        MODULE_FILE "${module_file}"
+    )
 
     # Unset temporary variables
     # jrl_find_package is a macro, so temporary variables leak into the caller scope
@@ -1885,10 +1971,8 @@ macro(jrl_find_package)
     unset(package_variables_pp)
     unset(variables_before)
     unset(imported_targets_before)
-    unset(deps)
     unset(module_file)
     unset(package_json)
-    unset(deps_length)
 endmacro()
 
 #[============================================================================[
