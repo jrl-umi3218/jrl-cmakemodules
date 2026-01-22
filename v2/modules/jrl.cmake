@@ -3421,16 +3421,23 @@ jrl_python_compute_install_dir(<output>)
 
 
 ### Description
-  Compute the installation directory for Python bindings.
- * If ${PROJECT_NAME}_PYTHON_INSTALL_DIR is defined, its value is used.
- * Otherwise, if running inside a Conda environment on Windows, an
-   absolute path to `sysconfig.get_path('purelib')` is returned.
- * In all other cases, the relative path to site-packages is returned.
+    Compute the installation directory for Python libraries.
+    It chooses the installation based using the following priority:
+ 1. If ${PROJECT_NAME}_PYTHON_INSTALL_DIR is defined, its value is used.
+    Usually passed via CMake command line: -D${PROJECT_NAME}_PYTHON_INSTALL_DIR=<path>
+    It is usually an absolute path to a specific site-packages folder.
+ 2. If ${PROJECT_NAME}_PYTHON_INSTALL_DIR **environment** variable is defined, its value is used.
+ 3. If running inside a Conda environment, on Windows, the absolute path to site-packages is used.
+    It is the return value of: `sysconfig.get_path('purelib')`.
+    Example: `C:/Users/You/Miniconda3/envs/myenv/Lib/site-packages`
+ 4. The relative path to site-packages is used.
+    It is the result of: `sysconfig.get_path('purelib')).relative_to(sysconfig.get_path('data')`
+    Example: `lib/python3.11/site-packages`
 
-### Windows Layout
+#### Conda Windows Layout
 
-On conda, the site-packages is located in the `Lib\site-packages` folder,
-but the conda native libraries (DLLs) are located in the `Library\bin` folder.
+On Conda Windows, the site-packages is located in the `Lib\site-packages` folder,
+but the Conda native libraries (DLLs) are located in the `Library\bin` folder.
 CMAKE_INSTALL_PREFIX is set to CMAKE_INSTALL_PREFIX=%PREFIX%\Library.
 But the python libraries are installed in %PREFIX%\Lib\site-packages.
 
@@ -3452,7 +3459,10 @@ C:\Users\You\Miniconda3\envs\myenv\
 └── ...
 ```
 
-### Linux & macOS Layout (Unix)
+#### Conda Linux & macOS Layout (Unix)
+
+On Unix Conda environments, the site-packages is located in the `lib/pythonX.Y/site-packages` folder,
+and the Conda native libraries are located in the `lib/` folder, just like a standard installation.
 
 ```
 /home/user/miniconda3/envs/myenv/
@@ -3479,33 +3489,58 @@ C:\Users\You\Miniconda3\envs\myenv\
 ```
 #]============================================================================]
 function(jrl_python_compute_install_dir output)
-    # Case 1: Use user-defined install dir via the <PROJECT_NAME>_PYTHON_INSTALL_DIR variable
+    # Case 1: override via the <PROJECT_NAME>_PYTHON_INSTALL_DIR CMake variable
     if(DEFINED ${PROJECT_NAME}_PYTHON_INSTALL_DIR)
+        set(pyinstall_dir "${${PROJECT_NAME}_PYTHON_INSTALL_DIR}")
+
         # On Windows, convert to CMake path list (backslashes to slashes)
         if(WIN32)
-            cmake_path(
-                CONVERT "${${PROJECT_NAME}_PYTHON_INSTALL_DIR}"
-                TO_CMAKE_PATH_LIST ${PROJECT_NAME}_PYTHON_INSTALL_DIR
-                NORMALIZE
-            )
+            cmake_path(CONVERT "${pyinstall_dir}" TO_CMAKE_PATH_LIST pyinstall_dir NORMALIZE)
         endif()
 
         message(
             STATUS
-            "${PROJECT_NAME}_PYTHON_INSTALL_DIR is defined, using its value: ${${PROJECT_NAME}_PYTHON_INSTALL_DIR} as python install dir"
+            "Variable ${PROJECT_NAME}_PYTHON_INSTALL_DIR is defined, using its value as python install dir.
+    ${PROJECT_NAME}_PYTHON_INSTALL_DIR : ${pyinstall_dir}
+    Python install dir                 : ${pyinstall_dir}
+            "
         )
 
-        set(${output} ${${PROJECT_NAME}_PYTHON_INSTALL_DIR} PARENT_SCOPE)
+        set(${output} ${pyinstall_dir} PARENT_SCOPE)
         return()
     endif()
 
-    # Case 2: Conda environment on Windows specific case, use absolute site-packages path
-    if(WIN32 AND DEFINED ENV{CONDA_PREFIX})
-        jrl_python_absolute_site_packages(python_absolute_site_packages)
+    # Case 1b: override via the <PROJECT_NAME>_PYTHON_INSTALL_DIR environment variable
+    if(DEFINED ENV{${PROJECT_NAME}_PYTHON_INSTALL_DIR})
+        set(pyinstall_dir "$ENV{${PROJECT_NAME}_PYTHON_INSTALL_DIR}")
 
+        if(WIN32)
+            cmake_path(CONVERT "${pyinstall_dir}" TO_CMAKE_PATH_LIST pyinstall_dir NORMALIZE)
+        endif()
         message(
             STATUS
-            "Detected Conda environment on Windows (\$ENV{CONDA_PREFIX}=$ENV{CONDA_PREFIX}), using absolute python site-packages: ${python_absolute_site_packages}"
+            "Environnement variable ${PROJECT_NAME}_PYTHON_INSTALL_DIR is defined, using its value as python install dir.
+    ${PROJECT_NAME}_PYTHON_INSTALL_DIR : ${pyinstall_dir}
+    Python install dir                 : ${pyinstall_dir}
+            "
+        )
+
+        set(${output} ${pyinstall_dir} PARENT_SCOPE)
+        return()
+    endif()
+
+    # Case 2: Conda environment on Windows specific case
+    if(WIN32 AND DEFINED ENV{CONDA_PREFIX})
+        jrl_python_absolute_site_packages(python_absolute_site_packages)
+        message(
+            STATUS
+            "Detected Conda environment on Windows, using absolute python site-packages as python install dir.
+    CONDA_PREFIX               : $ENV{CONDA_PREFIX}
+    Python site-packages (abs) : ${python_absolute_site_packages}
+    Python install dir         : ${python_absolute_site_packages}
+
+    You can override this behavior with the ${PROJECT_NAME}_PYTHON_INSTALL_DIR variable (CMake or env variable).
+            "
         )
 
         set(${output} "${python_absolute_site_packages}" PARENT_SCOPE)
@@ -3517,8 +3552,12 @@ function(jrl_python_compute_install_dir output)
 
     message(
         STATUS
-        "Computed python install destination ${python_relative_site_packages} (default site-packages).
-        Use install(DESTINATION \${${output}} ...)"
+        "Using default relative python site-packages as python install dir.
+    Python site-packages (rel) : ${python_relative_site_packages}
+    Python install dir         : ${python_relative_site_packages}
+
+    You can override this behavior with the ${PROJECT_NAME}_PYTHON_INSTALL_DIR variable (CMake or env variable).
+    "
     )
 
     set(${output} "${python_relative_site_packages}" PARENT_SCOPE)
