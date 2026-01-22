@@ -2178,10 +2178,6 @@ function(jrl_add_export_component)
         "
     )
 
-    # Despite its signature, the following commented line associates the installed target files with an export, without installing anything.
-    # install(TARGETS ${arg_TARGETS} EXPORT ${PROJECT_NAME}-${arg_NAME})
-    # TODO: Declare exports first like that, then split the jrl_export_package() with a generation and an install step.
-
     set_property(GLOBAL PROPERTY _jrl_${PROJECT_NAME}_export_components ${arg_NAME} APPEND)
     set_property(GLOBAL PROPERTY _jrl_${PROJECT_NAME}_${arg_NAME}_targets ${arg_TARGETS})
 endfunction()
