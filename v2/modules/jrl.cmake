@@ -226,6 +226,40 @@ function(_jrl_check_file_exists filepath)
 endfunction()
 
 #[============================================================================[
+# `_jrl_check_no_unrecognized_arguments`
+
+```cpp
+_jrl_check_no_unrecognized_arguments(<prefix>)
+```
+
+**Type:** function
+
+
+### Description
+  Check if there are unrecognized arguments after parsing with cmake_parse_arguments.
+  This function checks if the variable `<prefix>_UNPARSED_ARGUMENTS` is defined and raises
+  a fatal error if unrecognized arguments were found.
+
+
+### Arguments
+* `prefix`: The prefix used in the `cmake_parse_arguments()` call. Usually "arg"
+
+
+### Example
+```cmake
+function(my_function)
+    cmake_parse_arguments(arg "" "" "" ${ARGN})
+    _jrl_check_no_unrecognized_arguments(arg)
+endfunction()
+```
+#]============================================================================]
+function(_jrl_check_no_unrecognized_arguments prefix)
+    if(DEFINED ${prefix}_UNPARSED_ARGUMENTS)
+        message(FATAL_ERROR "Unrecognized arguments: ${${prefix}_UNPARSED_ARGUMENTS}")
+    endif()
+endfunction()
+
+#[============================================================================[
 # `_jrl_top_dir`
 
 ```cpp
@@ -832,6 +866,7 @@ function(jrl_target_set_output_directory target_name)
     set(oneValueArgs OUTPUT_DIRECTORY)
     set(multiValueArgs)
     cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+    _jrl_check_no_unrecognized_arguments(arg)
     _jrl_check_target_exists(${target_name})
     _jrl_check_var_defined(arg_OUTPUT_DIRECTORY)
 
@@ -1249,6 +1284,7 @@ function(_jrl_normalize_version version_str)
     )
     set(multiValueArgs)
     cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+    _jrl_check_no_unrecognized_arguments(arg)
 
     string(REGEX MATCH "^[0-9.]+" clean_version "${version_str}")
 
@@ -1373,6 +1409,7 @@ function(_jrl_target_generate_header target_name visibility)
     )
     set(multiValueArgs TEMPLATE_VARIABLES)
     cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+    _jrl_check_no_unrecognized_arguments(arg)
 
     _jrl_check_target_exists(${target_name})
     _jrl_check_valid_visibility(${visibility})
@@ -1765,6 +1802,7 @@ function(jrl_export_dependency)
     set(oneValueArgs PACKAGE_NAME MODULE_FILE)
     set(multiValueArgs FIND_PACKAGE_ARGS PACKAGE_VARIABLES PACKAGE_TARGETS)
     cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+    _jrl_check_no_unrecognized_arguments(arg)
 
     _jrl_check_var_defined(arg_PACKAGE_NAME)
 
@@ -2064,6 +2102,7 @@ function(_jrl_export_dependencies)
     set(oneValueArgs INSTALL_DESTINATION GEN_DIR)
     set(multiValueArgs TARGETS)
     cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+    _jrl_check_no_unrecognized_arguments(arg)
 
     _jrl_check_var_defined(arg_TARGETS)
 
@@ -2179,6 +2218,7 @@ function(jrl_add_export_component)
     set(oneValueArgs NAME)
     set(multiValueArgs TARGETS)
     cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+    _jrl_check_no_unrecognized_arguments(arg)
 
     _jrl_check_var_defined(PROJECT_NAME)
     _jrl_check_var_defined(arg_TARGETS)
@@ -2258,6 +2298,7 @@ function(jrl_target_headers target visibility)
     set(oneValueArgs)
     set(multiValueArgs HEADERS BASE_DIRS)
     cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+    _jrl_check_no_unrecognized_arguments(arg)
 
     _jrl_check_var_defined(arg_HEADERS)
     _jrl_check_target_exists(${target})
@@ -2304,6 +2345,7 @@ function(jrl_target_install_headers target)
     set(oneValueArgs DESTINATION)
     set(multiValueArgs)
     cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+    _jrl_check_no_unrecognized_arguments(arg)
 
     _jrl_check_target_exists(${target})
 
@@ -2400,6 +2442,7 @@ function(jrl_install_headers)
     set(oneValueArgs DESTINATION)
     set(multiValueArgs COMPONENTS)
     cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+    _jrl_check_no_unrecognized_arguments(arg)
 
     _jrl_check_var_defined(PROJECT_NAME)
 
@@ -2498,6 +2541,7 @@ function(jrl_export_package)
     set(oneValueArgs PACKAGE_CONFIG_TEMPLATE CMAKE_FILES_INSTALL_DIR PACKAGE_CONFIG_EXTRA_CONTENT)
     set(multiValueArgs)
     cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+    _jrl_check_no_unrecognized_arguments(arg)
 
     string(MAKE_C_IDENTIFIER ${PROJECT_NAME} project_name_identifier)
     string(TOUPPER ${project_name_identifier} project_name_identifier_upper)
@@ -2697,6 +2741,7 @@ function(jrl_legacy_option)
     set(oneValueArgs NEW_OPTION OLD_OPTION)
     set(multiValueArgs)
     cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+    _jrl_check_no_unrecognized_arguments(arg)
 
     # Validate required arguments
     _jrl_check_var_defined(arg_NEW_OPTION)
@@ -2785,6 +2830,7 @@ function(jrl_option option_name help_text default_value)
     set(oneValueArgs CONDITION FALLBACK LEGACY_NAME)
     set(multiValueArgs)
     cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+    _jrl_check_no_unrecognized_arguments(arg)
 
     message(
         DEBUG
@@ -3195,6 +3241,7 @@ function(jrl_python_compile_all)
     set(oneValueArgs DIRECTORY)
     set(multiValueArgs)
     cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+    _jrl_check_no_unrecognized_arguments(arg)
 
     _jrl_check_var_defined(arg_DIRECTORY)
     jrl_python_get_interpreter(python)
@@ -3273,6 +3320,7 @@ function(jrl_python_generate_init_py name)
     set(oneValueArgs OUTPUT_PATH TEMPLATE_FILE)
     set(multiValueArgs)
     cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+    _jrl_check_no_unrecognized_arguments(arg)
 
     _jrl_check_target_exists(${name})
     _jrl_check_var_defined(arg_OUTPUT_PATH)
@@ -3379,6 +3427,7 @@ function(jrl_check_python_module module_name)
     set(oneValueArgs)
     set(multiValueArgs)
     cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+    _jrl_check_no_unrecognized_arguments(arg)
 
     jrl_python_get_interpreter(python)
 
@@ -3884,6 +3933,7 @@ function(jrl_boostpy_add_stubs name)
     set(oneValueArgs MODULE OUTPUT_PATH PYTHON_PATH DEPENDS)
     set(multiValueArgs)
     cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+    _jrl_check_no_unrecognized_arguments(arg)
 
     _jrl_check_var_defined(arg_MODULE)
     _jrl_check_var_defined(arg_OUTPUT_PATH)
@@ -3984,6 +4034,7 @@ function(jrl_generate_ros2_package_files)
     )
     set(multiValueArgs)
     cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+    _jrl_check_no_unrecognized_arguments(arg)
 
     message(STATUS "[${PROJECT_NAME}] Generating files for ament (ROS 2)")
 
