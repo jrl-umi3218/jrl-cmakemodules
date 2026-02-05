@@ -1,11 +1,6 @@
 include(${CMAKE_CURRENT_LIST_DIR}/../modules/jrl.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/jrl_test.cmake)
 
-# Set PROJECT_NAME for the tests (required by jrl_option)
-if(NOT DEFINED PROJECT_NAME)
-    set(PROJECT_NAME test_project)
-endif()
-
 # Helper function to assert that a variable is defined and has expected value
 function(assert_defined var_name expected_value)
     if(NOT DEFINED ${var_name})
@@ -226,22 +221,9 @@ jrl_option(TEST_OPTION_16 "Test option 16" ON LEGACY_NAME OLD_OPTION_16)
 assert_defined(TEST_OPTION_16 ON)
 
 #[============================================================================[
-# Test 17: Fatal error when PROJECT_NAME is missing
+# Test 17: Fatal error when NEW_OPTION is undefined in cache
 #]============================================================================]
-message(STATUS "\n=== Test 17: Fatal error when PROJECT_NAME is missing ===")
-jrl_expect_error(
-    CODE "
-        include(${CMAKE_CURRENT_LIST_DIR}/../modules/jrl.cmake)
-        unset(PROJECT_NAME)
-        jrl_option(BAD_OPT \"desc\" ON)
-    "
-    MATCH "Required variable 'PROJECT_NAME' is not defined"
-)
-
-#[============================================================================[
-# Test 18: Fatal error when NEW_OPTION is undefined in cache
-#]============================================================================]
-message(STATUS "\n=== Test 18: Fatal error when NEW_OPTION is undefined in cache ===")
+message(STATUS "\n=== Test 17: Fatal error when NEW_OPTION is undefined in cache ===")
 set(jrl ${CMAKE_CURRENT_LIST_DIR}/../modules/jrl.cmake)
 jrl_expect_error(
     CODE [[
