@@ -3552,10 +3552,11 @@ jrl_python_compute_install_dir(<output>)
 ### Description
     Compute the installation directory for Python libraries.
     It chooses the installation based using the following priority:
- 1. If ${PROJECT_NAME}_PYTHON_INSTALL_DIR is defined, its value is used.
-    Usually passed via CMake command line: -D${PROJECT_NAME}_PYTHON_INSTALL_DIR=<path>
+ 1. If <PROJECT_NAME_UPPER>_PYTHON_INSTALL_DIR is defined, its value is used.
+    Usually passed via CMake command line: -D<PROJECT_NAME_UPPER>_PYTHON_INSTALL_DIR=<path>
     It is usually an absolute path to a specific site-packages folder.
- 2. If ${PROJECT_NAME}_PYTHON_INSTALL_DIR **environment** variable is defined, its value is used.
+    Note: <PROJECT_NAME_UPPER> is the PROJECT_NAME converted to a valid C identifier and in upper case.
+ 2. If <PROJECT_NAME_UPPER>_PYTHON_INSTALL_DIR **environment** variable is defined, its value is used.
  3. If running inside a Conda environment, on Windows, the absolute path to site-packages is used.
     It is the return value of: `sysconfig.get_path('purelib')`.
     Example: `C:/Users/You/Miniconda3/envs/myenv/Lib/site-packages`
@@ -3618,9 +3619,13 @@ and the Conda native libraries are located in the `lib/` folder, just like a sta
 ```
 #]============================================================================]
 function(jrl_python_compute_install_dir output)
-    # Case 1: override via the <PROJECT_NAME>_PYTHON_INSTALL_DIR CMake variable
-    if(DEFINED ${PROJECT_NAME}_PYTHON_INSTALL_DIR)
-        set(pyinstall_dir "${${PROJECT_NAME}_PYTHON_INSTALL_DIR}")
+    string(MAKE_C_IDENTIFIER "${PROJECT_NAME}" project_name_identifier)
+    string(TOUPPER "${project_name_identifier}" project_name_identifier)
+    set(python_install_dir_var "${project_name_identifier}_PYTHON_INSTALL_DIR")
+
+    # Case 1: override via the <PROJECT_NAME_UPPER>_PYTHON_INSTALL_DIR CMake variable
+    if(DEFINED ${python_install_dir_var})
+        set(pyinstall_dir "${${python_install_dir_var}}")
 
         # On Windows, convert to CMake path list (backslashes to slashes)
         if(WIN32)
@@ -3629,8 +3634,8 @@ function(jrl_python_compute_install_dir output)
 
         message(
             STATUS
-            "Variable ${PROJECT_NAME}_PYTHON_INSTALL_DIR is defined, using its value as python install dir.
-    ${PROJECT_NAME}_PYTHON_INSTALL_DIR : ${pyinstall_dir}
+            "Variable ${python_install_dir_var} is defined, using its value as python install dir.
+    ${python_install_dir_var} : ${pyinstall_dir}
     Python install dir                 : ${pyinstall_dir}
             "
         )
@@ -3639,17 +3644,17 @@ function(jrl_python_compute_install_dir output)
         return()
     endif()
 
-    # Case 1b: override via the <PROJECT_NAME>_PYTHON_INSTALL_DIR environment variable
-    if(DEFINED ENV{${PROJECT_NAME}_PYTHON_INSTALL_DIR})
-        set(pyinstall_dir "$ENV{${PROJECT_NAME}_PYTHON_INSTALL_DIR}")
+    # Case 1b: override via the <PROJECT_NAME_UPPER>_PYTHON_INSTALL_DIR environment variable
+    if(DEFINED ENV{${python_install_dir_var}})
+        set(pyinstall_dir "$ENV{${python_install_dir_var}}")
 
         if(WIN32)
             cmake_path(CONVERT "${pyinstall_dir}" TO_CMAKE_PATH_LIST pyinstall_dir NORMALIZE)
         endif()
         message(
             STATUS
-            "Environnement variable ${PROJECT_NAME}_PYTHON_INSTALL_DIR is defined, using its value as python install dir.
-    ${PROJECT_NAME}_PYTHON_INSTALL_DIR : ${pyinstall_dir}
+            "Environnement variable ${python_install_dir_var} is defined, using its value as python install dir.
+    ${python_install_dir_var} : ${pyinstall_dir}
     Python install dir                 : ${pyinstall_dir}
             "
         )
@@ -3668,7 +3673,7 @@ function(jrl_python_compute_install_dir output)
     Python site-packages (abs) : ${python_absolute_site_packages}
     Python install dir         : ${python_absolute_site_packages}
 
-    You can override this behavior with the ${PROJECT_NAME}_PYTHON_INSTALL_DIR variable (CMake or env variable).
+    You can override this behavior with the ${python_install_dir_var} variable (CMake or env variable).
             "
         )
 
@@ -3685,7 +3690,7 @@ function(jrl_python_compute_install_dir output)
     Python site-packages (rel) : ${python_relative_site_packages}
     Python install dir         : ${python_relative_site_packages}
 
-    You can override this behavior with the ${PROJECT_NAME}_PYTHON_INSTALL_DIR variable (CMake or env variable).
+    You can override this behavior with the ${python_install_dir_var} variable (CMake or env variable).
     "
     )
 
