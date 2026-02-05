@@ -2,3 +2,7 @@ hpp/idl/*.pyc
 .docs/build
 _unittests/build/
 _unittests/install/
+build*/
+install*/
+.DS_Store
+.ruff_cache/
