@@ -1803,7 +1803,6 @@ jrl_find_package(
     [version]
     [COMPONENTS <comp>...]
     [REQUIRED]
-    [MODULE_PATH <path_to_find_module>]
 )
 ```
 
@@ -1820,7 +1819,6 @@ jrl_find_package(
 
 ### Arguments
     <PackageName> [<version>] [REQUIRED] [COMPONENTS <components>...] - The same as find_package.
-* `MODULE_PATH`: Path to a dir containing a custom Find<PackageName>.cmake module file.
 
 
 ### Example
@@ -1830,29 +1828,24 @@ jrl_find_package(Boost REQUIRED COMPONENTS filesystem system)
 ```
 #]============================================================================]
 macro(jrl_find_package)
-    set(options)
-    set(oneValueArgs MODULE_PATH)
-    set(multiValueArgs)
-    cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+    # Check at least 1 argument (the package name) is provided
+    if(ARGC EQUAL 0)
+        message(
+            FATAL_ERROR
+            "jrl_find_package(<PackageName>) requires at least the package name as argument."
+        )
+    endif()
 
     message(STATUS "[${ARGV0}]")
     message(DEBUG "Executing jrl_find_package with args ${ARGV}")
 
     # Pkg name is the first argument of find_package(<pkg_name> ...)
     set(package_name ${ARGV0})
-    set(find_package_args "${arg_UNPARSED_ARGUMENTS}")
+    set(find_package_args "${ARGV}")
 
-    # Handle custom module file
-    if(arg_MODULE_PATH)
-        set(module_file "${arg_MODULE_PATH}/Find${package_name}.cmake")
-        _jrl_check_file_exists(${module_file}
-            "Custom module file provided with MODULE_PATH does not exist: ${module_file}"
-        )
-    else()
-        # search for the module file only if CONFIG is not in the find_package args
-        if(NOT "CONFIG" IN_LIST find_package_args)
-            _jrl_search_package_module_file(${package_name} module_file)
-        endif()
+    # search for the module file only if CONFIG is not in the find_package args
+    if(NOT "CONFIG" IN_LIST find_package_args)
+        _jrl_search_package_module_file(${package_name} module_file)
     endif()
 
     if(module_file)
