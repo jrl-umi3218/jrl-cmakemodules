@@ -797,14 +797,46 @@ jrl_dump_package_dependencies_json(<output>)
 ```cmake
 jrl_dump_package_dependencies_json(my_deps.json)
 ```
+# `jrl_legacy_option`
+
+```cpp
+jrl_legacy_option(
+    NEW_OPTION <new_option_name>
+    OLD_OPTION <old_option_name>
+)
+```
+
+**Type:** function
+
+
+### Description
+  Migrate a legacy option value to a new option name and emit a deprecation warning.
+  If the old option is defined, its value is migrated to the new option.
+  The NEW_OPTION must already exist in the cache (created via jrl_option or option()).
+  The help text is automatically retrieved from the NEW_OPTION cache property.
+
+
+### Arguments
+* `NEW_OPTION`: The current/new option name (must already exist in cache).
+* `OLD_OPTION`: The deprecated/old option name to migrate from.
+
+
+### Example
+```cmake
+jrl_legacy_option(
+    NEW_OPTION BUILD_PYTHON
+    OLD_OPTION BUILD_PYTHON_BINDINGS
+)
+```
 # `jrl_option`
 
 ```cpp
 jrl_option(
-    <option_name>
-    <description>
+    <name>
+    <help_text>
     <default_value>
-    [COMPATIBILITY_OPTION <compat_opt>]
+    [CONDITION <cmake_condition> [FALLBACK <fallback_value>]]
+    [LEGACY_NAME <legacy_name>]
 )
 ```
 
@@ -812,51 +844,32 @@ jrl_option(
 
 
 ### Description
-  Override cmake option() to get a nice summary at the end of the configuration step
+  Declare a cache BOOL option with optional conditional availability and legacy name migration.
+  When `CONDITION` evaluates to false, the option is forced to the `FALLBACK` value (default OFF) with FORCE and hidden.
+  When `LEGACY_NAME` is set, its value is migrated to `<name>` and a deprecation
+  warning is emitted.
 
 
 ### Arguments
-* `option_name`: The option name.
-* `description`: The description.
+* `name`: The option name.
+* `help_text`: The cache entry help string.
 * `default_value`: The default value (ON/OFF).
-* `COMPATIBILITY_OPTION`: An old option name for compatibility.
+* `CONDITION`: CMake condition string to evaluate (optional).
+* `FALLBACK`: Value to force when CONDITION is false (optional, default is OFF). Set with FORCE flag. Only used with CONDITION.
+* `LEGACY_NAME`: Deprecated option name to migrate (optional).
 
 
 ### Example
 ```cmake
-jrl_option(BUILD_TESTING "Build the tests" ON)
-```
-# `jrl_cmake_dependent_option`
-
-```cpp
-jrl_cmake_dependent_option(
-    <option_name>
-    <description>
-    <default_value>
-    <condition>
-    <else_value>
+jrl_option(BUILD_TESTS "Build unit tests" ON)
+jrl_option(
+    BUILD_PYTHON
+    "Build Python bindings"
+    ON
+    CONDITION "BUILD_SHARED_LIBS AND Python_FOUND"
+    FALLBACK OFF
+    LEGACY_NAME BUILD_PYTHON_BINDINGS
 )
-```
-
-**Type:** function
-
-
-### Description
-  Same as cmake_dependent_option(), but store default value and option name for the jrl_print_options_summary()
-  See official documentation: https://cmake.org/cmake/help/latest/module/CMakeDependentOption.html
-
-
-### Arguments
-* `option_name`: The option name.
-* `description`: The description.
-* `default_value`: The default value.
-* `condition`: The condition.
-* `else_value`: The value if condition is false.
-
-
-### Example
-```cmake
-jrl_cmake_dependent_option(USE_FOO "Use Foo" ON "USE_BAR;NOT USE_ZOT" OFF)
 ```
 # `jrl_print_options_summary`
 
@@ -1120,10 +1133,11 @@ jrl_python_compute_install_dir(<output>)
 ### Description
     Compute the installation directory for Python libraries.
     It chooses the installation based using the following priority:
- 1. If ${PROJECT_NAME}_PYTHON_INSTALL_DIR is defined, its value is used.
-    Usually passed via CMake command line: -D${PROJECT_NAME}_PYTHON_INSTALL_DIR=<path>
+ 1. If <PROJECT_NAME_UPPER>_PYTHON_INSTALL_DIR is defined, its value is used.
+    Usually passed via CMake command line: -D<PROJECT_NAME_UPPER>_PYTHON_INSTALL_DIR=<path>
     It is usually an absolute path to a specific site-packages folder.
- 2. If ${PROJECT_NAME}_PYTHON_INSTALL_DIR **environment** variable is defined, its value is used.
+    Note: <PROJECT_NAME_UPPER> is the PROJECT_NAME converted to a valid C identifier and in upper case.
+ 2. If <PROJECT_NAME_UPPER>_PYTHON_INSTALL_DIR **environment** variable is defined, its value is used.
  3. If running inside a Conda environment, on Windows, the absolute path to site-packages is used.
     It is the return value of: `sysconfig.get_path('purelib')`.
     Example: `C:/Users/You/Miniconda3/envs/myenv/Lib/site-packages`
