@@ -2769,8 +2769,8 @@ jrl_option(
 * `name`: The option name.
 * `help_text`: The cache entry help string.
 * `default_value`: The default value (ON/OFF).
-* `CONDITION`: CMake condition string to evaluate (optional).
-* `FALLBACK`: Value to force when CONDITION is false (optional, default is OFF). Set with FORCE flag. Only used with CONDITION.
+* `CONDITION`: CMake condition string to evaluate (optional). If false, the option will be forced to FALLBACK value.
+* `FALLBACK`: Value to force when CONDITION is false (optional).
 * `LEGACY_NAME`: Deprecated option name to migrate (optional).
 
 
@@ -2798,10 +2798,14 @@ function(jrl_option option_name help_text default_value)
         "[${PROJECT_NAME}::jrl_option] Configuring option '${option_name}' (default: ${default_value})"
     )
 
-    if(arg_FALLBACK)
-        set(fallback_value "${arg_FALLBACK}")
-    else()
-        set(fallback_value OFF)
+    if(DEFINED arg_CONDITION)
+        message(DEBUG "    Option has condition: ${arg_CONDITION}")
+        _jrl_check_var_defined(arg_FALLBACK "FALLBACK argument must be provided when CONDITION is used.")
+    endif()
+
+    if(DEFINED arg_FALLBACK)
+        set(fallback_value ${arg_FALLBACK})
+        message(DEBUG "    Fallback value when condition is false: ${fallback_value}")
     endif()
 
     # Evaluate condition
@@ -2826,7 +2830,7 @@ function(jrl_option option_name help_text default_value)
         else()
             message(
                 DEBUG
-                "    Condition failed, option will be set to '${fallback_value}' (hidden)"
+                "    Condition failed, option will be set to fallback value '${fallback_value}' (hidden)"
             )
         endif()
     endif()
@@ -2849,7 +2853,10 @@ function(jrl_option option_name help_text default_value)
             set(${option_name} "${default_value}" CACHE BOOL "${help_text}")
         endif()
     else()
-        message(DEBUG "    Forcing option '${option_name}' to '${fallback_value}' (hidden)")
+        message(
+            DEBUG
+            "    Forcing option '${option_name}' to fallback value '${fallback_value}' (hidden)"
+        )
         set(${option_name} "${fallback_value}" CACHE BOOL "${help_text}" FORCE)
         mark_as_advanced(${option_name})
     endif()
@@ -2971,9 +2978,9 @@ function(jrl_print_options_summary)
         )
         get_property(_help CACHE ${option_name} PROPERTY HELPSTRING)
         get_property(
-            _compat_option
+            _legacy_option
             GLOBAL
-            PROPERTY _jrl_${PROJECT_NAME}_option_${option_name}_compat_option
+            PROPERTY _jrl_${PROJECT_NAME}_option_${option_name}_legacy_option
         )
 
         _jrl_pad_string("${option_name}"      40 _name)
@@ -2983,8 +2990,8 @@ function(jrl_print_options_summary)
         _jrl_pad_string("${_default}"  3 _default)
 
         _jrl_log("${_name} | ${_type} | ${_val} | ${_help} (${_default})")
-        if(_compat_option)
-            _jrl_log("  (Compatibility option: ${_compat_option})")
+        if(_legacy_option)
+            _jrl_log("  (Legacy option: ${_legacy_option})")
         endif()
     endforeach()
 
