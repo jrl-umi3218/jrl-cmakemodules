@@ -2793,9 +2793,10 @@ function(jrl_option option_name help_text default_value)
     set(multiValueArgs)
     cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-    message(DEBUG "jrl_option: Configuring option '${option_name}' (default: ${default_value})")
-
-    _jrl_check_var_defined(PROJECT_NAME)
+    message(
+        DEBUG
+        "[${PROJECT_NAME}::jrl_option] Configuring option '${option_name}' (default: ${default_value})"
+    )
 
     if(arg_FALLBACK)
         set(fallback_value "${arg_FALLBACK}")
@@ -2806,7 +2807,7 @@ function(jrl_option option_name help_text default_value)
     # Evaluate condition
     set(enable_option ON)
     if(arg_CONDITION)
-        message(DEBUG "jrl_option: Evaluating condition: ${arg_CONDITION}")
+        message(DEBUG "    Evaluating condition: ${arg_CONDITION}")
 
         # Evaluate the string condition
         cmake_language(
@@ -2821,11 +2822,11 @@ function(jrl_option option_name help_text default_value)
         )
 
         if(enable_option)
-            message(DEBUG "jrl_option: Condition passed")
+            message(DEBUG "    Condition passed")
         else()
             message(
                 DEBUG
-                "jrl_option: Condition failed, option will be set to '${fallback_value}' (hidden)"
+                "    Condition failed, option will be set to '${fallback_value}' (hidden)"
             )
         endif()
     endif()
@@ -2833,20 +2834,29 @@ function(jrl_option option_name help_text default_value)
     # Set the option
     if(enable_option)
         if(DEFINED CACHE{${option_name}})
-            message(DEBUG "jrl_option: Option '${option_name}' already set to '${${option_name}}'")
-            set(${option_name} "${${option_name}}" CACHE BOOL "${help_text}")
+            message(DEBUG "    Option '${option_name}' already set to '${${option_name}}'")
+            # Get the type and force it to be initialized. Right now, only BOOL options are supported, but this can be extended in the future if needed.
+            get_property(type CACHE ${option_name} PROPERTY TYPE)
+            if(type STREQUAL "UNINITIALIZED")
+                message(
+                    DEBUG
+                    "    Option '${option_name}' is UNINITIALIZED, setting default value to BOOL:'${default_value}'"
+                )
+                set(${option_name} "${default_value}" CACHE BOOL "${help_text}")
+            endif()
         else()
-            message(DEBUG "jrl_option: Setting option '${option_name}' to '${default_value}'")
+            message(DEBUG "    Setting option '${option_name}' to '${default_value}'")
             set(${option_name} "${default_value}" CACHE BOOL "${help_text}")
         endif()
     else()
-        message(DEBUG "jrl_option: Forcing option '${option_name}' to '${fallback_value}' (hidden)")
+        message(DEBUG "    Forcing option '${option_name}' to '${fallback_value}' (hidden)")
         set(${option_name} "${fallback_value}" CACHE BOOL "${help_text}" FORCE)
         mark_as_advanced(${option_name})
     endif()
 
     # Handle legacy name (after option is created)
     if(arg_LEGACY_NAME)
+        message(DEBUG "    Handling legacy option name '${arg_LEGACY_NAME}' for '${option_name}'")
         jrl_legacy_option(
             NEW_OPTION ${option_name}
             OLD_OPTION ${arg_LEGACY_NAME}
