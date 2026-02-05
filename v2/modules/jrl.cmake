@@ -2652,14 +2652,91 @@ function(jrl_dump_package_dependencies_json output)
 endfunction()
 
 #[============================================================================[
+# `jrl_legacy_option`
+
+```cpp
+jrl_legacy_option(
+    NEW_OPTION <new_option_name>
+    OLD_OPTION <old_option_name>
+)
+```
+
+**Type:** function
+
+
+### Description
+  Migrate a legacy option value to a new option name and emit a deprecation warning.
+  If the old option is defined, its value is migrated to the new option.
+  The NEW_OPTION must already exist in the cache (created via jrl_option or option()).
+  The help text is automatically retrieved from the NEW_OPTION cache property.
+
+
+### Arguments
+* `NEW_OPTION`: The current/new option name (must already exist in cache).
+* `OLD_OPTION`: The deprecated/old option name to migrate from.
+
+
+### Example
+```cmake
+jrl_legacy_option(
+    NEW_OPTION BUILD_PYTHON
+    OLD_OPTION BUILD_PYTHON_BINDINGS
+)
+```
+#]============================================================================]
+function(jrl_legacy_option)
+    set(options)
+    set(oneValueArgs NEW_OPTION OLD_OPTION)
+    set(multiValueArgs)
+    cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+    # Validate required arguments
+    _jrl_check_var_defined(arg_NEW_OPTION)
+    _jrl_check_var_defined(arg_OLD_OPTION)
+
+    # Check that NEW_OPTION exists in cache
+    get_property(cache_exists CACHE ${arg_NEW_OPTION} PROPERTY VALUE SET)
+    if(NOT cache_exists)
+        message(
+            FATAL_ERROR
+            "jrl_legacy_option: NEW_OPTION '${arg_NEW_OPTION}' does not exist in cache. "
+            "The option must be created first (via jrl_option or option()) before calling jrl_legacy_option."
+        )
+    endif()
+
+    # Get help text from cache property
+    get_property(help_text CACHE ${arg_NEW_OPTION} PROPERTY HELPSTRING)
+    if(NOT help_text)
+        set(help_text "Option ${arg_NEW_OPTION}")
+    endif()
+
+    # Check if old option is defined
+    if(DEFINED ${arg_OLD_OPTION})
+        message(
+            DEBUG
+            "jrl_legacy_option: Found legacy variable '${arg_OLD_OPTION}' set to '${${arg_OLD_OPTION}}'"
+        )
+        message(
+            DEPRECATION
+            "Option '${arg_OLD_OPTION}' is deprecated. Please use '${arg_NEW_OPTION}' instead."
+        )
+
+        # Override NEW_OPTION with legacy value
+        message(DEBUG "jrl_legacy_option: Migrating legacy value to '${arg_NEW_OPTION}'")
+        set(${arg_NEW_OPTION} "${${arg_OLD_OPTION}}" CACHE BOOL "${help_text}" FORCE)
+    endif()
+endfunction()
+
+#[============================================================================[
 # `jrl_option`
 
 ```cpp
 jrl_option(
-    <option_name>
-    <description>
+    <name>
+    <help_text>
     <default_value>
-    [COMPATIBILITY_OPTION <compat_opt>]
+    [CONDITION <cmake_condition> [FALLBACK <fallback_value>]]
+    [LEGACY_NAME <legacy_name>]
 )
 ```
 
@@ -2667,95 +2744,98 @@ jrl_option(
 
 
 ### Description
-  Override cmake option() to get a nice summary at the end of the configuration step
+  Declare a cache BOOL option with optional conditional availability and legacy name migration.
+  When `CONDITION` evaluates to false, the option is forced to the `FALLBACK` value (default OFF) with FORCE and hidden.
+  When `LEGACY_NAME` is set, its value is migrated to `<name>` and a deprecation
+  warning is emitted.
 
 
 ### Arguments
-* `option_name`: The option name.
-* `description`: The description.
+* `name`: The option name.
+* `help_text`: The cache entry help string.
 * `default_value`: The default value (ON/OFF).
-* `COMPATIBILITY_OPTION`: An old option name for compatibility.
+* `CONDITION`: CMake condition string to evaluate (optional).
+* `FALLBACK`: Value to force when CONDITION is false (optional, default is OFF). Set with FORCE flag. Only used with CONDITION.
+* `LEGACY_NAME`: Deprecated option name to migrate (optional).
 
 
 ### Example
 ```cmake
-jrl_option(BUILD_TESTING "Build the tests" ON)
+jrl_option(BUILD_TESTS "Build unit tests" ON)
+jrl_option(
+    BUILD_PYTHON
+    "Build Python bindings"
+    ON
+    CONDITION "BUILD_SHARED_LIBS AND Python_FOUND"
+    FALLBACK OFF
+    LEGACY_NAME BUILD_PYTHON_BINDINGS
+)
 ```
 #]============================================================================]
-function(jrl_option option_name description default_value)
+function(jrl_option option_name help_text default_value)
     set(options)
-    set(oneValueArgs COMPATIBILITY_OPTION)
+    set(oneValueArgs CONDITION FALLBACK LEGACY_NAME)
     set(multiValueArgs)
     cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-    option(${option_name} "${description}" ${default_value})
+    message(DEBUG "jrl_option: Configuring option '${option_name}' (default: ${default_value})")
 
-    if(arg_COMPATIBILITY_OPTION)
-        set_property(
-            GLOBAL
-            PROPERTY
-                _jrl_${PROJECT_NAME}_option_${option_name}_compat_option ${arg_COMPATIBILITY_OPTION}
+    _jrl_check_var_defined(PROJECT_NAME)
+
+    if(arg_FALLBACK)
+        set(fallback_value "${arg_FALLBACK}")
+    else()
+        set(fallback_value OFF)
+    endif()
+
+    # Evaluate condition
+    set(enable_option ON)
+    if(arg_CONDITION)
+        message(DEBUG "jrl_option: Evaluating condition: ${arg_CONDITION}")
+
+        # Evaluate the string condition
+        cmake_language(
+            EVAL CODE
+                "
+            if(${arg_CONDITION})
+                set(enable_option ON)
+            else()
+                set(enable_option OFF)
+            endif()
+        "
         )
-        if(DEFINED ${arg_COMPATIBILITY_OPTION})
+
+        if(enable_option)
+            message(DEBUG "jrl_option: Condition passed")
+        else()
             message(
-                WARNING
-                "Option ${arg_COMPATIBILITY_OPTION} is deprecated. Please use ${option_name} instead."
+                DEBUG
+                "jrl_option: Condition failed, option will be set to '${fallback_value}' (hidden)"
             )
-            set(${option_name} ${${arg_COMPATIBILITY_OPTION}} CACHE BOOL "${description}" FORCE)
         endif()
     endif()
 
-    set_property(
-        GLOBAL
-        PROPERTY _jrl_${PROJECT_NAME}_option_${option_name}_default_value ${default_value}
-    )
-    set_property(GLOBAL PROPERTY _jrl_${PROJECT_NAME}_option_names ${option_name} APPEND)
-endfunction()
+    # Set the option
+    if(enable_option)
+        if(DEFINED CACHE{${option_name}})
+            message(DEBUG "jrl_option: Option '${option_name}' already set to '${${option_name}}'")
+        else()
+            message(DEBUG "jrl_option: Setting option '${option_name}' to '${default_value}'")
+            set(${option_name} "${default_value}" CACHE BOOL "${help_text}")
+        endif()
+    else()
+        message(DEBUG "jrl_option: Forcing option '${option_name}' to '${fallback_value}' (hidden)")
+        set(${option_name} "${fallback_value}" CACHE BOOL "${help_text}" FORCE)
+        mark_as_advanced(${option_name})
+    endif()
 
-#[============================================================================[
-# `jrl_cmake_dependent_option`
-
-```cpp
-jrl_cmake_dependent_option(
-    <option_name>
-    <description>
-    <default_value>
-    <condition>
-    <else_value>
-)
-```
-
-**Type:** function
-
-
-### Description
-  Same as cmake_dependent_option(), but store default value and option name for the jrl_print_options_summary()
-  See official documentation: https://cmake.org/cmake/help/latest/module/CMakeDependentOption.html
-
-
-### Arguments
-* `option_name`: The option name.
-* `description`: The description.
-* `default_value`: The default value.
-* `condition`: The condition.
-* `else_value`: The value if condition is false.
-
-
-### Example
-```cmake
-jrl_cmake_dependent_option(USE_FOO "Use Foo" ON "USE_BAR;NOT USE_ZOT" OFF)
-```
-#]============================================================================]
-function(
-    jrl_cmake_dependent_option
-    option_name
-    description
-    default_value
-    condition
-    else_value
-)
-    include(CMakeDependentOption)
-    cmake_dependent_option(${ARGV})
+    # Handle legacy name (after option is created)
+    if(arg_LEGACY_NAME)
+        jrl_legacy_option(
+            NEW_OPTION ${option_name}
+            OLD_OPTION ${arg_LEGACY_NAME}
+        )
+    endif()
 
     set_property(
         GLOBAL
