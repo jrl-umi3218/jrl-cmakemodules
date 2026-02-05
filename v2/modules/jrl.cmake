@@ -2506,7 +2506,22 @@ function(jrl_export_package)
     set(multiValueArgs)
     cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-    message(STATUS "[${PROJECT_NAME}] Exporting package (${CMAKE_CURRENT_FUNCTION})")
+    string(MAKE_C_IDENTIFIER ${PROJECT_NAME} project_name_identifier)
+    string(TOUPPER ${project_name_identifier} project_name_identifier_upper)
+    set(option_var_name "${project_name_identifier_upper}_EXPORT_PACKAGE")
+
+    if(DEFINED ${option_var_name} AND NOT ${option_var_name})
+        message(STATUS "Skipping package export because ${option_var_name} is set to OFF")
+        return()
+    endif()
+
+    message(
+        STATUS
+        "[${PROJECT_NAME}] Exporting package (${CMAKE_CURRENT_FUNCTION})
+
+    You can disable this step by setting the option ${option_var_name} to OFF.
+    "
+    )
 
     include(CMakePackageConfigHelpers)
     _jrl_check_var_defined(PROJECT_NAME)
