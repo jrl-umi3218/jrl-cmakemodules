@@ -4082,7 +4082,7 @@ function(_jrl_generate_api_doc input_file output_file)
     message(STATUS "API documentation generated at '${output_file}'")
 endfunction()
 
-if(GENERATE_API_DOC)
+if(JRL_GENERATE_API_DOC)
     _jrl_docs_dir(docs_dir)
     _jrl_generate_api_doc(${CMAKE_CURRENT_LIST_FILE} ${docs_dir}/api.md)
 endif()
