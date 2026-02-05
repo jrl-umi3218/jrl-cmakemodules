@@ -6,8 +6,8 @@ project(jrl-cmakemodules VERSION 2.0.0)
 set(jrl-cmakemodules_VERSION ${PROJECT_VERSION} CACHE STRING "Version of jrl-cmakemodules")
 include(${CMAKE_CURRENT_SOURCE_DIR}/modules/jrl.cmake)
 
-option(JRL_GENERATE_DOCUMENTATION "Generate the documentation for jrl-cmakemodules (v2)" OFF)
-if(JRL_GENERATE_DOCUMENTATION)
+option(JRL_GENERATE_API_DOC "Generate the API documentation for jrl-cmakemodules (v2)" OFF)
+if(JRL_GENERATE_API_DOC)
     _jrl_generate_api_doc(
         ${CMAKE_CURRENT_SOURCE_DIR}/modules/jrl.cmake
         ${CMAKE_CURRENT_SOURCE_DIR}/docs/api.md
