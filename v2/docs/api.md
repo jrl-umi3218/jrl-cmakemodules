@@ -578,7 +578,6 @@ jrl_find_package(
     [version]
     [COMPONENTS <comp>...]
     [REQUIRED]
-    [MODULE_PATH <path_to_find_module>]
 )
 ```
 
@@ -595,7 +594,6 @@ jrl_find_package(
 
 ### Arguments
     <PackageName> [<version>] [REQUIRED] [COMPONENTS <components>...] - The same as find_package.
-* `MODULE_PATH`: Path to a dir containing a custom Find<PackageName>.cmake module file.
 
 
 ### Example
@@ -854,8 +852,8 @@ jrl_option(
 * `name`: The option name.
 * `help_text`: The cache entry help string.
 * `default_value`: The default value (ON/OFF).
-* `CONDITION`: CMake condition string to evaluate (optional).
-* `FALLBACK`: Value to force when CONDITION is false (optional, default is OFF). Set with FORCE flag. Only used with CONDITION.
+* `CONDITION`: CMake condition string to evaluate (optional). If false, the option will be forced to FALLBACK value.
+* `FALLBACK`: Value to force when CONDITION is false (optional).
 * `LEGACY_NAME`: Deprecated option name to migrate (optional).
 
 
