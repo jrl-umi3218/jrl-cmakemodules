@@ -37,16 +37,16 @@ assert_defined(TEST_OPTION_1 ON)
 message(STATUS "\n=== Test 2: Option with CONDITION=TRUE ===")
 unset(TEST_OPTION_2 CACHE)
 set(MY_DEP_ENABLED TRUE)
-jrl_option(TEST_OPTION_2 "Test option 2" ON CONDITION "MY_DEP_ENABLED")
+jrl_option(TEST_OPTION_2 "Test option 2" ON CONDITION "MY_DEP_ENABLED" FALLBACK OFF)
 assert_defined(TEST_OPTION_2 ON)
 
 #[============================================================================[
-# Test 3: Option with CONDITION=FALSE, default FALLBACK (OFF)
+# Test 3: Option with CONDITION=FALSE (FALLBACK=OFF)
 #]============================================================================]
-message(STATUS "\n=== Test 3: Option with CONDITION=FALSE (default FALLBACK=OFF) ===")
+message(STATUS "\n=== Test 3: Option with CONDITION=FALSE (FALLBACK=OFF) ===")
 unset(TEST_OPTION_3 CACHE)
 set(MY_DEP_DISABLED FALSE)
-jrl_option(TEST_OPTION_3 "Test option 3" ON CONDITION "MY_DEP_DISABLED")
+jrl_option(TEST_OPTION_3 "Test option 3" ON CONDITION "MY_DEP_DISABLED" FALLBACK OFF)
 assert_defined(TEST_OPTION_3 OFF)
 
 #[============================================================================[
@@ -122,7 +122,7 @@ message(STATUS "\n=== Test 9: Complex CONDITION expression ===")
 unset(TEST_OPTION_9 CACHE)
 set(DEP_A TRUE)
 set(DEP_B FALSE)
-jrl_option(TEST_OPTION_9 "Test option 9" ON CONDITION "DEP_A AND NOT DEP_B")
+jrl_option(TEST_OPTION_9 "Test option 9" ON CONDITION "DEP_A AND NOT DEP_B" FALLBACK OFF)
 assert_defined(TEST_OPTION_9 ON)
 
 #[============================================================================[
@@ -226,13 +226,27 @@ assert_defined(TEST_OPTION_16 ON)
 message(STATUS "\n=== Test 17: Fatal error when NEW_OPTION is undefined in cache ===")
 set(jrl ${CMAKE_CURRENT_LIST_DIR}/../modules/jrl.cmake)
 jrl_expect_error(
-    CODE [[
-        include(@jrl@)
+    CODE "
+        include(\"${jrl}\")
         set(PROJECT_NAME test_project)
-        set(OLD_OPT ON CACHE BOOL "old")
+        set(OLD_OPT ON CACHE BOOL \"old\")
         jrl_legacy_option(NEW_OPTION NON_EXISTENT OLD_OPTION OLD_OPT)
-    ]]
+    "
     MATCH "jrl_legacy_option: NEW_OPTION 'NON_EXISTENT' does not exist in cache"
+)
+
+#[============================================================================[
+# Test 18: Fatal error when CONDITION is set but FALLBACK is missing
+#]============================================================================]
+message(STATUS "\n=== Test 18: Fatal error when CONDITION is set but FALLBACK is missing ===")
+set(jrl ${CMAKE_CURRENT_LIST_DIR}/../modules/jrl.cmake)
+jrl_expect_error(
+    CODE "
+        include(\"${jrl}\")
+        set(PROJECT_NAME test_project)
+        jrl_option(BAD_OPT \"desc\" ON CONDITION \"TRUE\")
+    "
+    MATCH "FALLBACK argument must be provided when CONDITION is used"
 )
 
 message(STATUS "\n=== All tests passed! ===\n")
