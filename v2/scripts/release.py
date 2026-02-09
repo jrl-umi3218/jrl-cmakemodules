@@ -9,6 +9,117 @@
 # ]
 # ///
 
+"""
+# Release Script Documentation
+
+`release.py` is a utility script designed to manage project versions across multiple file formats, ensuring consistency and automating the release process.
+
+## Features
+
+-   **Multi-file Support**: Updates version strings in:
+    -   `package.xml` (ROS)
+    -   `pyproject.toml` (Python)
+    -   `CHANGELOG.md` (Keep a Changelog format)
+    -   `pixi.toml` (Pixi)
+    -   `CITATION.cff` (Citation File Format)
+    -   `CMakeLists.txt` (CMake)
+-   **Version Checking**: Verifies that all tracked files share the same version number.
+-   **Semantic Versioning**: Enforces SemVer (X.Y.Z) compliance.
+-   **Automated Bumping**: Supports major, minor, and patch version bumps.
+-   **Git Integration**: Option to automatically commit changes and create release tags.
+-   **Safe Checks**: Includes dry-run mode and version progression validation (e.g., preventing accidental downgrades).
+
+## Prerequisites
+
+The script lists its dependencies in the file header using [inline script metadata (PEP 723)](https://peps.python.org/pep-0723/). It is recommended to execute it using `uv` to handle dependencies automatically.
+
+-   Python >= 3.9
+-   Dependencies: `tomlkit`, `ruamel.yaml`, `rich`, `packaging`
+
+## Usage
+
+### Running the Script
+
+You can run the script directly with `uv`, which will create a temporary environment with the required dependencies:
+
+```bash
+uv run --no-project release.py [OPTIONS]
+```
+
+Or via python if dependencies are manually installed:
+
+```bash
+python release.py [OPTIONS]
+```
+
+### Common Commands
+
+#### Check Current Version
+Verify that all files are in sync and report the current consensus version.
+
+```bash
+uv run --no-project release.py --check-version
+```
+
+#### Interactive Upgrade
+Interactively choose whether to bump the major, minor, or patch version. Shows a diff and validation warnings before confirming.
+
+```bash
+uv run --no-project release.py --upgrade-version
+```
+
+#### Specific Upgrade
+Bump a specific component of the version.
+
+```bash
+uv run --no-project release.py --upgrade-version-patch  # e.g., 1.0.0 -> 1.0.1
+uv run --no-project release.py --upgrade-version-minor  # e.g., 1.0.0 -> 1.1.0
+uv run --no-project release.py --upgrade-version-major  # e.g., 1.0.0 -> 2.0.0
+```
+
+#### Set Specific Version
+Manually set the project to a specific version string.
+
+```bash
+uv run --no-project release.py --update-version 1.2.3
+```
+
+### Options
+
+| Option | Description |
+| :--- | :--- |
+| `--root <PATH>` | Set the project root directory (default: current working directory). |
+| `--dry-run` | Simulate operations without modifying files. |
+| `--confirm` | Auto-confirm actions without interactive prompts. |
+| `--list-files` | List all files that are currently checked/updated. |
+
+### Git Integration
+
+The script can automatically commit changes and tag the release using the local git configuration.
+
+```bash
+# Upgrade patch version, commit, and tag
+uv run --no-project release.py --upgrade-version-patch --git-commit --git-tag
+```
+
+-   **Commit Message**: `chore: bump version to X.Y.Z`
+-   **Tag Name**: `vX.Y.Z`
+-   **Tag Message**: `Release version X.Y.Z`
+
+## Supported File Patterns
+
+The script defines several `VersionExtractor` classes to handle specific file formats:
+
+-   **package.xml**: Updates contents of `<version>X.Y.Z</version>`.
+-   **pyproject.toml**: Updates `tool.poetry.version` or standard `project.version` (configured for `project.version`).
+-   **CHANGELOG.md**:
+    -   Reads the first version that != "Unreleased".
+    -   On update, replaces the `## [Unreleased]` header with `## [Unreleased]` followed by a new section `## [X.Y.Z] - YYYY-MM-DD`.
+-   **pixi.toml**: Updates the `[workspace] version` key.
+-   **CITATION.cff**: Updates the top-level `version` key.
+-   **CMakeLists.txt**: Scans for `project(... VERSION X.Y.Z ...)` using regex.
+"""
+
 import sys
 import re
 import argparse
@@ -25,6 +136,8 @@ from rich.table import Table
 from rich import box
 from rich.prompt import Prompt, Confirm
 from rich.panel import Panel
+from rich.markdown import Markdown
+from rich.text import Text
 from packaging.version import parse as parse_version, InvalidVersion
 
 console = Console()
@@ -498,8 +611,50 @@ def list_version_files(checks: List[VersionExtractor]) -> None:
     sys.exit(0)
 
 
+class RichHelpAction(argparse.Action):
+    def __init__(
+        self,
+        option_strings,
+        dest=argparse.SUPPRESS,
+        default=argparse.SUPPRESS,
+        help=None,
+    ):
+        super().__init__(
+            option_strings=option_strings,
+            dest=dest,
+            default=default,
+            nargs=0,
+            help=help,
+        )
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        if parser.description:
+            console.print(Markdown(parser.description))
+
+        # Print the standard argparse usage and options
+        # We clear the description to avoid printing the markdown source again
+        original_description = parser.description
+        parser.description = None
+
+        console.print(Text("\nCommand Reference:\n", style="bold"))
+        console.print(Text(parser.format_help()))
+
+        parser.description = original_description
+        parser.exit()
+
+
 def main():
-    parser = argparse.ArgumentParser(description="Manage project versions.")
+    parser = argparse.ArgumentParser(
+        description=__doc__,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        add_help=False,
+    )
+    parser.add_argument(
+        "-h",
+        "--help",
+        action=RichHelpAction,
+        help="Show this help message and exit",
+    )
     parser.add_argument(
         "--root", type=Path, default=Path.cwd(), help="Project root directory"
     )
