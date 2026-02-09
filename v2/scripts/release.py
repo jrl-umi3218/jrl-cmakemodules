@@ -817,6 +817,11 @@ def main():
                     "\n[bold red]FAILURE:[/bold red] Errors encountered (parsing errors)."
                 )
             sys.exit(1)
+        elif not versions_found:
+            console.print(
+                f"\n[bold red]FAILURE:[/bold red] No version files found in {root_dir}."
+            )
+            sys.exit(1)
         else:
             console.print(
                 f"\n[bold green]SUCCESS:[/bold green] All files match version [bold]{consensus_version}[/bold]."
