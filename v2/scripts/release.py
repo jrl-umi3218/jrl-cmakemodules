@@ -27,7 +27,7 @@
 -   **Semantic Versioning**: Enforces SemVer (X.Y.Z) compliance.
 -   **Automated Bumping**: Supports major, minor, and patch version bumps.
 -   **Git Integration**: Option to automatically commit changes and create release tags.
--   **Safe Checks**: Includes dry-run mode and version progression validation (e.g., preventing accidental downgrades).
+-   **Safe Checks**: Includes dry-run mode and version progression validation.
 
 ## Prerequisites
 
@@ -40,7 +40,7 @@ The script lists its dependencies in the file header using [inline script metada
 
 ### Running the Script
 
-You can run the script directly with `uv`, which will create a temporary environment with the required dependencies:
+You can run the script directly with `uv`:
 
 ```bash
 uv run --no-project release.py [OPTIONS]
@@ -61,20 +61,18 @@ Verify that all files are in sync and report the current consensus version.
 uv run --no-project release.py --check-version
 ```
 
-#### Interactive Upgrade
-Interactively choose whether to bump the major, minor, or patch version. Shows a diff and validation warnings before confirming.
+#### Bump Version
+Bump the project version (semver).
 
 ```bash
-uv run --no-project release.py --upgrade-version
-```
+# Bump patch version (e.g. 1.0.0 -> 1.0.1)
+uv run --no-project release.py --bump patch
 
-#### Specific Upgrade
-Bump a specific component of the version.
+# Bump minor version (e.g. 1.0.0 -> 1.1.0)
+uv run --no-project release.py --bump minor
 
-```bash
-uv run --no-project release.py --upgrade-version-patch  # e.g., 1.0.0 -> 1.0.1
-uv run --no-project release.py --upgrade-version-minor  # e.g., 1.0.0 -> 1.1.0
-uv run --no-project release.py --upgrade-version-major  # e.g., 1.0.0 -> 2.0.0
+# Bump major version (e.g. 1.0.0 -> 2.0.0)
+uv run --no-project release.py --bump major
 ```
 
 #### Set Specific Version
@@ -89,7 +87,10 @@ uv run --no-project release.py --update-version 1.2.3
 | Option | Description |
 | :--- | :--- |
 | `--root <PATH>` | Set the project root directory (default: current working directory). |
-| `--dry-run` | Simulate operations without modifying files. |
+| `--bump <major\\|minor\\|patch>` | Bump the version component. |
+| `--dry-run` | Show what would change without modifying files. |
+| `--short` | Output only the final version string. |
+| `--output-format <text\\|json>` | Output format (default: text). |
 | `--confirm` | Auto-confirm actions without interactive prompts. |
 | `--list-files` | List all files that are currently checked/updated. |
 
@@ -98,8 +99,8 @@ uv run --no-project release.py --update-version 1.2.3
 The script can automatically commit changes and tag the release using the local git configuration.
 
 ```bash
-# Upgrade patch version, commit, and tag
-uv run --no-project release.py --upgrade-version-patch --git-commit --git-tag
+# Bump patch version, commit, and tag
+uv run --no-project release.py --bump patch --git-commit --git-tag
 ```
 
 -   **Commit Message**: `chore: bump version to X.Y.Z`
@@ -111,7 +112,7 @@ uv run --no-project release.py --upgrade-version-patch --git-commit --git-tag
 The script defines several `VersionExtractor` classes to handle specific file formats:
 
 -   **package.xml**: Updates contents of `<version>X.Y.Z</version>`.
--   **pyproject.toml**: Updates `tool.poetry.version` or standard `project.version` (configured for `project.version`).
+-   **pyproject.toml**: Updates `tool.poetry.version` or standard `project.version`.
 -   **CHANGELOG.md**:
     -   Reads the first version that != "Unreleased".
     -   On update, replaces the `## [Unreleased]` header with `## [Unreleased]` followed by a new section `## [X.Y.Z] - YYYY-MM-DD`.
@@ -125,6 +126,7 @@ import re
 import argparse
 import datetime
 import subprocess
+import json
 from pathlib import Path
 from abc import ABC, abstractmethod
 from typing import List, Optional, Tuple
@@ -134,7 +136,7 @@ from ruamel.yaml import YAML
 from rich.console import Console
 from rich.table import Table
 from rich import box
-from rich.prompt import Prompt, Confirm
+from rich.prompt import Confirm
 from rich.panel import Panel
 from rich.markdown import Markdown
 from rich.text import Text
@@ -678,6 +680,17 @@ def main():
         action="store_true",
         help="Create a git tag for the new version.",
     )
+    parser.add_argument(
+        "--short",
+        action="store_true",
+        help="Output only the final version string.",
+    )
+    parser.add_argument(
+        "--output-format",
+        choices=["text", "json"],
+        default="text",
+        help="Output format (default: text).",
+    )
 
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument(
@@ -694,37 +707,27 @@ def main():
         help="Update version in all files (enforces semver).",
     )
     group.add_argument(
-        "--upgrade-version",
-        action="store_true",
-        help="Interactively upgrade version (major/minor/patch).",
-    )
-    group.add_argument(
-        "--upgrade-version-major",
-        action="store_true",
-        help="Upgrade major version (X.0.0).",
-    )
-    group.add_argument(
-        "--upgrade-version-minor",
-        action="store_true",
-        help="Upgrade minor version (x.X.0).",
-    )
-    group.add_argument(
-        "--upgrade-version-patch",
-        action="store_true",
-        help="Upgrade patch version (x.x.X).",
+        "--bump",
+        choices=["major", "minor", "patch"],
+        help="Bump the project version.",
     )
 
     args = parser.parse_args()
     root_dir = args.root
+
+    # Redirect console output to stderr if we want clean stdout for json/short
+    global console
+    if args.short or args.output_format == "json":
+        console = Console(file=sys.stderr)
+    else:
+        # Default behavior
+        console = Console()
 
     # Enforce semver for update
     if args.update_version:
         try:
             # simple semver check
             if not re.match(r"^\d+\.\d+\.\d+$", args.update_version):
-                # packaging.version allows v1.0, 1.0.0.0 etc.
-                # Strict SemVer 2.0.0 is X.Y.Z
-                # The user asked to "Enforce semver".
                 console.print(
                     f"[red]Invalid SemVer '{args.update_version}'. strict X.Y.Z required.[/red]"
                 )
@@ -745,14 +748,31 @@ def main():
     ]
 
     if args.list_files:
-        list_version_files(checks)
+        if args.output_format == "json":
+            files_list = []
+            for check in checks:
+                files_list.append(
+                    {
+                        "name": check.name,
+                        "path": str(check.file_path),
+                        "exists": check.check_file_exists(),
+                        "type": check.__class__.__name__.replace(
+                            "VersionExtractor", ""
+                        ),
+                    }
+                )
+            print(json.dumps(files_list, indent=2))
+        else:
+            list_version_files(checks)
+        sys.exit(0)
 
     if args.check_version:
         results = []
         versions_found = set()
         errors = False
 
-        console.print(f"[bold blue]Checking versions in {root_dir}...[/bold blue]")
+        if not args.short:
+            console.print(f"[bold blue]Checking versions in {root_dir}...[/bold blue]")
 
         for check in checks:
             result = {
@@ -763,16 +783,16 @@ def main():
             }
 
             if not check.check_file_exists():
-                result["status"] = "[yellow]Missing[/yellow]"
-                result["message"] = "File not found (optional)"
+                result["status"] = "Missing"
+                result["message"] = "File not found"
             else:
                 try:
                     version = check.get_version()
                     result["version"] = version
-                    result["status"] = "[green]Found[/green]"
+                    result["status"] = "Found"
                     versions_found.add(version)
                 except Exception as e:
-                    result["status"] = "[red]Error[/red]"
+                    result["status"] = "Error"
                     result["message"] = str(e)
                     errors = True
 
@@ -785,6 +805,16 @@ def main():
             errors = True
             consensus_version = "MISMATCH"
 
+        if args.output_format == "json":
+            out_payload = {
+                "consensus_version": consensus_version,
+                "files": results,
+                "consistent": not errors and len(versions_found) == 1,
+            }
+            print(json.dumps(out_payload, indent=2))
+            sys.exit(1 if errors else 0)
+
+        # Standard Rich table output
         table = Table(title="Version Check Summary", box=box.ROUNDED)
         table.add_column("File", style="cyan")
         table.add_column("Version", style="magenta")
@@ -792,6 +822,14 @@ def main():
         table.add_column("Details")
 
         for res in results:
+            status_style = res["status"]
+            if res["status"] == "Found":
+                status_style = "[green]Found[/green]"
+            elif res["status"] == "Missing":
+                status_style = "[yellow]Missing[/yellow]"
+            elif res["status"] == "Error":
+                status_style = "[red]Error[/red]"
+
             version_display = res["version"] if res["version"] else "-"
             if res["version"]:
                 if (
@@ -803,9 +841,13 @@ def main():
                 elif consensus_version == "MISMATCH":
                     version_display = f"[yellow]{res['version']}[/yellow]"
 
-            table.add_row(res["file"], version_display, res["status"], res["message"])
+            table.add_row(res["file"], version_display, status_style, res["message"])
 
-        console.print(table)
+        if not args.short:
+            console.print(table)
+
+        if args.short and consensus_version and consensus_version != "MISMATCH":
+            print(consensus_version)
 
         if errors:
             if len(versions_found) > 1:
@@ -823,110 +865,54 @@ def main():
             )
             sys.exit(1)
         else:
-            console.print(
-                f"\n[bold green]SUCCESS:[/bold green] All files match version [bold]{consensus_version}[/bold]."
-            )
+            if not args.short:
+                console.print(
+                    f"\n[bold green]SUCCESS:[/bold green] All files match version [bold]{consensus_version}[/bold]."
+                )
             sys.exit(0)
 
-    elif args.update_version:
-        new_ver = args.update_version
+    # BRANCH: update-version or bump
+    current_version = None
+    new_version_str = None
 
-        if args.dry_run:
-            console.print(
-                f"[bold yellow]DRY RUN:[/bold yellow] Would update versions to {new_ver} in {root_dir}"
-            )
-        else:
-            console.print(
-                f"[bold blue]Updating versions to {new_ver} in {root_dir}...[/bold blue]"
-            )
-
-        for check in checks:
-            if check.check_file_exists():
-                try:
-                    if args.dry_run:
-                        current_ver = check.get_version()
-                        console.print(
-                            f"[cyan]Would update[/cyan] {check.name}: {current_ver} → {new_ver}"
-                        )
-                    else:
-                        check.update_version(new_ver)
-                        console.print(f"[green]Updated[/green] {check.name}")
-                except Exception as e:
-                    console.print(f"[red]Failed to update {check.name}: {e}[/red]")
-                    if not args.dry_run:
-                        sys.exit(1)
-            else:
-                console.print(f"[yellow]Skipping[/yellow] {check.name} (not found)")
-
-        if args.dry_run:
-            console.print(
-                "\n[bold yellow]DRY RUN COMPLETE:[/bold yellow] No files were modified."
-            )
-            sys.exit(0)
-        else:
-            console.print(
-                f"\n[bold green]SUCCESS:[/bold green] Version updated to {new_ver}."
-            )
-
-            # Git operations
-            if args.git_commit:
-                git_commit_version(root_dir, new_ver, args.confirm)
-
-            if args.git_tag:
-                git_tag_version(root_dir, new_ver, args.confirm)
-
-    elif (
-        args.upgrade_version
-        or args.upgrade_version_major
-        or args.upgrade_version_minor
-        or args.upgrade_version_patch
-    ):
+    if args.update_version:
+        new_version_str = args.update_version
+        console.print(
+            f"[bold blue]Updating versions to {new_version_str} in {root_dir}...[/bold blue]"
+        )
+    elif args.bump:
         # Get current version
         current_version = get_current_version(checks)
         if not current_version:
+            # get_current_version likely printed why
             sys.exit(1)
 
         console.print(f"[bold blue]Current version: {current_version}[/bold blue]")
 
-        # Determine bump type
-        if args.upgrade_version:
-            # Interactive mode
-            bump_type = Prompt.ask(
-                "[bold cyan]What do you want to upgrade?[/bold cyan]",
-                choices=["major", "minor", "patch"],
-                default="patch",
-            )
-        elif args.upgrade_version_major:
-            bump_type = "major"
-        elif args.upgrade_version_minor:
-            bump_type = "minor"
-        else:  # args.upgrade_version_patch
-            bump_type = "patch"
-
         # Calculate new version
         try:
-            new_version = bump_version(current_version, bump_type)
+            new_version_str = bump_version(current_version, args.bump)
         except ValueError as e:
             console.print(f"[red]Error: {e}[/red]")
             sys.exit(1)
 
         # Show version diff visualization
-        show_version_diff(current_version, new_version)
+        show_version_diff(current_version, new_version_str)
 
         # Validate version progression
-        validate_version_progression(current_version, new_version, bump_type)
+        validate_version_progression(current_version, new_version_str, args.bump)
 
         # Confirm upgrade
         if args.dry_run:
             console.print(
-                f"\n[bold yellow]DRY RUN:[/bold yellow] Would upgrade from {current_version} to {new_version}"
+                f"\n[bold yellow]DRY RUN:[/bold yellow] Would upgrade from {current_version} to {new_version_str}"
             )
             confirmed = True
         elif args.confirm:
             confirmed = True
         else:
             confirmed = Confirm.ask(
-                f"\n[bold]Do you want to upgrade from [cyan]{current_version}[/cyan] to [green]{new_version}[/green]?[/bold]",
+                f"\n[bold]Do you want to upgrade from [cyan]{current_version}[/cyan] to [green]{new_version_str}[/green]?[/bold]",
                 default=True,
             )
 
@@ -934,46 +920,65 @@ def main():
             console.print("[yellow]Upgrade cancelled.[/yellow]")
             sys.exit(0)
 
-        # Perform the upgrade
-        if args.dry_run:
-            console.print(
-                f"\n[bold yellow]DRY RUN:[/bold yellow] Would upgrade version from {current_version} to {new_version}"
-            )
+        console.print(
+            f"\n[bold blue]Upgrading version from {current_version} to {new_version_str}...[/bold blue]"
+        )
+
+    # APPLY UPDATES
+    updated_files = []
+    failed = False
+
+    for check in checks:
+        if check.check_file_exists():
+            try:
+                if args.dry_run:
+                    curr = check.get_version()
+                    console.print(
+                        f"[cyan]Would update[/cyan] {check.name}: {curr} → {new_version_str}"
+                    )
+                else:
+                    check.update_version(new_version_str)
+                    console.print(f"[green]Updated[/green] {check.name}")
+                updated_files.append(check.name)
+            except Exception as e:
+                console.print(f"[red]Failed to update {check.name}: {e}[/red]")
+                if not args.dry_run:
+                    failed = True
         else:
+            console.print(f"[yellow]Skipping[/yellow] {check.name} (not found)")
+
+    if failed:
+        sys.exit(1)
+
+    if args.output_format == "json":
+        res_json = {
+            "previous_version": current_version,
+            "new_version": new_version_str,
+            "updated_files": updated_files,
+            "dry_run": args.dry_run,
+        }
+        print(json.dumps(res_json, indent=2))
+
+    elif args.short:
+        print(new_version_str)
+
+    if args.dry_run:
+        console.print(
+            "\n[bold yellow]DRY RUN COMPLETE:[/bold yellow] No files were modified."
+        )
+        sys.exit(0)
+    else:
+        if not args.short and args.output_format == "text":
             console.print(
-                f"\n[bold blue]Upgrading version from {current_version} to {new_version}...[/bold blue]"
+                f"\n[bold green]SUCCESS:[/bold green] Version updated to {new_version_str}."
             )
 
-        for check in checks:
-            if check.check_file_exists():
-                try:
-                    if args.dry_run:
-                        console.print(f"[cyan]Would update[/cyan] {check.name}")
-                    else:
-                        check.update_version(new_version)
-                        console.print(f"[green]Updated[/green] {check.name}")
-                except Exception as e:
-                    console.print(f"[red]Failed to update {check.name}: {e}[/red]")
-                    if not args.dry_run:
-                        sys.exit(1)
-            else:
-                console.print(f"[yellow]Skipping[/yellow] {check.name} (not found)")
+        # Git operations
+        if args.git_commit:
+            git_commit_version(root_dir, new_version_str, args.confirm)
 
-        if args.dry_run:
-            console.print(
-                "\n[bold yellow]DRY RUN COMPLETE:[/bold yellow] No files were modified."
-            )
-        else:
-            console.print(
-                f"\n[bold green]SUCCESS:[/bold green] Version upgraded from {current_version} to {new_version}."
-            )
-
-            # Git operations
-            if args.git_commit:
-                git_commit_version(root_dir, new_version, args.confirm)
-
-            if args.git_tag:
-                git_tag_version(root_dir, new_version, args.confirm)
+        if args.git_tag:
+            git_tag_version(root_dir, new_version_str, args.confirm)
 
 
 if __name__ == "__main__":
