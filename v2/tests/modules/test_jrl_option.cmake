@@ -1,4 +1,5 @@
-include(${CMAKE_CURRENT_LIST_DIR}/../modules/jrl.cmake)
+set(jrl_script_path ${CMAKE_CURRENT_LIST_DIR}/../../modules/jrl.cmake)
+include(${jrl_script_path})
 include(${CMAKE_CURRENT_LIST_DIR}/jrl_test.cmake)
 
 # Helper function to assert that a variable is defined and has expected value
@@ -224,10 +225,9 @@ assert_defined(TEST_OPTION_16 ON)
 # Test 17: Fatal error when NEW_OPTION is undefined in cache
 #]============================================================================]
 message(STATUS "\n=== Test 17: Fatal error when NEW_OPTION is undefined in cache ===")
-set(jrl ${CMAKE_CURRENT_LIST_DIR}/../modules/jrl.cmake)
 jrl_expect_error(
     CODE "
-        include(\"${jrl}\")
+        include(\"${jrl_script_path}\")
         set(PROJECT_NAME test_project)
         set(OLD_OPT ON CACHE BOOL \"old\")
         jrl_legacy_option(NEW_OPTION NON_EXISTENT OLD_OPTION OLD_OPT)
@@ -239,10 +239,9 @@ jrl_expect_error(
 # Test 18: Fatal error when CONDITION is set but FALLBACK is missing
 #]============================================================================]
 message(STATUS "\n=== Test 18: Fatal error when CONDITION is set but FALLBACK is missing ===")
-set(jrl ${CMAKE_CURRENT_LIST_DIR}/../modules/jrl.cmake)
 jrl_expect_error(
     CODE "
-        include(\"${jrl}\")
+        include(\"${jrl_script_path}\")
         set(PROJECT_NAME test_project)
         jrl_option(BAD_OPT \"desc\" ON CONDITION \"TRUE\")
     "
