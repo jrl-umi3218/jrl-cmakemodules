@@ -255,7 +255,8 @@ endfunction()
 #]============================================================================]
 function(_jrl_check_no_unrecognized_arguments prefix)
     if(DEFINED ${prefix}_UNPARSED_ARGUMENTS)
-        message(FATAL_ERROR "Unrecognized arguments: ${${prefix}_UNPARSED_ARGUMENTS}")
+        string(REPLACE ";" " " unparsed_args "${${prefix}_UNPARSED_ARGUMENTS}")
+        message(FATAL_ERROR "Unrecognized arguments: ${unparsed_args}")
     endif()
 endfunction()
 
@@ -2445,10 +2446,6 @@ function(jrl_install_headers)
     _jrl_check_no_unrecognized_arguments(arg)
 
     _jrl_check_var_defined(PROJECT_NAME)
-
-    if(arg_UNPARSED_ARGUMENTS)
-        message(FATAL_ERROR "Unrecognized arguments: ${arg_UNPARSED_ARGUMENTS}")
-    endif()
 
     if(NOT arg_DESTINATION)
         set(install_destination ${CMAKE_INSTALL_INCLUDEDIR})
