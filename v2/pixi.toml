@@ -1,0 +1,61 @@
+[workspace]
+name = "jrl-cmakemodules"
+version = "2.0.0"
+description = "jrl-cmakemodules"
+authors = ["Antoine Hoarau 703240+ahoarau@users.noreply.github.com"]
+channels = ["conda-forge"]
+platforms = ["osx-arm64", "osx-64", "linux-64", "win-64"]
+preview = ["pixi-build"]
+
+[dependencies]
+python = ">=3.14.3,<3.15"
+cxx-compiler = ">=1.11.0,<2"
+nanobind = ">=2.10.2,<3"
+cmake = ">=4.2.3,<5"
+catch2 = ">=3.12.0,<4"
+pytest = ">=9.0.2,<10"
+ccache = ">=4.12.3,<5"
+ninja = ">=1.13.2,<2"
+prek = ">=0.3.2,<0.4"
+libboost-python-devel = ">=1.90.0,<2"
+numpy = ">=2.4.2,<3"
+
+[tasks]
+configure = { cmd = [
+    "cmake",
+    "-G Ninja",
+    "-B build",
+    "-DJRL_CMAKEMODULES_GENERATE_API_DOC=ON",
+    "-DJRL_CMAKEMODULES_BUILD_TESTS=ON",
+] }
+build = { cmd = "cmake --build build", depends-on = ["configure"] }
+install = { cmd = "cmake --install build", depends-on = ["build"] }
+prek = { cmd = "prek run -a" }
+test = { cmd = "ctest --test-dir build --output-on-failure", depends-on = [
+    "configure",
+] }
+
+[feature.test-pixi-build]
+dependencies = { jrl-cmakemodules = { path = "." }, cmake = ">=4.2.3,<5" }
+
+[feature.test-pixi-build.tasks]
+test-packaging-pixi-build = "cmake -S tests/packaging/pixi_build -B build/pixi_build"
+
+[environments]
+test-pixi-build = { features = ["test-pixi-build"], no-default-feature = true }
+# ---------------------------------------------------------------
+
+[package]
+name = { workspace = true }
+version = { workspace = true }
+
+[package.build]
+backend = { name = "pixi-build-cmake", version = "*" }
+
+[package.build.config]
+extra-args = ["-DJRL_CMAKEMODULES_BUILD_TESTS=OFF"]
+
+[target.win-64.activation.env]
+CLICOLOR_FORCE = "1"
+CMAKE_EXPORT_COMPILE_COMMANDS = "ON"
+CMAKE_CXX_COMPILER_LAUNCHER = "ccache"
