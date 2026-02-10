@@ -10,6 +10,7 @@ env:
   VCPKG_COMMAND: C:/vcpkg/vcpkg.exe --vcpkg-root=C:/vcpkg
   VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}/vcpkg-bincache
   VCPKG_BINARY_SOURCES: "clear;files,${{ github.workspace }}/vcpkg-bincache,readwrite"
+  CMAKE_TOOLCHAIN_FILE: C:/vcpkg/scripts/buildsystems/vcpkg.cmake
 
 jobs:
   windows-with-vcpkg:
@@ -65,7 +66,7 @@ jobs:
           C:/vcpkg/installed/${{ matrix.arch }}-windows/tools/python3/python.exe -m pip install nanobind pytest numpy
 
       - name: Configure project
-        run: cmake -G Ninja -S v2 -B build --log-level=DEBUG -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_PYTHON_BINDINGS=ON -DBUILD_TESTS=ON
+        run: cmake -G Ninja -S v2 -B build --log-level=DEBUG -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_PYTHON_BINDINGS=ON -DBUILD_TESTS=ON
 
       - name: Build project
         run: cmake --build build --verbose
