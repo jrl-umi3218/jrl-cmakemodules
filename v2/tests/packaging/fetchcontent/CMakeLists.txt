@@ -1,15 +1,28 @@
 cmake_minimum_required(VERSION 3.22)
 
-include(FetchContent)
-FetchContent_Declare(
-    jrl-cmakemodules-v2
-    GIT_REPOSITORY https://github.com/ahoarau/jrl-cmakemodules-v2.git
-    GIT_TAG main
-    GIT_SHALLOW True
-)
-FetchContent_MakeAvailable(jrl-cmakemodules-v2)
-
 project(myproj VERSION 1.2.3 LANGUAGES CXX)
+
+# TODO: Find a portable way to specify this
+set(JRL_CMAKEMODULES_FETCHCONTENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../../..)
+
+if(NOT DEFINED JRL_CMAKEMODULES_FETCHCONTENT_SOURCE_DIR)
+    message(FATAL_ERROR "JRL_CMAKEMODULES_FETCHCONTENT_SOURCE_DIR is not defined")
+endif()
+
+cmake_path(
+    CONVERT "${JRL_CMAKEMODULES_FETCHCONTENT_SOURCE_DIR}"
+    TO_CMAKE_PATH_LIST JRL_CMAKEMODULES_FETCHCONTENT_SOURCE_DIR
+    NORMALIZE
+)
+message(
+    STATUS
+    "JRL_CMAKEMODULES_FETCHCONTENT_SOURCE_DIR: ${JRL_CMAKEMODULES_FETCHCONTENT_SOURCE_DIR}"
+)
+
+include(FetchContent)
+set(JRL_CMAKEMODULES_USE_V2 ON CACHE BOOL "" FORCE)
+FetchContent_Declare(jrl-cmakemodules SOURCE_DIR ${JRL_CMAKEMODULES_FETCHCONTENT_SOURCE_DIR})
+FetchContent_MakeAvailable(jrl-cmakemodules)
 
 # (recommended) Configure defaults (output dirs, install prefix, etc.)
 jrl_configure_defaults()
