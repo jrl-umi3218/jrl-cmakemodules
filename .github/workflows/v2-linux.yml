@@ -37,7 +37,7 @@ jobs:
           unzip catch2.zip
           cmake -B catch2-build -S Catch2-3.11.0 -G Ninja -DCMAKE_BUILD_TYPE=Release
           cmake --build catch2-build --config Release
-          cmake --install catch2-build
+          sudo cmake --install catch2-build
 
       - name: Configure project
         run: cmake -G Ninja -S v2 -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_PYTHON_BINDINGS=ON -DBUILD_TESTS=ON
