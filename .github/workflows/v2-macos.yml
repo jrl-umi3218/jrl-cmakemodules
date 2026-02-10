@@ -1,0 +1,38 @@
+name: macOS CI
+
+on: [push, pull_request]
+
+jobs:
+  macos:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.image }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: macos-26
+            name: macOS 26 (Apple Silicon)
+
+          - image: macos-15
+            name: macOS 15 (Apple Silicon)
+
+          - image: macos-15-intel
+            name: macOS 15 (Intel)
+
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install dependencies (via brew)
+        run: |
+          brew install catch2 boost-python3 robin-map nanobind pytest numpy
+
+      - name: Configure project
+        run: cmake -G Ninja -S v2 -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_PYTHON_BINDINGS=ON -DBUILD_TESTS=ON
+
+      - name: Build project
+        run: cmake --build build
+
+      - name: Install project
+        run: cmake --install build --prefix ./install
+
+      - name: Run tests
+        run: ctest --test-dir build --output-on-failure
