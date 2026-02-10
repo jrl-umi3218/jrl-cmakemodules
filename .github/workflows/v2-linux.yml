@@ -1,0 +1,105 @@
+name: Linux CI
+
+on: [push, pull_request]
+
+jobs:
+  ubuntu22:
+    name: Ubuntu 22.04
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version: "3.22"
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.10"
+      - name: Install c++ dependencies (via apt)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build g++ unzip libboost-python-dev
+
+      - name: Install python dependencies (via pip)
+        run: |
+          which python3
+          which pip3
+          pip3 install nanobind pytest numpy
+
+      - name: Build Catch2 (Ubuntu 22.04 has Catch2 v2, we need v3)
+        run: |
+          cd /home/runner/work/
+          wget https://github.com/catchorg/Catch2/archive/refs/tags/v3.11.0.zip -O catch2.zip
+          unzip catch2.zip
+          cmake -B catch2-build -S Catch2-3.11.0 -G Ninja -DCMAKE_BUILD_TYPE=Release
+          cmake --build catch2-build --config Release
+          cmake --install catch2-build --prefix /home/runner/work/catch2-install
+
+      - name: Configure project
+        run: cmake -G Ninja -S v2 -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_PREFIX_PATH="/home/runner/work/catch2-install" -DBUILD_PYTHON_BINDINGS=ON -DBUILD_TESTS=ON
+
+      - name: Build project
+        run: cmake --build build
+
+      - name: Install project
+        run: cmake --install build --prefix ./install
+
+      - name: Run tests
+        run: ctest --test-dir build --output-on-failure
+
+  ubuntu24:
+    name: Ubuntu 24.04
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version: "3.28"
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install c++ dependencies (via apt)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build g++ catch2 libboost-python-dev
+
+      - name: Install python dependencies (via pip)
+        run: |
+          which python3
+          which pip3
+          pip3 install nanobind pytest numpy
+
+      - name: Configure project
+        run: cmake -G Ninja -S v2 -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_PYTHON_BINDINGS=ON -DBUILD_TESTS=ON
+
+      - name: Build project
+        run: cmake --build build
+
+      - name: Install project
+        run: cmake --install build --prefix ./install
+
+      - name: Run tests
+        run: ctest --test-dir build --output-on-failure
+
+  archlinux:
+    name: "Archlinux"
+    runs-on: ubuntu-latest
+    container:
+      image: docker://archlinux:latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install dependencies
+        run: pacman -Syu --noconfirm cmake ninja gcc catch2 python-pytest nanobind python-numpy boost
+
+      - name: Configure project
+        run: cmake -G Ninja -S v2 -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_PYTHON_BINDINGS=ON -DBUILD_TESTS=ON
+
+      - name: Build project
+        run: cmake --build build
+
+      - name: Install project
+        run: cmake --install build --prefix ./install
+
+      - name: Run tests
+        run: ctest --test-dir build --output-on-failure
