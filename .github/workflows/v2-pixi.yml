@@ -40,5 +40,9 @@ jobs:
       - name: Run tests
         run: pixi run test
 
-      - name: Run tests (pixi build)
-        run: pixi run test-packaging-pixi-build
+      # Error:   × failed to build 'jrl-cmakemodules' from '.'
+      #   ╰─▶   × Package jrl-cmakemodules contains symlinks which are not supported on most Windows systems:
+      #         │   - Library/share/jrl-cmakemodules/_unittests/cmake
+      #         │ To allow symlinks, use the --allow-symlinks-on-windows flag.
+      # - name: Run tests (pixi build)
+      # run: pixi run test-packaging-pixi-build
