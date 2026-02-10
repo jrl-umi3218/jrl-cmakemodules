@@ -1,6 +1,6 @@
-# Test Project for jrl-cmakemodules-v2
+# Test Project for jrl-cmakemodules
 
-This is a test C++ project demonstrating the usage of various functions from jrl-cmakemodules-v2.cmake.
+This is a test C++ project demonstrating the usage of various functions from jrl-cmakemodules.cmake.
 
 ## Features
 
