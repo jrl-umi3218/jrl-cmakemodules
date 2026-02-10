@@ -1,4 +1,4 @@
-name: Prek CI
+name: V2 - Prek
 on: [push, pull_request]
 
 jobs:
