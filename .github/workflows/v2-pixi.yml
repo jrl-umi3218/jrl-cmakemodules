@@ -1,4 +1,4 @@
-name: Pixi CI
+name: V2 - Pixi
 
 on: [push, pull_request]
 
