@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.22...4.1)
+cmake_minimum_required(VERSION 3.22)
 
 project(myproj VERSION 1.0.0 LANGUAGES NONE)
 
@@ -7,7 +7,9 @@ find_package(jrl-cmakemodules 0.1.0 CONFIG REQUIRED)
 
 # Example finding an external package
 jrl_find_package(jrl-cmakemodules 0.1.0 CONFIG REQUIRED)
-jrl_check_var_defined(jrl-cmakemodules_VERSION)
+if(NOT DEFINED jrl-cmakemodules_VERSION)
+    message(FATAL_ERROR "jrl-cmakemodules_VERSION is not defined")
+endif()
 
 # Testing one of the functions provided by jrl-cmakemodules
 jrl_include_ctest()
