@@ -1,4 +1,4 @@
-name: macOS CI
+name: V2 - macOS
 
 on: [push, pull_request]
 
