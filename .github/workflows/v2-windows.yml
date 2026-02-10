@@ -40,8 +40,9 @@ jobs:
       - name: Create vcpkg binary cache directory
         run: mkdir -p ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
 
-      - name: Cache vcpkg binary packages
-        uses: actions/cache@v4
+      - name: Restore vcpkg binary cache
+        id: cache-vcpkg-restore
+        uses: actions/cache/restore@v4
         with:
           path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
           key: vcpkg-${{ matrix.image }}-${{ matrix.arch }}-${{ github.ref }}
@@ -50,6 +51,13 @@ jobs:
       - name: Install C++ dependencies (via vcpkg)
         run: |
           ${{ env.VCPKG_COMMAND }} install catch2 boost-python
+
+      - name: Save vcpkg binary cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
+          key: ${{ steps.cache-vcpkg-restore.outputs.cache-primary-key }}
 
       - name: Install Python dependencies (via pip)
         run: |
