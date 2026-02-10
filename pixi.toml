@@ -32,7 +32,7 @@ configure = { cmd = [
 build = { cmd = "cmake --build build/v2", depends-on = ["configure"] }
 install = { cmd = "cmake --install build/v2", depends-on = ["build"] }
 prek = { cmd = "prek run -a" }
-test = { cmd = "ctest --test-dir build/v2 --output-on-failure", depends-on = [
+test = { cmd = "ctest --test-dir build/v2 --output-on-failure --verbose", depends-on = [
     "configure",
 ] }
 
