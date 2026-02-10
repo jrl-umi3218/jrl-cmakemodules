@@ -44,9 +44,8 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
-          key: vcpkg-${{ matrix.image }}-${{ matrix.arch }}-${{ hashFiles('**/vcpkg.json') }}
-          restore-keys: |
-            vcpkg-${{ matrix.image }}-${{ matrix.arch }}-
+          key: vcpkg-${{ matrix.image }}-${{ matrix.arch }}-${{ github.ref }}
+          restore-keys: vcpkg-${{ matrix.image }}-${{ matrix.arch }}-
 
       - name: Install C++ dependencies (via vcpkg)
         run: |
