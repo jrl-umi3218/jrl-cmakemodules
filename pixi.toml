@@ -25,15 +25,15 @@ configure = { cmd = [
     "cmake",
     "-S v2",
     "-G Ninja",
-    "-B build",
+    "-B build/v2",
     "-DJRL_CMAKEMODULES_GENERATE_API_DOC=ON",
     "-DJRL_CMAKEMODULES_BUILD_TESTS=ON",
 ] }
 build = { cmd = "cmake --build build/v2", depends-on = ["configure"] }
 install = { cmd = "cmake --install build/v2", depends-on = ["build"] }
 prek = { cmd = "prek run -a" }
-test = { cmd = "ctest --test-dir build/v2 --output-on-failure --verbose", depends-on = [
-    "configure",
+test = { cmd = "ctest --test-dir build/v2 --output-on-failure", depends-on = [
+    "build",
 ] }
 
 [feature.test-pixi-build]
