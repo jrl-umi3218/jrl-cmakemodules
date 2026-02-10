@@ -52,6 +52,7 @@ version = { workspace = true }
 
 [package.build]
 backend = { name = "pixi-build-cmake", version = "*" }
+source = { path = "v2" }
 
 [package.build.config]
 extra-args = ["-DJRL_CMAKEMODULES_BUILD_TESTS=OFF"]
