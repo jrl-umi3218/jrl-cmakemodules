@@ -6,14 +6,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-permissions:
-  packages: write
-
 env:
-  USERNAME: ${{ github.actor }}
   VCPKG_COMMAND: C:/vcpkg/vcpkg.exe --vcpkg-root=C:/vcpkg
-  FEED_URL: https://nuget.pkg.github.com/${{ github.actor }}/index.json
-  VCPKG_BINARY_SOURCES: "clear;nuget,https://nuget.pkg.github.com/${{ github.actor }}/index.json,readwrite"
+  VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}/vcpkg-bincache
+  VCPKG_BINARY_SOURCES: "clear;files,${{ github.workspace }}/vcpkg-bincache,readwrite"
 
 jobs:
   windows-with-vcpkg:
@@ -41,19 +37,16 @@ jobs:
         with:
           arch: ${{ matrix.arch }}
 
-      - name: Add NuGet sources
-        shell: pwsh
-        run: |
-          .$(${{ env.VCPKG_COMMAND }} fetch nuget) `
-            sources add `
-            -Source "${{ env.FEED_URL }}" `
-            -StorePasswordInClearText `
-            -Name GitHubPackages `
-            -UserName "${{ env.USERNAME }}" `
-            -Password "${{ secrets.GITHUB_TOKEN }}"
-          .$(${{ env.VCPKG_COMMAND }} fetch nuget) `
-            setapikey "${{ secrets.GITHUB_TOKEN }}" `
-            -Source "${{ env.FEED_URL }}"
+      - name: Create vcpkg binary cache directory
+        run: mkdir -p ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
+
+      - name: Cache vcpkg binary packages
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
+          key: vcpkg-${{ matrix.image }}-${{ matrix.arch }}-${{ hashFiles('**/vcpkg.json') }}
+          restore-keys: |
+            vcpkg-${{ matrix.image }}-${{ matrix.arch }}-
 
       - name: Install C++ dependencies (via vcpkg)
         run: |
