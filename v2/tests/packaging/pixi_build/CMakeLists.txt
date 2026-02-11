@@ -12,4 +12,4 @@ if(NOT DEFINED jrl-cmakemodules_VERSION)
 endif()
 
 # Testing one of the functions provided by jrl-cmakemodules
-jrl_include_ctest()
+jrl_print_banner()
