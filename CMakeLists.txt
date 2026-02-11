@@ -29,13 +29,13 @@ set(
 option(
   JRL_CMAKEMODULES_GENERATE_API_DOC
   "Generate the API documentation for jrl-cmakemodules (v2)"
-  ${PROJECT_IS_TOP_LEVEL}
+  OFF
 )
 
 option(
   JRL_CMAKEMODULES_BUILD_TESTS
   "Build the tests for jrl-cmakemodules (v2)"
-  ${PROJECT_IS_TOP_LEVEL}
+  OFF
 )
 
 if(JRL_CMAKEMODULES_GENERATE_API_DOC)
