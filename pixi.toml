@@ -1,24 +1,27 @@
+# ============================================================================
+# WORKSPACE CONFIGURATION
+# ============================================================================
+
 [workspace]
 name = "jrl-cmakemodules"
-version = "2.0.0"
+version = "1.1.2"
 description = "jrl-cmakemodules"
 authors = ["Antoine Hoarau <703240+ahoarau@users.noreply.github.com>"]
 channels = ["conda-forge"]
 platforms = ["osx-arm64", "osx-64", "linux-64", "win-64"]
 preview = ["pixi-build"]
 
+# ============================================================================
+# DEFAULT DEPENDENCIES
+# ============================================================================
+
 [dependencies]
-python = ">=3.10"
-cxx-compiler = ">=1.11.0,<2"
-nanobind = ">=2.5.0"
 cmake = ">=3.22"
-catch2 = ">=3.1.0,<4"
-pytest = ">=9.0.0,<10"
-ccache = ">=4.12.3,<5"
 ninja = ">=1.13.2,<2"
-prek = ">=0.3.2,<0.4"
-libboost-python-devel = ">=1.90.0,<2"
-numpy = ">=2.4.2,<3"
+
+# ============================================================================
+# DEFAULT TASKS
+# ============================================================================
 
 [tasks]
 configure = { cmd = [
@@ -27,15 +30,62 @@ configure = { cmd = [
     "-G Ninja",
     "-B build",
     "-DCMAKE_INSTALL_PREFIX=build/install",
-    "-DJRL_CMAKEMODULES_GENERATE_API_DOC=ON",
-    "-DJRL_CMAKEMODULES_BUILD_TESTS=ON",
+    "-DJRL_CMAKEMODULES_GENERATE_API_DOC=OFF",
+    "-DJRL_CMAKEMODULES_BUILD_TESTS=OFF",
 ] }
 build = { cmd = "cmake --build build", depends-on = ["configure"] }
 install = { cmd = "cmake --install build", depends-on = ["build"] }
-test = { cmd = "ctest --test-dir build --output-on-failure", depends-on = ["build"] }
-clear ={ cmd = "rm -rf build" }
+clear = { cmd = "rm -rf build" }
 
-prek = { cmd = "prek run -a" }
+# ============================================================================
+# TEST FEATURE CONFIGURATION
+# ============================================================================
+
+[feature.test.dependencies]
+cxx-compiler = ">=1.11.0,<2"
+ccache = ">=4.12.3,<5"
+catch2 = ">=3.1.0,<4"
+python = ">=3.10"
+nanobind = ">=2.5.0"
+pytest = ">=9.0.0,<10"
+libboost-python-devel = ">=1.90.0,<2"
+numpy = ">=2.4.2,<3"
+
+[feature.test.tasks]
+_configure = { cmd = [
+    "cmake",
+    "-S .",
+    "-G Ninja",
+    "-B build/test",
+    "-DCMAKE_INSTALL_PREFIX=build/install",
+    "-DJRL_CMAKEMODULES_GENERATE_API_DOC=ON",
+    "-DJRL_CMAKEMODULES_BUILD_TESTS=ON",
+] }
+_build = { cmd = "cmake --build build/test", depends-on = ["_configure"] }
+test = { cmd = "ctest --test-dir build/test --output-on-failure", depends-on = [
+    "_build",
+] }
+
+[environments.test]
+features = ["test"]
+
+# ============================================================================
+# PRE-COMMIT HOOKS CONFIGURATION
+# ============================================================================
+
+[feature.prek.dependencies]
+prek = ">=0.3.2,<0.4"
+
+[feature.prek.tasks]
+prek = "prek run -a"
+
+[environments.prek]
+features = ["prek"]
+no-default-feature = true
+
+# ============================================================================
+# PIXI BUILD PACKAGING TESTS
+# ============================================================================
 
 [feature.test-pixi-build]
 dependencies = { jrl-cmakemodules = { path = "." }, cmake = ">=3.22" }
@@ -43,9 +93,13 @@ dependencies = { jrl-cmakemodules = { path = "." }, cmake = ">=3.22" }
 [feature.test-pixi-build.tasks]
 test-packaging-pixi-build = "cmake -S v2/tests/packaging/pixi_build -B build/v2/pixi_build"
 
-[environments]
-test-pixi-build = { features = ["test-pixi-build"], no-default-feature = true }
-# ---------------------------------------------------------------
+[environments.test-pixi-build]
+features = ["test-pixi-build"]
+no-default-feature = true
+
+# ============================================================================
+# PACKAGE BUILD CONFIGURATION
+# ============================================================================
 
 [package]
 name = { workspace = true }
@@ -55,9 +109,7 @@ version = { workspace = true }
 backend = { name = "pixi-build-cmake", version = "*" }
 
 [package.build.config]
-extra-args = ["-DJRL_CMAKEMODULES_BUILD_TESTS=OFF"]
-
-[target.win-64.activation.env]
-CLICOLOR_FORCE = "1"
-CMAKE_EXPORT_COMPILE_COMMANDS = "ON"
-CMAKE_CXX_COMPILER_LAUNCHER = "ccache"
+extra-args = [
+    "-DJRL_CMAKEMODULES_BUILD_TESTS=OFF",
+    "-DJRL_CMAKEMODULES_GENERATE_API_DOC=OFF",
+]
