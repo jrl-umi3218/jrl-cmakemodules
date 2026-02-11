@@ -4236,9 +4236,35 @@ function(_jrl_generate_api_doc input_file output_file)
 
     set(JRL_API_DOCUMENTATION "${markdown_content}")
 
+    # Check if output file already exists
+    set(output_file_exists false)
+    set(output_file_old_content "")
+    if(EXISTS ${output_file})
+        set(output_file_exists true)
+        file(READ ${output_file} output_file_old_content)
+    endif()
+
+    set(tmp_output_file ${output_file}.tmp)
+
     _jrl_templates_dir(templates_dir)
-    configure_file(${templates_dir}/api.md.in ${output_file} @ONLY)
-    message(STATUS "API documentation generated at '${output_file}'")
+    configure_file(${templates_dir}/api.md.in ${tmp_output_file} @ONLY)
+
+    # Check if the file is new or has been updated
+    if(output_file_old_content STREQUAL "")
+        file(COPY_FILE ${tmp_output_file} ${output_file})
+        message(STATUS "API documentation created at '${output_file}'")
+    else()
+        file(READ ${tmp_output_file} output_file_new_content)
+        if(output_file_old_content STREQUAL output_file_new_content)
+            message(STATUS "API documentation already up to date at '${output_file}'")
+        else()
+            file(COPY_FILE ${tmp_output_file} ${output_file})
+            message(STATUS "API documentation updated at '${output_file}'")
+        endif()
+    endif()
+
+    message(DEBUG "Removing temporary file '${tmp_output_file}'")
+    file(REMOVE ${tmp_output_file})
 endfunction()
 
 if(JRL_GENERATE_API_DOC)
