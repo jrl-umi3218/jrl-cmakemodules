@@ -86,6 +86,20 @@ jobs:
       - name: Run tests
         run: ctest --test-dir build --output-on-failure
 
+  api_doc:
+    name: "Generate API documentation"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Generate API documentation (direct function call)
+        run: cmake -G Ninja -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo -DJRL_CMAKEMODULES_GENERATE_API_DOC=ON
+
+      - name: Check API is still up to date
+        run: git diff --exit-code -- v2/docs
+
+      - name: Generate API documentation (cmake script mode)
+        run: cmake -DJRL_GENERATE_API_DOC=ON -P v2/modules/jrl.cmake
+
   archlinux:
     name: "Archlinux"
     runs-on: ubuntu-latest
