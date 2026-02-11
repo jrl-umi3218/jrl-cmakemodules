@@ -1,184 +1,199 @@
 cmake_minimum_required(VERSION 3.22)
 
-option(
-  JRL_CMAKEMODULES_USE_V2
-  "Use jrl-cmakemodules v2 API (bypasses v1 completely)"
-  OFF
+project(
+  jrl-cmakemodules
+  DESCRIPTION "JRL CMake utility toolbox"
+  HOMEPAGE_URL "http://github.com/jrl-umi3218/jrl-cmakemodules"
+  VERSION 1.1.2
+  LANGUAGES NONE
 )
-if(JRL_CMAKEMODULES_USE_V2)
-  add_subdirectory(v2)
-  jrl_print_banner()
+
+# The JRL CMake Modules V2 API
+include(${CMAKE_CURRENT_SOURCE_DIR}/v2/modules/jrl.cmake)
+
+# Stop here if this is not the top-level project (included via FetchContent or add_subdirectory)
+if(NOT PROJECT_IS_TOP_LEVEL)
   return()
 endif()
 
-set(PROJECT_NAME "jrl-cmakemodules")
-set(PROJECT_DESCRIPTION "CMake utility toolbox")
-set(PROJECT_URL "http://github.com/jrl-umi3218/${PROJECT_NAME}")
+jrl_configure_defaults()
 
-project(${PROJECT_NAME} DESCRIPTION ${PROJECT_DESCRIPTION} LANGUAGES CXX)
+# JRL_CMAKE_FILES_INSTALL_DIR: Where to install the <project>-config.cmake and related files
+# In CMake, 'share' is CMAKE_INSTALL_DATAROOTDIR
+# Here we choose <install_prefix>/share/cmake/<project>
+set(
+  JRL_CMAKE_FILES_INSTALL_DIR
+  ${CMAKE_INSTALL_DATAROOTDIR}/cmake/${PROJECT_NAME}
+)
 
-# Avoid project to be installed when it's not the top-level cmake.
-# First detect super project, second one detect fetch content.
-# The seconde one is needed because jrl-cmakemodules are included
-# before top-level cmake project definition.
-if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND NOT ${PROJECT_NAME}_POPULATED)
-  set(PROJECT_JRL_CMAKE_MODULE_DIR ${CMAKE_CURRENT_LIST_DIR})
-  include(base.cmake)
-  COMPUTE_PROJECT_ARGS(PROJECT_ARGS LANGUAGES CXX)
-  project(${PROJECT_NAME} ${PROJECT_ARGS})
+option(
+  JRL_CMAKEMODULES_GENERATE_API_DOC
+  "Generate the API documentation for jrl-cmakemodules (v2)"
+  ${PROJECT_IS_TOP_LEVEL}
+)
 
-  # Add a dummy library with a useful INTERFACE_INCLUDE_DIRECTORIES
-  add_library(${PROJECT_NAME} INTERFACE)
-  set(INSTALL_DIR "${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME}")
-  target_include_directories(
-    ${PROJECT_NAME}
-    INTERFACE $<INSTALL_INTERFACE:${INSTALL_DIR}>
+option(
+  JRL_CMAKEMODULES_BUILD_TESTS
+  "Build the tests for jrl-cmakemodules (v2)"
+  ${PROJECT_IS_TOP_LEVEL}
+)
+
+if(JRL_CMAKEMODULES_GENERATE_API_DOC)
+  _jrl_generate_api_doc(
+    ${CMAKE_CURRENT_SOURCE_DIR}/v2/modules/jrl.cmake
+    ${CMAKE_CURRENT_SOURCE_DIR}/v2/docs/api.md
   )
-
-  # find . -maxdepth 1 -type d ! -path './.*' | sort
-  install(
-    DIRECTORY
-      ./boost
-      ./cython
-      ./doxygen
-      ./dynamic_graph
-      ./find-external
-      ./github
-      ./gtest
-      ./hpp
-      ./image
-      ./sphinx
-      ./stubgen
-      ./_unittests
-    DESTINATION ${INSTALL_DIR}
-  )
-
-  install(DIRECTORY ./v2 DESTINATION ${INSTALL_DIR})
-
-  # find . -maxdepth 1 -type f ! -perm 111 ! -path './.*' | sort
-  install(
-    PROGRAMS
-      ./announce-gen
-      ./fix-license.sh
-      ./git-archive-all.py
-      ./git-archive-all.sh
-      ./gitlog-to-changelog
-      ./pixi.py
-      ./pyproject.py
-    DESTINATION ${INSTALL_DIR}
-  )
-
-  # find . -maxdepth 1 -type f ! -perm /111 ! -path './.*' | sort
-  install(
-    FILES
-      ./apple.cmake
-      ./base.cmake
-      ./boost.cmake
-      ./catkin.cmake
-      ./CMakeLists.txt
-      ./cmake_reinstall.cmake.in
-      ./cmake_uninstall.cmake.in
-      ./compiler.cmake
-      ./componentConfig.cmake.in
-      ./Config.cmake.in
-      ./config.h.cmake
-      ./config.hh.cmake
-      ./coverage.cmake
-      ./cpack.cmake
-      ./createshexe.cmake
-      ./cxx11.cmake
-      ./cxx-standard.cmake
-      ./debian.cmake
-      ./deprecated.hh.cmake
-      ./distcheck.cmake
-      ./dist.cmake
-      ./doxygen.cmake
-      ./eigen.cmake
-      ./filefilter.txt
-      ./flake.lock
-      ./flake.nix
-      ./geometric-tools.cmake
-      ./GNUInstallDirs.cmake
-      ./gtest.cmake
-      ./header.cmake
-      ./hpp.cmake
-      ./ide.cmake
-      ./idl.cmake
-      ./idlrtc.cmake
-      ./install-data.cmake
-      ./install-helpers.cmake
-      ./julia.cmake
-      ./kineo.cmake
-      ./lapack.cmake
-      ./LICENSE
-      ./logging.cmake
-      ./man.cmake
-      ./memorycheck_unit_test.cmake.in
-      ./metapodfromurdf.cmake
-      ./modernize-links.cmake
-      ./msvc-specific.cmake
-      ./msvc.vcxproj.user.in
-      ./openhrp.cmake
-      ./openhrpcontroller.cmake
-      ./openrtm.cmake
-      ./oscheck.cmake
-      ./package-config.cmake
-      ./package.xml
-      ./pkg-config.cmake
-      ./pkg-config.pc.cmake
-      ./portability.cmake
-      ./post-project.cmake
-      ./pthread.cmake
-      ./python.cmake
-      ./python-helpers.cmake
-      ./qhull.cmake
-      ./README.md
-      ./release.cmake
-      ./relpath.cmake
-      ./ros2.cmake
-      ./ros.cmake
-      ./sdformat.cmake
-      ./setup.cfg
-      ./shared-library.cmake
-      ./sphinx.cmake
-      ./stubs.cmake
-      ./swig.cmake
-      ./test.cmake
-      ./tracy.cmake
-      ./tracy.hh.cmake
-      ./uninstall.cmake
-      ./version.cmake
-      ./version-script.cmake
-      ./version-script-test.lds
-      ./warning.hh.cmake
-      ./xacro.cmake
-    DESTINATION ${INSTALL_DIR}
-  )
-
-  # This package is architecture independent. Dont allow ROS to think otherwise
-  # and break everything by installing in lib/x86_64-linux-gnu, which does prevent
-  # find_package(jrl-cmakemodules) to work before a call to project().
-  # share is fine.
-  set(
-    CMAKE_INSTALL_LIBDIR
-    "${CMAKE_INSTALL_DATAROOTDIR}"
-    CACHE PATH
-    "Install exports in share, not lib"
-    FORCE
-  )
-
-  install(TARGETS ${PROJECT_NAME} EXPORT ${TARGETS_EXPORT_NAME})
-
-  set(
-    PACKAGE_TOP_MACROS
-    [[
-if(JRL_CMAKEMODULES_USE_V2)
-  add_subdirectory(${PACKAGE_PREFIX_DIR}/share/jrl-cmakemodules/v2 jrl-cmakemodules)
-  jrl_print_banner()
-  return()
 endif()
-    ]]
-  )
 
-  SETUP_PROJECT_PACKAGE_FINALIZE()
+if(JRL_CMAKEMODULES_BUILD_TESTS)
+  jrl_include_ctest()
+  enable_testing()
+  add_subdirectory(v2/tests)
 endif()
+
+# Add a dummy library with a useful INTERFACE_INCLUDE_DIRECTORIES
+add_library(jrl-cmakemodules INTERFACE)
+target_include_directories(
+  jrl-cmakemodules
+  INTERFACE $<INSTALL_INTERFACE:${JRL_CMAKE_FILES_INSTALL_DIR}>
+)
+
+# find . -maxdepth 1 -type d ! -path './.*' | sort
+install(
+  DIRECTORY
+    ./boost
+    ./cython
+    ./doxygen
+    ./dynamic_graph
+    ./find-external
+    ./github
+    ./gtest
+    ./hpp
+    ./image
+    ./sphinx
+    ./stubgen
+  # ./_unittests
+  DESTINATION ${JRL_CMAKE_FILES_INSTALL_DIR}
+)
+
+# Install the v2 API
+install(
+  DIRECTORY
+    v2/external-modules
+    v2/find-modules
+    v2/modules
+    v2/templates
+    v2/scripts
+  DESTINATION ${JRL_CMAKE_FILES_INSTALL_DIR}
+  PATTERN ".ruff_cache" EXCLUDE
+  PATTERN "__pycache__" EXCLUDE
+  PATTERN ".pytest_cache" EXCLUDE
+)
+
+# find . -maxdepth 1 -type f ! -perm 111 ! -path './.*' | sort
+install(
+  PROGRAMS
+    ./announce-gen
+    ./fix-license.sh
+    ./git-archive-all.py
+    ./git-archive-all.sh
+    ./gitlog-to-changelog
+    ./pixi.py
+    ./pyproject.py
+  DESTINATION ${JRL_CMAKE_FILES_INSTALL_DIR}
+)
+
+# find . -maxdepth 1 -type f ! -perm /111 ! -path './.*' | sort
+install(
+  FILES
+    ./apple.cmake
+    ./base.cmake
+    ./boost.cmake
+    ./catkin.cmake
+    ./CMakeLists.txt
+    ./cmake_reinstall.cmake.in
+    ./cmake_uninstall.cmake.in
+    ./compiler.cmake
+    ./componentConfig.cmake.in
+    ./Config.cmake.in
+    ./config.h.cmake
+    ./config.hh.cmake
+    ./coverage.cmake
+    ./cpack.cmake
+    ./createshexe.cmake
+    ./cxx11.cmake
+    ./cxx-standard.cmake
+    ./debian.cmake
+    ./deprecated.hh.cmake
+    ./distcheck.cmake
+    ./dist.cmake
+    ./doxygen.cmake
+    ./eigen.cmake
+    ./filefilter.txt
+    ./flake.lock
+    ./flake.nix
+    ./geometric-tools.cmake
+    ./GNUInstallDirs.cmake
+    ./gtest.cmake
+    ./header.cmake
+    ./hpp.cmake
+    ./ide.cmake
+    ./idl.cmake
+    ./idlrtc.cmake
+    ./install-data.cmake
+    ./install-helpers.cmake
+    ./julia.cmake
+    ./kineo.cmake
+    ./lapack.cmake
+    ./LICENSE
+    ./logging.cmake
+    ./man.cmake
+    ./memorycheck_unit_test.cmake.in
+    ./metapodfromurdf.cmake
+    ./modernize-links.cmake
+    ./msvc-specific.cmake
+    ./msvc.vcxproj.user.in
+    ./openhrp.cmake
+    ./openhrpcontroller.cmake
+    ./openrtm.cmake
+    ./oscheck.cmake
+    ./package-config.cmake
+    ./package.xml
+    ./pkg-config.cmake
+    ./pkg-config.pc.cmake
+    ./portability.cmake
+    ./post-project.cmake
+    ./pthread.cmake
+    ./python.cmake
+    ./python-helpers.cmake
+    ./qhull.cmake
+    ./README.md
+    ./release.cmake
+    ./relpath.cmake
+    ./ros2.cmake
+    ./ros.cmake
+    ./sdformat.cmake
+    ./setup.cfg
+    ./shared-library.cmake
+    ./sphinx.cmake
+    ./stubs.cmake
+    ./swig.cmake
+    ./test.cmake
+    ./tracy.cmake
+    ./tracy.hh.cmake
+    ./uninstall.cmake
+    ./version.cmake
+    ./version-script.cmake
+    ./version-script-test.lds
+    ./warning.hh.cmake
+    ./xacro.cmake
+  DESTINATION ${JRL_CMAKE_FILES_INSTALL_DIR}
+)
+
+jrl_export_package(
+  PACKAGE_CONFIG_TEMPLATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/v2/templates/config-basic.cmake.in
+  PACKAGE_CONFIG_EXTRA_CONTENT
+    [[include("${CMAKE_CURRENT_LIST_DIR}/modules/jrl.cmake")]]
+  CMAKE_FILES_INSTALL_DIR ${JRL_CMAKE_FILES_INSTALL_DIR}
+)
