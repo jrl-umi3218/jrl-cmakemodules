@@ -30,7 +30,7 @@ jobs:
           brew install catch2 boost-python3 robin-map nanobind pytest numpy
 
       - name: Configure project
-        run: cmake -G Ninja -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_PYTHON_BINDINGS=ON -DBUILD_TESTS=ON
+        run: cmake -G Ninja -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo -DJRL_CMAKEMODULES_BUILD_TESTS=ON
 
       - name: Build project
         run: cmake --build build
