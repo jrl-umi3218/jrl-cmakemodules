@@ -746,7 +746,7 @@ function(jrl_print_banner)
         "
         🚧 Welcome to JRL CMake Modules v${v} ${commit_msg}
         🚧 Loaded from: ${CMAKE_CURRENT_FUNCTION_LIST_FILE}
-        🚧 This version is still under heavy development.
+        🚧 This v2 API is still under heavy development.
         🚧 API may change without notice.
     "
     )

@@ -8,8 +8,18 @@ project(
   LANGUAGES NONE
 )
 
+# The jrl_print_banner() needs this variable to be set to display the correct version
+set(
+  jrl-cmakemodules_VERSION
+  ${PROJECT_VERSION}
+  CACHE STRING
+  "Version of jrl-cmakemodules"
+)
+
 # The JRL CMake Modules V2 API
 include(${CMAKE_CURRENT_SOURCE_DIR}/v2/modules/jrl.cmake)
+
+jrl_print_banner()
 
 # Stop here if this is not the top-level project (included via FetchContent or add_subdirectory)
 if(NOT PROJECT_IS_TOP_LEVEL)
@@ -194,6 +204,9 @@ jrl_export_package(
   PACKAGE_CONFIG_TEMPLATE
     ${CMAKE_CURRENT_SOURCE_DIR}/v2/templates/config-basic.cmake.in
   PACKAGE_CONFIG_EXTRA_CONTENT
-    [[include("${CMAKE_CURRENT_LIST_DIR}/modules/jrl.cmake")]]
+    [[
+include("${CMAKE_CURRENT_LIST_DIR}/modules/jrl.cmake")
+jrl_print_banner()
+    ]]
   CMAKE_FILES_INSTALL_DIR ${JRL_CMAKE_FILES_INSTALL_DIR}
 )
