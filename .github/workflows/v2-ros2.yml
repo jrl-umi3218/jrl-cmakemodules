@@ -1,0 +1,45 @@
+name: V2 - ROS2
+on: [push, pull_request]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ros2:
+    name: ROS2 ${{ matrix.ROS_DISTRO }} - ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # ROS2 Humble Hawksbill (May 2022 - May 2027)
+          - ROS_DISTRO: humble
+            os: Ubuntu 22.04 (Jammy)
+
+          # ROS2 Jazzy Jalisco (May 2024 - May 2029)
+          - ROS_DISTRO: jazzy
+            os: Ubuntu 24.04 (Noble)
+
+          # ROS2 Kilted Kayu (May 2025 - December 2026)
+          - ROS_DISTRO: kilted
+            os: Ubuntu 24.04 (Noble)
+
+          # ROS2 Rolling Ridley
+          - ROS_DISTRO: rolling
+            os: Ubuntu 24.04 (Noble)
+    env:
+      CCACHE_DIR: ${{ github.workspace }}/.ccache
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/cache@v4
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ccache-${{ matrix.ROS_DISTRO }}-${{github.run_id}}
+          restore-keys: ccache-${{ matrix.ROS_DISTRO }}-
+      - uses: ros-industrial/industrial_ci@ba2a3d0f830f8051b356711a8df2fedfc5d256cf
+        env:
+          CMAKE_ARGS: -DJRL_CMAKEMODULES_BUILD_TESTS=ON
+          VERBOSE_OUTPUT: true
+          VERBOSE_TESTS: true
+          ROS_DISTRO: ${{ matrix.ROS_DISTRO }}
