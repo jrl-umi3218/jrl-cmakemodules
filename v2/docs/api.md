@@ -1136,12 +1136,16 @@ jrl_python_compute_install_dir(<output>)
     It is usually an absolute path to a specific site-packages folder.
     Note: <PROJECT_NAME_UPPER> is the PROJECT_NAME converted to a valid C identifier and in upper case.
  2. If <PROJECT_NAME_UPPER>_PYTHON_INSTALL_DIR **environment** variable is defined, its value is used.
- 3. If running inside a Conda environment, on Windows, the absolute path to site-packages is used.
+ 3. If running inside a CMeel environment (on Windows), the PYTHON_SITELIB variable is used.
+    CMeel is detected when CMAKE_INSTALL_PREFIX contains "cmeel.prefix".
+    The PYTHON_SITELIB variable is forwareded by CMeel.
+ 4. If running inside a Conda environment, on Windows, the absolute path to site-packages is used.
     It is the return value of: `sysconfig.get_path('purelib')`.
     Example: `C:/Users/You/Miniconda3/envs/myenv/Lib/site-packages`
- 4. The relative path to site-packages is used.
+ 5. The relative path to site-packages is used.
     It is the result of: `sysconfig.get_path('purelib')).relative_to(sysconfig.get_path('data')`
-    Example: `lib/python3.11/site-packages`
+    On macOS/Linux: `lib/python3.11/site-packages`
+    On Windows: `Lib/site-packages`
 
 #### Conda Windows Layout
 
