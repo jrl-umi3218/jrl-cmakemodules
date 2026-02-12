@@ -448,6 +448,7 @@ def show_version_diff(old_version: str, new_version: str) -> None:
         f"[cyan]{old_version}[/cyan] → [green]{new_version}[/green]",
         title="[bold yellow]Version Change[/bold yellow]",
         border_style="yellow",
+        expand=False,
     )
     console.print(panel)
 
