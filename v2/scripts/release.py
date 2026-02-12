@@ -6,6 +6,7 @@
 #     "ruamel.yaml",
 #     "rich",
 #     "packaging",
+#     "GitPython",
 # ]
 # ///
 
@@ -26,7 +27,7 @@
 -   **Version Checking**: Verifies that all tracked files share the same version number.
 -   **Semantic Versioning**: Enforces SemVer (X.Y.Z) compliance.
 -   **Automated Bumping**: Supports major, minor, and patch version bumps.
--   **Git Integration**: Option to automatically commit changes and create release tags.
+-   **Git Integration**: Option to automatically commit changes and create release tags using GitPython.
 -   **Safe Checks**: Includes dry-run mode and version progression validation.
 
 ## Prerequisites
@@ -34,7 +35,7 @@
 The script lists its dependencies in the file header using [inline script metadata (PEP 723)](https://peps.python.org/pep-0723/). It is recommended to execute it using `uv` to handle dependencies automatically.
 
 -   Python >= 3.9
--   Dependencies: `tomlkit`, `ruamel.yaml`, `rich`, `packaging`
+-   Dependencies: `tomlkit`, `ruamel.yaml`, `rich`, `packaging`, `GitPython`
 
 ## Usage
 
@@ -125,13 +126,13 @@ import sys
 import re
 import argparse
 import datetime
-import subprocess
 import json
 from pathlib import Path
 from abc import ABC, abstractmethod
 from typing import List, Optional, Tuple
 
 import tomlkit
+from git import Repo, exc
 from ruamel.yaml import YAML
 from rich.console import Console
 from rich.table import Table
@@ -505,30 +506,15 @@ def validate_version_progression(
         console.print()
 
 
-def run_git_command(args: List[str], cwd: Path) -> Tuple[bool, str]:
-    """Run a git command and return success status and output."""
-    try:
-        result = subprocess.run(
-            ["git"] + args, cwd=cwd, capture_output=True, text=True, check=True
-        )
-        return True, result.stdout.strip()
-    except subprocess.CalledProcessError as e:
-        return False, e.stderr.strip()
-    except FileNotFoundError:
-        return False, "git command not found"
-
-
 def git_commit_version(root_dir: Path, version: str, auto_confirm: bool) -> bool:
     """Commit version changes to git."""
-    # Check if we're in a git repo
-    success, _ = run_git_command(["rev-parse", "--git-dir"], root_dir)
-    if not success:
+    try:
+        repo = Repo(root_dir, search_parent_directories=True)
+    except exc.InvalidGitRepositoryError:
         console.print("[yellow]Not a git repository, skipping git commit.[/yellow]")
         return False
 
-    # Check for uncommitted changes
-    success, status = run_git_command(["status", "--porcelain"], root_dir)
-    if not success or not status:
+    if not repo.is_dirty():
         console.print("[yellow]No changes to commit.[/yellow]")
         return False
 
@@ -544,26 +530,46 @@ def git_commit_version(root_dir: Path, version: str, auto_confirm: bool) -> bool
             return False
 
     # Add all version files
-    success, _ = run_git_command(["add", "-u"], root_dir)
-    if not success:
-        console.print("[red]Failed to stage changes.[/red]")
+    try:
+        repo.git.add(update=True)
+    except exc.GitCommandError as e:
+        console.print(f"[red]Failed to stage changes: {e}[/red]")
         return False
 
     # Commit
-    success, output = run_git_command(["commit", "-m", commit_message], root_dir)
-    if success:
+    try:
+        # Use git command to trigger hooks
+        repo.git.commit("-m", commit_message)
         console.print(f"[green]✓ Committed changes: {commit_message}[/green]")
         return True
-    else:
-        console.print(f"[red]Failed to commit: {output}[/red]")
+    except exc.GitCommandError as e:
+        # Check if pre-commit hooks failed (often they modify files)
+        if (root_dir / ".pre-commit-config.yaml").exists():
+            console.print(
+                "[yellow]Commit failed or hooks triggered. Attempting to re-stage and commit...[/yellow]"
+            )
+            try:
+                # Re-stage any changes made by hooks (e.g. formatting)
+                repo.git.add(update=True)
+                # Try commit again
+                repo.git.commit("-m", commit_message)
+                console.print(
+                    f"[green]✓ Committed changes after hook updates: {commit_message}[/green]"
+                )
+                return True
+            except exc.GitCommandError as e2:
+                console.print(f"[red]Failed to commit after retry: {e2}[/red]")
+                return False
+
+        console.print(f"[red]Failed to commit: {e}[/red]")
         return False
 
 
 def git_tag_version(root_dir: Path, version: str, auto_confirm: bool) -> bool:
     """Create a git tag for the version."""
-    # Check if we're in a git repo
-    success, _ = run_git_command(["rev-parse", "--git-dir"], root_dir)
-    if not success:
+    try:
+        repo = Repo(root_dir, search_parent_directories=True)
+    except exc.InvalidGitRepositoryError:
         console.print("[yellow]Not a git repository, skipping git tag.[/yellow]")
         return False
 
@@ -571,8 +577,7 @@ def git_tag_version(root_dir: Path, version: str, auto_confirm: bool) -> bool:
     tag_message = f"Release version {version}"
 
     # Check if tag already exists
-    success, _ = run_git_command(["rev-parse", tag_name], root_dir)
-    if success:
+    if tag_name in repo.tags:
         console.print(f"[yellow]Tag {tag_name} already exists.[/yellow]")
         return False
 
@@ -585,15 +590,13 @@ def git_tag_version(root_dir: Path, version: str, auto_confirm: bool) -> bool:
             return False
 
     # Create annotated tag
-    success, output = run_git_command(
-        ["tag", "-a", tag_name, "-m", tag_message], root_dir
-    )
-    if success:
+    try:
+        repo.create_tag(tag_name, message=tag_message)
         console.print(f"[green]✓ Created tag: {tag_name}[/green]")
         console.print(f"[dim]  To push: git push origin {tag_name}[/dim]")
         return True
-    else:
-        console.print(f"[red]Failed to create tag: {output}[/red]")
+    except exc.GitCommandError as e:
+        console.print(f"[red]Failed to create tag: {e}[/red]")
         return False
 
 
