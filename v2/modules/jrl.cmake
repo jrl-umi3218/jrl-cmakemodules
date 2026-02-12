@@ -3614,12 +3614,16 @@ jrl_python_compute_install_dir(<output>)
     It is usually an absolute path to a specific site-packages folder.
     Note: <PROJECT_NAME_UPPER> is the PROJECT_NAME converted to a valid C identifier and in upper case.
  2. If <PROJECT_NAME_UPPER>_PYTHON_INSTALL_DIR **environment** variable is defined, its value is used.
- 3. If running inside a Conda environment, on Windows, the absolute path to site-packages is used.
+ 3. If running inside a CMeel environment (on Windows), the PYTHON_SITELIB variable is used.
+    CMeel is detected when CMAKE_INSTALL_PREFIX contains "cmeel.prefix".
+    The PYTHON_SITELIB variable is forwareded by CMeel.
+ 4. If running inside a Conda environment, on Windows, the absolute path to site-packages is used.
     It is the return value of: `sysconfig.get_path('purelib')`.
     Example: `C:/Users/You/Miniconda3/envs/myenv/Lib/site-packages`
- 4. The relative path to site-packages is used.
+ 5. The relative path to site-packages is used.
     It is the result of: `sysconfig.get_path('purelib')).relative_to(sysconfig.get_path('data')`
-    Example: `lib/python3.11/site-packages`
+    On macOS/Linux: `lib/python3.11/site-packages`
+    On Windows: `Lib/site-packages`
 
 #### Conda Windows Layout
 
@@ -3720,7 +3724,29 @@ function(jrl_python_compute_install_dir output)
         return()
     endif()
 
-    # Case 2: Conda environment on Windows specific case
+    # Case 2: CMeel detection if the install prefix contains "cmeel.prefix"
+    # This is a weak check until CMeel uses the proper cross-platform relative site-packages.
+    # ref: https://github.com/cmake-wheel/cmeel/issues/252
+    if(WIN32 AND DEFINED CMAKE_INSTALL_PREFIX)
+        if(CMAKE_INSTALL_PREFIX MATCHES "cmeel.prefix")
+            _jrl_check_var_defined(PYTHON_SITELIB "PYTHON_SITELIB variable must be defined when using CMeel environment.")
+            if(WIN32)
+                cmake_path(CONVERT "${PYTHON_SITELIB}" TO_CMAKE_PATH_LIST PYTHON_SITELIB NORMALIZE)
+            endif()
+            set(pyinstall_dir ${PYTHON_SITELIB})
+            message(
+                STATUS
+                "CMeel environment detected, using the provided PYTHON_SITELIB as install dir.
+        ${python_install_dir_var} : ${pyinstall_dir}
+        Python install dir                 : ${pyinstall_dir}
+            "
+            )
+            set(${output} ${pyinstall_dir} PARENT_SCOPE)
+            return()
+        endif()
+    endif()
+
+    # Case 3: Conda environment on Windows specific case
     if(WIN32 AND DEFINED ENV{CONDA_PREFIX})
         jrl_python_absolute_site_packages(python_absolute_site_packages)
         message(
@@ -3738,7 +3764,7 @@ function(jrl_python_compute_install_dir output)
         return()
     endif()
 
-    # Case 3: Default case, use the relative site-packages path
+    # Case 4: Default case, use the relative site-packages path
     jrl_python_relative_site_packages(python_relative_site_packages)
 
     message(
