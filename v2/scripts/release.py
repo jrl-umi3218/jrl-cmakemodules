@@ -506,7 +506,9 @@ def validate_version_progression(
         console.print()
 
 
-def git_commit_version(root_dir: Path, version: str, auto_confirm: bool) -> bool:
+def git_commit_version(
+    root_dir: Path, version: str, files_to_commit: List[str], auto_confirm: bool
+) -> bool:
     """Commit version changes to git."""
     try:
         repo = Repo(root_dir, search_parent_directories=True)
@@ -531,7 +533,8 @@ def git_commit_version(root_dir: Path, version: str, auto_confirm: bool) -> bool
 
     # Add all version files
     try:
-        repo.git.add(update=True)
+        console.print(f"[dim]$ git add {' '.join(files_to_commit)}[/dim]")
+        repo.git.add(files_to_commit)
     except exc.GitCommandError as e:
         console.print(f"[red]Failed to stage changes: {e}[/red]")
         return False
@@ -539,6 +542,7 @@ def git_commit_version(root_dir: Path, version: str, auto_confirm: bool) -> bool
     # Commit
     try:
         # Use git command to trigger hooks
+        console.print(f"[dim]$ git commit -m '{commit_message}'[/dim]")
         repo.git.commit("-m", commit_message)
         console.print(f"[green]✓ Committed changes: {commit_message}[/green]")
         return True
@@ -550,8 +554,10 @@ def git_commit_version(root_dir: Path, version: str, auto_confirm: bool) -> bool
             )
             try:
                 # Re-stage any changes made by hooks (e.g. formatting)
-                repo.git.add(update=True)
+                console.print(f"[dim]$ git add {' '.join(files_to_commit)}[/dim]")
+                repo.git.add(files_to_commit)
                 # Try commit again
+                console.print(f"[dim]$ git commit -m '{commit_message}'[/dim]")
                 repo.git.commit("-m", commit_message)
                 console.print(
                     f"[green]✓ Committed changes after hook updates: {commit_message}[/green]"
@@ -591,6 +597,7 @@ def git_tag_version(root_dir: Path, version: str, auto_confirm: bool) -> bool:
 
     # Create annotated tag
     try:
+        console.print(f"[dim]$ git tag -a {tag_name} -m '{tag_message}'[/dim]")
         repo.create_tag(tag_name, message=tag_message)
         console.print(f"[green]✓ Created tag: {tag_name}[/green]")
         console.print(f"[dim]  To push: git push origin {tag_name}[/dim]")
@@ -930,6 +937,7 @@ def main():
 
     # APPLY UPDATES
     updated_files = []
+    updated_file_paths = []
     failed = False
 
     for check in checks:
@@ -944,6 +952,7 @@ def main():
                     check.update_version(new_version_str)
                     console.print(f"[green]Updated[/green] {check.name}")
                 updated_files.append(check.name)
+                updated_file_paths.append(str(check.file_path))
             except Exception as e:
                 console.print(f"[red]Failed to update {check.name}: {e}[/red]")
                 if not args.dry_run:
@@ -978,11 +987,15 @@ def main():
             )
 
         # Git operations
-        if args.git_commit:
-            git_commit_version(root_dir, new_version_str, args.confirm)
+        committed = False
+        if args.git_commit or (not args.confirm and not args.dry_run):
+            committed = git_commit_version(
+                root_dir, new_version_str, updated_file_paths, args.confirm
+            )
 
-        if args.git_tag:
-            git_tag_version(root_dir, new_version_str, args.confirm)
+        if args.git_tag or (not args.confirm and not args.dry_run):
+            if args.git_tag or committed:
+                git_tag_version(root_dir, new_version_str, args.confirm)
 
 
 if __name__ == "__main__":
