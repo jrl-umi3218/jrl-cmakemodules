@@ -754,7 +754,7 @@ def main():
         TomlVersionExtractor(root_dir / "pixi.toml", ["workspace", "version"]),
         YamlVersionExtractor(root_dir / "CITATION.cff", ["version"]),
         RegexVersionExtractor(
-            root_dir / "CMakeLists.txt", r"project\s*\(\s*\w+\s+VERSION\s+([\d.]+)"
+            root_dir / "CMakeLists.txt", r"project\s*\([^)]*VERSION\s+([\d.]+)"
         ),
     ]
 
