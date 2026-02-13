@@ -8,6 +8,7 @@
 #     "ruamel.yaml",
 #     "rich",
 #     "packaging",
+#     "GitPython",
 # ]
 # ///
 
@@ -389,14 +390,14 @@ def test_yaml_extractor_nested_key(tmp_path):
 
 def test_regex_extractor_get_version(sample_cmake_lists):
     """Test RegexVersionExtractor can extract version from CMakeLists.txt."""
-    pattern = r"project\s*\(\s*\w+\s+VERSION\s+([\d.]+)"
+    pattern = r"project\s*\([^)]*VERSION\s+([\d.]+)"
     extractor = release.RegexVersionExtractor(sample_cmake_lists, pattern)
     assert extractor.get_version() == "1.0.0"
 
 
 def test_regex_extractor_update_version(sample_cmake_lists):
     """Test RegexVersionExtractor can update version."""
-    pattern = r"project\s*\(\s*\w+\s+VERSION\s+([\d.]+)"
+    pattern = r"project\s*\([^)]*VERSION\s+([\d.]+)"
     extractor = release.RegexVersionExtractor(sample_cmake_lists, pattern)
     extractor.update_version("3.5.7")
 
@@ -432,7 +433,7 @@ project(
     file_path = tmp_path / "multiline.cmake"
     file_path.write_text(content, encoding="utf-8")
 
-    pattern = r"project\s*\(\s*\w+\s+VERSION\s+([\d.]+)"
+    pattern = r"project\s*\([^)]*VERSION\s+([\d.]+)"
     extractor = release.RegexVersionExtractor(file_path, pattern)
     assert extractor.get_version() == "2.3.4"
 
