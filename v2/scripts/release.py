@@ -7,6 +7,7 @@
 #     "rich",
 #     "packaging",
 #     "GitPython",
+#     "cmake-parser",
 # ]
 # ///
 
@@ -132,6 +133,7 @@ from abc import ABC, abstractmethod
 from typing import List, Optional, Tuple
 
 import tomlkit
+import cmake_parser
 from git import Repo, exc
 from ruamel.yaml import YAML
 from rich.console import Console
@@ -308,6 +310,126 @@ class RegexVersionExtractor(VersionExtractor):
 
         with open(self.file_path, "w", encoding="utf-8") as f:
             f.write(new_content)
+
+
+class CMakeListsVersionExtractor(VersionExtractor):
+    """Specialized extractor for CMakeLists.txt that uses cmake-parser
+    and handles both direct VERSION and variables (e.g., from package.xml)."""
+
+    def get_version(self) -> str:
+        with open(self.file_path, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        try:
+            # Parse the CMakeLists.txt file
+            tree = cmake_parser.parse(content)
+
+            fallback_version = None
+            project_version = None
+
+            # Walk through all commands
+            for node in tree:
+                if hasattr(node, "name"):
+                    # Look for set(PROJECT_VERSION "...")
+                    if node.name.lower() == "set":
+                        args = self._get_command_args(node)
+                        if len(args) >= 2 and args[0] == "PROJECT_VERSION":
+                            # Remove quotes from version string
+                            fallback_version = args[1].strip('"')
+
+                    # Look for project(...VERSION ...)
+                    elif node.name.lower() == "project":
+                        args = self._get_command_args(node)
+                        # Find VERSION keyword
+                        try:
+                            version_idx = args.index("VERSION")
+                            if version_idx + 1 < len(args):
+                                ver = args[version_idx + 1]
+                                # Check if it's a variable reference
+                                if not ver.startswith("${"):
+                                    project_version = ver
+                        except ValueError:
+                            pass
+
+            # If project() uses a variable, return fallback
+            if fallback_version and not project_version:
+                return fallback_version
+
+            # If project() has a literal version, use that
+            if project_version:
+                return project_version
+
+            raise ValueError(f"No version found in {self.name}")
+
+        except Exception:
+            # Fallback to regex if cmake-parser fails
+            return self._get_version_regex(content)
+
+    def _get_command_args(self, node) -> List[str]:
+        """Extract arguments from a cmake command node."""
+        args = []
+        if hasattr(node, "body"):
+            for item in node.body:
+                if hasattr(item, "contents"):
+                    args.append(item.contents)
+        return args
+
+    def _get_version_regex(self, content: str) -> str:
+        """Fallback regex-based version extraction."""
+        # First try to find set(PROJECT_VERSION "X.Y.Z")
+        fallback_pattern = re.compile(
+            r'set\s*\(\s*PROJECT_VERSION\s+"([0-9]+\.[0-9]+\.[0-9]+)"',
+            re.MULTILINE,
+        )
+        fallback_match = fallback_pattern.search(content)
+
+        # Also check if project() uses a literal version or variable
+        project_pattern = re.compile(
+            r"project\s*\([^)]*VERSION\s+([\d.]+|\$\{[^}]+\})", re.MULTILINE
+        )
+        project_match = project_pattern.search(content)
+
+        # If project() uses a variable, use the fallback version
+        if project_match and project_match.group(1).startswith("${"):
+            if fallback_match:
+                return fallback_match.group(1)
+            raise ValueError(
+                f"{self.name} reads version from variable {project_match.group(1)}, no fallback found"
+            )
+
+        # If project() uses a literal, return it
+        if project_match and not project_match.group(1).startswith("${"):
+            return project_match.group(1)
+
+        raise ValueError(f"Pattern not found in {self.name}")
+
+    def update_version(self, new_version: str) -> None:
+        with open(self.file_path, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        # Update the fallback version in set(PROJECT_VERSION "...")
+        fallback_pattern = re.compile(
+            r'(set\s*\(\s*PROJECT_VERSION\s+)"([0-9]+\.[0-9]+\.[0-9]+)"',
+            re.MULTILINE,
+        )
+
+        def repl_fallback(match):
+            return f'{match.group(1)}"{new_version}"'
+
+        content = fallback_pattern.sub(repl_fallback, content, count=1)
+
+        # Also update literal version in project() if present
+        project_pattern = re.compile(
+            r"(project\s*\([^)]*VERSION\s+)([\d.]+)", re.MULTILINE
+        )
+
+        def repl_project(match):
+            return f"{match.group(1)}{new_version}"
+
+        content = project_pattern.sub(repl_project, content, count=1)
+
+        with open(self.file_path, "w", encoding="utf-8") as f:
+            f.write(content)
 
 
 class ChangelogVersionExtractor(RegexVersionExtractor):
@@ -753,9 +875,7 @@ def main():
         ChangelogVersionExtractor(root_dir / "CHANGELOG.md", r""),
         TomlVersionExtractor(root_dir / "pixi.toml", ["workspace", "version"]),
         YamlVersionExtractor(root_dir / "CITATION.cff", ["version"]),
-        RegexVersionExtractor(
-            root_dir / "CMakeLists.txt", r"project\s*\([^)]*VERSION\s+([\d.]+)"
-        ),
+        CMakeListsVersionExtractor(root_dir / "CMakeLists.txt"),
     ]
 
     if args.list_files:

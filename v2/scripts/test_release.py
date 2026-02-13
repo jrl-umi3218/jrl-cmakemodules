@@ -4,11 +4,13 @@
 # dependencies = [
 #     "pytest>=8.4.2",
 #     "pytest-mock>=3.12.0",
+#     # The following dependencies must be kept in sync with release.py
 #     "tomlkit",
 #     "ruamel.yaml",
 #     "rich",
 #     "packaging",
 #     "GitPython",
+#     "cmake-parser",
 # ]
 # ///
 
@@ -436,6 +438,175 @@ project(
     pattern = r"project\s*\([^)]*VERSION\s+([\d.]+)"
     extractor = release.RegexVersionExtractor(file_path, pattern)
     assert extractor.get_version() == "2.3.4"
+
+
+# ============================================================================
+# TEST CMakeListsVersionExtractor
+# ============================================================================
+
+
+def test_cmake_extractor_get_version_simple(sample_cmake_lists):
+    """Test CMakeListsVersionExtractor can extract version from simple CMakeLists.txt."""
+    extractor = release.CMakeListsVersionExtractor(sample_cmake_lists)
+    assert extractor.get_version() == "1.0.0"
+
+
+def test_cmake_extractor_get_version_multiline(tmp_path):
+    """Test CMakeListsVersionExtractor with multiline project()."""
+    content = """cmake_minimum_required(VERSION 3.22)
+
+project(
+  TestProject
+  DESCRIPTION "JRL CMake utility toolbox"
+  HOMEPAGE_URL "http://github.com/example/project"
+  VERSION 2.5.10
+  LANGUAGES CXX
+)
+
+add_library(testlib src/test.cpp)
+"""
+    file_path = tmp_path / "CMakeLists.txt"
+    file_path.write_text(content, encoding="utf-8")
+
+    extractor = release.CMakeListsVersionExtractor(file_path)
+    assert extractor.get_version() == "2.5.10"
+
+
+def test_cmake_extractor_with_fallback_version(tmp_path):
+    """Test CMakeListsVersionExtractor with PROJECT_VERSION variable and fallback."""
+    content = """cmake_minimum_required(VERSION 3.22)
+
+# Read version from package.xml if available
+set(PROJECT_VERSION "3.1.4") # Default fallback version
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/package.xml")
+  file(READ "${CMAKE_CURRENT_SOURCE_DIR}/package.xml" PACKAGE_XML_CONTENT)
+  string(REGEX MATCH "<version>([0-9]+\\.[0-9]+\\.[0-9]+)</version>" _ "${PACKAGE_XML_CONTENT}")
+  if(CMAKE_MATCH_1)
+    set(PROJECT_VERSION "${CMAKE_MATCH_1}")
+  endif()
+endif()
+
+project(
+  TestProject
+  DESCRIPTION "Test project"
+  VERSION ${PROJECT_VERSION}
+  LANGUAGES NONE
+)
+"""
+    file_path = tmp_path / "CMakeLists.txt"
+    file_path.write_text(content, encoding="utf-8")
+
+    extractor = release.CMakeListsVersionExtractor(file_path)
+    # Should extract from the fallback set(PROJECT_VERSION "3.1.4")
+    assert extractor.get_version() == "3.1.4"
+
+
+def test_cmake_extractor_update_version_simple(sample_cmake_lists):
+    """Test CMakeListsVersionExtractor can update version in simple CMakeLists.txt."""
+    extractor = release.CMakeListsVersionExtractor(sample_cmake_lists)
+    extractor.update_version("2.0.0")
+
+    # Verify the update
+    assert extractor.get_version() == "2.0.0"
+
+    # Verify structure is preserved
+    content = sample_cmake_lists.read_text(encoding="utf-8")
+    assert "cmake_minimum_required" in content
+    assert "add_library" in content
+    assert 'DESCRIPTION "A test project"' in content
+
+
+def test_cmake_extractor_update_version_multiline(tmp_path):
+    """Test CMakeListsVersionExtractor can update version in multiline project()."""
+    content = """cmake_minimum_required(VERSION 3.22)
+
+project(
+  TestProject
+  DESCRIPTION "Test project"
+  VERSION 1.0.0
+  LANGUAGES CXX
+)
+"""
+    file_path = tmp_path / "CMakeLists.txt"
+    file_path.write_text(content, encoding="utf-8")
+
+    extractor = release.CMakeListsVersionExtractor(file_path)
+    extractor.update_version("1.2.3")
+
+    assert extractor.get_version() == "1.2.3"
+    content = file_path.read_text(encoding="utf-8")
+    assert "VERSION 1.2.3" in content
+
+
+def test_cmake_extractor_update_fallback_version(tmp_path):
+    """Test CMakeListsVersionExtractor updates both fallback and project version."""
+    content = """cmake_minimum_required(VERSION 3.22)
+
+set(PROJECT_VERSION "1.0.0")
+
+project(
+  TestProject
+  VERSION ${PROJECT_VERSION}
+  LANGUAGES NONE
+)
+"""
+    file_path = tmp_path / "CMakeLists.txt"
+    file_path.write_text(content, encoding="utf-8")
+
+    extractor = release.CMakeListsVersionExtractor(file_path)
+    extractor.update_version("2.5.0")
+
+    # Check that fallback was updated
+    content = file_path.read_text(encoding="utf-8")
+    assert 'set(PROJECT_VERSION "2.5.0")' in content
+
+
+def test_cmake_extractor_no_version_found(tmp_path):
+    """Test CMakeListsVersionExtractor raises error when no version found."""
+    content = """cmake_minimum_required(VERSION 3.10)
+project(TestProject DESCRIPTION "No version here")
+"""
+    file_path = tmp_path / "CMakeLists.txt"
+    file_path.write_text(content, encoding="utf-8")
+
+    extractor = release.CMakeListsVersionExtractor(file_path)
+    with pytest.raises(ValueError, match="No version found|Pattern not found"):
+        extractor.get_version()
+
+
+def test_cmake_extractor_preserves_structure(tmp_path):
+    """Test CMakeListsVersionExtractor preserves file structure and formatting."""
+    content = """# This is a comment
+cmake_minimum_required(VERSION 3.22)
+
+# Another comment
+project(
+  TestProject
+  VERSION 1.5.2
+  DESCRIPTION "Test"
+  LANGUAGES CXX
+)
+
+# Build configuration
+set(CMAKE_CXX_STANDARD 17)
+add_library(mylib src/lib.cpp)
+"""
+    file_path = tmp_path / "CMakeLists.txt"
+    file_path.write_text(content, encoding="utf-8")
+
+    extractor = release.CMakeListsVersionExtractor(file_path)
+    extractor.update_version("1.5.3")
+
+    content = file_path.read_text(encoding="utf-8")
+    # Check comments are preserved
+    assert "# This is a comment" in content
+    assert "# Another comment" in content
+    assert "# Build configuration" in content
+    # Check other settings preserved
+    assert "CMAKE_CXX_STANDARD" in content
+    assert "add_library" in content
+    # Check version updated
+    assert "VERSION 1.5.3" in content
 
 
 # ============================================================================
