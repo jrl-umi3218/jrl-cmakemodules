@@ -557,18 +557,23 @@ def show_version_diff(old_version: str, new_version: str) -> None:
     old_parts = old_version.split(".")
     new_parts = new_version.split(".")
 
-    diff_parts = []
+    # Build colored versions with highlights on changed parts
+    old_colored_parts = []
+    new_colored_parts = []
+
     for i, (old, new) in enumerate(zip(old_parts, new_parts)):
         if old != new:
-            diff_parts.append(f"[red]{old}[/red] → [green]{new}[/green]")
+            old_colored_parts.append(f"[red]{old}[/red]")
+            new_colored_parts.append(f"[green]{new}[/green]")
         else:
-            diff_parts.append(f"[dim]{old}[/dim]")
+            old_colored_parts.append(f"[dim]{old}[/dim]")
+            new_colored_parts.append(f"[dim]{new}[/dim]")
 
-    diff_text = ".".join(diff_parts)
+    old_colored = ".".join(old_colored_parts)
+    new_colored = ".".join(new_colored_parts)
 
     panel = Panel(
-        f"[bold]{diff_text}[/bold]\n\n"
-        f"[cyan]{old_version}[/cyan] → [green]{new_version}[/green]",
+        f"[bold]{old_colored} → {new_colored}[/bold]",
         title="[bold yellow]Version Change[/bold yellow]",
         border_style="yellow",
         expand=False,
