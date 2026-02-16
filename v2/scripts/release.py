@@ -1124,4 +1124,8 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        console.print("\n[yellow]Operation cancelled by user (Ctrl+C).[/yellow]")
+        sys.exit(130)
