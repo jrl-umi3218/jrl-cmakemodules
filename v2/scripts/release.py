@@ -147,6 +147,19 @@ from packaging.version import parse as parse_version, InvalidVersion
 
 console = Console()
 
+STYLE_INFO = "bold blue"
+STYLE_SUCCESS = "green"
+STYLE_SUCCESS_STRONG = "bold green"
+STYLE_WARNING = "yellow"
+STYLE_WARNING_STRONG = "bold yellow"
+STYLE_ERROR = "red"
+STYLE_ERROR_STRONG = "bold red"
+STYLE_MUTED = "dim"
+STYLE_OLD_VALUE = "red"
+STYLE_NEW_VALUE = "green"
+STYLE_UNCHANGED_VALUE = "dim"
+STYLE_HIGHLIGHT = "cyan"
+
 
 class VersionExtractor(ABC):
     def __init__(self, file_path: Path):
@@ -465,7 +478,7 @@ class ChangelogVersionExtractor(RegexVersionExtractor):
         pattern = r"^## \[Unreleased\]"
         if not re.search(pattern, content, re.MULTILINE):
             console.print(
-                "[yellow]Warning: Could not find '## [Unreleased]' in CHANGELOG.md. Skipping update.[/yellow]"
+                f"[{STYLE_WARNING}]Warning: Could not find '## [Unreleased]' in CHANGELOG.md. Skipping update.[/{STYLE_WARNING}]"
             )
             return
 
@@ -483,7 +496,7 @@ class ChangelogVersionExtractor(RegexVersionExtractor):
             f.write(new_content)
 
         console.print(
-            "[blue]Updated CHANGELOG.md header. Note: Link definitions at the bottom were not updated automatically.[/blue]"
+            f"[{STYLE_INFO}]Updated CHANGELOG.md header. Note: Link definitions at the bottom were not updated automatically.[/{STYLE_INFO}]"
         )
 
 
@@ -541,14 +554,16 @@ def get_current_version(checks: List[VersionExtractor]) -> Optional[str]:
         return list(versions_found)[0]
     elif len(versions_found) > 1:
         console.print(
-            f"[red]Error: Multiple versions found: {', '.join(sorted(versions_found))}[/red]"
+            f"[{STYLE_ERROR}]Error: Multiple versions found: {', '.join(sorted(versions_found))}[/{STYLE_ERROR}]"
         )
         console.print(
-            "[yellow]Please run --check-version first to resolve conflicts.[/yellow]"
+            f"[{STYLE_WARNING}]Please run --check-version first to resolve conflicts.[/{STYLE_WARNING}]"
         )
         return None
     else:
-        console.print("[red]Error: No version found in any files.[/red]")
+        console.print(
+            f"[{STYLE_ERROR}]Error: No version found in any files.[/{STYLE_ERROR}]"
+        )
         return None
 
 
@@ -587,11 +602,15 @@ def show_version_diff(
 
     for i, (old, new) in enumerate(zip(old_parts, new_parts)):
         if old != new:
-            old_colored_parts.append(f"[red]{old}[/red]")
-            new_colored_parts.append(f"[green]{new}[/green]")
+            old_colored_parts.append(f"[{STYLE_OLD_VALUE}]{old}[/{STYLE_OLD_VALUE}]")
+            new_colored_parts.append(f"[{STYLE_NEW_VALUE}]{new}[/{STYLE_NEW_VALUE}]")
         else:
-            old_colored_parts.append(f"[dim]{old}[/dim]")
-            new_colored_parts.append(f"[dim]{new}[/dim]")
+            old_colored_parts.append(
+                f"[{STYLE_UNCHANGED_VALUE}]{old}[/{STYLE_UNCHANGED_VALUE}]"
+            )
+            new_colored_parts.append(
+                f"[{STYLE_UNCHANGED_VALUE}]{new}[/{STYLE_UNCHANGED_VALUE}]"
+            )
 
     old_colored = ".".join(old_colored_parts)
     new_colored = ".".join(new_colored_parts)
@@ -600,8 +619,8 @@ def show_version_diff(
 
     panel = Panel(
         f"[bold]{old_colored} → {new_colored}[/bold]",
-        title=f"[bold yellow]Version Change ({change_type})[/bold yellow]",
-        border_style="yellow",
+        title=f"[{STYLE_WARNING_STRONG}]Version Change ({change_type})[/{STYLE_WARNING_STRONG}]",
+        border_style=STYLE_WARNING,
         expand=False,
     )
     console.print(panel)
@@ -653,9 +672,11 @@ def validate_version_progression(
         warnings.append("New version is not greater than old version")
 
     if warnings:
-        console.print("[bold yellow]⚠ Version Progression Warnings:[/bold yellow]")
+        console.print(
+            f"[{STYLE_WARNING_STRONG}]⚠ Version Progression Warnings:[/{STYLE_WARNING_STRONG}]"
+        )
         for warning in warnings:
-            console.print(f"  [yellow]• {warning}[/yellow]")
+            console.print(f"  [{STYLE_WARNING}]• {warning}[/{STYLE_WARNING}]")
         console.print()
 
 
@@ -666,11 +687,13 @@ def git_commit_version(
     try:
         repo = Repo(root_dir, search_parent_directories=True)
     except exc.InvalidGitRepositoryError:
-        console.print("[yellow]Not a git repository, skipping git commit.[/yellow]")
+        console.print(
+            f"[{STYLE_WARNING}]Not a git repository, skipping git commit.[/{STYLE_WARNING}]"
+        )
         return False
 
     if not repo.is_dirty():
-        console.print("[yellow]No changes to commit.[/yellow]")
+        console.print(f"[{STYLE_WARNING}]No changes to commit.[/{STYLE_WARNING}]")
         return False
 
     commit_message = f"chore: bump version to {version}"
@@ -681,46 +704,58 @@ def git_commit_version(
             default=True,
         )
         if not confirmed:
-            console.print("[yellow]Git commit skipped.[/yellow]")
+            console.print(f"[{STYLE_WARNING}]Git commit skipped.[/{STYLE_WARNING}]")
             return False
 
     # Add all version files
     try:
-        console.print(f"[dim]$ git add {' '.join(files_to_commit)}[/dim]")
+        console.print(
+            f"[{STYLE_MUTED}]$ git add {' '.join(files_to_commit)}[/{STYLE_MUTED}]"
+        )
         repo.git.add(files_to_commit)
     except exc.GitCommandError as e:
-        console.print(f"[red]Failed to stage changes: {e}[/red]")
+        console.print(f"[{STYLE_ERROR}]Failed to stage changes: {e}[/{STYLE_ERROR}]")
         return False
 
     # Commit
     try:
         # Use git command to trigger hooks
-        console.print(f"[dim]$ git commit -m '{commit_message}'[/dim]")
+        console.print(
+            f"[{STYLE_MUTED}]$ git commit -m '{commit_message}'[/{STYLE_MUTED}]"
+        )
         repo.git.commit("-m", commit_message)
-        console.print(f"[green]✓ Committed changes: {commit_message}[/green]")
+        console.print(
+            f"[{STYLE_SUCCESS}]✓ Committed changes: {commit_message}[/{STYLE_SUCCESS}]"
+        )
         return True
     except exc.GitCommandError as e:
         # Check if pre-commit hooks failed (often they modify files)
         if (root_dir / ".pre-commit-config.yaml").exists():
             console.print(
-                "[yellow]Commit failed or hooks triggered. Attempting to re-stage and commit...[/yellow]"
+                f"[{STYLE_WARNING}]Commit failed or hooks triggered. Attempting to re-stage and commit...[/{STYLE_WARNING}]"
             )
             try:
                 # Re-stage any changes made by hooks (e.g. formatting)
-                console.print(f"[dim]$ git add {' '.join(files_to_commit)}[/dim]")
+                console.print(
+                    f"[{STYLE_MUTED}]$ git add {' '.join(files_to_commit)}[/{STYLE_MUTED}]"
+                )
                 repo.git.add(files_to_commit)
                 # Try commit again
-                console.print(f"[dim]$ git commit -m '{commit_message}'[/dim]")
+                console.print(
+                    f"[{STYLE_MUTED}]$ git commit -m '{commit_message}'[/{STYLE_MUTED}]"
+                )
                 repo.git.commit("-m", commit_message)
                 console.print(
-                    f"[green]✓ Committed changes after hook updates: {commit_message}[/green]"
+                    f"[{STYLE_SUCCESS}]✓ Committed changes after hook updates: {commit_message}[/{STYLE_SUCCESS}]"
                 )
                 return True
             except exc.GitCommandError as e2:
-                console.print(f"[red]Failed to commit after retry: {e2}[/red]")
+                console.print(
+                    f"[{STYLE_ERROR}]Failed to commit after retry: {e2}[/{STYLE_ERROR}]"
+                )
                 return False
 
-        console.print(f"[red]Failed to commit: {e}[/red]")
+        console.print(f"[{STYLE_ERROR}]Failed to commit: {e}[/{STYLE_ERROR}]")
         return False
 
 
@@ -729,7 +764,9 @@ def git_tag_version(root_dir: Path, version: str, auto_confirm: bool) -> bool:
     try:
         repo = Repo(root_dir, search_parent_directories=True)
     except exc.InvalidGitRepositoryError:
-        console.print("[yellow]Not a git repository, skipping git tag.[/yellow]")
+        console.print(
+            f"[{STYLE_WARNING}]Not a git repository, skipping git tag.[/{STYLE_WARNING}]"
+        )
         return False
 
     tag_name = f"v{version}"
@@ -737,7 +774,9 @@ def git_tag_version(root_dir: Path, version: str, auto_confirm: bool) -> bool:
 
     # Check if tag already exists
     if tag_name in repo.tags:
-        console.print(f"[yellow]Tag {tag_name} already exists.[/yellow]")
+        console.print(
+            f"[{STYLE_WARNING}]Tag {tag_name} already exists.[/{STYLE_WARNING}]"
+        )
         return False
 
     if not auto_confirm:
@@ -745,18 +784,22 @@ def git_tag_version(root_dir: Path, version: str, auto_confirm: bool) -> bool:
             f"[bold]Create git tag '{tag_name}'?[/bold]", default=True
         )
         if not confirmed:
-            console.print("[yellow]Git tag skipped.[/yellow]")
+            console.print(f"[{STYLE_WARNING}]Git tag skipped.[/{STYLE_WARNING}]")
             return False
 
     # Create annotated tag
     try:
-        console.print(f"[dim]$ git tag -a {tag_name} -m '{tag_message}'[/dim]")
+        console.print(
+            f"[{STYLE_MUTED}]$ git tag -a {tag_name} -m '{tag_message}'[/{STYLE_MUTED}]"
+        )
         repo.create_tag(tag_name, message=tag_message)
-        console.print(f"[green]✓ Created tag: {tag_name}[/green]")
-        console.print(f"[dim]  To push: git push origin {tag_name}[/dim]")
+        console.print(f"[{STYLE_SUCCESS}]✓ Created tag: {tag_name}[/{STYLE_SUCCESS}]")
+        console.print(
+            f"[{STYLE_MUTED}]  To push: git push origin {tag_name}[/{STYLE_MUTED}]"
+        )
         return True
     except exc.GitCommandError as e:
-        console.print(f"[red]Failed to create tag: {e}[/red]")
+        console.print(f"[{STYLE_ERROR}]Failed to create tag: {e}[/{STYLE_ERROR}]")
         return False
 
 
@@ -769,7 +812,11 @@ def list_version_files(checks: List[VersionExtractor]) -> None:
     table.add_column("Type", style="magenta")
 
     for check in checks:
-        exists = "[green]✓[/green]" if check.check_file_exists() else "[red]✗[/red]"
+        exists = (
+            f"[{STYLE_SUCCESS}]✓[/{STYLE_SUCCESS}]"
+            if check.check_file_exists()
+            else f"[{STYLE_ERROR}]✗[/{STYLE_ERROR}]"
+        )
         file_type = check.__class__.__name__.replace("VersionExtractor", "")
         table.add_row(check.name, str(check.file_path), exists, file_type)
 
@@ -893,11 +940,13 @@ def main():
             # simple semver check
             if not re.match(r"^\d+\.\d+\.\d+$", args.update_version):
                 console.print(
-                    f"[red]Invalid SemVer '{args.update_version}'. strict X.Y.Z required.[/red]"
+                    f"[{STYLE_ERROR}]Invalid SemVer '{args.update_version}'. strict X.Y.Z required.[/{STYLE_ERROR}]"
                 )
                 sys.exit(1)
         except Exception as e:
-            console.print(f"[red]Error validating version: {e}[/red]")
+            console.print(
+                f"[{STYLE_ERROR}]Error validating version: {e}[/{STYLE_ERROR}]"
+            )
             sys.exit(1)
 
     checks: List[VersionExtractor] = [
@@ -934,7 +983,9 @@ def main():
         errors = False
 
         if not args.short:
-            console.print(f"[bold blue]Checking versions in {root_dir}...[/bold blue]")
+            console.print(
+                f"[{STYLE_INFO}]Checking versions in {root_dir}...[/{STYLE_INFO}]"
+            )
 
         for check in checks:
             result = {
@@ -986,11 +1037,11 @@ def main():
         for res in results:
             status_style = res["status"]
             if res["status"] == "Found":
-                status_style = "[green]Found[/green]"
+                status_style = f"[{STYLE_SUCCESS}]Found[/{STYLE_SUCCESS}]"
             elif res["status"] == "Missing":
-                status_style = "[yellow]Missing[/yellow]"
+                status_style = f"[{STYLE_WARNING}]Missing[/{STYLE_WARNING}]"
             elif res["status"] == "Error":
-                status_style = "[red]Error[/red]"
+                status_style = f"[{STYLE_ERROR}]Error[/{STYLE_ERROR}]"
 
             version_display = res["version"] if res["version"] else "-"
             if res["version"]:
@@ -999,9 +1050,13 @@ def main():
                     and consensus_version != "MISMATCH"
                     and res["version"] == consensus_version
                 ):
-                    version_display = f"[green]{res['version']}[/green]"
+                    version_display = (
+                        f"[{STYLE_SUCCESS}]{res['version']}[/{STYLE_SUCCESS}]"
+                    )
                 elif consensus_version == "MISMATCH":
-                    version_display = f"[yellow]{res['version']}[/yellow]"
+                    version_display = (
+                        f"[{STYLE_WARNING}]{res['version']}[/{STYLE_WARNING}]"
+                    )
 
             table.add_row(res["file"], version_display, status_style, res["message"])
 
@@ -1014,22 +1069,22 @@ def main():
         if errors:
             if len(versions_found) > 1:
                 console.print(
-                    f"\n[bold red]FAILURE:[/bold red] Found conflicting versions: {', '.join(sorted(versions_found))}"
+                    f"\n[{STYLE_ERROR_STRONG}]FAILURE:[/{STYLE_ERROR_STRONG}] Found conflicting versions: {', '.join(sorted(versions_found))}"
                 )
             else:
                 console.print(
-                    "\n[bold red]FAILURE:[/bold red] Errors encountered (parsing errors)."
+                    f"\n[{STYLE_ERROR_STRONG}]FAILURE:[/{STYLE_ERROR_STRONG}] Errors encountered (parsing errors)."
                 )
             sys.exit(1)
         elif not versions_found:
             console.print(
-                f"\n[bold red]FAILURE:[/bold red] No version files found in {root_dir}."
+                f"\n[{STYLE_ERROR_STRONG}]FAILURE:[/{STYLE_ERROR_STRONG}] No version files found in {root_dir}."
             )
             sys.exit(1)
         else:
             if not args.short:
                 console.print(
-                    f"\n[bold green]SUCCESS:[/bold green] All files match version [bold]{consensus_version}[/bold]."
+                    f"\n[{STYLE_SUCCESS_STRONG}]SUCCESS:[/{STYLE_SUCCESS_STRONG}] All files match version [bold]{consensus_version}[/bold]."
                 )
             sys.exit(0)
 
@@ -1040,7 +1095,7 @@ def main():
     if args.update_version:
         new_version_str = args.update_version
         console.print(
-            f"[bold blue]Updating versions to {new_version_str} in {root_dir}...[/bold blue]"
+            f"[{STYLE_INFO}]Updating versions to {new_version_str} in {root_dir}...[/{STYLE_INFO}]"
         )
     elif args.bump:
         # Get current version
@@ -1049,13 +1104,11 @@ def main():
             # get_current_version likely printed why
             sys.exit(1)
 
-        console.print(f"[bold blue]Current version: {current_version}[/bold blue]")
-
         # Calculate new version
         try:
             new_version_str = bump_version(current_version, args.bump)
         except ValueError as e:
-            console.print(f"[red]Error: {e}[/red]")
+            console.print(f"[{STYLE_ERROR}]Error: {e}[/{STYLE_ERROR}]")
             sys.exit(1)
 
         # Show version diff visualization
@@ -1067,24 +1120,31 @@ def main():
         # Confirm upgrade
         if args.dry_run:
             console.print(
-                f"\n[bold yellow]DRY RUN:[/bold yellow] Would upgrade from {current_version} to {new_version_str}"
+                f"\n[{STYLE_WARNING_STRONG}]DRY RUN:[/{STYLE_WARNING_STRONG}] Would upgrade from [{STYLE_OLD_VALUE}]{current_version}[/{STYLE_OLD_VALUE}] to [{STYLE_NEW_VALUE}]{new_version_str}[/{STYLE_NEW_VALUE}]"
             )
             confirmed = True
         elif args.confirm:
             confirmed = True
         else:
             confirmed = Confirm.ask(
-                f"\n[bold]Do you want to upgrade from [cyan]{current_version}[/cyan] to [green]{new_version_str}[/green]?[/bold]",
+                f"\n[bold]Do you want to upgrade from [{STYLE_INFO}]{current_version}[/{STYLE_INFO}] to [{STYLE_NEW_VALUE}]{new_version_str}[/{STYLE_NEW_VALUE}]?[/bold]",
                 default=True,
             )
 
         if not confirmed:
-            console.print("[yellow]Upgrade cancelled.[/yellow]")
+            console.print(f"[{STYLE_WARNING}]Upgrade cancelled.[/{STYLE_WARNING}]")
             sys.exit(0)
 
         console.print(
-            f"\n[bold blue]Upgrading version from {current_version} to {new_version_str}...[/bold blue]"
+            f"\n[{STYLE_INFO}]Upgrading version from {current_version} to {new_version_str}...[/{STYLE_INFO}]"
         )
+
+    if new_version_str is None:
+        console.print(
+            f"[{STYLE_ERROR}]Internal error: target version is undefined.[/{STYLE_ERROR}]"
+        )
+        sys.exit(1)
+    target_version: str = new_version_str
 
     # APPLY UPDATES
     updated_files = []
@@ -1097,19 +1157,25 @@ def main():
                 if args.dry_run:
                     curr = check.get_version()
                     console.print(
-                        f"[cyan]Would update[/cyan] {check.name}: {curr} → {new_version_str}"
+                        f"[{STYLE_HIGHLIGHT}]Would update[/{STYLE_HIGHLIGHT}] {check.name}: [{STYLE_OLD_VALUE}]{curr}[/{STYLE_OLD_VALUE}] → [{STYLE_NEW_VALUE}]{target_version}[/{STYLE_NEW_VALUE}]"
                     )
                 else:
-                    check.update_version(new_version_str)
-                    console.print(f"[green]Updated[/green] {check.name}")
+                    check.update_version(target_version)
+                    console.print(
+                        f"[{STYLE_SUCCESS}]Updated[/{STYLE_SUCCESS}] {check.name}"
+                    )
                 updated_files.append(check.name)
                 updated_file_paths.append(str(check.file_path))
             except Exception as e:
-                console.print(f"[red]Failed to update {check.name}: {e}[/red]")
+                console.print(
+                    f"[{STYLE_ERROR}]Failed to update {check.name}: {e}[/{STYLE_ERROR}]"
+                )
                 if not args.dry_run:
                     failed = True
         else:
-            console.print(f"[yellow]Skipping[/yellow] {check.name} (not found)")
+            console.print(
+                f"[{STYLE_WARNING}]Skipping[/{STYLE_WARNING}] {check.name} (not found)"
+            )
 
     if failed:
         sys.exit(1)
@@ -1117,41 +1183,43 @@ def main():
     if args.output_format == "json":
         res_json = {
             "previous_version": current_version,
-            "new_version": new_version_str,
+            "new_version": target_version,
             "updated_files": updated_files,
             "dry_run": args.dry_run,
         }
         print(json.dumps(res_json, indent=2))
 
     elif args.short:
-        print(new_version_str)
+        print(target_version)
 
     if args.dry_run:
         console.print(
-            "\n[bold yellow]DRY RUN COMPLETE:[/bold yellow] No files were modified."
+            f"\n[{STYLE_WARNING_STRONG}]DRY RUN COMPLETE:[/{STYLE_WARNING_STRONG}] No files were modified."
         )
         sys.exit(0)
     else:
         if not args.short and args.output_format == "text":
             console.print(
-                f"\n[bold green]SUCCESS:[/bold green] Version updated to {new_version_str}."
+                f"\n[{STYLE_SUCCESS_STRONG}]SUCCESS:[/{STYLE_SUCCESS_STRONG}] Version updated to {target_version}."
             )
 
         # Git operations
         committed = False
         if args.git_commit or (not args.confirm and not args.dry_run):
             committed = git_commit_version(
-                root_dir, new_version_str, updated_file_paths, args.confirm
+                root_dir, target_version, updated_file_paths, args.confirm
             )
 
         if args.git_tag or (not args.confirm and not args.dry_run):
             if args.git_tag or committed:
-                git_tag_version(root_dir, new_version_str, args.confirm)
+                git_tag_version(root_dir, target_version, args.confirm)
 
 
 if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        console.print("\n[yellow]Operation cancelled by user (Ctrl+C).[/yellow]")
+        console.print(
+            f"\n[{STYLE_WARNING}]Operation cancelled by user (Ctrl+C).[/{STYLE_WARNING}]"
+        )
         sys.exit(130)
