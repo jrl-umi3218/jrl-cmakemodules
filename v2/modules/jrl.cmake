@@ -3064,7 +3064,7 @@ jrl_find_python(
 
 ### Example
 ```cmake
-jrl_find_python(3.8 REQUIRED COMPONENTS Interpreter Development.Module)
+jrl_find_python(3.10 REQUIRED COMPONENTS Interpreter Development.Module)
 ```
 #]============================================================================]
 macro(jrl_find_python)
@@ -3107,7 +3107,7 @@ jrl_find_nanobind([<args>...])
 
 ### Example
 ```cmake
-jrl_find_python(3.8 REQUIRED COMPONENTS Interpreter Development.Module)
+jrl_find_python(3.10 REQUIRED COMPONENTS Interpreter Development.Module)
 jrl_find_nanobind(2.5.0 CONFIG REQUIRED)
 ```
 #]============================================================================]
