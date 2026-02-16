@@ -552,7 +552,31 @@ def get_current_version(checks: List[VersionExtractor]) -> Optional[str]:
         return None
 
 
-def show_version_diff(old_version: str, new_version: str) -> None:
+def infer_change_type(
+    old_version: str, new_version: str, bump_type: Optional[str] = None
+) -> str:
+    """Infer change type label (major/minor/patch/custom)."""
+    if bump_type in {"major", "minor", "patch"}:
+        return bump_type
+
+    try:
+        old_major, old_minor, old_patch = parse_semver(old_version)
+        new_major, new_minor, new_patch = parse_semver(new_version)
+    except ValueError:
+        return "custom"
+
+    if new_major != old_major:
+        return "major"
+    if new_minor != old_minor:
+        return "minor"
+    if new_patch != old_patch:
+        return "patch"
+    return "no-change"
+
+
+def show_version_diff(
+    old_version: str, new_version: str, bump_type: Optional[str] = None
+) -> None:
     """Display a visual diff between old and new versions."""
     old_parts = old_version.split(".")
     new_parts = new_version.split(".")
@@ -572,9 +596,11 @@ def show_version_diff(old_version: str, new_version: str) -> None:
     old_colored = ".".join(old_colored_parts)
     new_colored = ".".join(new_colored_parts)
 
+    change_type = infer_change_type(old_version, new_version, bump_type)
+
     panel = Panel(
         f"[bold]{old_colored} → {new_colored}[/bold]",
-        title="[bold yellow]Version Change[/bold yellow]",
+        title=f"[bold yellow]Version Change ({change_type})[/bold yellow]",
         border_style="yellow",
         expand=False,
     )
@@ -1033,7 +1059,7 @@ def main():
             sys.exit(1)
 
         # Show version diff visualization
-        show_version_diff(current_version, new_version_str)
+        show_version_diff(current_version, new_version_str, args.bump)
 
         # Validate version progression
         validate_version_progression(current_version, new_version_str, args.bump)
