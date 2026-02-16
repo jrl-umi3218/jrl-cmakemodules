@@ -4,7 +4,7 @@
 
 [workspace]
 name = "jrl-cmakemodules"
-version = "1.1.2"
+version = "1.2.0"
 description = "jrl-cmakemodules"
 authors = ["Antoine Hoarau <703240+ahoarau@users.noreply.github.com>"]
 channels = ["conda-forge"]
