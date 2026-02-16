@@ -98,19 +98,46 @@ uv run --no-project release.py --update-version 1.2.3
 | `--output-format <text\\|json>` | Output format (default: text). |
 | `--confirm` | Auto-confirm actions without interactive prompts. |
 | `--list-files` | List all files that are currently checked/updated. |
+| `--git-commit [MESSAGE]` | Commit version changes. Optional custom message (use `{version}` placeholder). |
+| `--git-tag [NAME]` | Create a git tag. Optional custom tag name (use `{version}` placeholder). |
+| `--git-tag-message <MESSAGE>` | Custom git tag message. Use `{version}` as placeholder. |
 
 ### Git Integration
 
 The script can automatically commit changes and tag the release using the local git configuration.
 
-```bash
-# Bump patch version, commit, and tag
-uv run --no-project release.py --bump patch --git-commit --git-tag
-```
+#### Default Behavior
 
--   **Commit Message**: `chore: bump version to X.Y.Z`
--   **Tag Name**: `vX.Y.Z`
--   **Tag Message**: `Release version X.Y.Z`
+-   **Default Commit Message**: `chore: bump version to {version}` (e.g., `chore: bump version to 1.2.3`)
+-   **Default Tag Name**: `v{version}` (e.g., `v1.2.3`)
+-   **Default Tag Message**: `Release version {version}` (e.g., `Release version 1.2.3`)
+
+#### Examples
+
+```bash
+# Bump patch version, commit and tag with defaults
+# Commit: "chore: bump version to 1.0.1"
+# Tag: "v1.0.1" with message "Release version 1.0.1"
+uv run --no-project release.py --bump patch --git-commit --git-tag
+
+# Custom commit message
+# Commit: "release: version 1.0.1"
+uv run --no-project release.py --bump patch --git-commit "release: version {version}"
+
+# Custom tag name (without 'v' prefix)
+# Tag: "1.1.0" with default message "Release version 1.1.0"
+uv run --no-project release.py --bump minor --git-tag "{version}"
+
+# Custom tag name and message
+# Tag: "1.1.0" with message "Version 1.1.0"
+uv run --no-project release.py --bump minor --git-tag "{version}" --git-tag-message "Version {version}"
+
+# Only commit, no tag
+uv run --no-project release.py --bump patch --git-commit
+
+# Only tag, no commit
+uv run --no-project release.py --bump patch --git-tag
+```
 
 ## Supported File Patterns
 
@@ -697,9 +724,21 @@ def validate_version_progression(
 
 
 def git_commit_version(
-    root_dir: Path, version: str, files_to_commit: List[str], auto_confirm: bool
+    root_dir: Path,
+    version: str,
+    files_to_commit: List[str],
+    auto_confirm: bool,
+    custom_message: Optional[str] = None,
 ) -> bool:
-    """Commit version changes to git."""
+    """Commit version changes to git.
+
+    Args:
+        root_dir: Project root directory
+        version: Version being committed
+        files_to_commit: List of file paths to stage
+        auto_confirm: Whether to skip confirmation prompts
+        custom_message: Optional custom commit message (default: 'chore: bump version to {version}')
+    """
     try:
         repo = Repo(root_dir, search_parent_directories=True)
     except exc.InvalidGitRepositoryError:
@@ -712,7 +751,12 @@ def git_commit_version(
         console.print(f"[{STYLE_WARNING}]No changes to commit.[/{STYLE_WARNING}]")
         return False
 
-    commit_message = f"chore: bump version to {version}"
+    # Use custom message if provided, otherwise use default
+    if custom_message:
+        # Replace {version} placeholder if present
+        commit_message = custom_message.format(version=version)
+    else:
+        commit_message = f"chore: bump version to {version}"
 
     if not auto_confirm:
         confirmed = Confirm.ask(
@@ -775,8 +819,22 @@ def git_commit_version(
         return False
 
 
-def git_tag_version(root_dir: Path, version: str, auto_confirm: bool) -> bool:
-    """Create a git tag for the version."""
+def git_tag_version(
+    root_dir: Path,
+    version: str,
+    auto_confirm: bool,
+    custom_tag_name: Optional[str] = None,
+    custom_tag_message: Optional[str] = None,
+) -> bool:
+    """Create a git tag for the version.
+
+    Args:
+        root_dir: Project root directory
+        version: Version being tagged
+        auto_confirm: Whether to skip confirmation prompts
+        custom_tag_name: Optional custom tag name (default: 'v{version}')
+        custom_tag_message: Optional custom tag message (default: 'Release version {version}')
+    """
     try:
         repo = Repo(root_dir, search_parent_directories=True)
     except exc.InvalidGitRepositoryError:
@@ -785,8 +843,17 @@ def git_tag_version(root_dir: Path, version: str, auto_confirm: bool) -> bool:
         )
         return False
 
-    tag_name = f"v{version}"
-    tag_message = f"Release version {version}"
+    # Use custom tag name if provided, otherwise use default
+    if custom_tag_name:
+        tag_name = custom_tag_name.format(version=version)
+    else:
+        tag_name = f"v{version}"
+
+    # Use custom tag message if provided, otherwise use default
+    if custom_tag_message:
+        tag_message = custom_tag_message.format(version=version)
+    else:
+        tag_message = f"Release version {version}"
 
     # Check if tag already exists
     if tag_name in repo.tags:
@@ -1176,13 +1243,26 @@ def main():
     )
     parser.add_argument(
         "--git-commit",
-        action="store_true",
-        help="Commit version changes to git after updating.",
+        nargs="?",
+        const=True,
+        default=None,
+        metavar="MESSAGE",
+        help="Commit version changes to git. Optionally provide a custom commit message. Use {version} as placeholder. Default: 'chore: bump version to {version}'",
     )
     parser.add_argument(
         "--git-tag",
-        action="store_true",
-        help="Create a git tag for the new version.",
+        nargs="?",
+        const=True,
+        default=None,
+        metavar="NAME",
+        help="Create a git tag for the new version. Optionally provide a custom tag name. Use {version} as placeholder. Default: 'v{version}'",
+    )
+    parser.add_argument(
+        "--git-tag-message",
+        type=str,
+        default=None,
+        metavar="MESSAGE",
+        help="Custom git tag message. Use {version} as placeholder for version number. Default: 'Release version {version}'",
     )
     parser.add_argument(
         "--short",
@@ -1420,13 +1500,27 @@ def main():
             )
 
         # Git operations - only perform if explicitly requested
-        if args.git_commit:
+        if args.git_commit is not None:
+            # args.git_commit is True for default message, or a string for custom message
+            custom_message = None if args.git_commit is True else args.git_commit
             git_commit_version(
-                root_dir, target_version, updated_file_paths, args.confirm
+                root_dir,
+                target_version,
+                updated_file_paths,
+                args.confirm,
+                custom_message,
             )
 
-        if args.git_tag:
-            git_tag_version(root_dir, target_version, args.confirm)
+        if args.git_tag is not None:
+            # args.git_tag is True for default tag name, or a string for custom tag name
+            custom_tag_name = None if args.git_tag is True else args.git_tag
+            git_tag_version(
+                root_dir,
+                target_version,
+                args.confirm,
+                custom_tag_name,
+                args.git_tag_message,
+            )
 
 
 if __name__ == "__main__":
