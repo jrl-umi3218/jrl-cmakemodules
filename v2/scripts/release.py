@@ -133,9 +133,11 @@ import argparse
 import datetime
 import json
 import subprocess
+import shutil
+import tempfile
 from pathlib import Path
 from abc import ABC, abstractmethod
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Dict
 
 import tomlkit
 import cmake_parser
@@ -546,14 +548,23 @@ def bump_version(version: str, bump_type: str) -> str:
 def get_current_version(checks: List[VersionExtractor]) -> Optional[str]:
     """Get the current consensus version from all files."""
     versions_found = set()
+    errors = []
 
     for check in checks:
         if check.check_file_exists():
             try:
                 version = check.get_version()
                 versions_found.add(version)
-            except Exception:
-                pass
+            except Exception as e:
+                errors.append(f"{check.name}: {e}")
+
+    # Report parsing errors
+    if errors:
+        console.print(
+            f"[{STYLE_WARNING}]Warning: Failed to parse version from some files:[/{STYLE_WARNING}]"
+        )
+        for error in errors:
+            console.print(f"  [{STYLE_MUTED}]• {error}[/{STYLE_MUTED}]")
 
     if len(versions_found) == 1:
         return list(versions_found)[0]
@@ -812,21 +823,21 @@ def update_pixi_lock(
     root_dir: Path, target_version: str, dry_run: bool = False
 ) -> Optional[str]:
     """Update pixi.lock file by running 'pixi list'.
-    
+
     Returns the path to pixi.lock if updated, None otherwise.
     """
     pixi_lock_path = root_dir / "pixi.lock"
-    
+
     # Check if pixi.lock exists
     if not pixi_lock_path.exists():
         return None
-    
+
     if dry_run:
         console.print(
             f"[{STYLE_HIGHLIGHT}]Would run 'pixi list' to update pixi.lock[/{STYLE_HIGHLIGHT}]"
         )
         return None
-    
+
     # Run 'pixi list' to update the lock file
     # This is REQUIRED if pixi.lock exists
     try:
@@ -840,7 +851,7 @@ def update_pixi_lock(
             text=True,
             timeout=30,
         )
-        
+
         if result.returncode != 0:
             console.print(
                 f"[{STYLE_ERROR}]Error: 'pixi list' returned non-zero exit code: {result.returncode}[/{STYLE_ERROR}]"
@@ -853,16 +864,14 @@ def update_pixi_lock(
                 f"[{STYLE_ERROR}]Failed to update pixi.lock. Please ensure 'pixi' is installed.[/{STYLE_ERROR}]"
             )
             raise RuntimeError(f"'pixi list' failed with exit code {result.returncode}")
-            
+
     except subprocess.TimeoutExpired:
         console.print(
             f"[{STYLE_ERROR}]Error: 'pixi list' command timed out[/{STYLE_ERROR}]"
         )
         raise RuntimeError("'pixi list' command timed out after 30 seconds")
     except FileNotFoundError:
-        console.print(
-            f"[{STYLE_ERROR}]Error: 'pixi' command not found[/{STYLE_ERROR}]"
-        )
+        console.print(f"[{STYLE_ERROR}]Error: 'pixi' command not found[/{STYLE_ERROR}]")
         console.print(
             f"[{STYLE_ERROR}]pixi.lock exists but 'pixi' executable is not available.[/{STYLE_ERROR}]"
         )
@@ -875,12 +884,62 @@ def update_pixi_lock(
             f"[{STYLE_ERROR}]Error: Failed to run 'pixi list': {e}[/{STYLE_ERROR}]"
         )
         raise RuntimeError(f"Failed to run 'pixi list': {e}") from e
-    
+
     console.print(
         f"[{STYLE_SUCCESS}]✓ Updated pixi.lock via 'pixi list'[/{STYLE_SUCCESS}]"
     )
-    
+
     return str(pixi_lock_path)
+
+
+def create_backups(file_paths: List[Path]) -> Dict[Path, Path]:
+    """Create backup copies of files in a temporary directory.
+
+    Returns a mapping of original paths to backup paths.
+    """
+    backups = {}
+    temp_dir = Path(tempfile.mkdtemp(prefix="release_backup_"))
+
+    for file_path in file_paths:
+        if file_path.exists():
+            backup_path = temp_dir / file_path.name
+            shutil.copy2(file_path, backup_path)
+            backups[file_path] = backup_path
+
+    return backups
+
+
+def restore_backups(backups: Dict[Path, Path]) -> None:
+    """Restore files from backups and cleanup temporary directory."""
+    if not backups:
+        return
+
+    # Get temp directory from first backup
+    temp_dir = None
+    for original_path, backup_path in backups.items():
+        if backup_path.exists():
+            shutil.copy2(backup_path, original_path)
+            temp_dir = backup_path.parent
+
+    # Clean up temp directory
+    if temp_dir and temp_dir.exists():
+        shutil.rmtree(temp_dir)
+
+
+def cleanup_backups(backups: Dict[Path, Path]) -> None:
+    """Remove backup files without restoring."""
+    if not backups:
+        return
+
+    # Get temp directory from first backup
+    temp_dir = None
+    for backup_path in backups.values():
+        temp_dir = backup_path.parent
+        break
+
+    # Clean up temp directory
+    if temp_dir and temp_dir.exists():
+        shutil.rmtree(temp_dir)
 
 
 def list_version_files(checks: List[VersionExtractor]) -> None:
@@ -902,6 +961,160 @@ def list_version_files(checks: List[VersionExtractor]) -> None:
 
     console.print(table)
     sys.exit(0)
+
+
+def handle_check_version(checks: List[VersionExtractor], args) -> int:
+    """Handle the --check-version command.
+
+    Returns the exit code.
+    """
+    results = []
+    versions_found = set()
+    errors = False
+
+    if not args.short:
+        console.print(
+            f"[{STYLE_INFO}]Checking versions in {args.root}...[/{STYLE_INFO}]"
+        )
+
+    for check in checks:
+        result = {
+            "file": check.name,
+            "version": None,
+            "status": "Unknown",
+            "message": "",
+        }
+
+        if not check.check_file_exists():
+            result["status"] = "Missing"
+            result["message"] = "File not found"
+        else:
+            try:
+                version = check.get_version()
+                result["version"] = version
+                result["status"] = "Found"
+                versions_found.add(version)
+            except Exception as e:
+                result["status"] = "Error"
+                result["message"] = str(e)
+                errors = True
+
+        results.append(result)
+
+    consensus_version = None
+    if len(versions_found) == 1:
+        consensus_version = list(versions_found)[0]
+    elif len(versions_found) > 1:
+        errors = True
+        consensus_version = "MISMATCH"
+
+    if args.output_format == "json":
+        out_payload = {
+            "consensus_version": consensus_version,
+            "files": results,
+            "consistent": not errors and len(versions_found) == 1,
+        }
+        print(json.dumps(out_payload, indent=2))
+        return 1 if errors else 0
+
+    # Standard Rich table output
+    table = Table(title="Version Check Summary", box=box.ROUNDED)
+    table.add_column("File", style="cyan")
+    table.add_column("Version", style="magenta")
+    table.add_column("Status", justify="center")
+    table.add_column("Details")
+
+    for res in results:
+        status_style = res["status"]
+        if res["status"] == "Found":
+            status_style = f"[{STYLE_SUCCESS}]Found[/{STYLE_SUCCESS}]"
+        elif res["status"] == "Missing":
+            status_style = f"[{STYLE_WARNING}]Missing[/{STYLE_WARNING}]"
+        elif res["status"] == "Error":
+            status_style = f"[{STYLE_ERROR}]Error[/{STYLE_ERROR}]"
+
+        version_display = res["version"] if res["version"] else "-"
+        if res["version"]:
+            if (
+                consensus_version
+                and consensus_version != "MISMATCH"
+                and res["version"] == consensus_version
+            ):
+                version_display = f"[{STYLE_SUCCESS}]{res['version']}[/{STYLE_SUCCESS}]"
+            elif consensus_version == "MISMATCH":
+                version_display = f"[{STYLE_WARNING}]{res['version']}[/{STYLE_WARNING}]"
+
+        table.add_row(res["file"], version_display, status_style, res["message"])
+
+    if not args.short:
+        console.print(table)
+
+    if args.short and consensus_version and consensus_version != "MISMATCH":
+        print(consensus_version)
+
+    if errors:
+        if len(versions_found) > 1:
+            console.print(
+                f"\n[{STYLE_ERROR_STRONG}]FAILURE:[/{STYLE_ERROR_STRONG}] Found conflicting versions: {', '.join(sorted(versions_found))}"
+            )
+        else:
+            console.print(
+                f"\n[{STYLE_ERROR_STRONG}]FAILURE:[/{STYLE_ERROR_STRONG}] Errors encountered (parsing errors)."
+            )
+        return 1
+    elif not versions_found:
+        console.print(
+            f"\n[{STYLE_ERROR_STRONG}]FAILURE:[/{STYLE_ERROR_STRONG}] No version files found in {args.root}."
+        )
+        return 1
+    else:
+        if not args.short:
+            console.print(
+                f"\n[{STYLE_SUCCESS_STRONG}]SUCCESS:[/{STYLE_SUCCESS_STRONG}] All files match version [bold]{consensus_version}[/bold]."
+            )
+        return 0
+
+
+def perform_version_updates(
+    checks: List[VersionExtractor],
+    target_version: str,
+    dry_run: bool = False,
+) -> Tuple[List[str], List[str], bool]:
+    """Apply version updates to all files.
+
+    Returns: (updated_files, updated_file_paths, failed)
+    """
+    updated_files = []
+    updated_file_paths = []
+    failed = False
+
+    for check in checks:
+        if check.check_file_exists():
+            try:
+                if dry_run:
+                    curr = check.get_version()
+                    console.print(
+                        f"[{STYLE_HIGHLIGHT}]Would update[/{STYLE_HIGHLIGHT}] {check.name}: [{STYLE_OLD_VALUE}]{curr}[/{STYLE_OLD_VALUE}] → [{STYLE_NEW_VALUE}]{target_version}[/{STYLE_NEW_VALUE}]"
+                    )
+                else:
+                    check.update_version(target_version)
+                    console.print(
+                        f"[{STYLE_SUCCESS}]Updated[/{STYLE_SUCCESS}] {check.name}"
+                    )
+                updated_files.append(check.name)
+                updated_file_paths.append(str(check.file_path))
+            except Exception as e:
+                console.print(
+                    f"[{STYLE_ERROR}]Failed to update {check.name}: {e}[/{STYLE_ERROR}]"
+                )
+                if not dry_run:
+                    failed = True
+        else:
+            console.print(
+                f"[{STYLE_WARNING}]Skipping[/{STYLE_WARNING}] {check.name} (not found)"
+            )
+
+    return updated_files, updated_file_paths, failed
 
 
 class RichHelpAction(argparse.Action):
@@ -1058,115 +1271,7 @@ def main():
         sys.exit(0)
 
     if args.check_version:
-        results = []
-        versions_found = set()
-        errors = False
-
-        if not args.short:
-            console.print(
-                f"[{STYLE_INFO}]Checking versions in {root_dir}...[/{STYLE_INFO}]"
-            )
-
-        for check in checks:
-            result = {
-                "file": check.name,
-                "version": None,
-                "status": "Unknown",
-                "message": "",
-            }
-
-            if not check.check_file_exists():
-                result["status"] = "Missing"
-                result["message"] = "File not found"
-            else:
-                try:
-                    version = check.get_version()
-                    result["version"] = version
-                    result["status"] = "Found"
-                    versions_found.add(version)
-                except Exception as e:
-                    result["status"] = "Error"
-                    result["message"] = str(e)
-                    errors = True
-
-            results.append(result)
-
-        consensus_version = None
-        if len(versions_found) == 1:
-            consensus_version = list(versions_found)[0]
-        elif len(versions_found) > 1:
-            errors = True
-            consensus_version = "MISMATCH"
-
-        if args.output_format == "json":
-            out_payload = {
-                "consensus_version": consensus_version,
-                "files": results,
-                "consistent": not errors and len(versions_found) == 1,
-            }
-            print(json.dumps(out_payload, indent=2))
-            sys.exit(1 if errors else 0)
-
-        # Standard Rich table output
-        table = Table(title="Version Check Summary", box=box.ROUNDED)
-        table.add_column("File", style="cyan")
-        table.add_column("Version", style="magenta")
-        table.add_column("Status", justify="center")
-        table.add_column("Details")
-
-        for res in results:
-            status_style = res["status"]
-            if res["status"] == "Found":
-                status_style = f"[{STYLE_SUCCESS}]Found[/{STYLE_SUCCESS}]"
-            elif res["status"] == "Missing":
-                status_style = f"[{STYLE_WARNING}]Missing[/{STYLE_WARNING}]"
-            elif res["status"] == "Error":
-                status_style = f"[{STYLE_ERROR}]Error[/{STYLE_ERROR}]"
-
-            version_display = res["version"] if res["version"] else "-"
-            if res["version"]:
-                if (
-                    consensus_version
-                    and consensus_version != "MISMATCH"
-                    and res["version"] == consensus_version
-                ):
-                    version_display = (
-                        f"[{STYLE_SUCCESS}]{res['version']}[/{STYLE_SUCCESS}]"
-                    )
-                elif consensus_version == "MISMATCH":
-                    version_display = (
-                        f"[{STYLE_WARNING}]{res['version']}[/{STYLE_WARNING}]"
-                    )
-
-            table.add_row(res["file"], version_display, status_style, res["message"])
-
-        if not args.short:
-            console.print(table)
-
-        if args.short and consensus_version and consensus_version != "MISMATCH":
-            print(consensus_version)
-
-        if errors:
-            if len(versions_found) > 1:
-                console.print(
-                    f"\n[{STYLE_ERROR_STRONG}]FAILURE:[/{STYLE_ERROR_STRONG}] Found conflicting versions: {', '.join(sorted(versions_found))}"
-                )
-            else:
-                console.print(
-                    f"\n[{STYLE_ERROR_STRONG}]FAILURE:[/{STYLE_ERROR_STRONG}] Errors encountered (parsing errors)."
-                )
-            sys.exit(1)
-        elif not versions_found:
-            console.print(
-                f"\n[{STYLE_ERROR_STRONG}]FAILURE:[/{STYLE_ERROR_STRONG}] No version files found in {root_dir}."
-            )
-            sys.exit(1)
-        else:
-            if not args.short:
-                console.print(
-                    f"\n[{STYLE_SUCCESS_STRONG}]SUCCESS:[/{STYLE_SUCCESS_STRONG}] All files match version [bold]{consensus_version}[/bold]."
-                )
-            sys.exit(0)
+        sys.exit(handle_check_version(checks, args))
 
     # BRANCH: update-version or bump
     current_version = None
@@ -1226,45 +1331,70 @@ def main():
         sys.exit(1)
     target_version: str = new_version_str
 
-    # APPLY UPDATES
-    updated_files = []
-    updated_file_paths = []
-    failed = False
+    # APPLY UPDATES with rollback support
+    backups = {}
+    if not args.dry_run:
+        # Create backups before updating
+        file_paths_to_backup = [
+            check.file_path for check in checks if check.check_file_exists()
+        ]
+        backups = create_backups(file_paths_to_backup)
+        console.print(
+            f"[{STYLE_MUTED}]Created backups for {len(backups)} files[/{STYLE_MUTED}]"
+        )
 
-    for check in checks:
-        if check.check_file_exists():
-            try:
-                if args.dry_run:
-                    curr = check.get_version()
-                    console.print(
-                        f"[{STYLE_HIGHLIGHT}]Would update[/{STYLE_HIGHLIGHT}] {check.name}: [{STYLE_OLD_VALUE}]{curr}[/{STYLE_OLD_VALUE}] → [{STYLE_NEW_VALUE}]{target_version}[/{STYLE_NEW_VALUE}]"
-                    )
-                else:
-                    check.update_version(target_version)
-                    console.print(
-                        f"[{STYLE_SUCCESS}]Updated[/{STYLE_SUCCESS}] {check.name}"
-                    )
-                updated_files.append(check.name)
-                updated_file_paths.append(str(check.file_path))
-            except Exception as e:
+    try:
+        updated_files, updated_file_paths, failed = perform_version_updates(
+            checks, target_version, args.dry_run
+        )
+
+        if failed:
+            if backups:
                 console.print(
-                    f"[{STYLE_ERROR}]Failed to update {check.name}: {e}[/{STYLE_ERROR}]"
+                    f"[{STYLE_WARNING}]Restoring files from backup due to failures...[/{STYLE_WARNING}]"
                 )
-                if not args.dry_run:
-                    failed = True
-        else:
+                restore_backups(backups)
+                console.print(
+                    f"[{STYLE_SUCCESS}]Files restored from backup[/{STYLE_SUCCESS}]"
+                )
+            sys.exit(1)
+
+        # Update pixi.lock if present - wrap in try/except
+        try:
+            pixi_lock_path = update_pixi_lock(root_dir, target_version, args.dry_run)
+            if pixi_lock_path:
+                updated_files.append("pixi.lock")
+                updated_file_paths.append(pixi_lock_path)
+        except RuntimeError as e:
+            # Pixi update failed - restore backups
             console.print(
-                f"[{STYLE_WARNING}]Skipping[/{STYLE_WARNING}] {check.name} (not found)"
+                f"[{STYLE_ERROR}]Pixi lock update failed: {e}[/{STYLE_ERROR}]"
             )
+            if backups:
+                console.print(
+                    f"[{STYLE_WARNING}]Restoring files from backup...[/{STYLE_WARNING}]"
+                )
+                restore_backups(backups)
+                console.print(
+                    f"[{STYLE_SUCCESS}]Files restored from backup[/{STYLE_SUCCESS}]"
+                )
+            sys.exit(1)
 
-    if failed:
-        sys.exit(1)
-
-    # Update pixi.lock if present
-    pixi_lock_path = update_pixi_lock(root_dir, target_version, args.dry_run)
-    if pixi_lock_path:
-        updated_files.append("pixi.lock")
-        updated_file_paths.append(pixi_lock_path)
+        # Success - clean up backups
+        if backups:
+            cleanup_backups(backups)
+    except Exception as e:
+        # Unexpected error - restore backups
+        console.print(f"[{STYLE_ERROR}]Unexpected error: {e}[/{STYLE_ERROR}]")
+        if backups:
+            console.print(
+                f"[{STYLE_WARNING}]Restoring files from backup...[/{STYLE_WARNING}]"
+            )
+            restore_backups(backups)
+            console.print(
+                f"[{STYLE_SUCCESS}]Files restored from backup[/{STYLE_SUCCESS}]"
+            )
+        raise
 
     if args.output_format == "json":
         res_json = {
@@ -1289,16 +1419,14 @@ def main():
                 f"\n[{STYLE_SUCCESS_STRONG}]SUCCESS:[/{STYLE_SUCCESS_STRONG}] Version updated to {target_version}."
             )
 
-        # Git operations
-        committed = False
-        if args.git_commit or (not args.confirm and not args.dry_run):
-            committed = git_commit_version(
+        # Git operations - only perform if explicitly requested
+        if args.git_commit:
+            git_commit_version(
                 root_dir, target_version, updated_file_paths, args.confirm
             )
 
-        if args.git_tag or (not args.confirm and not args.dry_run):
-            if args.git_tag or committed:
-                git_tag_version(root_dir, target_version, args.confirm)
+        if args.git_tag:
+            git_tag_version(root_dir, target_version, args.confirm)
 
 
 if __name__ == "__main__":
