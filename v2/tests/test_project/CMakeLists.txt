@@ -19,10 +19,10 @@ jrl_option(TEST_PROJECT_BUILD_TESTS "Build tests" ON)
 
 # Find dependencies
 if(TEST_PROJECT_BUILD_PYTHON_BINDINGS)
-    jrl_find_python(3.8 REQUIRED COMPONENTS Interpreter Development.Module)
-    jrl_find_nanobind(2.4.0 CONFIG REQUIRED)
+    jrl_find_python(3.10 REQUIRED COMPONENTS Interpreter Development.Module)
+    jrl_find_nanobind(2.5.0 CONFIG REQUIRED)
 
-    jrl_find_python(3.8 REQUIRED COMPONENTS Development.Module NumPy)
+    jrl_find_python(3.10 REQUIRED COMPONENTS Development.Module NumPy)
     jrl_find_package(Boost CONFIG REQUIRED COMPONENTS python)
 endif()
 
