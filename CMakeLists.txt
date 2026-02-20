@@ -210,3 +210,8 @@ jrl_print_banner()
     ]]
   CMAKE_FILES_INSTALL_DIR ${JRL_CMAKE_FILES_INSTALL_DIR}
 )
+
+jrl_generate_ros2_package_files(
+  INSTALL_PYTHON_PACKAGE_FILES OFF
+  DESTINATION ${JRL_CMAKE_FILES_INSTALL_DIR}
+)
