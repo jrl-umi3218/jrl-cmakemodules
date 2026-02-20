@@ -1,0 +1,42 @@
+name: V2 - Pixi
+
+on: [push, pull_request]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pixi-ci:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+          - os: macos-15-intel
+          - os: macos-26
+          - os: windows-2025
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install Pixi
+        uses: prefix-dev/setup-pixi@v0.9.3
+        with:
+          pixi-version: latest
+
+      - name: Configure Pixi environment
+        run: pixi install
+
+      - name: Configure project
+        run: pixi run configure
+
+      - name: Build project
+        run: pixi run build
+
+      - name: Run tests
+        run: pixi run test
+
+      - name: Run tests (pixi build)
+        run: pixi run test-packaging-pixi-build

@@ -1,0 +1,111 @@
+# Copyright 2025-2026 Inria
+# Generated and temporary file - do not edit
+
+cmake_minimum_required(VERSION 3.22)
+
+include("${CMAKE_CURRENT_LIST_DIR}/imported-libraries.cmake")
+
+# Check if the required variables are defined
+if(NOT DEFINED imported_libraries)
+    message(FATAL_ERROR "imported_libraries variable is not defined in @IMPORTED_LIBRARIES_TO_EXPORT_FILE@.")
+endif()
+
+if(NOT DEFINED package_dependencies_json_content)
+    message(FATAL_ERROR "package_dependencies_json_content variable is not defined in @IMPORTED_LIBRARIES_TO_EXPORT_FILE@.")
+endif()
+
+# Parse the 'package_dependencies_json_content' JSON content
+# NOTE: 'package_dependencies_json_content' can be defined but empty
+# if not call to jrl_find_package() has been made in the project.
+if(package_dependencies_json_content)
+    string(JSON package_dependencies GET "${package_dependencies_json_content}" "package_dependencies")
+    string(JSON num_deps LENGTH "${package_dependencies}")
+    math(EXPR max_idx "${num_deps} - 1")
+endif()
+
+set(fd "")
+foreach(imported_lib IN LISTS imported_libraries)
+    if(NOT imported_lib)
+        continue()
+    endif()
+
+    message(DEBUG "       Processing imported library: ${imported_lib}")
+
+    # Find the corresponding package dependency JSON info
+    set(package_json "")
+    foreach(idx RANGE ${max_idx})
+        string(JSON dep_i_json GET "${package_dependencies}" ${idx})
+        string(JSON package_targets GET "${dep_i_json}" "package_targets")
+        if(${imported_lib} IN_LIST package_targets)
+            set(package_json ${dep_i_json})
+            break()
+        endif()
+    endforeach()
+
+    # TODO: in order to handle generator expressions, the imported libraries variable
+    # Also contains buildsystems targets. So we should not issue a warning here.
+    # Later, we should filter them out before processing and displaying a warning if the info is missing.
+    if(NOT package_json)
+        message(DEBUG "Could not find package dependency information for imported target: ${imported_lib}")
+        continue()
+    endif()
+
+    # Parse the package JSON info
+    string(JSON package_name GET "${package_json}" "package_name")
+    string(JSON find_package_args GET "${package_json}" "find_package_args")
+    string(JSON package_targets GET "${package_json}" "find_package_args")
+    string(JSON module_file GET "${package_json}" "module_file")
+
+    if(NOT fd)
+        set(fd "include(CMakeFindDependencyMacro)\n\n")
+    endif()
+
+    # Handling if package is using a custom module
+    if(module_file)
+        string(APPEND fd "list(APPEND CMAKE_MODULE_PATH \${CMAKE_CURRENT_LIST_DIR}/find-modules/${package_name})\n\n")
+
+        # New Method: install the files directly
+        if(IS_ABSOLUTE @INSTALL_DESTINATION@)
+            file(INSTALL DESTINATION @INSTALL_DESTINATION@/find-modules/${package_name} TYPE FILE FILES ${module_file})
+        else()
+            file(INSTALL DESTINATION ${CMAKE_INSTALL_PREFIX}/@INSTALL_DESTINATION@/find-modules/${package_name} TYPE FILE FILES ${module_file})
+        endif()
+    endif()
+
+    string(REPLACE ";" " " find_package_args "${find_package_args}")
+
+    # Handling find_dependency logic
+    if(NOT package_targets)
+        string(APPEND fd "find_dependency(${find_package_args})\n")
+    else()
+        string(APPEND fd "if(NOT TARGET ${imported_lib})\n")
+        string(APPEND fd "    message(DEBUG \"            ==> Executing find_dependency(${find_package_args})\")\n")
+        string(APPEND fd "    find_dependency(${find_package_args})\n")
+        string(APPEND fd "else()\n")
+        string(APPEND fd "    message(DEBUG \"            ==> Target ${imported_lib} already exists, skipping find_dependency(${find_package_args})\")\n")
+        string(APPEND fd "endif()\n\n")
+    endif()
+endforeach()
+
+string(PREPEND fd "# Generated file - do not edit\n")
+
+# Read existing file and compare
+if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/dependencies.cmake)
+    file(READ ${CMAKE_CURRENT_LIST_DIR}/dependencies.cmake existing_fd)
+else()
+    set(existing_fd "")
+endif()
+
+if(fd STREQUAL existing_fd)
+    message(DEBUG "       Same content generated for ${CMAKE_CURRENT_LIST_DIR}/dependencies.cmake, not overwriting.")
+else()
+    message(DEBUG "       Writing ${CMAKE_CURRENT_LIST_DIR}/dependencies.cmake")
+    file(WRITE ${CMAKE_CURRENT_LIST_DIR}/dependencies.cmake "${fd}")
+endif()
+
+# New Method: install the files directly
+if(IS_ABSOLUTE @INSTALL_DESTINATION@)
+    file(INSTALL DESTINATION @INSTALL_DESTINATION@ TYPE FILE FILES ${CMAKE_CURRENT_LIST_DIR}/dependencies.cmake)
+else()
+    file(INSTALL DESTINATION ${CMAKE_INSTALL_PREFIX}/@INSTALL_DESTINATION@ TYPE FILE FILES ${CMAKE_CURRENT_LIST_DIR}/dependencies.cmake)
+endif()
