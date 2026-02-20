@@ -13,11 +13,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-22.04
           - os: ubuntu-24.04
           - os: macos-15-intel
           - os: macos-26
-          - os: windows-2022
           - os: windows-2025
 
     steps:
