@@ -1680,7 +1680,7 @@ function(jrl_target_generate_config_header target_name visibility)
 
     _jrl_templates_dir(templates_dir)
     _jrl_target_generate_header(${target_name} ${visibility}
-        ${ARGN}
+        ${arg_UNPARSED_ARGUMENTS}
         TEMPLATE_FILE ${templates_dir}/config.hpp.in
         TEMPLATE_VARIABLES ${template_variables}
     )
