@@ -1,4 +1,4 @@
-include(cmake/pkg-config.cmake)
+include(../pkg-config.cmake)
 
 # cmake -P
 macro(EXPECT_STREQUAL _lhs _rhs)
