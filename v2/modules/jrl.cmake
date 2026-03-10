@@ -3245,22 +3245,27 @@ function(jrl_python_compile_all)
 
     if(arg_VERBOSE)
         message(STATUS "Compiling all Python files in directory '${arg_DIRECTORY}'")
-        # If quiet is False or 0 (the default), the filenames and other information are printed to standard out.
-        # Set to 1, only errors are printed. Set to 2, all output is suppressed.
-        set(quiet_flag "0")
+        set(quiet_flag "")
     else()
-        set(quiet_flag "1")
+        # Do not print the list of files compiled. If passed once, error messages will still be printed.
+        # If passed twice (-qq), all output is suppressed.
+        set(quiet_flag "-q")
+    endif()
+
+    set(cmd "${python} -m compileall ${arg_DIRECTORY} -j 0 ${quiet_flag}")
+
+    if(arg_VERBOSE)
+        message(DEBUG "Running command: '${cmd}'")
     endif()
 
     execute_process(
-        COMMAND
-            ${python} -c
-            "import compileall; compileall.compile_dir(r'${arg_DIRECTORY}', workers=0, quiet=${quiet_flag})"
+        COMMAND ${cmd}
         RESULT_VARIABLE result
         ERROR_VARIABLE error
         OUTPUT_STRIP_TRAILING_WHITESPACE
         WORKING_DIRECTORY ${arg_DIRECTORY}
     )
+
     if(error)
         message(
             FATAL_ERROR
