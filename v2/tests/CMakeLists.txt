@@ -1,15 +1,24 @@
 # gersemi: off
+
+# 1. Install the project
 add_test(
-    NAME ${PROJECT_NAME}-install
+    NAME jrl-cmakemodules-install
     COMMAND ${CMAKE_CTEST_COMMAND}
         --build-and-test    "${PROJECT_SOURCE_DIR}"
-                            "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-build"
+                            "${CMAKE_CURRENT_BINARY_DIR}/jrl-cmakemodules-build"
         --build-config      "Release"
         --build-generator   "${CMAKE_GENERATOR}"
         --build-target      install
-        --build-options     "-DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-install"
+        --build-options     "-DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}/jrl-cmakemodules-install"
 )
 
+# 2. Check that the jrl.cmake is present
+add_test(NAME "Check jrl.cmake"
+    COMMAND ${CMAKE_COMMAND} -E cat "${CMAKE_CURRENT_BINARY_DIR}/jrl-cmakemodules-install/share/cmake/jrl-cmakemodules/v2/modules/jrl.cmake"
+)
+set_tests_properties("Check jrl.cmake" PROPERTIES DEPENDS jrl-cmakemodules-install)
+
+# 3. Run the tests with the local test projects
 function(add_cmake_test dir)
     cmake_parse_arguments(arg "" "" "EXTRA_OPTIONS" ${ARGN})
     string(SHA256 hash "${dir};${arg_EXTRA_OPTIONS}")
@@ -25,9 +34,9 @@ function(add_cmake_test dir)
             --build-generator   "${CMAKE_GENERATOR}"
             --build-target      install
             --build-options     "-DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}/${dir}/${test_id}/install"
-                                "-DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-install"
+                                "-DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_BINARY_DIR}/jrl-cmakemodules-install"
     )
-    set_tests_properties("${test_name}" PROPERTIES DEPENDS ${PROJECT_NAME}-install)
+    set_tests_properties("${test_name}" PROPERTIES DEPENDS jrl-cmakemodules-install)
 endfunction()
 # gersemi: on
 
