@@ -94,7 +94,7 @@ install(
     v2/modules
     v2/templates
     v2/scripts
-  DESTINATION ${JRL_CMAKE_FILES_INSTALL_DIR}
+  DESTINATION ${JRL_CMAKE_FILES_INSTALL_DIR}/v2
   PATTERN ".ruff_cache" EXCLUDE
   PATTERN "__pycache__" EXCLUDE
   PATTERN ".pytest_cache" EXCLUDE
@@ -205,7 +205,7 @@ jrl_export_package(
     ${CMAKE_CURRENT_SOURCE_DIR}/v2/templates/config-basic.cmake.in
   PACKAGE_CONFIG_EXTRA_CONTENT
     [[
-include("${CMAKE_CURRENT_LIST_DIR}/modules/jrl.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/v2/modules/jrl.cmake")
 jrl_print_banner()
     ]]
   CMAKE_FILES_INSTALL_DIR ${JRL_CMAKE_FILES_INSTALL_DIR}
