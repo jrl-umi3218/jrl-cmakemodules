@@ -6,3 +6,4 @@ build*/
 install*/
 .DS_Store
 .ruff_cache/
+*.conda
