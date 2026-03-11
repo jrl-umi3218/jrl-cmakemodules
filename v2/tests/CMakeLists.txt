@@ -40,6 +40,9 @@ function(add_cmake_test dir)
 endfunction()
 # gersemi: on
 
+add_cmake_test(packaging/find_package_v1)
+add_cmake_test(packaging/find_package_v2)
+
 add_cmake_test(test_project)
 add_cmake_test(test_project EXTRA_OPTIONS "--build-noclean")
 add_cmake_test(test_project EXTRA_OPTIONS "--build-noclean" "--build-two-config")
