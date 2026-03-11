@@ -63,6 +63,7 @@ endif()
 
 # Add a dummy library with a useful INTERFACE_INCLUDE_DIRECTORIES
 add_library(jrl-cmakemodules INTERFACE)
+add_library(jrl-cmakemodules::jrl-cmakemodules ALIAS jrl-cmakemodules)
 target_include_directories(
   jrl-cmakemodules
   INTERFACE $<INSTALL_INTERFACE:${JRL_CMAKE_FILES_INSTALL_DIR}>
@@ -200,6 +201,7 @@ install(
   DESTINATION ${JRL_CMAKE_FILES_INSTALL_DIR}
 )
 
+jrl_add_export_component(NAME jrl-cmakemodules TARGETS jrl-cmakemodules)
 jrl_export_package(
   PACKAGE_CONFIG_TEMPLATE
     ${CMAKE_CURRENT_SOURCE_DIR}/v2/templates/config-basic.cmake.in
