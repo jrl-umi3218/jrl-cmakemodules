@@ -203,8 +203,6 @@ install(
 
 jrl_add_export_component(NAME jrl-cmakemodules TARGETS jrl-cmakemodules)
 jrl_export_package(
-  PACKAGE_CONFIG_TEMPLATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/v2/templates/config-basic.cmake.in
   PACKAGE_CONFIG_EXTRA_CONTENT
     [[
 include("${CMAKE_CURRENT_LIST_DIR}/v2/modules/jrl.cmake")
