@@ -918,6 +918,16 @@ jrl_configure_default_install_dirs()
 ```
 #]============================================================================]
 function(jrl_configure_default_install_dirs)
+    # Prevent the following warning on pure-cmake projects (i.e. defined with LANGUAGES NONE, like jrl-cmakemodules):
+    # "Unable to determine default CMAKE_INSTALL_LIBDIR directory because no target architecture is known.
+    # Please enable at least one language before including GNUInstallDirs"
+    # ref: https://github.com/Kitware/CMake/blob/v4.2.3/Modules/GNUInstallDirs.cmake#L434C8-L435C75
+    # issue: https://gitlab.kitware.com/cmake/cmake/-/issues/23461
+
+    if(NOT DEFINED CMAKE_SIZEOF_VOID_P)
+        set(CMAKE_SIZEOF_VOID_P 0)
+    endif()
+
     include(GNUInstallDirs)
 endfunction()
 
