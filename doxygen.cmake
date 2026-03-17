@@ -652,7 +652,7 @@ macro(_SETUP_PROJECT_DOCUMENTATION)
         )
       endif(EXISTS ${PROJECT_SOURCE_DIR}/doc/pictures)
       # If DOXYGEN_GENERATE_XML option is set to YES", install doxygen-xml directory
-      if (DOXYGEN_GENERATE_XML STREQUAL "YES")
+      if(DOXYGEN_GENERATE_XML STREQUAL "YES")
         install(
           DIRECTORY ${PROJECT_BINARY_DIR}/doc/${DOXYGEN_XML_OUTPUT}
           DESTINATION ${CMAKE_INSTALL_FULL_DOCDIR}
