@@ -100,5 +100,6 @@ add_cmake_test(NAME packaging/fetchcontent)
 
 add_subdirectory(modules)
 
+add_subdirectory(MinimalProj)
 add_subdirectory(multitargets)
 add_subdirectory(multicomp)
