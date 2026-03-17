@@ -33,7 +33,7 @@ jrl_configure_defaults()
 # Here we choose <install_prefix>/share/cmake/<project>
 set(
   JRL_CMAKE_FILES_INSTALL_DIR
-  ${CMAKE_INSTALL_DATAROOTDIR}/cmake/${PROJECT_NAME}
+  ${CMAKE_INSTALL_DATAROOTDIR}/cmake/jrl-cmakemodules
 )
 
 option(

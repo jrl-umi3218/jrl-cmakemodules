@@ -1,4 +1,13 @@
 cmake_minimum_required(VERSION 3.22)
+message(
+    "
+
+CMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}
+
+
+"
+)
 
 set(PROJECT_NAME jrl-cmakemodules-find-package-test-v1)
 set(PROJECT_DESCRIPTION "A project description")
