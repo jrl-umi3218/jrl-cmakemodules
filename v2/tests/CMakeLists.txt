@@ -56,7 +56,7 @@ function(add_cmake_test)
             --build-generator   "${CMAKE_GENERATOR}"
             --build-target      "${build_target}"
             --build-options     "${build_options}"
-                                "${extra_build_options}"
+                                ${extra_build_options}
     )
 
     if(arg_DEPENDS)
