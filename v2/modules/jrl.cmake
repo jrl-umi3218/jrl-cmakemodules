@@ -1801,7 +1801,7 @@ jrl_export_dependency(
 )
 # If you `target_link_libraries(my_target PUBLIC MyLib::MyLib)`, then jrl_export_package() will
 # know that MyLib is a dependency of your package, and add the following lines to the generated
-# `<project_name>-config.cmake` file:
+# `<project_name>Config.cmake` file:
 
 if(NOT TARGET MyLib::MyLib)
     find_dependency(MyLib REQUIRED)
@@ -2523,8 +2523,8 @@ jrl_export_package(
 ### Description
   Export the CMake package with all its components (targets, headers, package modules, etc.)
   Generates and installs CMake package configuration files:
-   - <INSTALL_DIR>/<package>/<package>-config.cmake
-   - <INSTALL_DIR>/<package>/<package>-config-version.cmake
+   - <INSTALL_DIR>/<package>/<package>Config.cmake
+   - <INSTALL_DIR>/<package>/<package>ConfigVersion.cmake
    - <INSTALL_DIR>/<package>/<package>/<componentA>/targets.cmake
    - <INSTALL_DIR>/<package>/<package>/<componentA>/dependencies.cmake
    - <INSTALL_DIR>/<package>/<package>/<componentB>/targets.cmake
@@ -2592,9 +2592,9 @@ function(jrl_export_package)
     set(GEN_DIR ${CMAKE_CURRENT_BINARY_DIR}/generated/cmake/${PROJECT_NAME})
     set(PACKAGE_NAME ${PROJECT_NAME})
     set(PACKAGE_NAMESPACE "${PACKAGE_NAME}::")
-    set(PACKAGE_CONFIG_FILENAME ${PACKAGE_NAME}-config.cmake)
+    set(PACKAGE_CONFIG_FILENAME ${PACKAGE_NAME}Config.cmake)
     set(PACKAGE_VERSION ${PROJECT_VERSION})
-    set(PACKAGE_VERSION_FILENAME ${PACKAGE_NAME}-config-version.cmake) # Note: This needs to be config-version.cmake or ConfigVersion.cmake to work.
+    set(PACKAGE_VERSION_FILENAME ${PACKAGE_NAME}ConfigVersion.cmake) # Note: This needs to be config-version.cmake or ConfigVersion.cmake to work.
     set(PACKAGE_VERSION_COMPATIBILITY AnyNewerVersion)
     set(PACKAGE_VERSION_ARCH_INDEPENDENT "")
     set(NO_SET_AND_CHECK_MACRO "NO_SET_AND_CHECK_MACRO")
@@ -2618,7 +2618,7 @@ function(jrl_export_package)
         )
     endif()
 
-    # <package>-config.cmake
+    # <package>Config.cmake
     set(JRL_PACKAGE_CONFIG_EXTRA_CONTENT ${arg_PACKAGE_CONFIG_EXTRA_CONTENT})
     set(JRL_PROJECT_COMPONENTS ${declared_components})
     configure_package_config_file(
@@ -2630,7 +2630,7 @@ function(jrl_export_package)
     )
     install(FILES ${GEN_DIR}/${PACKAGE_CONFIG_FILENAME} DESTINATION ${cmake_files_install_dir})
 
-    # <package>-config-version.cmake
+    # <package>ConfigVersion.cmake
     write_basic_package_version_file(
         ${GEN_DIR}/${PACKAGE_VERSION_FILENAME}
         VERSION ${PACKAGE_VERSION}
