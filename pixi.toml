@@ -42,13 +42,13 @@ clear = { cmd = "rm -rf build" }
 # ============================================================================
 
 [feature.test.dependencies]
-cxx-compiler = ">=1.11.0,<2"
-ccache = ">=4.12.3,<5"
+cxx-compiler = ">=1.10.0,<2"
+ccache = ">=4.0.0,<5"
 catch2 = ">=3.1.0,<4"
 python = ">=3.10"
 nanobind = ">=2.5.0"
 pytest = ">=9.0.0,<10"
-libboost-python-devel = ">=1.90.0,<2"
+libboost-python-devel = ">=1.82.0,<2"
 numpy = ">=2.4.2,<3"
 
 [feature.test.tasks]
@@ -68,6 +68,16 @@ test = { cmd = "ctest --test-dir build/test --output-on-failure", depends-on = [
 
 [environments.test]
 features = ["test"]
+
+# ============================================================================
+# CMAKE 3.22 TEST ENVIRONMENT
+# ============================================================================
+
+[feature.cmake322.dependencies]
+cmake = "3.22.*"
+
+[environments.cmake322]
+features = ["test", "cmake322"]
 
 # ============================================================================
 # PRE-COMMIT HOOKS CONFIGURATION
