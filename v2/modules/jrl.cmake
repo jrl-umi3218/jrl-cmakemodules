@@ -2644,7 +2644,13 @@ function(jrl_export_package)
 
         get_property(targets GLOBAL PROPERTY _jrl_${PROJECT_NAME}_${component}_targets)
 
-        jrl_target_install_headers(${targets} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+        foreach(target ${targets})
+            message(
+                STATUS
+                "Installing headers for target '${target}' of component '${component}' to '${CMAKE_INSTALL_INCLUDEDIR}'"
+            )
+            jrl_target_install_headers(${target} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+        endforeach()
 
         # <package>/<component>/dependencies.cmake
         _jrl_export_dependencies(
