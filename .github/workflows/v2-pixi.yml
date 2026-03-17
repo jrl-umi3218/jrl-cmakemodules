@@ -35,8 +35,11 @@ jobs:
       - name: Build project
         run: pixi run build
 
-      - name: Run tests
-        run: pixi run test
+      - name: Run tests (cmake latest)
+        run: pixi run -e test test
+
+      - name: Run tests (cmake 3.22)
+        run: pixi run -e cmake322 test
 
       - name: Run tests (pixi build)
         run: pixi run test-packaging-pixi-build
