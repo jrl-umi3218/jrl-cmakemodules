@@ -564,7 +564,7 @@ jrl_export_dependency(
 )
 # If you `target_link_libraries(my_target PUBLIC MyLib::MyLib)`, then jrl_export_package() will
 # know that MyLib is a dependency of your package, and add the following lines to the generated
-# `<project_name>-config.cmake` file:
+# `<project_name>Config.cmake` file:
 
 if(NOT TARGET MyLib::MyLib)
     find_dependency(MyLib REQUIRED)
@@ -753,8 +753,8 @@ jrl_export_package(
 ### Description
   Export the CMake package with all its components (targets, headers, package modules, etc.)
   Generates and installs CMake package configuration files:
-   - <INSTALL_DIR>/<package>/<package>-config.cmake
-   - <INSTALL_DIR>/<package>/<package>-config-version.cmake
+   - <INSTALL_DIR>/<package>/<package>Config.cmake
+   - <INSTALL_DIR>/<package>/<package>ConfigVersion.cmake
    - <INSTALL_DIR>/<package>/<package>/<componentA>/targets.cmake
    - <INSTALL_DIR>/<package>/<package>/<componentA>/dependencies.cmake
    - <INSTALL_DIR>/<package>/<package>/<componentB>/targets.cmake
