@@ -494,6 +494,7 @@ macro(_SETUP_DOXYGEN_DEFAULT_OPTIONS)
   # ---------------------------------------------------------------------------
   # Configuration options related to the XML output
   # ---------------------------------------------------------------------------
+  _set_if_undefined(DOXYGEN_XML_OUTPUT doxygen-xml)
 
   # ---------------------------------------------------------------------------
   # Configuration options related to the DOCBOOK output
@@ -650,6 +651,13 @@ macro(_SETUP_PROJECT_DOCUMENTATION)
           DESTINATION ${CMAKE_INSTALL_FULL_DOCDIR}/doxygen-html
         )
       endif(EXISTS ${PROJECT_SOURCE_DIR}/doc/pictures)
+      # If DOXYGEN_GENERATE_XML option is set to YES", install doxygen-xml directory
+      if(DOXYGEN_GENERATE_XML STREQUAL "YES")
+        install(
+          DIRECTORY ${PROJECT_BINARY_DIR}/doc/${DOXYGEN_XML_OUTPUT}
+          DESTINATION ${CMAKE_INSTALL_FULL_DOCDIR}
+        )
+      endif()
     endif(INSTALL_DOCUMENTATION)
 
     list(
