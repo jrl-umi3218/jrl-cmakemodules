@@ -42,4 +42,4 @@ jobs:
         run: pixi run -e cmake322 test
 
       - name: Run tests (pixi build)
-        run: pixi run test-packaging-pixi-build
+        run: pixi run -e test-pixi-build test-packaging-pixi-build
