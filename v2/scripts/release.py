@@ -1336,6 +1336,43 @@ def main():
         console.print(
             f"\n[{STYLE_WARNING_STRONG}]DRY RUN COMPLETE:[/{STYLE_WARNING_STRONG}] No files were modified."
         )
+        if args.git_commit is not None or args.git_tag is not None:
+            console.print(
+                f"\n[{STYLE_HIGHLIGHT}]Would run git operations:[/{STYLE_HIGHLIGHT}]"
+            )
+            if args.git_commit is not None:
+                custom_message = None if args.git_commit is True else args.git_commit
+                commit_message = (
+                    custom_message.format(version=target_version)
+                    if custom_message
+                    else f"chore: bump version to {target_version}"
+                )
+                rel_paths = (
+                    [str(Path(p).relative_to(root_dir)) for p in updated_file_paths]
+                    if updated_file_paths
+                    else None
+                )
+                console.print(
+                    f"  [{STYLE_MUTED}]$ git add {' '.join(rel_paths) if rel_paths else '-u'}[/{STYLE_MUTED}]"
+                )
+                console.print(
+                    f"  [{STYLE_MUTED}]$ git commit -m '{commit_message}'[/{STYLE_MUTED}]"
+                )
+            if args.git_tag is not None:
+                custom_tag_name = None if args.git_tag is True else args.git_tag
+                tag_name = (
+                    custom_tag_name.format(version=target_version)
+                    if custom_tag_name
+                    else f"v{target_version}"
+                )
+                tag_message = (
+                    args.git_tag_message.format(version=target_version)
+                    if args.git_tag_message
+                    else f"Release version {target_version}"
+                )
+                console.print(
+                    f"  [{STYLE_MUTED}]$ git tag -a {tag_name} -m '{tag_message}'[/{STYLE_MUTED}]"
+                )
         sys.exit(0)
     else:
         if not args.short and args.output_format == "text":
@@ -1344,6 +1381,11 @@ def main():
             )
 
         # Git operations - only perform if explicitly requested
+        if args.git_tag is not None and args.git_commit is None:
+            console.print(
+                f"[{STYLE_WARNING}]Warning: --git-tag used without --git-commit. The tag will point to the current HEAD, not the version bump commit.[/{STYLE_WARNING}]"
+            )
+
         if args.git_commit is not None:
             custom_message = None if args.git_commit is True else args.git_commit
             git_commit_version(
