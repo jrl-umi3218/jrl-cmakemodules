@@ -68,7 +68,8 @@ _ctest = { cmd = "ctest --test-dir build/test --output-on-failure", depends-on =
     "_build",
 ] }
 _test-scripts = { cmd = "uv run --no-project v2/scripts/test_release.py" }
-test = { depends-on = ["_ctest", "_test-scripts"] }
+_test-scripts-coverage = { cmd = "uv run --no-project test_release.py --cov=release --cov-report=term-missing --cov-report=html:htmlcov", cwd = "v2/scripts" }
+test = { depends-on = ["_ctest", "_test-scripts", "_test-scripts-coverage"] }
 
 [environments.test]
 features = ["test"]
