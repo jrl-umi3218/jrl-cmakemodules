@@ -190,7 +190,7 @@ class TomlVersionExtractor(VersionExtractor):
 
         # Navigate to the key
         container = data
-        for i, key in enumerate(self.keys[:-1]):
+        for key in self.keys[:-1]:
             if key in container:
                 container = container[key]
             else:
@@ -539,7 +539,7 @@ def show_version_diff(
     old_colored_parts = []
     new_colored_parts = []
 
-    for i, (old, new) in enumerate(zip(old_parts, new_parts)):
+    for old, new in zip(old_parts, new_parts):
         if old != new:
             old_colored_parts.append(f"[{STYLE_OLD_VALUE}]{old}[/{STYLE_OLD_VALUE}]")
             new_colored_parts.append(f"[{STYLE_NEW_VALUE}]{new}[/{STYLE_NEW_VALUE}]")
