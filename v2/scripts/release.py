@@ -750,9 +750,7 @@ def git_tag_version(
         return False
 
 
-def update_pixi_lock(
-    root_dir: Path, target_version: str, dry_run: bool = False
-) -> Optional[str]:
+def update_pixi_lock(root_dir: Path, dry_run: bool = False) -> Optional[str]:
     """Update pixi.lock file by running 'pixi list'.
 
     Returns the path to pixi.lock if updated, None otherwise.
@@ -1216,6 +1214,7 @@ def main():
 
     if args.update_version:
         new_version_str = args.update_version
+        current_version = get_current_version(checks)
         console.print(
             f"[{STYLE_INFO}]Updating versions to {new_version_str} in {root_dir}...[/{STYLE_INFO}]"
         )
@@ -1288,7 +1287,7 @@ def main():
             sys.exit(1)
 
         try:
-            pixi_lock_path = update_pixi_lock(root_dir, target_version, args.dry_run)
+            pixi_lock_path = update_pixi_lock(root_dir, args.dry_run)
             if pixi_lock_path:
                 updated_files.append("pixi.lock")
                 updated_file_paths.append(pixi_lock_path)
@@ -1393,6 +1392,7 @@ def main():
                 target_version,
                 args.confirm,
                 custom_message,
+                updated_file_paths,
             )
 
         if args.git_tag is not None:
