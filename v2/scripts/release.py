@@ -11,146 +11,67 @@
 # ///
 
 """
-# Release Script Documentation
+# release.py
 
-`release.py` is a utility script designed to manage project versions across multiple file formats, ensuring consistency and automating the release process.
-
-## Features
-
--   **Multi-file Support**: Updates version strings in:
-    -   `package.xml` (ROS)
-    -   `pyproject.toml` (Python)
-    -   `CHANGELOG.md` (Keep a Changelog format)
-    -   `pixi.toml` (Pixi)
-    -   `pixi.lock` (Pixi lockfile - automatically updated via `pixi list`)
-    -   `CITATION.cff` (Citation File Format)
-    -   `CMakeLists.txt` (CMake)
--   **Version Checking**: Verifies that all tracked files share the same version number.
--   **Semantic Versioning**: Enforces SemVer (X.Y.Z) compliance.
--   **Automated Bumping**: Supports major, minor, and patch version bumps.
--   **Git Integration**: Option to automatically commit changes and create release tags using GitPython.
--   **Safe Checks**: Includes dry-run mode and version progression validation.
--   **Pixi Lock Update**: When updating versions, runs `pixi list` to regenerate `pixi.lock`. Requires `pixi` to be installed if a lock file exists.
-
-## Prerequisites
-
-The script lists its dependencies in the file header using [inline script metadata (PEP 723)](https://peps.python.org/pep-0723/). It is recommended to execute it using `uv` to handle dependencies automatically.
-
--   Python >= 3.9
--   Dependencies: `tomlkit`, `ruamel.yaml`, `rich`, `packaging`, `GitPython`, `cmake-parser`
--   Optional: `pixi` CLI tool (required if `pixi.lock` exists)
+Version management script for multi-format projects. Keeps version strings in sync across all tracked files and automates the release process.
 
 ## Usage
 
-### Running the Script
-
-You can run the script directly with `uv`:
+> Requires [`uv`](https://docs.astral.sh/uv/) — it auto-installs dependencies via PEP 723 inline metadata.
 
 ```bash
 uv run --no-project release.py [OPTIONS]
 ```
 
-Or via python if dependencies are manually installed:
+## Common Commands
 
 ```bash
-python release.py [OPTIONS]
-```
-
-### Common Commands
-
-#### Check Current Version
-Verify that all files are in sync and report the current consensus version.
-
-```bash
+# Check that all files agree on the current version
 uv run --no-project release.py --check-version
-```
 
-#### Bump Version
-Bump the project version (semver).
+# Bump version
+uv run --no-project release.py --bump patch       # 1.0.0 -> 1.0.1
+uv run --no-project release.py --bump minor       # 1.0.0 -> 1.1.0
+uv run --no-project release.py --bump major       # 1.0.0 -> 2.0.0
 
-```bash
-# Bump patch version (e.g. 1.0.0 -> 1.0.1)
-uv run --no-project release.py --bump patch
-
-# Bump minor version (e.g. 1.0.0 -> 1.1.0)
-uv run --no-project release.py --bump minor
-
-# Bump major version (e.g. 1.0.0 -> 2.0.0)
-uv run --no-project release.py --bump major
-```
-
-#### Set Specific Version
-Manually set the project to a specific version string.
-
-```bash
+# Set a specific version
 uv run --no-project release.py --update-version 1.2.3
+
+# Bump, commit and tag in one step
+uv run --no-project release.py --bump patch --git-commit --git-tag
 ```
 
-### Options
+## Options
 
 | Option | Description |
 | :--- | :--- |
-| `--root <PATH>` | Set the project root directory (default: current working directory). |
-| `--bump <major\\|minor\\|patch>` | Bump the version component. |
-| `--dry-run` | Show what would change without modifying files. |
-| `--short` | Output only the final version string. |
-| `--output-format <text\\|json>` | Output format (default: text). |
-| `--confirm` | Auto-confirm actions without interactive prompts. |
-| `--list-files` | List all files that are currently checked/updated. |
-| `--git-commit [MESSAGE]` | Commit version changes. Optional custom message (use `{version}` placeholder). |
-| `--git-tag [NAME]` | Create a git tag. Optional custom tag name (use `{version}` placeholder). |
-| `--git-tag-message <MESSAGE>` | Custom git tag message. Use `{version}` as placeholder. |
+| `--root <PATH>` | Project root (default: cwd). |
+| `--bump <major|minor|patch>` | Bump version component. |
+| `--update-version <X.Y.Z>` | Set a specific version. |
+| `--dry-run` | Show changes without writing files. |
+| `--short` | Print only the version string. |
+| `--output-format <text|json>` | Output format (default: text). |
+| `--confirm` | Skip interactive prompts. |
+| `--list-files` | List tracked files. |
+| `--git-commit [MSG]` | Commit changes. Optional message (`{version}` placeholder). |
+| `--git-tag [NAME]` | Create a tag. Optional name (`{version}` placeholder). |
+| `--git-tag-message <MSG>` | Tag annotation (`{version}` placeholder). |
 
-### Git Integration
+**Git defaults**: commit `chore: bump version to {version}`, tag `v{version}`, tag message `Release version {version}`.
 
-The script can automatically commit changes and tag the release using the local git configuration.
+## Supported Files
 
-#### Default Behavior
+| File | Key |
+| :--- | :--- |
+| `package.xml` | `<version>` tag |
+| `pyproject.toml` | `project.version` |
+| `CHANGELOG.md` | First `## [X.Y.Z]` section (not Unreleased) |
+| `pixi.toml` | `[workspace] version` |
+| `pixi.lock` | Regenerated via `pixi list` |
+| `CITATION.cff` | `version` key |
+| `CMakeLists.txt` | `project(... VERSION X.Y.Z ...)` |
 
--   **Default Commit Message**: `chore: bump version to {version}` (e.g., `chore: bump version to 1.2.3`)
--   **Default Tag Name**: `v{version}` (e.g., `v1.2.3`)
--   **Default Tag Message**: `Release version {version}` (e.g., `Release version 1.2.3`)
-
-#### Examples
-
-```bash
-# Bump patch version, commit and tag with defaults
-# Commit: "chore: bump version to 1.0.1"
-# Tag: "v1.0.1" with message "Release version 1.0.1"
-uv run --no-project release.py --bump patch --git-commit --git-tag
-
-# Custom commit message
-# Commit: "release: version 1.0.1"
-uv run --no-project release.py --bump patch --git-commit "release: version {version}"
-
-# Custom tag name (without 'v' prefix)
-# Tag: "1.1.0" with default message "Release version 1.1.0"
-uv run --no-project release.py --bump minor --git-tag "{version}"
-
-# Custom tag name and message
-# Tag: "1.1.0" with message "Version 1.1.0"
-uv run --no-project release.py --bump minor --git-tag "{version}" --git-tag-message "Version {version}"
-
-# Only commit, no tag
-uv run --no-project release.py --bump patch --git-commit
-
-# Only tag, no commit
-uv run --no-project release.py --bump patch --git-tag
-```
-
-## Supported File Patterns
-
-The script defines several `VersionExtractor` classes to handle specific file formats:
-
--   **package.xml**: Updates contents of `<version>X.Y.Z</version>`.
--   **pyproject.toml**: Updates `tool.poetry.version` or standard `project.version`.
--   **CHANGELOG.md**:
-    -   Reads the first version that != "Unreleased".
-    -   On update, replaces the `## [Unreleased]` header with `## [Unreleased]` followed by a new section `## [X.Y.Z] - YYYY-MM-DD`.
--   **pixi.toml**: Updates the `[workspace] version` key.
--   **pixi.lock**: Regenerated by running `pixi list`. Requires the `pixi` executable to be available.
--   **CITATION.cff**: Updates the top-level `version` key.
--   **CMakeLists.txt**: Scans for `project(... VERSION X.Y.Z ...)` using regex.
+> Requires `pixi` CLI if `pixi.lock` exists in the project root.
 """
 
 import sys
