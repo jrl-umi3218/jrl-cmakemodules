@@ -1260,7 +1260,7 @@ def test_cli_dry_run(project_dir, mocker, capsys):
     assert "<version>1.0.0</version>" in xml_content
 
     captured = capsys.readouterr()
-    assert "DRY RUN" in captured.out
+    assert "Dry run" in captured.out
 
 
 def test_cli_git_commit_and_tag(project_dir, mocker, capsys):
