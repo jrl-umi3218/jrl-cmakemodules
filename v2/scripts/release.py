@@ -398,8 +398,10 @@ class CMakeListsVersionExtractor(VersionExtractor):
             f.write(content)
 
 
-class ChangelogVersionExtractor(RegexVersionExtractor):
-    # Specialized for Keep a Changelog
+class ChangelogVersionExtractor(VersionExtractor):
+    def __init__(self, file_path: Path, pattern: str = ""):
+        super().__init__(file_path)
+
     def get_version(self) -> str:
         with open(self.file_path, "r", encoding="utf-8") as f:
             content = f.read()
