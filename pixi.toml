@@ -51,6 +51,7 @@ nanobind = ">=2.5.0"
 pytest = ">=9.0.0,<10"
 libboost-python-devel = ">=1.82.0,<2"
 numpy = ">=2.4.2,<3"
+uv = ">=0.6.0"
 
 [feature.test.tasks]
 _configure = { cmd = [
@@ -63,9 +64,11 @@ _configure = { cmd = [
     "-DJRL_CMAKEMODULES_BUILD_TESTS=ON",
 ] }
 _build = { cmd = "cmake --build build/test", depends-on = ["_configure"] }
-test = { cmd = "ctest --test-dir build/test --output-on-failure", depends-on = [
+_ctest = { cmd = "ctest --test-dir build/test --output-on-failure", depends-on = [
     "_build",
 ] }
+_test-scripts = { cmd = "uv run --no-project v2/scripts/test_release.py" }
+test = { depends-on = ["_ctest", "_test-scripts"] }
 
 [environments.test]
 features = ["test"]
