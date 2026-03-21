@@ -644,6 +644,7 @@ def git_commit_version(
     version: str,
     auto_confirm: bool,
     custom_message: Optional[str] = None,
+    files_to_stage: Optional[List[str]] = None,
 ) -> bool:
     """Commit version changes to git."""
     success, _ = run_git_command(["rev-parse", "--git-dir"], root_dir)
@@ -673,8 +674,13 @@ def git_commit_version(
             console.print(f"[{STYLE_WARNING}]Git commit skipped.[/{STYLE_WARNING}]")
             return False
 
-    console.print(f"[{STYLE_MUTED}]$ git add -u[/{STYLE_MUTED}]")
-    run_git_command(["add", "-u"], root_dir)
+    if files_to_stage:
+        rel_paths = [str(Path(p).relative_to(root_dir)) for p in files_to_stage]
+        console.print(f"[{STYLE_MUTED}]$ git add {' '.join(rel_paths)}[/{STYLE_MUTED}]")
+        run_git_command(["add"] + files_to_stage, root_dir)
+    else:
+        console.print(f"[{STYLE_MUTED}]$ git add -u[/{STYLE_MUTED}]")
+        run_git_command(["add", "-u"], root_dir)
 
     console.print(f"[{STYLE_MUTED}]$ git commit -m '{commit_message}'[/{STYLE_MUTED}]")
     success, output = run_git_command(["commit", "-m", commit_message], root_dir)
