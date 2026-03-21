@@ -3,6 +3,7 @@
 # requires-python = ">=3.9"
 # dependencies = [
 #     "pytest>=8.4.2",
+#     "pytest-cov>=5.0.0",
 #     "pytest-mock>=3.12.0",
 #     # The following dependencies must be kept in sync with release.py
 #     "tomlkit",
@@ -1377,4 +1378,4 @@ def test_list_version_files_display(project_dir):
 # ============================================================================
 
 if __name__ == "__main__":
-    sys.exit(pytest.main([__file__, "-v"]))
+    sys.exit(pytest.main([__file__, "-v"] + sys.argv[1:]))

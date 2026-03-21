@@ -7,3 +7,5 @@ install*/
 .DS_Store
 .ruff_cache/
 *.conda
+.coverage
+htmlcov/
