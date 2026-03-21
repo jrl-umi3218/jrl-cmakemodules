@@ -6,7 +6,6 @@
 #     "ruamel.yaml",
 #     "rich",
 #     "packaging",
-#     "GitPython",
 #     "cmake-parser",
 # ]
 # ///
@@ -168,7 +167,6 @@ from typing import List, Optional, Tuple, Dict
 
 import tomlkit
 import cmake_parser
-from git import Repo, exc
 from ruamel.yaml import YAML
 from rich.console import Console
 from rich.table import Table
@@ -493,21 +491,10 @@ class ChangelogVersionExtractor(RegexVersionExtractor):
         raise ValueError("No released version found in CHANGELOG.md")
 
     def update_version(self, new_version: str) -> None:
-        # Strategy: Rename [Unreleased] to [new_version] - Date
-        # And add a new [Unreleased] section above it?
-        # Or just rename [Unreleased] if the user is cutting a release.
-        # Assuming we keep the [Unreleased] section for future dev.
-
         with open(self.file_path, "r", encoding="utf-8") as f:
             content = f.read()
 
         today = datetime.date.today().isoformat()
-
-        # Find ## [Unreleased]
-        # Replace with:
-        # ## [Unreleased]
-        #
-        # ## [new_version] - YYYY-MM-DD
 
         pattern = r"^## \[Unreleased\]"
         if not re.search(pattern, content, re.MULTILINE):
@@ -520,12 +507,6 @@ class ChangelogVersionExtractor(RegexVersionExtractor):
 
         new_content = re.sub(pattern, replacement, content, count=1, flags=re.MULTILINE)
 
-        # Also, we might need to update the comparison links at the bottom if they exist.
-        # e.g. [Unreleased]: https://.../compare/vX.Y.Z...HEAD
-        # [X.Y.Z]: https://.../compare/vPrevious...vX.Y.Z
-        # This is complex to do reliably with regex alone without strict format adherence.
-        # For now, we update the header which is the visible part.
-
         with open(self.file_path, "w", encoding="utf-8") as f:
             f.write(new_content)
 
@@ -537,12 +518,6 @@ class ChangelogVersionExtractor(RegexVersionExtractor):
 def validate_semver(version: str) -> str:
     try:
         parsed = parse_version(version)
-        if not isinstance(
-            parsed, parse_version("1.0.0").__class__
-        ):  # check if it's a valid version object
-            # packaging.version.parse returns a LegacyVersion if strict=False (default) and it's invalid
-            # But packaging > 22 removes LegacyVersion.
-            pass
         return str(parsed)
     except InvalidVersion:
         raise argparse.ArgumentTypeError(
@@ -723,40 +698,48 @@ def validate_version_progression(
         console.print()
 
 
+def run_git_command(args: List[str], cwd: Path) -> Tuple[bool, str]:
+    """Run a git command and return (success, output)."""
+    try:
+        result = subprocess.run(
+            ["git"] + args,
+            cwd=cwd,
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode != 0:
+            return False, result.stderr.strip()
+        return True, result.stdout.strip()
+    except subprocess.CalledProcessError as e:
+        return False, e.stderr or ""
+    except FileNotFoundError:
+        return False, "git command not found"
+
+
 def git_commit_version(
     root_dir: Path,
     version: str,
-    files_to_commit: List[str],
     auto_confirm: bool,
     custom_message: Optional[str] = None,
 ) -> bool:
-    """Commit version changes to git.
-
-    Args:
-        root_dir: Project root directory
-        version: Version being committed
-        files_to_commit: List of file paths to stage
-        auto_confirm: Whether to skip confirmation prompts
-        custom_message: Optional custom commit message (default: 'chore: bump version to {version}')
-    """
-    try:
-        repo = Repo(root_dir, search_parent_directories=True)
-    except exc.InvalidGitRepositoryError:
+    """Commit version changes to git."""
+    success, _ = run_git_command(["rev-parse", "--git-dir"], root_dir)
+    if not success:
         console.print(
             f"[{STYLE_WARNING}]Not a git repository, skipping git commit.[/{STYLE_WARNING}]"
         )
         return False
 
-    if not repo.is_dirty():
+    _, status_output = run_git_command(["status", "--porcelain"], root_dir)
+    if not status_output:
         console.print(f"[{STYLE_WARNING}]No changes to commit.[/{STYLE_WARNING}]")
         return False
 
-    # Use custom message if provided, otherwise use default
-    if custom_message:
-        # Replace {version} placeholder if present
-        commit_message = custom_message.format(version=version)
-    else:
-        commit_message = f"chore: bump version to {version}"
+    commit_message = (
+        custom_message.format(version=version)
+        if custom_message
+        else f"chore: bump version to {version}"
+    )
 
     if not auto_confirm:
         confirmed = Confirm.ask(
@@ -767,55 +750,18 @@ def git_commit_version(
             console.print(f"[{STYLE_WARNING}]Git commit skipped.[/{STYLE_WARNING}]")
             return False
 
-    # Add all version files
-    try:
-        console.print(
-            f"[{STYLE_MUTED}]$ git add {' '.join(files_to_commit)}[/{STYLE_MUTED}]"
-        )
-        repo.git.add(files_to_commit)
-    except exc.GitCommandError as e:
-        console.print(f"[{STYLE_ERROR}]Failed to stage changes: {e}[/{STYLE_ERROR}]")
-        return False
+    console.print(f"[{STYLE_MUTED}]$ git add -u[/{STYLE_MUTED}]")
+    run_git_command(["add", "-u"], root_dir)
 
-    # Commit
-    try:
-        # Use git command to trigger hooks
-        console.print(
-            f"[{STYLE_MUTED}]$ git commit -m '{commit_message}'[/{STYLE_MUTED}]"
-        )
-        repo.git.commit("-m", commit_message)
+    console.print(f"[{STYLE_MUTED}]$ git commit -m '{commit_message}'[/{STYLE_MUTED}]")
+    success, output = run_git_command(["commit", "-m", commit_message], root_dir)
+    if success:
         console.print(
             f"[{STYLE_SUCCESS}]✓ Committed changes: {commit_message}[/{STYLE_SUCCESS}]"
         )
         return True
-    except exc.GitCommandError as e:
-        # Check if pre-commit hooks failed (often they modify files)
-        if (root_dir / ".pre-commit-config.yaml").exists():
-            console.print(
-                f"[{STYLE_WARNING}]Commit failed or hooks triggered. Attempting to re-stage and commit...[/{STYLE_WARNING}]"
-            )
-            try:
-                # Re-stage any changes made by hooks (e.g. formatting)
-                console.print(
-                    f"[{STYLE_MUTED}]$ git add {' '.join(files_to_commit)}[/{STYLE_MUTED}]"
-                )
-                repo.git.add(files_to_commit)
-                # Try commit again
-                console.print(
-                    f"[{STYLE_MUTED}]$ git commit -m '{commit_message}'[/{STYLE_MUTED}]"
-                )
-                repo.git.commit("-m", commit_message)
-                console.print(
-                    f"[{STYLE_SUCCESS}]✓ Committed changes after hook updates: {commit_message}[/{STYLE_SUCCESS}]"
-                )
-                return True
-            except exc.GitCommandError as e2:
-                console.print(
-                    f"[{STYLE_ERROR}]Failed to commit after retry: {e2}[/{STYLE_ERROR}]"
-                )
-                return False
-
-        console.print(f"[{STYLE_ERROR}]Failed to commit: {e}[/{STYLE_ERROR}]")
+    else:
+        console.print(f"[{STYLE_ERROR}]Failed to commit: {output}[/{STYLE_ERROR}]")
         return False
 
 
@@ -826,37 +772,25 @@ def git_tag_version(
     custom_tag_name: Optional[str] = None,
     custom_tag_message: Optional[str] = None,
 ) -> bool:
-    """Create a git tag for the version.
-
-    Args:
-        root_dir: Project root directory
-        version: Version being tagged
-        auto_confirm: Whether to skip confirmation prompts
-        custom_tag_name: Optional custom tag name (default: 'v{version}')
-        custom_tag_message: Optional custom tag message (default: 'Release version {version}')
-    """
-    try:
-        repo = Repo(root_dir, search_parent_directories=True)
-    except exc.InvalidGitRepositoryError:
+    """Create a git tag for the version."""
+    success, _ = run_git_command(["rev-parse", "--git-dir"], root_dir)
+    if not success:
         console.print(
             f"[{STYLE_WARNING}]Not a git repository, skipping git tag.[/{STYLE_WARNING}]"
         )
         return False
 
-    # Use custom tag name if provided, otherwise use default
-    if custom_tag_name:
-        tag_name = custom_tag_name.format(version=version)
-    else:
-        tag_name = f"v{version}"
+    tag_name = (
+        custom_tag_name.format(version=version) if custom_tag_name else f"v{version}"
+    )
+    tag_message = (
+        custom_tag_message.format(version=version)
+        if custom_tag_message
+        else f"Release version {version}"
+    )
 
-    # Use custom tag message if provided, otherwise use default
-    if custom_tag_message:
-        tag_message = custom_tag_message.format(version=version)
-    else:
-        tag_message = f"Release version {version}"
-
-    # Check if tag already exists
-    if tag_name in repo.tags:
+    success, _ = run_git_command(["rev-parse", tag_name], root_dir)
+    if success:
         console.print(
             f"[{STYLE_WARNING}]Tag {tag_name} already exists.[/{STYLE_WARNING}]"
         )
@@ -870,19 +804,20 @@ def git_tag_version(
             console.print(f"[{STYLE_WARNING}]Git tag skipped.[/{STYLE_WARNING}]")
             return False
 
-    # Create annotated tag
-    try:
-        console.print(
-            f"[{STYLE_MUTED}]$ git tag -a {tag_name} -m '{tag_message}'[/{STYLE_MUTED}]"
-        )
-        repo.create_tag(tag_name, message=tag_message)
+    console.print(
+        f"[{STYLE_MUTED}]$ git tag -a {tag_name} -m '{tag_message}'[/{STYLE_MUTED}]"
+    )
+    success, output = run_git_command(
+        ["tag", "-a", tag_name, "-m", tag_message], root_dir
+    )
+    if success:
         console.print(f"[{STYLE_SUCCESS}]✓ Created tag: {tag_name}[/{STYLE_SUCCESS}]")
         console.print(
             f"[{STYLE_MUTED}]  To push: git push origin {tag_name}[/{STYLE_MUTED}]"
         )
         return True
-    except exc.GitCommandError as e:
-        console.print(f"[{STYLE_ERROR}]Failed to create tag: {e}[/{STYLE_ERROR}]")
+    else:
+        console.print(f"[{STYLE_ERROR}]Failed to create tag: {output}[/{STYLE_ERROR}]")
         return False
 
 
@@ -895,7 +830,6 @@ def update_pixi_lock(
     """
     pixi_lock_path = root_dir / "pixi.lock"
 
-    # Check if pixi.lock exists
     if not pixi_lock_path.exists():
         return None
 
@@ -905,8 +839,6 @@ def update_pixi_lock(
         )
         return None
 
-    # Run 'pixi list' to update the lock file
-    # This is REQUIRED if pixi.lock exists
     try:
         console.print(
             f"[{STYLE_INFO}]Running 'pixi list' to update pixi.lock...[/{STYLE_INFO}]"
@@ -1299,18 +1231,15 @@ def main():
     args = parser.parse_args()
     root_dir = args.root
 
-    # Redirect console output to stderr if we want clean stdout for json/short
+    # Redirect console output to stderr for clean stdout with json/short
     global console
     if args.short or args.output_format == "json":
         console = Console(file=sys.stderr)
     else:
-        # Default behavior
         console = Console()
 
-    # Enforce semver for update
     if args.update_version:
         try:
-            # simple semver check
             if not re.match(r"^\d+\.\d+\.\d+$", args.update_version):
                 console.print(
                     f"[{STYLE_ERROR}]Invalid SemVer '{args.update_version}'. strict X.Y.Z required.[/{STYLE_ERROR}]"
@@ -1353,7 +1282,6 @@ def main():
     if args.check_version:
         sys.exit(handle_check_version(checks, args))
 
-    # BRANCH: update-version or bump
     current_version = None
     new_version_str = None
 
@@ -1363,26 +1291,19 @@ def main():
             f"[{STYLE_INFO}]Updating versions to {new_version_str} in {root_dir}...[/{STYLE_INFO}]"
         )
     elif args.bump:
-        # Get current version
         current_version = get_current_version(checks)
         if not current_version:
-            # get_current_version likely printed why
             sys.exit(1)
 
-        # Calculate new version
         try:
             new_version_str = bump_version(current_version, args.bump)
         except ValueError as e:
             console.print(f"[{STYLE_ERROR}]Error: {e}[/{STYLE_ERROR}]")
             sys.exit(1)
 
-        # Show version diff visualization
         show_version_diff(current_version, new_version_str, args.bump)
-
-        # Validate version progression
         validate_version_progression(current_version, new_version_str, args.bump)
 
-        # Confirm upgrade
         if args.dry_run:
             console.print(
                 f"\n[{STYLE_WARNING_STRONG}]DRY RUN:[/{STYLE_WARNING_STRONG}] Would upgrade from [{STYLE_OLD_VALUE}]{current_version}[/{STYLE_OLD_VALUE}] to [{STYLE_NEW_VALUE}]{new_version_str}[/{STYLE_NEW_VALUE}]"
@@ -1411,10 +1332,8 @@ def main():
         sys.exit(1)
     target_version: str = new_version_str
 
-    # APPLY UPDATES with rollback support
     backups = {}
     if not args.dry_run:
-        # Create backups before updating
         file_paths_to_backup = [
             check.file_path for check in checks if check.check_file_exists()
         ]
@@ -1439,14 +1358,12 @@ def main():
                 )
             sys.exit(1)
 
-        # Update pixi.lock if present - wrap in try/except
         try:
             pixi_lock_path = update_pixi_lock(root_dir, target_version, args.dry_run)
             if pixi_lock_path:
                 updated_files.append("pixi.lock")
                 updated_file_paths.append(pixi_lock_path)
         except RuntimeError as e:
-            # Pixi update failed - restore backups
             console.print(
                 f"[{STYLE_ERROR}]Pixi lock update failed: {e}[/{STYLE_ERROR}]"
             )
@@ -1460,11 +1377,9 @@ def main():
                 )
             sys.exit(1)
 
-        # Success - clean up backups
         if backups:
             cleanup_backups(backups)
     except Exception as e:
-        # Unexpected error - restore backups
         console.print(f"[{STYLE_ERROR}]Unexpected error: {e}[/{STYLE_ERROR}]")
         if backups:
             console.print(
@@ -1501,18 +1416,15 @@ def main():
 
         # Git operations - only perform if explicitly requested
         if args.git_commit is not None:
-            # args.git_commit is True for default message, or a string for custom message
             custom_message = None if args.git_commit is True else args.git_commit
             git_commit_version(
                 root_dir,
                 target_version,
-                updated_file_paths,
                 args.confirm,
                 custom_message,
             )
 
         if args.git_tag is not None:
-            # args.git_tag is True for default tag name, or a string for custom tag name
             custom_tag_name = None if args.git_tag is True else args.git_tag
             git_tag_version(
                 root_dir,
