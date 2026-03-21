@@ -1336,7 +1336,7 @@ def test_cli_json_output(project_dir, mocker, capsys):
     captured = capsys.readouterr()
     data = json.loads(captured.out)
     assert data["new_version"] == "3.2.1"
-    assert data["previous_version"] is None  # Because we used --update-version
+    assert data["previous_version"] is not None  # current version read from files
     assert "updated_files" in data
 
 
