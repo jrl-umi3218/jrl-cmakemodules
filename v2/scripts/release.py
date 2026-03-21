@@ -761,9 +761,6 @@ def update_pixi_lock(root_dir: Path, dry_run: bool = False) -> Optional[str]:
         return None
 
     if dry_run:
-        console.print(
-            f"[{STYLE_HIGHLIGHT}]Would run 'pixi list' to update pixi.lock[/{STYLE_HIGHLIGHT}]"
-        )
         return None
 
     try:
@@ -1005,23 +1002,23 @@ def perform_version_updates(
     checks: List[VersionExtractor],
     target_version: str,
     dry_run: bool = False,
-) -> Tuple[List[str], List[str], bool]:
+) -> Tuple[List[str], List[str], bool, List[Tuple[str, str, str]]]:
     """Apply version updates to all files.
 
-    Returns: (updated_files, updated_file_paths, failed)
+    Returns: (updated_files, updated_file_paths, failed, dry_run_rows)
+    dry_run_rows contains (name, old_version, new_version) tuples when dry_run=True.
     """
     updated_files = []
     updated_file_paths = []
     failed = False
+    dry_run_rows: List[Tuple[str, str, str]] = []
 
     for check in checks:
         if check.check_file_exists():
             try:
                 if dry_run:
                     curr = check.get_version()
-                    console.print(
-                        f"[{STYLE_HIGHLIGHT}]Would update[/{STYLE_HIGHLIGHT}] {check.name}: [{STYLE_OLD_VALUE}]{curr}[/{STYLE_OLD_VALUE}] → [{STYLE_NEW_VALUE}]{target_version}[/{STYLE_NEW_VALUE}]"
-                    )
+                    dry_run_rows.append((check.name, curr, target_version))
                 else:
                     check.update_version(target_version)
                     console.print(
@@ -1036,11 +1033,47 @@ def perform_version_updates(
                 if not dry_run:
                     failed = True
         else:
-            console.print(
-                f"[{STYLE_WARNING}]Skipping[/{STYLE_WARNING}] {check.name} (not found)"
-            )
+            if not dry_run:
+                console.print(
+                    f"[{STYLE_WARNING}]Skipping[/{STYLE_WARNING}] {check.name} (not found)"
+                )
 
-    return updated_files, updated_file_paths, failed
+    return updated_files, updated_file_paths, failed, dry_run_rows
+
+
+def show_dry_run_panel(
+    dry_run_rows: List[Tuple[str, str, str]],
+    pixi_lock_would_update: bool,
+    git_lines: List[str],
+) -> None:
+    """Display a unified dry-run preview."""
+    console.print(
+        f"\n[{STYLE_WARNING_STRONG}]Dry run — no files were modified[/{STYLE_WARNING_STRONG}]"
+    )
+    console.print()
+
+    console.print("  [bold cyan]Files[/bold cyan]")
+    console.print(f"  [dim]{'─' * 44}[/dim]")
+    for name, old, new in dry_run_rows:
+        line = Text()
+        line.append(f"  {name:<22}", style="cyan")
+        line.append(old, style=STYLE_OLD_VALUE)
+        line.append("  →  ", style="dim")
+        line.append(new, style=STYLE_NEW_VALUE)
+        console.print(line)
+    if pixi_lock_would_update:
+        line = Text()
+        line.append(f"  {'pixi.lock':<22}", style="cyan")
+        line.append("regenerated via pixi list", style="dim")
+        console.print(line)
+
+    if git_lines:
+        console.print()
+        console.print("  [bold cyan]Git[/bold cyan]")
+        console.print(f"  [dim]{'─' * 44}[/dim]")
+        for cmd in git_lines:
+            console.print(f"  [{STYLE_MUTED}]{cmd}[/{STYLE_MUTED}]", highlight=False)
+    console.print()
 
 
 class RichHelpAction(argparse.Action):
@@ -1215,9 +1248,10 @@ def main():
     if args.update_version:
         new_version_str = args.update_version
         current_version = get_current_version(checks)
-        console.print(
-            f"[{STYLE_INFO}]Updating versions to {new_version_str} in {root_dir}...[/{STYLE_INFO}]"
-        )
+        if not args.dry_run:
+            console.print(
+                f"[{STYLE_INFO}]Updating versions to {new_version_str} in {root_dir}...[/{STYLE_INFO}]"
+            )
     elif args.bump:
         current_version = get_current_version(checks)
         if not current_version:
@@ -1233,9 +1267,6 @@ def main():
         validate_version_progression(current_version, new_version_str, args.bump)
 
         if args.dry_run:
-            console.print(
-                f"\n[{STYLE_WARNING_STRONG}]DRY RUN:[/{STYLE_WARNING_STRONG}] Would upgrade from [{STYLE_OLD_VALUE}]{current_version}[/{STYLE_OLD_VALUE}] to [{STYLE_NEW_VALUE}]{new_version_str}[/{STYLE_NEW_VALUE}]"
-            )
             confirmed = True
         elif args.confirm:
             confirmed = True
@@ -1249,9 +1280,10 @@ def main():
             console.print(f"[{STYLE_WARNING}]Upgrade cancelled.[/{STYLE_WARNING}]")
             sys.exit(0)
 
-        console.print(
-            f"\n[{STYLE_INFO}]Upgrading version from {current_version} to {new_version_str}...[/{STYLE_INFO}]"
-        )
+        if not args.dry_run:
+            console.print(
+                f"\n[{STYLE_INFO}]Upgrading version from {current_version} to {new_version_str}...[/{STYLE_INFO}]"
+            )
 
     if new_version_str is None:
         console.print(
@@ -1271,8 +1303,8 @@ def main():
         )
 
     try:
-        updated_files, updated_file_paths, failed = perform_version_updates(
-            checks, target_version, args.dry_run
+        updated_files, updated_file_paths, failed, dry_run_rows = (
+            perform_version_updates(checks, target_version, args.dry_run)
         )
 
         if failed:
@@ -1332,46 +1364,38 @@ def main():
         print(target_version)
 
     if args.dry_run:
-        console.print(
-            f"\n[{STYLE_WARNING_STRONG}]DRY RUN COMPLETE:[/{STYLE_WARNING_STRONG}] No files were modified."
-        )
-        if args.git_commit is not None or args.git_tag is not None:
-            console.print(
-                f"\n[{STYLE_HIGHLIGHT}]Would run git operations:[/{STYLE_HIGHLIGHT}]"
+        pixi_lock_would_update = (root_dir / "pixi.lock").exists()
+
+        git_lines: List[str] = []
+        if args.git_commit is not None:
+            custom_message = None if args.git_commit is True else args.git_commit
+            commit_message = (
+                custom_message.format(version=target_version)
+                if custom_message
+                else f"chore: bump version to {target_version}"
             )
-            if args.git_commit is not None:
-                custom_message = None if args.git_commit is True else args.git_commit
-                commit_message = (
-                    custom_message.format(version=target_version)
-                    if custom_message
-                    else f"chore: bump version to {target_version}"
-                )
-                rel_paths = (
-                    [str(Path(p).relative_to(root_dir)) for p in updated_file_paths]
-                    if updated_file_paths
-                    else None
-                )
-                console.print(
-                    f"  [{STYLE_MUTED}]$ git add {' '.join(rel_paths) if rel_paths else '-u'}[/{STYLE_MUTED}]"
-                )
-                console.print(
-                    f"  [{STYLE_MUTED}]$ git commit -m '{commit_message}'[/{STYLE_MUTED}]"
-                )
-            if args.git_tag is not None:
-                custom_tag_name = None if args.git_tag is True else args.git_tag
-                tag_name = (
-                    custom_tag_name.format(version=target_version)
-                    if custom_tag_name
-                    else f"v{target_version}"
-                )
-                tag_message = (
-                    args.git_tag_message.format(version=target_version)
-                    if args.git_tag_message
-                    else f"Release version {target_version}"
-                )
-                console.print(
-                    f"  [{STYLE_MUTED}]$ git tag -a {tag_name} -m '{tag_message}'[/{STYLE_MUTED}]"
-                )
+            rel_paths = (
+                [str(Path(p).relative_to(root_dir)) for p in updated_file_paths]
+                if updated_file_paths
+                else None
+            )
+            git_lines.append(f"$ git add {' '.join(rel_paths) if rel_paths else '-u'}")
+            git_lines.append(f"$ git commit -m '{commit_message}'")
+        if args.git_tag is not None:
+            custom_tag_name = None if args.git_tag is True else args.git_tag
+            tag_name = (
+                custom_tag_name.format(version=target_version)
+                if custom_tag_name
+                else f"v{target_version}"
+            )
+            tag_message = (
+                args.git_tag_message.format(version=target_version)
+                if args.git_tag_message
+                else f"Release version {target_version}"
+            )
+            git_lines.append(f"$ git tag -a {tag_name} -m '{tag_message}'")
+
+        show_dry_run_panel(dry_run_rows, pixi_lock_would_update, git_lines)
         sys.exit(0)
     else:
         if not args.short and args.output_format == "text":
