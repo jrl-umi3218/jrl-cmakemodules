@@ -36,6 +36,7 @@ configure = { cmd = [
 build = { cmd = "cmake --build build", depends-on = ["configure"] }
 install = { cmd = "cmake --install build", depends-on = ["build"] }
 clear = { cmd = "rm -rf build" }
+doc = { cmd = "cmake -DJRL_GENERATE_API_DOC=ON -P v2/modules/jrl.cmake" }
 
 # ============================================================================
 # TEST FEATURE CONFIGURATION
