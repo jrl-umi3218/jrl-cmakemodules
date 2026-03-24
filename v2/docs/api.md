@@ -13,7 +13,8 @@ jrl_copy_compile_commands_in_source_dir()
 
 ### Description
   Copy compile_commands.json from the binary dir to the upper source directory for clangd support.
-  This is only useful when the build directory is not <source_dir>/build.
+  See jrl_configure_copy_compile_commands_in_source_dir for more info.
+  NOTE: This is volontarly a copy and not a symlink to avoid issues when the build directory is deleted (IDE are not happy about this).
 
 
 ### Arguments
@@ -34,7 +35,11 @@ jrl_configure_copy_compile_commands_in_source_dir()
 
 
 ### Description
-  Configure copy of compile_commands.json to source directory at end of configuration step.
+  Configure copy of `compile_commands.json` to source directory at end of configuration step.
+  This is useful for `clangd` when the build directory is not `<source_dir>/build` (ex: `<source_dir>/build/<config>`).
+  Also makes `clangd` still available when the build directory is deleted but the `compile_commands.json` in the source directory is not.
+  This copys the default behavior of the CMake extension for VSCode (`cmake.copyCompileCommands`).
+  It is recommended to add `compile_commands.json` to `.gitignore` if you use this function.
 
 
 ### Arguments
@@ -279,6 +284,12 @@ jrl_configure_defaults()
 
 ### Description
   Setup the default options for a project (opinionated defaults).
+  * Default build type: Release
+  * Default binary directories: ${CMAKE_BINARY_DIR}/bin and ${CMAKE_BINARY_DIR}/lib (top-level, allows for superbuilds)
+  * Default install directories: via GNUInstallDirs (bin, lib, include, etc.)
+  * Default install prefix: ${CMAKE_BINARY_DIR}/install
+  * Copy compile_commands.json to source directory for clangd support (only if the build directory is not <source_dir>/build)
+  * Add a `uninstall` target to uninstall the project.
 
 
 ### Arguments
