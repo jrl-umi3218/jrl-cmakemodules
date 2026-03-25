@@ -1014,10 +1014,18 @@ def perform_version_updates(
                     curr = check.get_version()
                     dry_run_rows.append((check.name, curr, target_version))
                 else:
+                    try:
+                        old_version = check.get_version()
+                    except Exception:
+                        old_version = "?"
                     check.update_version(target_version)
-                    console.print(
-                        f"[{STYLE_SUCCESS}]Updated[/{STYLE_SUCCESS}] {check.name}"
-                    )
+                    dry_run_rows.append((check.name, old_version, target_version))
+                    line = Text()
+                    line.append(f"  {check.name:<22}", style="cyan")
+                    line.append(old_version, style=STYLE_OLD_VALUE)
+                    line.append("  →  ", style="dim")
+                    line.append(target_version, style=STYLE_NEW_VALUE)
+                    console.print(line)
                 updated_files.append(check.name)
                 updated_file_paths.append(str(check.file_path))
             except Exception as e:
@@ -1026,11 +1034,6 @@ def perform_version_updates(
                 )
                 if not dry_run:
                     failed = True
-        else:
-            if not dry_run:
-                console.print(
-                    f"[{STYLE_WARNING}]Skipping[/{STYLE_WARNING}] {check.name} (not found)"
-                )
 
     return updated_files, updated_file_paths, failed, dry_run_rows
 
@@ -1068,6 +1071,21 @@ def show_dry_run_panel(
         for cmd in git_lines:
             console.print(f"  [{STYLE_MUTED}]{cmd}[/{STYLE_MUTED}]", highlight=False)
     console.print()
+
+
+def show_result_panel(
+    pixi_lock_updated: bool,
+) -> None:
+    """Display a polished summary of completed version updates."""
+    if pixi_lock_updated:
+        line = Text()
+        line.append(f"  {'pixi.lock':<22}", style="cyan")
+        line.append("regenerated via pixi list", style="dim")
+        console.print(line)
+    console.print()
+    console.print(
+        f"[{STYLE_SUCCESS_STRONG}]✓ Version updated successfully[/{STYLE_SUCCESS_STRONG}]"
+    )
 
 
 class RichHelpAction(argparse.Action):
@@ -1274,11 +1292,6 @@ def main():
             console.print(f"[{STYLE_WARNING}]Upgrade cancelled.[/{STYLE_WARNING}]")
             sys.exit(0)
 
-        if not args.dry_run:
-            console.print(
-                f"\n[{STYLE_INFO}]Upgrading version from {current_version} to {new_version_str}...[/{STYLE_INFO}]"
-            )
-
     if new_version_str is None:
         console.print(
             f"[{STYLE_ERROR}]Internal error: target version is undefined.[/{STYLE_ERROR}]"
@@ -1297,6 +1310,10 @@ def main():
         )
 
     try:
+        if not args.dry_run and args.output_format == "text":
+            console.print()
+            console.print("  [bold cyan]Files[/bold cyan]")
+            console.print(f"  [dim]{'─' * 44}[/dim]")
         updated_files, updated_file_paths, failed, dry_run_rows = (
             perform_version_updates(checks, target_version, args.dry_run)
         )
@@ -1393,9 +1410,7 @@ def main():
         sys.exit(0)
     else:
         if not args.short and args.output_format == "text":
-            console.print(
-                f"\n[{STYLE_SUCCESS_STRONG}]SUCCESS:[/{STYLE_SUCCESS_STRONG}] Version updated to {target_version}."
-            )
+            show_result_panel(pixi_lock_path is not None)
 
         # Git operations - only perform if explicitly requested
         if args.git_tag is not None and args.git_commit is None:
