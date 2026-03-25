@@ -5,7 +5,7 @@
 #     "pytest>=8.4.2",
 #     "pytest-cov>=5.0.0",
 #     "pytest-mock>=3.12.0",
-#     # The following dependencies must be kept in sync with release.py
+#     # The following dependencies must be kept in sync with jrl_release.py
 #     "tomlkit",
 #     "ruamel.yaml",
 #     "rich",
@@ -16,12 +16,12 @@
 # ///
 
 """
-Comprehensive unit tests for release.py.
+Comprehensive unit tests for jrl_release.py.
 
 Run with:
-    uv run test_release.py               # Run all tests
-    uv run test_release.py -v            # Verbose output
-    uv run test_release.py -k test_xml   # Run specific tests
+    uv run test_jrl_release.py               # Run all tests
+    uv run test_jrl_release.py -v            # Verbose output
+    uv run test_jrl_release.py -k test_xml   # Run specific tests
 """
 
 import sys
@@ -39,7 +39,7 @@ from rich.console import Console
 
 # Import the module under test
 sys.path.insert(0, str(Path(__file__).parent))
-import release
+import jrl_release as release
 
 
 # ============================================================================
@@ -920,7 +920,7 @@ def test_run_git_command_not_found(mocker):
 
 def test_git_commit_version_success(mocker, tmp_path, capsys):
     """Test git_commit_version with successful commit."""
-    mock_run = mocker.patch("release.run_git_command")
+    mock_run = mocker.patch("jrl_release.run_git_command")
     mock_run.side_effect = [
         (True, ""),  # rev-parse --git-dir
         (True, "M file.txt"),  # status --porcelain
@@ -937,7 +937,7 @@ def test_git_commit_version_success(mocker, tmp_path, capsys):
 
 def test_git_commit_version_not_git_repo(mocker, tmp_path, capsys):
     """Test git_commit_version when not in a git repo."""
-    mock_run = mocker.patch("release.run_git_command")
+    mock_run = mocker.patch("jrl_release.run_git_command")
     mock_run.return_value = (False, "not a git repository")
 
     result = release.git_commit_version(tmp_path, "1.2.3", auto_confirm=True)
@@ -949,7 +949,7 @@ def test_git_commit_version_not_git_repo(mocker, tmp_path, capsys):
 
 def test_git_commit_version_no_changes(mocker, tmp_path, capsys):
     """Test git_commit_version with no changes."""
-    mock_run = mocker.patch("release.run_git_command")
+    mock_run = mocker.patch("jrl_release.run_git_command")
     mock_run.side_effect = [
         (True, ""),  # rev-parse --git-dir
         (True, ""),  # status --porcelain (empty = no changes)
@@ -964,7 +964,7 @@ def test_git_commit_version_no_changes(mocker, tmp_path, capsys):
 
 def test_git_commit_version_user_cancels(mocker, tmp_path, capsys):
     """Test git_commit_version when user cancels."""
-    mock_run = mocker.patch("release.run_git_command")
+    mock_run = mocker.patch("jrl_release.run_git_command")
     mock_run.side_effect = [
         (True, ""),  # rev-parse --git-dir
         (True, "M file.txt"),  # status --porcelain
@@ -981,7 +981,7 @@ def test_git_commit_version_user_cancels(mocker, tmp_path, capsys):
 
 def test_git_tag_version_success(mocker, tmp_path, capsys):
     """Test git_tag_version with successful tag creation."""
-    mock_run = mocker.patch("release.run_git_command")
+    mock_run = mocker.patch("jrl_release.run_git_command")
     mock_run.side_effect = [
         (True, ""),  # rev-parse --git-dir
         (False, ""),  # rev-parse v1.2.3 (tag doesn't exist)
@@ -1000,7 +1000,7 @@ def test_git_tag_version_success(mocker, tmp_path, capsys):
 
 def test_git_tag_version_already_exists(mocker, tmp_path, capsys):
     """Test git_tag_version when tag already exists."""
-    mock_run = mocker.patch("release.run_git_command")
+    mock_run = mocker.patch("jrl_release.run_git_command")
     mock_run.side_effect = [
         (True, ""),  # rev-parse --git-dir
         (True, "abc123"),  # rev-parse v1.2.3 (tag exists)
@@ -1015,7 +1015,7 @@ def test_git_tag_version_already_exists(mocker, tmp_path, capsys):
 
 def test_git_tag_version_user_cancels(mocker, tmp_path):
     """Test git_tag_version when user cancels."""
-    mock_run = mocker.patch("release.run_git_command")
+    mock_run = mocker.patch("jrl_release.run_git_command")
     mock_run.side_effect = [
         (True, ""),  # rev-parse --git-dir
         (False, ""),  # rev-parse v1.2.3 (tag doesn't exist)
@@ -1036,7 +1036,7 @@ def test_git_tag_version_user_cancels(mocker, tmp_path):
 def test_cli_check_version_success(project_dir, mocker, capsys):
     """Test CLI --check-version with all files matching."""
     mocker.patch(
-        "sys.argv", ["release.py", "--root", str(project_dir), "--check-version"]
+        "sys.argv", ["jrl_release.py", "--root", str(project_dir), "--check-version"]
     )
 
     with pytest.raises(SystemExit) as exc_info:
@@ -1052,7 +1052,9 @@ def test_cli_check_version_mismatch(tmp_path, mocker, capsys):
     (tmp_path / "package.xml").write_text("<version>1.0.0</version>")
     (tmp_path / "pyproject.toml").write_text('[project]\nversion = "2.0.0"\n')
 
-    mocker.patch("sys.argv", ["release.py", "--root", str(tmp_path), "--check-version"])
+    mocker.patch(
+        "sys.argv", ["jrl_release.py", "--root", str(tmp_path), "--check-version"]
+    )
 
     with pytest.raises(SystemExit) as exc_info:
         release.main()
@@ -1065,7 +1067,7 @@ def test_cli_check_version_json_output(project_dir, mocker, capsys):
     mocker.patch(
         "sys.argv",
         [
-            "release.py",
+            "jrl_release.py",
             "--root",
             str(project_dir),
             "--check-version",
@@ -1087,7 +1089,7 @@ def test_cli_check_version_short_output(project_dir, mocker, capsys):
     """Test CLI --check-version with --short flag."""
     mocker.patch(
         "sys.argv",
-        ["release.py", "--root", str(project_dir), "--check-version", "--short"],
+        ["jrl_release.py", "--root", str(project_dir), "--check-version", "--short"],
     )
 
     with pytest.raises(SystemExit):
@@ -1099,7 +1101,9 @@ def test_cli_check_version_short_output(project_dir, mocker, capsys):
 
 def test_cli_list_files(project_dir, mocker, capsys):
     """Test CLI --list-files."""
-    mocker.patch("sys.argv", ["release.py", "--root", str(project_dir), "--list-files"])
+    mocker.patch(
+        "sys.argv", ["jrl_release.py", "--root", str(project_dir), "--list-files"]
+    )
 
     with pytest.raises(SystemExit) as exc_info:
         release.main()
@@ -1115,7 +1119,7 @@ def test_cli_list_files_json(project_dir, mocker, capsys):
     mocker.patch(
         "sys.argv",
         [
-            "release.py",
+            "jrl_release.py",
             "--root",
             str(project_dir),
             "--list-files",
@@ -1137,7 +1141,7 @@ def test_cli_update_version(project_dir, mocker, capsys):
     """Test CLI --update-version."""
     mocker.patch(
         "sys.argv",
-        ["release.py", "--root", str(project_dir), "--update-version", "2.3.4"],
+        ["jrl_release.py", "--root", str(project_dir), "--update-version", "2.3.4"],
     )
 
     # main() may or may not raise SystemExit depending on the path
@@ -1156,7 +1160,7 @@ def test_cli_update_version_invalid_semver(project_dir, mocker, capsys):
     """Test CLI --update-version with invalid semver."""
     mocker.patch(
         "sys.argv",
-        ["release.py", "--root", str(project_dir), "--update-version", "1.2"],
+        ["jrl_release.py", "--root", str(project_dir), "--update-version", "1.2"],
     )
 
     with pytest.raises(SystemExit) as exc_info:
@@ -1171,7 +1175,7 @@ def test_cli_bump_patch(project_dir, mocker, capsys):
     mock_confirm.return_value = True
 
     mocker.patch(
-        "sys.argv", ["release.py", "--root", str(project_dir), "--bump", "patch"]
+        "sys.argv", ["jrl_release.py", "--root", str(project_dir), "--bump", "patch"]
     )
 
     release.main()
@@ -1187,7 +1191,7 @@ def test_cli_bump_minor(project_dir, mocker):
     mock_confirm.return_value = True
 
     mocker.patch(
-        "sys.argv", ["release.py", "--root", str(project_dir), "--bump", "minor"]
+        "sys.argv", ["jrl_release.py", "--root", str(project_dir), "--bump", "minor"]
     )
 
     release.main()
@@ -1202,7 +1206,7 @@ def test_cli_bump_major(project_dir, mocker):
     mock_confirm.return_value = True
 
     mocker.patch(
-        "sys.argv", ["release.py", "--root", str(project_dir), "--bump", "major"]
+        "sys.argv", ["jrl_release.py", "--root", str(project_dir), "--bump", "major"]
     )
 
     release.main()
@@ -1215,7 +1219,7 @@ def test_cli_bump_with_auto_confirm(project_dir, mocker):
     """Test CLI --bump with --confirm flag."""
     mocker.patch(
         "sys.argv",
-        ["release.py", "--root", str(project_dir), "--bump", "patch", "--confirm"],
+        ["jrl_release.py", "--root", str(project_dir), "--bump", "patch", "--confirm"],
     )
 
     release.main()
@@ -1230,7 +1234,7 @@ def test_cli_bump_user_cancels(project_dir, mocker, capsys):
     mock_confirm.return_value = False
 
     mocker.patch(
-        "sys.argv", ["release.py", "--root", str(project_dir), "--bump", "patch"]
+        "sys.argv", ["jrl_release.py", "--root", str(project_dir), "--bump", "patch"]
     )
 
     with pytest.raises(SystemExit) as exc_info:
@@ -1247,7 +1251,7 @@ def test_cli_dry_run(project_dir, mocker, capsys):
     """Test CLI --dry-run flag."""
     mocker.patch(
         "sys.argv",
-        ["release.py", "--root", str(project_dir), "--bump", "patch", "--dry-run"],
+        ["jrl_release.py", "--root", str(project_dir), "--bump", "patch", "--dry-run"],
     )
 
     with pytest.raises(SystemExit) as exc_info:
@@ -1265,7 +1269,7 @@ def test_cli_dry_run(project_dir, mocker, capsys):
 
 def test_cli_git_commit_and_tag(project_dir, mocker, capsys):
     """Test CLI with --git-commit and --git-tag flags."""
-    mock_run = mocker.patch("release.run_git_command")
+    mock_run = mocker.patch("jrl_release.run_git_command")
     mock_run.side_effect = [
         (True, ""),  # rev-parse --git-dir (commit check)
         (True, "M file.txt"),  # status --porcelain
@@ -1279,7 +1283,7 @@ def test_cli_git_commit_and_tag(project_dir, mocker, capsys):
     mocker.patch(
         "sys.argv",
         [
-            "release.py",
+            "jrl_release.py",
             "--root",
             str(project_dir),
             "--bump",
@@ -1302,7 +1306,7 @@ def test_cli_short_output(project_dir, mocker, capsys):
     mocker.patch(
         "sys.argv",
         [
-            "release.py",
+            "jrl_release.py",
             "--root",
             str(project_dir),
             "--update-version",
@@ -1322,7 +1326,7 @@ def test_cli_json_output(project_dir, mocker, capsys):
     mocker.patch(
         "sys.argv",
         [
-            "release.py",
+            "jrl_release.py",
             "--root",
             str(project_dir),
             "--update-version",
