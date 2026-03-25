@@ -763,26 +763,20 @@ def update_pixi_lock(root_dir: Path, dry_run: bool = False) -> Optional[str]:
     if dry_run:
         return None
 
+    console.print(
+        f"[{STYLE_INFO}]Running 'pixi list' to update pixi.lock...[/{STYLE_INFO}]"
+    )
     try:
-        console.print(
-            f"[{STYLE_INFO}]Running 'pixi list' to update pixi.lock...[/{STYLE_INFO}]"
-        )
         result = subprocess.run(
             ["pixi", "list"],
             cwd=root_dir,
-            capture_output=True,
-            text=True,
-            timeout=30,
+            timeout=60,
         )
 
         if result.returncode != 0:
             console.print(
                 f"[{STYLE_ERROR}]Error: 'pixi list' returned non-zero exit code: {result.returncode}[/{STYLE_ERROR}]"
             )
-            if result.stderr:
-                console.print(
-                    f"[{STYLE_MUTED}]stderr: {result.stderr.strip()}[/{STYLE_MUTED}]"
-                )
             console.print(
                 f"[{STYLE_ERROR}]Failed to update pixi.lock. Please ensure 'pixi' is installed.[/{STYLE_ERROR}]"
             )
