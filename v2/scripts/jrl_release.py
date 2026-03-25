@@ -11,7 +11,7 @@
 # ///
 
 """
-# release.py
+# jrl_release.py
 
 Version management script for multi-format projects. Keeps version strings in sync across all tracked files and automates the release process.
 
@@ -20,25 +20,25 @@ Version management script for multi-format projects. Keeps version strings in sy
 > Requires [`uv`](https://docs.astral.sh/uv/) — it auto-installs dependencies via PEP 723 inline metadata.
 
 ```bash
-uv run --no-project release.py [OPTIONS]
+uv run --no-project jrl_release.py [OPTIONS]
 ```
 
 ## Common Commands
 
 ```bash
 # Check that all files agree on the current version
-uv run --no-project release.py --check-version
+uv run --no-project jrl_release.py --check-version
 
 # Bump version
-uv run --no-project release.py --bump patch       # 1.0.0 -> 1.0.1
-uv run --no-project release.py --bump minor       # 1.0.0 -> 1.1.0
-uv run --no-project release.py --bump major       # 1.0.0 -> 2.0.0
+uv run --no-project jrl_release.py --bump patch       # 1.0.0 -> 1.0.1
+uv run --no-project jrl_release.py --bump minor       # 1.0.0 -> 1.1.0
+uv run --no-project jrl_release.py --bump major       # 1.0.0 -> 2.0.0
 
 # Set a specific version
-uv run --no-project release.py --update-version 1.2.3
+uv run --no-project jrl_release.py --update-version 1.2.3
 
 # Bump, commit and tag in one step
-uv run --no-project release.py --bump patch --git-commit --git-tag
+uv run --no-project jrl_release.py --bump patch --git-commit --git-tag
 ```
 
 ## Options
