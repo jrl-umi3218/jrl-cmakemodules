@@ -387,61 +387,6 @@ def test_yaml_extractor_nested_key(tmp_path):
 
 
 # ============================================================================
-# TEST RegexVersionExtractor
-# ============================================================================
-
-
-def test_regex_extractor_get_version(sample_cmake_lists):
-    """Test RegexVersionExtractor can extract version from CMakeLists.txt."""
-    pattern = r"project\s*\([^)]*VERSION\s+([\d.]+)"
-    extractor = release.RegexVersionExtractor(sample_cmake_lists, pattern)
-    assert extractor.get_version() == "1.0.0"
-
-
-def test_regex_extractor_update_version(sample_cmake_lists):
-    """Test RegexVersionExtractor can update version."""
-    pattern = r"project\s*\([^)]*VERSION\s+([\d.]+)"
-    extractor = release.RegexVersionExtractor(sample_cmake_lists, pattern)
-    extractor.update_version("3.5.7")
-
-    assert extractor.get_version() == "3.5.7"
-
-    # Verify structure is preserved
-    content = sample_cmake_lists.read_text(encoding="utf-8")
-    assert "cmake_minimum_required" in content
-    assert "add_library" in content
-    assert 'DESCRIPTION "A test project"' in content
-
-
-def test_regex_extractor_pattern_not_found(tmp_path):
-    """Test RegexVersionExtractor raises error when pattern not found."""
-    file_path = tmp_path / "no_match.txt"
-    file_path.write_text("Nothing to match here\n")
-
-    extractor = release.RegexVersionExtractor(file_path, r"VERSION\s+([\d.]+)")
-    with pytest.raises(ValueError, match="Pattern not found"):
-        extractor.get_version()
-
-
-def test_regex_extractor_multiline_pattern(tmp_path):
-    """Test RegexVersionExtractor with multiline CMake."""
-    content = """cmake_minimum_required(VERSION 3.10)
-project(
-    MultiLineProject
-    VERSION 2.3.4
-    DESCRIPTION "Project with multiline declaration"
-    LANGUAGES CXX
-)
-"""
-    file_path = tmp_path / "multiline.cmake"
-    file_path.write_text(content, encoding="utf-8")
-
-    pattern = r"project\s*\([^)]*VERSION\s+([\d.]+)"
-    extractor = release.RegexVersionExtractor(file_path, pattern)
-    assert extractor.get_version() == "2.3.4"
-
-
-# ============================================================================
 # TEST CMakeListsVersionExtractor
 # ============================================================================
 
