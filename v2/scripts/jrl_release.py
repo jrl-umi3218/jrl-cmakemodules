@@ -238,46 +238,6 @@ class YamlVersionExtractor(VersionExtractor):
             self.yaml.dump(data, f)
 
 
-class RegexVersionExtractor(VersionExtractor):
-    def __init__(self, file_path: Path, pattern: str):
-        super().__init__(file_path)
-        self.pattern = re.compile(pattern, re.MULTILINE)
-
-    def get_version(self) -> str:
-        with open(self.file_path, "r", encoding="utf-8") as f:
-            content = f.read()
-
-        match = self.pattern.search(content)
-        if match:
-            return match.group(1)
-        raise ValueError(f"Pattern not found in {self.name}")
-
-    def update_version(self, new_version: str) -> None:
-        with open(self.file_path, "r", encoding="utf-8") as f:
-            content = f.read()
-
-        # We need to replace the group(1) with new_version.
-        # re.sub with a function allows us to reconstruct the string using the match
-        def repl(match):
-            # match.group(0) is the whole match
-            # match.group(1) is the version part
-            # We want to keep everything before and after group(1) in group(0)
-            start, end = match.span(1)
-            full_start, _ = match.span(0)
-
-            # offset in the full match
-            inner_start = start - full_start
-            inner_end = end - full_start
-
-            original_text = match.group(0)
-            return original_text[:inner_start] + new_version + original_text[inner_end:]
-
-        new_content = self.pattern.sub(repl, content, count=1)
-
-        with open(self.file_path, "w", encoding="utf-8") as f:
-            f.write(new_content)
-
-
 class CMakeListsVersionExtractor(VersionExtractor):
     """Specialized extractor for CMakeLists.txt that uses cmake-parser
     and handles both direct VERSION and variables (e.g., from package.xml)."""
