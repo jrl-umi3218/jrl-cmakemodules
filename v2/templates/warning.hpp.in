@@ -1,0 +1,28 @@
+/// Copyright 2025-2026 Inria. All rights reserved.
+#pragma once
+
+// Emits a warning in a portable way.
+//
+// To emit a warning, one can insert:
+//
+// #pragma message @JRL_LIBRARY_NAME_UPPERCASE@_WARN("your warning message here")
+//
+// The use of this syntax is required as this is /not/ a standardized
+// feature of C++ language or preprocessor, even if most of the
+// compilers support it.
+
+#define @JRL_LIBRARY_NAME_UPPERCASE@_WARN_STRINGISE_IMPL(x) #x
+#define @JRL_LIBRARY_NAME_UPPERCASE@_WARN_STRINGISE(x) \
+       @JRL_LIBRARY_NAME_UPPERCASE@_WARN_STRINGISE_IMPL(x)
+#ifdef __GNUC__
+# define @JRL_LIBRARY_NAME_UPPERCASE@_WARN(exp) ("WARNING: " exp)
+#else
+# ifdef _MSC_VER
+#  define FILE_LINE_LINK __FILE__ "(" \
+         @JRL_LIBRARY_NAME_UPPERCASE@_WARN_STRINGISE(__LINE__) ") : "
+#  define @JRL_LIBRARY_NAME_UPPERCASE@_WARN(exp) (FILE_LINE_LINK "WARNING: " exp)
+# else
+// If the compiler is not recognized, drop the feature.
+#  define @JRL_LIBRARY_NAME_UPPERCASE@_WARN(MSG) /* nothing */
+# endif // __MSVC__
+#endif // __GNUC__
