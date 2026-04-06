@@ -62,8 +62,7 @@ macro(DISTCHECK_SETUP)
     endif(APPLE)
 
     string(
-      REPLACE
-      "${CMAKE_SOURCE_DIR}"
+      REPLACE "${CMAKE_SOURCE_DIR}"
       "${SRCDIR}"
       NEW_CMAKE_BINARY_DIR
       "${CMAKE_BINARY_DIR}"

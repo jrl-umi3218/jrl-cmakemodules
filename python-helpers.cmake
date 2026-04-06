@@ -102,8 +102,7 @@ endmacro()
 function(PYTHON_BUILD_GET_TARGET python_build_target)
   # Regex from IsValidTargetName in CMake/Source/cmGeneratorExpression.cxx
   string(
-    REGEX REPLACE
-    "[^A-Za-z0-9_.+-]"
+    REGEX REPLACE "[^A-Za-z0-9_.+-]"
     "_"
     compile_pyc
     "${PROJECT_NAME}_compile_pyc_${CMAKE_CURRENT_SOURCE_DIR}"

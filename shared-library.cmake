@@ -37,8 +37,7 @@ elseif(UNIX)
     ERROR_VARIABLE LD_VERSION_STR
   )
   string(
-    REGEX MATCH
-    "([0-9]+\\.[0-9]+(\\.[0-9]+)?)"
+    REGEX MATCH "([0-9]+\\.[0-9]+(\\.[0-9]+)?)"
     LD_VERSION
     ${LD_VERSION_STR}
   )

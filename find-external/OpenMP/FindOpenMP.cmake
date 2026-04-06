@@ -320,15 +320,13 @@ function(_OPENMP_GET_FLAGS LANG FLAG_MODE OPENMP_FLAG_VAR OPENMP_LIB_NAMES_VAR)
             NAME_WE
           )
           string(
-            REGEX REPLACE
-            "([][+.*?()^$])"
+            REGEX REPLACE "([][+.*?()^$])"
             "\\\\\\1"
             _OPENMP_IMPLICIT_LIB_PLAIN_ESC
             "${_OPENMP_IMPLICIT_LIB_PLAIN}"
           )
           string(
-            REGEX REPLACE
-            "([][+.*?()^$])"
+            REGEX REPLACE "([][+.*?()^$])"
             "\\\\\\1"
             _OPENMP_IMPLICIT_LIB_PATH_ESC
             "${_OPENMP_IMPLICIT_LIB}"
@@ -580,8 +578,7 @@ macro(_OPENMP_SET_VERSION_BY_SPEC_DATE LANG)
 
   if(OpenMP_${LANG}_SPEC_DATE)
     string(
-      REGEX MATCHALL
-      "${OpenMP_${LANG}_SPEC_DATE}=([0-9]+)\\.([0-9]+)"
+      REGEX MATCHALL "${OpenMP_${LANG}_SPEC_DATE}=([0-9]+)\\.([0-9]+)"
       _version_match
       "${OpenMP_SPEC_DATE_MAP}"
     )

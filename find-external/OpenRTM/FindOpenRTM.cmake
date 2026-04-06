@@ -65,8 +65,7 @@ if(UNIX)
 
     if(RESULT EQUAL 0)
       string(
-        REGEX MATCHALL
-        "-D.*[^ ;]+"
+        REGEX MATCHALL "-D.*[^ ;]+"
         OPENRTM_DEFINITIONS
         ${OPENRTM_CXX_FLAGS}
       )
@@ -83,14 +82,12 @@ if(UNIX)
 
     if(RESULT EQUAL 0)
       string(
-        REGEX MATCHALL
-        "-L[^ ;]+"
+        REGEX MATCHALL "-L[^ ;]+"
         OPENRTM_LIBRARY_DIRS
         ${OPENRTM_LIBRARIES}
       )
       string(
-        REGEX REPLACE
-        "-L"
+        REGEX REPLACE "-L"
         ";"
         OPENRTM_LIBRARY_DIRS
         ${OPENRTM_LIBRARY_DIRS}

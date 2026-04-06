@@ -88,16 +88,14 @@ function(GENERATE_STUBS module_path module_name module_install_dir)
   # Regex from IsValidTargetName in CMake/Source/cmGeneratorExpression.cxx
   if(NOT module_path)
     string(
-      REGEX REPLACE
-      "[^A-Za-z0-9_.+-]"
+      REGEX REPLACE "[^A-Za-z0-9_.+-]"
       "_"
       target_name
       "${PROJECT_NAME}-generate_stubs_${module_name}"
     )
   else()
     string(
-      REGEX REPLACE
-      "[^A-Za-z0-9_.+-]"
+      REGEX REPLACE "[^A-Za-z0-9_.+-]"
       "_"
       target_name
       "${PROJECT_NAME}-generate_stubs_${module_path}_${module_name}"

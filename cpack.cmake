@@ -30,8 +30,7 @@ macro(ADD_CMAKE_DEPENDENCY PKG_CONFIG_STRING)
   # Carefull the space in front of the matching string is important to avoid
   # confusion with package name.
   string(
-    REGEX MATCHALL
-    " [0-9]+.[0-9]+(.[a-z0-9-])*"
+    REGEX MATCHALL " [0-9]+.[0-9]+(.[a-z0-9-])*"
     VERSION
     "${PKG_CONFIG_STRING}"
   )

@@ -769,8 +769,7 @@ function(MAKE_CYTHON_BINDINGS PACKAGE)
           OUTPUT_STRIP_TRAILING_WHITESPACE
         )
         string(
-          REPLACE
-          "python3/"
+          REPLACE "python3/"
           "${PYTHON_VERSION}/"
           PYTHON_INSTALL_DESTINATION
           "${PYTHON_INSTALL_DESTINATION}"

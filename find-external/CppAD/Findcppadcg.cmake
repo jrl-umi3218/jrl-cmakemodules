@@ -25,8 +25,7 @@ if(
     REGEX "^#define[\t ]+CPPAD_CG_VERSION[\t ]+\"cppadcg-.*\""
   )
   string(
-    REGEX REPLACE
-    "^#define[\t ]+CPPAD_CG_VERSION[\t ]+\"cppadcg-([^\"]*)\".*"
+    REGEX REPLACE "^#define[\t ]+CPPAD_CG_VERSION[\t ]+\"cppadcg-([^\"]*)\".*"
     "\\1"
     cppadcg_VERSION
     "${cppadcg_version_str}"
