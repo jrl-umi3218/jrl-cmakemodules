@@ -1114,7 +1114,21 @@ jrl_target_set_default_compile_options(
 
 ### Description
   Enable the most common warnings for MSVC, GCC and Clang.
-  Adding some extra warning on msvc to mimic gcc/clang behavior.
+
+  **MSVC** (`/W4` level + adjustments):
+  * `/W4` — Enable most warnings
+  * `/wd4250` — Suppress "inherits via dominance"
+  * `/wd4706` — Suppress assignment within conditional expression
+  * `/wd5030` — Suppress unrecognized attribute warnings
+  * `/wd4996` — Suppress "function may be unsafe" deprecation warnings
+  * `/we4834` — Error on discarding return value of `[[nodiscard]]` function
+  * `/we4062` — Error on unhandled enumerator in switch
+
+  **GCC / Clang**:
+  * `-Wall` — Enable most warnings
+  * `-Wextra` — Enable extra warnings
+  * `-Wconversion` — Warn on implicit type conversions that may lose data
+  * `-Wpedantic` — Warn on non-standard C++ usage
 
 
 ### Arguments
