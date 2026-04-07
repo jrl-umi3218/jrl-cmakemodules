@@ -376,9 +376,14 @@ jrl_target_enforce_msvc_conformance(
 
 
 ### Description
-  Enforce MSVC c++ conformance mode so msvc behaves more like gcc and clang.
-  If the compiler id is not MSVC, this function does nothing.
+  Enforce MSVC C++ conformance mode so MSVC behaves more like GCC and Clang.
+  If the compiler is not MSVC, this function does nothing.
 
+  **MSVC** options applied:
+  * `/permissive-`: Disable non-standard extensions (enables conformance mode)
+  * `/Zc:__cplusplus`: Defines the `__cplusplus` compile definition
+  * `/EHsc`: Enable standard C++ exception handling semantics
+  * `/bigobj`: Increase the number of sections in object files (avoids C1128 fatal error)
 
 ### Arguments
 * `target_name`: The target to modify.
