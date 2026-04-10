@@ -152,7 +152,7 @@ macro(RELEASE_SETUP)
         COMMAND
           # Note: Only the package version should be updated, not its dependencies, as this could break the package
             echo "pixi found: updating pixi.lock" &&
-            "${PIXI}" update ${PROJECT_NAME} &&
+            "${PIXI}" lock &&
             if ! (git diff --quiet pixi.lock) ; then
             (
               ${GIT} add pixi.lock &&
@@ -171,7 +171,7 @@ macro(RELEASE_SETUP)
             echo "===========================================" &&
             echo "= pixi not found! Unable to update lockfile" &&
             echo "= The following commands were not executed:" &&
-            echo "=   pixi update ${PROJECT_NAME}" &&
+            echo "=   pixi lock" &&
             echo "=   ${GIT} add pixi.lock" &&
             echo "=   ${GIT} commit -m \"release: Update pixi.lock with ${PROJECT_NAME} version to $$VERSION\"" &&
             echo "==========================================="
