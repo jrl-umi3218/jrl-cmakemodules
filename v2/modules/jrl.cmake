@@ -4276,8 +4276,7 @@ function(_jrl_generate_api_doc input_file output_file)
     set(doc_start "__JRL_DOC_START__")
     set(doc_end "__JRL_DOC_END__")
     string(
-        REGEX REPLACE
-        "(^|\n)[ \t]*#\\[=+\\[[ \t]*\n"
+        REGEX REPLACE "(^|\n)[ \t]*#\\[=+\\[[ \t]*\n"
         "\\1${doc_start}"
         content_marked
         "${content_escaped}"
