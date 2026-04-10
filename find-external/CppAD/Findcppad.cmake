@@ -31,7 +31,7 @@ if(cppad_INCLUDE_DIR AND EXISTS "${cppad_INCLUDE_DIR}/cppad/configure.hpp")
   )
   string(
     REGEX REPLACE
-    "^# *define[\t ]+CPPAD_PACKAGE_STRING[\t ]+\"cppad-([^\"]*)\".*"
+      "^# *define[\t ]+CPPAD_PACKAGE_STRING[\t ]+\"cppad-([^\"]*)\".*"
     "\\1"
     cppad_VERSION
     "${cppad_version_str}"

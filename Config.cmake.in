@@ -18,11 +18,18 @@ endif()
 set("@PROJECT_NAME@_INCLUDE_DIRS" "@PACKAGE_INSTALL_FULL_INCLUDEDIR@")
 set("@PROJECT_NAME_UPPER@_INCLUDE_DIRS" "@PACKAGE_INSTALL_FULL_INCLUDEDIR@")
 set("@PROJECT_NAME@_DOXYGENDOCDIR" "@PACKAGE_INSTALL_FULL_DOCDIR@/doxygen-html")
-set("@PROJECT_NAME_UPPER@_DOXYGENDOCDIR" "@PACKAGE_INSTALL_FULL_DOCDIR@/doxygen-html")
+set(
+  "@PROJECT_NAME_UPPER@_DOXYGENDOCDIR"
+  "@PACKAGE_INSTALL_FULL_DOCDIR@/doxygen-html"
+)
 set("@PROJECT_NAME@_DEPENDENCIES" "@PACKAGE_CONFIG_DEPENDENCIES_PROJECTS@")
 set("@PROJECT_NAME@_PKG_CONFIG_DEPENDENCIES" "@_PKG_CONFIG_REQUIRES_LIST@")
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} @PACKAGE_CONFIG_DEPENDENCIES_FIND_EXTERNAL@)
+set(
+  CMAKE_MODULE_PATH
+  ${CMAKE_MODULE_PATH}
+  @PACKAGE_CONFIG_DEPENDENCIES_FIND_EXTERNAL@
+)
 
 # Find absolute library paths for all _PKG_CONFIG_LIBS as CMake expects full paths, while pkg-config does not.
 set(_PACKAGE_CONFIG_LIBRARIES "")
@@ -31,10 +38,20 @@ set("_@PROJECT_NAME@_PKG_CONFIG_LIBS_LIST" "@_PKG_CONFIG_LIBS@")
 if(_@PROJECT_NAME@_PKG_CONFIG_LIBS_LIST)
   string(FIND ${_@PROJECT_NAME@_PKG_CONFIG_LIBS_LIST} ", " _is_comma_space)
   while(_is_comma_space GREATER -1)
-    string(REPLACE ", " "," _@PROJECT_NAME@_PKG_CONFIG_LIBS_LIST "${_@PROJECT_NAME@_PKG_CONFIG_LIBS_LIST}")
+    string(
+      REPLACE ", "
+      ","
+      _@PROJECT_NAME@_PKG_CONFIG_LIBS_LIST
+      "${_@PROJECT_NAME@_PKG_CONFIG_LIBS_LIST}"
+    )
     string(FIND ${_@PROJECT_NAME@_PKG_CONFIG_LIBS_LIST} ", " _is_comma_space)
   endwhile()
-  string(REPLACE " " ";" _@PROJECT_NAME@_PKG_CONFIG_LIBS_LIST "${_@PROJECT_NAME@_PKG_CONFIG_LIBS_LIST}")
+  string(
+    REPLACE " "
+    ";"
+    _@PROJECT_NAME@_PKG_CONFIG_LIBS_LIST
+    "${_@PROJECT_NAME@_PKG_CONFIG_LIBS_LIST}"
+  )
   set(LIBDIR_HINTS ${_@PROJECT_NAME@_PKG_CONFIG_LIBDIR})
   foreach(component ${_@PROJECT_NAME@_PKG_CONFIG_LIBS_LIST})
     string(STRIP ${component} component)
@@ -51,17 +68,20 @@ if(_@PROJECT_NAME@_PKG_CONFIG_LIBS_LIST)
       string(REGEX REPLACE "^-l" "" lib ${component})
       find_library(abs_lib_${lib} ${lib} HINTS ${LIBDIR_HINTS})
       if(NOT abs_lib_${lib})
-        IF(_LIBDIR_HINTS)
+        if(_LIBDIR_HINTS)
           message(STATUS "${lib} searched on ${_LIBDIR_HINTS} not FOUND.")
-        ELSE()
+        else()
           message(STATUS "${lib} not FOUND.")
-        ENDIF()
+        endif()
       else()
-        IF(_LIBDIR_HINTS)
-          message(STATUS "${lib} searched on ${_LIBDIR_HINTS} FOUND. ${lib} at ${abs_lib_${lib}}")
-        ELSE()
+        if(_LIBDIR_HINTS)
+          message(
+            STATUS
+            "${lib} searched on ${_LIBDIR_HINTS} FOUND. ${lib} at ${abs_lib_${lib}}"
+          )
+        else()
           message(STATUS "${lib} FOUND. ${lib} at ${abs_lib_${lib}}")
-        ENDIF()
+        endif()
         list(APPEND _PACKAGE_CONFIG_LIBRARIES "${abs_lib_${lib}}")
       endif()
       unset(abs_lib_${lib} CACHE)
@@ -79,17 +99,20 @@ if(_@PROJECT_NAME@_PKG_CONFIG_LIBS_LIST)
         string(REGEX REPLACE "^-l" "" lib ${lib_info})
         find_library(abs_lib_${lib} ${lib} HINTS ${LIBDIR_HINTS})
         if(NOT abs_lib_${lib})
-          IF(_LIBDIR_HINTS)
+          if(_LIBDIR_HINTS)
             message(STATUS "${lib} searched on ${_LIBDIR_HINTS} not FOUND.")
-          ELSE()
+          else()
             message(STATUS "${lib} not FOUND.")
-          ENDIF()
+          endif()
         else()
-          IF(_LIBDIR_HINTS)
-            message(STATUS "${lib} searched on ${_LIBDIR_HINTS} FOUND. ${lib} at ${abs_lib_${lib}}")
-          ELSE()
+          if(_LIBDIR_HINTS)
+            message(
+              STATUS
+              "${lib} searched on ${_LIBDIR_HINTS} FOUND. ${lib} at ${abs_lib_${lib}}"
+            )
+          else()
             message(STATUS "${lib} FOUND. ${lib} at ${abs_lib_${lib}}")
-          ENDIF()
+          endif()
           list(APPEND _PACKAGE_CONFIG_LIBRARIES "${abs_lib_${lib}}")
         endif()
         unset(abs_lib_${lib} CACHE)
@@ -120,15 +143,15 @@ else()
   @PACKAGE_DEPENDENCIES_FIND_DEPENDENCY@
 endif()
 
-IF(COMMAND ADD_REQUIRED_DEPENDENCY)
-  FOREACH(pkgcfg_dep ${@PROJECT_NAME@_PKG_CONFIG_DEPENDENCIES})
+if(COMMAND ADD_REQUIRED_DEPENDENCY)
+  foreach(pkgcfg_dep ${@PROJECT_NAME@_PKG_CONFIG_DEPENDENCIES})
     # Avoid duplicated lookup.
-    LIST (FIND $_PKG_CONFIG_REQUIRES "${pkgcfg_dep}" _index)
-    IF(${_index} EQUAL -1)
+    list(FIND $_PKG_CONFIG_REQUIRES "${pkgcfg_dep}" _index)
+    if(${_index} EQUAL -1)
       ADD_REQUIRED_DEPENDENCY(${pkgcfg_dep})
-    ENDIF()
-  ENDFOREACH()
-ENDIF(COMMAND ADD_REQUIRED_DEPENDENCY)
+    endif()
+  endforeach()
+endif(COMMAND ADD_REQUIRED_DEPENDENCY)
 
 @INCLUDE_TARGETS_FILE@
 

@@ -52,8 +52,7 @@ if(TARGET FFmpeg::avutil)
       REGEX "FFMPEG_VERSION"
     )
     string(
-      REGEX REPLACE
-      ".*\"n?\(.*\)\""
+      REGEX REPLACE ".*\"n?\(.*\)\""
       "\\1"
       FFmpeg_VERSION
       "${_ffmpeg_version}"

@@ -768,8 +768,7 @@ macro(_SETUP_PROJECT_DOCUMENTATION_FINALIZE)
         # convert comma-separated list to space-separated list string.
         list(REMOVE_DUPLICATES _TAGFILES_FROM_DEPENDENCIES)
         string(
-          REPLACE
-          ";"
+          REPLACE ";"
           " "
           DOXYGEN_TAGFILES_FROM_DEPENDENCIES
           "${_TAGFILES_FROM_DEPENDENCIES}"

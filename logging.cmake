@@ -111,8 +111,7 @@ function(LOGGING_INITIALIZE)
 
   if(NOT "$ENV{PKG_CONFIG_PATH}" STREQUAL "")
     string(
-      REPLACE
-      "${LIST_SEPARATOR}"
+      REPLACE "${LIST_SEPARATOR}"
       "\nPKG_CONFIG_PATH "
       PKG_CONFIG_PATH
       "$ENV{PKG_CONFIG_PATH}"

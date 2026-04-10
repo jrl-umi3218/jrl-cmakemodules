@@ -43,22 +43,19 @@ if(MPFR_INCLUDES)
   file(READ "${MPFR_INCLUDES}/mpfr.h" _mpfr_version_header)
 
   string(
-    REGEX MATCH
-    "define[ \t]+MPFR_VERSION_MAJOR[ \t]+([0-9]+)"
+    REGEX MATCH "define[ \t]+MPFR_VERSION_MAJOR[ \t]+([0-9]+)"
     _mpfr_major_version_match
     "${_mpfr_version_header}"
   )
   set(MPFR_MAJOR_VERSION "${CMAKE_MATCH_1}")
   string(
-    REGEX MATCH
-    "define[ \t]+MPFR_VERSION_MINOR[ \t]+([0-9]+)"
+    REGEX MATCH "define[ \t]+MPFR_VERSION_MINOR[ \t]+([0-9]+)"
     _mpfr_minor_version_match
     "${_mpfr_version_header}"
   )
   set(MPFR_MINOR_VERSION "${CMAKE_MATCH_1}")
   string(
-    REGEX MATCH
-    "define[ \t]+MPFR_VERSION_PATCHLEVEL[ \t]+([0-9]+)"
+    REGEX MATCH "define[ \t]+MPFR_VERSION_PATCHLEVEL[ \t]+([0-9]+)"
     _mpfr_patchlevel_version_match
     "${_mpfr_version_header}"
   )

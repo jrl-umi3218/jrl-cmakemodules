@@ -11,8 +11,7 @@ mark_as_advanced(mimalloc_LIBRARY mimalloc_INCLUDE_DIR)
 if(NOT TARGET mimalloc)
   file(READ "${mimalloc_INCLUDE_DIR}/mimalloc.h" mimalloc_h)
   string(
-    REGEX MATCH
-    "#define[ \t]+MI_MALLOC_VERSION[ \t]+([0-9])([0-9])2"
+    REGEX MATCH "#define[ \t]+MI_MALLOC_VERSION[ \t]+([0-9])([0-9])2"
     _
     ${mimalloc_h}
   )

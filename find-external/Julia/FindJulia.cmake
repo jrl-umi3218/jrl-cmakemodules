@@ -31,16 +31,14 @@ else()
   find_file(Julia_VERSION_INCLUDE julia_version.h PATH_SUFFIXES include/julia)
   file(READ ${Julia_VERSION_INCLUDE} Julia_VERSION_STRING)
   string(
-    REGEX MATCH
-    "JULIA_VERSION_STRING.*"
+    REGEX MATCH "JULIA_VERSION_STRING.*"
     Julia_VERSION_STRING
     ${Julia_VERSION_STRING}
   )
 endif()
 
 string(
-  REGEX REPLACE
-  ".*([0-9]+\\.[0-9]+\\.[0-9]+).*"
+  REGEX REPLACE ".*([0-9]+\\.[0-9]+\\.[0-9]+).*"
   "\\1"
   Julia_VERSION_STRING
   "${Julia_VERSION_STRING}"

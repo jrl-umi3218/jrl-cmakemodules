@@ -46,8 +46,7 @@ macro(_SETUP_DEBIAN)
 
           # From the v[0-9]+.[0-9]+.[0-9]+ version remove the v in prefix.
           string(
-            REGEX REPLACE
-            "^v"
+            REGEX REPLACE "^v"
             ""
             LPROJECT_RELEASE_VERSION
             "${LGIT_DESCRIBE_OUTPUT}"
