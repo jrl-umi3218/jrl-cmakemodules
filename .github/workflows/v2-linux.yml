@@ -108,7 +108,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: Install dependencies
-        run: pacman -Syu --noconfirm cmake ninja gcc catch2 python-pytest nanobind python-numpy boost
+        run: pacman -Syu --noconfirm cmake ninja gcc catch2 python-pytest nanobind python-numpy boost boost-libs
 
       - name: Configure project
         run: cmake -G Ninja -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo -DJRL_CMAKEMODULES_BUILD_TESTS=ON
