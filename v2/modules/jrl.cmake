@@ -2189,10 +2189,14 @@ function(_jrl_export_dependencies)
         GLOBAL
         PROPERTY _jrl_${PROJECT_NAME}_package_dependencies
     )
+
     if(all_imported_libraries AND NOT package_dependencies_json_content)
         message(
-            FATAL_ERROR
-            "Imported libraries found, but no package dependencies recorded with jrl_find_package()"
+            WARNING
+            "Imported libraries found, but no package dependencies recorded with jrl_find_package().
+            Imported libraries: '${all_imported_libraries}'
+            Did you forget to use jrl_find_package() to import those dependencies?
+            "
         )
     endif()
 
@@ -2600,7 +2604,10 @@ function(jrl_export_package)
     include(CMakePackageConfigHelpers)
     _jrl_check_var_defined(PROJECT_NAME)
     _jrl_check_var_defined(PROJECT_VERSION)
-    _jrl_check_var_defined(CMAKE_INSTALL_BINDIR)
+    _jrl_check_var_defined(CMAKE_INSTALL_BINDIR
+        "CMAKE_INSTALL_BINDIR is not defined.
+        Use jrl_configure_defaults(), or jrl_configure_default_install_dirs(), or include(GNUInstallDirs)."
+    )
     _jrl_check_var_defined(CMAKE_INSTALL_LIBDIR)
     _jrl_check_var_defined(CMAKE_INSTALL_INCLUDEDIR)
 
@@ -4173,10 +4180,8 @@ function(jrl_generate_ros2_package_files)
         set(install_destination ${arg_DESTINATION})
     else()
         _jrl_check_var_defined(CMAKE_INSTALL_DATAROOTDIR
-        "
-        CMAKE_INSTALL_DATAROOTDIR is not defined.
-        Did you call either jrl_configure_defaults(), or jrl_configure_default_install_dirs(), or include(GNUInstallDirs) ?
-        "
+            "CMAKE_INSTALL_DATAROOTDIR is not defined.
+            Use jrl_configure_defaults(), or jrl_configure_default_install_dirs(), or include(GNUInstallDirs)."
         )
         set(install_destination ${CMAKE_INSTALL_DATAROOTDIR})
     endif()
