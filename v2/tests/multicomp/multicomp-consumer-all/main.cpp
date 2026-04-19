@@ -1,4 +1,5 @@
 #include <multicomp-library/BaseMath.hpp>
+#include <multicomp-library/ExtraFormatter.hpp>
 #include <multicomp-library/ExtraUtils.hpp>
 
 auto main() -> int {
