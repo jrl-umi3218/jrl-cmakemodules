@@ -2160,45 +2160,32 @@ function(_jrl_export_dependencies)
         set(INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
     endif()
 
-    # TODO: filter the buildsystems targets of the INTERFACE_LINK_LIBRARIES.
-    # First, get a list of all the buildsystem targets, and filter them
-    # in generate-dependencies.cmake.in (not here, because of generator expressions).
-    # Note that:
-    # get_property(buildsystem_targets DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY BUILDSYSTEM_TARGETS)
-    # only get the buildsystems targets difined in the current directory. It's difficult to get the full complete list.
-    set(all_imported_libraries "")
+    # Gather the interface link libraries of all targets present in the export component.
+    # It contains external libraries but also buildsystem target, with or without generator expressions.
+    set(all_interface_link_libraries "")
     foreach(target ${arg_TARGETS})
         get_target_property(interface_link_libraries ${target} INTERFACE_LINK_LIBRARIES)
+
         if(NOT interface_link_libraries)
             message(DEBUG "Target '${target}' has no INTERFACE_LINK_LIBRARIES.")
             continue()
         endif()
-        foreach(lib ${interface_link_libraries})
-            if(lib IN_LIST all_imported_libraries)
-                continue()
-            endif()
 
-            list(APPEND all_imported_libraries ${lib})
-        endforeach()
+        list(APPEND all_interface_link_libraries ${interface_link_libraries})
     endforeach()
 
-    message(DEBUG "All link libraries for targets '${arg_TARGETS}': ${all_imported_libraries}")
+    list(REMOVE_DUPLICATES all_interface_link_libraries)
+
+    message(
+        DEBUG
+        "All interface link libraries for targets '${arg_TARGETS}': ${all_interface_link_libraries}"
+    )
 
     get_property(
         package_dependencies_json_content
         GLOBAL
         PROPERTY _jrl_${PROJECT_NAME}_package_dependencies
     )
-
-    if(all_imported_libraries AND NOT package_dependencies_json_content)
-        message(
-            WARNING
-            "Imported libraries found, but no package dependencies recorded with jrl_find_package().
-            Imported libraries: '${all_imported_libraries}'
-            Did you forget to use jrl_find_package() to import those dependencies?
-            "
-        )
-    endif()
 
     if(NOT package_dependencies_json_content)
         message(DEBUG "No package dependencies recorded with jrl_find_package()")
@@ -2209,13 +2196,14 @@ function(_jrl_export_dependencies)
         CONTENT
             "
 # Generated file - do not edit
-# This file contains the list of imported libraries that needs to be exported
-set(imported_libraries [[${all_imported_libraries}]])
-set(package_dependencies_json_content [[${package_dependencies_json_content}]])
+# The targets declared via jrl_add_export_component(NAME <component_name> TARGETS <target1> <target2> ...)
+set(export_component_targets [[${arg_TARGETS}]])
 
-# For debugging purposes
-set(targets [[${arg_TARGETS}]])
-set(buildsystem_targets [[${buildsystem_targets}]])
+# The resolved list of all interface link libraries the targets above, after generator expression evaluation.
+set(all_interface_link_libraries [[${all_interface_link_libraries}]])
+
+# The list of external dependencies recorded via jrl_find_package()
+set(package_dependencies_json_content [[${package_dependencies_json_content}]])
 "
     )
     # needs @INSTALL_DESTINATION@
