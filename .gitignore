@@ -9,3 +9,15 @@ install*/
 *.conda
 .coverage
 htmlcov/
+build*/
+install*/
+.pytest_cache/
+.cache/
+.pixi/
+__pycache__/
+Xcode*
+*.pyc
+*~
+*.egg-info
+compile_commands.json
+cmake-profiling.json
