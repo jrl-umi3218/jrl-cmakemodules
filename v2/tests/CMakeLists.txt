@@ -88,6 +88,8 @@ set_tests_properties("Check jrl.cmake" PROPERTIES DEPENDS jrl-cmakemodules)
 add_cmake_test(NAME packaging/find_package_v1 DEPENDS jrl-cmakemodules)
 add_cmake_test(NAME packaging/find_package_v2 DEPENDS jrl-cmakemodules)
 
+add_cmake_test(NAME regular_find_package DEPENDS jrl-cmakemodules)
+
 add_cmake_test(NAME test_project DEPENDS jrl-cmakemodules)
 add_cmake_test(NAME test_project EXTRA_OPTIONS "--build-noclean" DEPENDS jrl-cmakemodules)
 add_cmake_test(NAME test_project EXTRA_OPTIONS "--build-noclean" "--build-two-config" DEPENDS jrl-cmakemodules)
