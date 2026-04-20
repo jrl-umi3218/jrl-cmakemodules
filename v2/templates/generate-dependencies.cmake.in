@@ -56,6 +56,7 @@ foreach(ll IN LISTS all_interface_link_libraries)
     endif()
 
     if(NOT package_dependencies_json_content)
+        list(APPEND unknwon_libraries ${ll})
         continue()
     endif()
 
@@ -141,7 +142,7 @@ if(unknwon_libraries)
     message(
         WARNING
         "
-The following dependencies/libraries were found in the 'INTERFACE_LINK_LIBRARIES' of the export component, but do seem to have been imported via jrl_find_package():
+The following dependencies/libraries were found in the 'INTERFACE_LINK_LIBRARIES' of the export component, but have not been imported via jrl_find_package():
 
 '${unknwon_libraries}'
 
