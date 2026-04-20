@@ -52,6 +52,7 @@ pytest = ">=9.0.0,<10"
 libboost-python-devel = ">=1.82.0,<2"
 numpy = ">=2.4.2,<3"
 uv = ">=0.6.0"
+eigen=">=3.4.0"
 
 [feature.test.tasks]
 _configure = { cmd = [
