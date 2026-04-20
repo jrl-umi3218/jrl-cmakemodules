@@ -412,36 +412,6 @@ function(_jrl_find_modules_dir output_var)
 endfunction()
 
 #[============================================================================[
-# `_jrl_integrate_modules`
-
-```cpp
-_jrl_integrate_modules()
-```
-
-**Type:** function
-
-
-### Description
-  Internal function to integrate external modules and other logic.
-  It is called automatically when the module is loaded.
-
-
-### Arguments
-  None
-
-
-### Example
-```cmake
-_jrl_integrate_modules()
-```
-#]============================================================================]
-function(_jrl_integrate_modules)
-    include(${CMAKE_CURRENT_FUNCTION_LIST_DIR}/PrintSystemInfo.cmake)
-endfunction()
-
-_jrl_integrate_modules()
-
-#[============================================================================[
 # `jrl_copy_compile_commands_in_source_dir`
 
 ```cpp
