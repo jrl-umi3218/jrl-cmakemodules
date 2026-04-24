@@ -1,0 +1,61 @@
+[workspace]
+name = "jrl-tests"
+version = "1.0.0"
+channels = ["conda-forge"]
+platforms = ["osx-arm64", "osx-64", "linux-64", "linux-aarch64", "win-64"]
+preview = ["pixi-build"]
+
+[tasks]
+test_find_accelerate = { cmd = "pixi run test", cwd = "find_modules/FindAccelerate" }
+test_find_accelerate_quiet = { cmd = "pixi run test", cwd = "find_modules/FindAccelerateQuiet" }
+test_find_matio = { cmd = "pixi run test", cwd = "find_modules/Findmatio" }
+test_find_matio_quiet = { cmd = "pixi run test", cwd = "find_modules/FindmatioQuiet" }
+test_find_simde = { cmd = "pixi run test", cwd = "find_modules/Findsimde" }
+test_find_simde_quiet = { cmd = "pixi run test", cwd = "find_modules/FindsimdeQuiet" }
+test_find_pytest = { cmd = "pixi run test", cwd = "find_modules/FindPytest" }
+test_find_pytest_quiet = { cmd = "pixi run test", cwd = "find_modules/FindPytestQuiet" }
+test_mcg = { cmd = "pixi run test", cwd = "mcg" }
+test_minimalProj = { cmd = "pixi run test", cwd = "MinimalProj" }
+test_modules = { cmd = "pixi run test", cwd = "modules" }
+test_multicomp = { cmd = "pixi run test", cwd = "multicomp" }
+test_multitargets = { cmd = "pixi run test", cwd = "multitargets" }
+test_no_deps = { cmd = "pixi run test", cwd = "no_deps" }
+test_pybindings = { cmd = "pixi run test", cwd = "pybindings" }
+test_regular_find_package = { cmd = "pixi run test", cwd = "regular_find_package" }
+test_packaging_find_package_v1 = { cmd = "pixi run test", cwd = "packaging/find_package_v1" }
+test_packaging_find_package_v2 = { cmd = "pixi run test", cwd = "packaging/find_package_v2" }
+test_packaging_fetchcontent = { cmd = "pixi run test", cwd = "packaging/fetchcontent" }
+test_packaging_pixi_build = { cmd = "pixi run test", cwd = "packaging/pixi_build" }
+
+test = { depends-on = [
+    "test_find_accelerate",
+    "test_find_accelerate_quiet",
+    "test_find_matio",
+    "test_find_matio_quiet",
+    "test_find_simde",
+    "test_find_simde_quiet",
+    "test_find_pytest",
+    "test_find_pytest_quiet",
+    "test_mcg",
+    "test_minimalProj",
+    "test_modules",
+    "test_multicomp",
+    "test_multitargets",
+    "test_no_deps",
+    "test_pybindings",
+    "test_regular_find_package",
+    "test_packaging_find_package_v1",
+    "test_packaging_find_package_v2",
+    "test_packaging_fetchcontent",
+    "test_packaging_pixi_build",
+] }
+
+[package]
+name = { workspace = true }
+version = { workspace = true }
+
+[package.host-dependencies]
+test_find_accelerate = { path = "find_modules/FindAccelerate" }
+
+[package.build]
+backend = { name = "pixi-build-cmake", version = "*" }

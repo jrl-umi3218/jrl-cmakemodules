@@ -84,21 +84,15 @@ add_test(
 set_tests_properties("Check jrl.cmake" PROPERTIES DEPENDS jrl-cmakemodules)
 
 # 3. Run the tests with the local test projects
+add_subdirectory(find_modules)
 
 add_cmake_test(NAME packaging/find_package_v1 DEPENDS jrl-cmakemodules)
 add_cmake_test(NAME packaging/find_package_v2 DEPENDS jrl-cmakemodules)
 
 add_cmake_test(NAME regular_find_package DEPENDS jrl-cmakemodules)
 
-add_cmake_test(NAME test_project DEPENDS jrl-cmakemodules)
-add_cmake_test(NAME test_project EXTRA_OPTIONS "--build-noclean" DEPENDS jrl-cmakemodules)
-add_cmake_test(NAME test_project EXTRA_OPTIONS "--build-noclean" "--build-two-config" DEPENDS jrl-cmakemodules)
-
-add_cmake_test(NAME test_project_without_deps DEPENDS jrl-cmakemodules)
-add_cmake_test(NAME test_project_without_deps EXTRA_OPTIONS "--build-noclean" DEPENDS jrl-cmakemodules)
-add_cmake_test(NAME test_project_without_deps EXTRA_OPTIONS "--build-noclean" "--build-two-config" DEPENDS jrl-cmakemodules)
-
 add_cmake_test(NAME packaging/fetchcontent)
+add_cmake_test(NAME packaging/pixi_build DEPENDS jrl-cmakemodules BUILD_TARGET all)
 
 add_subdirectory(modules)
 
@@ -106,3 +100,5 @@ add_subdirectory(MinimalProj)
 add_subdirectory(multitargets)
 add_subdirectory(multicomp)
 add_subdirectory(mcg)
+add_subdirectory(no_deps)
+add_subdirectory(pybindings)

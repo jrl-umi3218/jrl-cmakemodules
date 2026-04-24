@@ -1,13 +1,12 @@
 cmake_minimum_required(VERSION 3.22)
 
-find_package(jrl-cmakemodules REQUIRED)
-
 project(
     Regular_FindPackage
     VERSION 1.0.0
     DESCRIPTION "A package that uses regular find_package to export its targets"
 )
 
+find_package(jrl-cmakemodules 1.2.0 CONFIG REQUIRED)
 jrl_configure_defaults()
 
 # User forgets to call jrl_find_package()

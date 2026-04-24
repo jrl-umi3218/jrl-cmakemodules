@@ -1,0 +1,9 @@
+[workspace]
+channels = ["conda-forge"]
+platforms = ["linux-64", "linux-aarch64", "osx-arm64", "osx-64", "win-64"]
+
+[dependencies]
+cmake = ">=3.22"
+
+[tasks]
+test = { cmd = "cmake -P test_jrl_option.cmake" }
