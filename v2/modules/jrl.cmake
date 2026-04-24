@@ -3136,6 +3136,15 @@ macro(jrl_find_python)
     # On Windows, Python_SITELIB returns \. Let's convert it to /.
     cmake_path(CONVERT "${Python_SITELIB}" TO_CMAKE_PATH_LIST Python_SITELIB NORMALIZE)
 
+    if(TARGET Python::Interpreter)
+        jrl_python_get_interpreter(python_interpreter)
+        set(python_interpreter_found true)
+    else()
+        set(python_interpreter_found false)
+    endif()
+
+    message(STATUS "   Python::Interpreter      : ${python_interpreter_found}")
+    message(STATUS "     => location property   : ${python_interpreter}")
     message(STATUS "   Python_FOUND             : ${Python_FOUND}")
     message(STATUS "   Python_EXECUTABLE        : ${Python_EXECUTABLE}")
     message(STATUS "   Python_VERSION           : ${Python_VERSION}")
