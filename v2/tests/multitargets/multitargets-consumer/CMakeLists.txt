@@ -8,3 +8,4 @@ target_link_libraries(
     multitargets-consumer
     PRIVATE multitargets-library::math multitargets-library::string_utils
 )
+install(TARGETS multitargets-consumer DESTINATION bin)

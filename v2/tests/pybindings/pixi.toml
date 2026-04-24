@@ -1,0 +1,12 @@
+[workspace]
+channels = ["conda-forge"]
+platforms = ["linux-64", "linux-aarch64", "osx-arm64", "osx-64", "win-64"]
+preview = ["pixi-build"]
+
+[dependencies]
+pb-consumer = { path = "pb-consumer" }
+pb-library = { path = "pb-library" }
+pytest = ">=8.0.0,<10"
+
+[tasks]
+test = { cmd = "pytest pybindings-consumer/tests/test_pybindings_consumer.py" }

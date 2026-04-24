@@ -1,0 +1,8 @@
+add_cmake_test(NAME FindAccelerate DEPENDS jrl-cmakemodules BUILD_TARGET all)
+add_cmake_test(NAME FindAccelerateQuiet DEPENDS jrl-cmakemodules BUILD_TARGET all)
+add_cmake_test(NAME Findmatio DEPENDS jrl-cmakemodules BUILD_TARGET all)
+add_cmake_test(NAME FindmatioQuiet DEPENDS jrl-cmakemodules BUILD_TARGET all)
+add_cmake_test(NAME Findsimde DEPENDS jrl-cmakemodules BUILD_TARGET all)
+add_cmake_test(NAME FindsimdeQuiet DEPENDS jrl-cmakemodules BUILD_TARGET all)
+add_cmake_test(NAME FindPytest DEPENDS jrl-cmakemodules BUILD_TARGET all)
+add_cmake_test(NAME FindPytestQuiet DEPENDS jrl-cmakemodules BUILD_TARGET all)

@@ -21,3 +21,9 @@ endif()
 
 add_executable(mcg-consumer main.cpp)
 target_link_libraries(mcg-consumer PRIVATE mcg-library::c mcg-library::d)
+install(
+    TARGETS mcg-consumer
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+)
