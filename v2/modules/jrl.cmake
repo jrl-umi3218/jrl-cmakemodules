@@ -3064,6 +3064,44 @@ function(jrl_print_options_summary)
 endfunction()
 
 #[============================================================================[
+# `jrl_python_get_interpreter`
+
+```cpp
+jrl_python_get_interpreter(<output_var>)
+```
+
+**Type:** function
+
+
+### Description
+  Get the python interpreter path from the Python::Interpreter target.
+
+
+### Arguments
+* `output_var`: The variable to store the path.
+
+
+### Example
+```cmake
+jrl_python_get_interpreter(python_interpreter)
+execute_process(COMMAND ${python_interpreter} -c "print('Hello from Python!')")
+```
+#]============================================================================]
+function(jrl_python_get_interpreter output_var)
+    _jrl_check_target_exists(Python::Interpreter
+    "
+        Python::Interpreter target not found.
+        Call (jrl_)find_package(Python REQUIRED COMPONENTS Interpreter) first.
+    "
+    )
+    get_target_property(python_interpreter Python::Interpreter LOCATION)
+    if(WIN32)
+        cmake_path(CONVERT "${python_interpreter}" TO_CMAKE_PATH_LIST python_interpreter NORMALIZE)
+    endif()
+    set(${output_var} ${python_interpreter} PARENT_SCOPE)
+endfunction()
+
+#[============================================================================[
 # `jrl_find_python`
 
 ```cpp
@@ -3191,44 +3229,6 @@ macro(jrl_find_nanobind)
         endif()
     endif()
 endmacro()
-
-#[============================================================================[
-# `jrl_python_get_interpreter`
-
-```cpp
-jrl_python_get_interpreter(<output_var>)
-```
-
-**Type:** function
-
-
-### Description
-  Get the python interpreter path from the Python::Interpreter target.
-
-
-### Arguments
-* `output_var`: The variable to store the path.
-
-
-### Example
-```cmake
-jrl_python_get_interpreter(python_interpreter)
-execute_process(COMMAND ${python_interpreter} -c "print('Hello from Python!')")
-```
-#]============================================================================]
-function(jrl_python_get_interpreter output_var)
-    _jrl_check_target_exists(Python::Interpreter
-    "
-        Python::Interpreter target not found.
-        Call (jrl_)find_package(Python REQUIRED COMPONENTS Interpreter) first.
-    "
-    )
-    get_target_property(python_interpreter Python::Interpreter LOCATION)
-    if(WIN32)
-        cmake_path(CONVERT "${python_interpreter}" TO_CMAKE_PATH_LIST python_interpreter NORMALIZE)
-    endif()
-    set(${output_var} ${python_interpreter} PARENT_SCOPE)
-endfunction()
 
 #[============================================================================[
 # `jrl_python_compile_all`

@@ -920,6 +920,28 @@ jrl_print_options_summary()
 ```cmake
 jrl_print_options_summary()
 ```
+# `jrl_python_get_interpreter`
+
+```cpp
+jrl_python_get_interpreter(<output_var>)
+```
+
+**Type:** function
+
+
+### Description
+  Get the python interpreter path from the Python::Interpreter target.
+
+
+### Arguments
+* `output_var`: The variable to store the path.
+
+
+### Example
+```cmake
+jrl_python_get_interpreter(python_interpreter)
+execute_process(COMMAND ${python_interpreter} -c "print('Hello from Python!')")
+```
 # `jrl_find_python`
 
 ```cpp
@@ -970,28 +992,6 @@ jrl_find_nanobind([<args>...])
 ```cmake
 jrl_find_python(3.10 REQUIRED COMPONENTS Interpreter Development.Module)
 jrl_find_nanobind(2.5.0 CONFIG REQUIRED)
-```
-# `jrl_python_get_interpreter`
-
-```cpp
-jrl_python_get_interpreter(<output_var>)
-```
-
-**Type:** function
-
-
-### Description
-  Get the python interpreter path from the Python::Interpreter target.
-
-
-### Arguments
-* `output_var`: The variable to store the path.
-
-
-### Example
-```cmake
-jrl_python_get_interpreter(python_interpreter)
-execute_process(COMMAND ${python_interpreter} -c "print('Hello from Python!')")
 ```
 # `jrl_python_compile_all`
 
