@@ -37,7 +37,7 @@ jobs:
           path: ${{ env.CCACHE_DIR }}
           key: ccache-${{ matrix.ROS_DISTRO }}-${{github.run_id}}
           restore-keys: ccache-${{ matrix.ROS_DISTRO }}-
-      - uses: ros-industrial/industrial_ci@ba2a3d0f830f8051b356711a8df2fedfc5d256cf
+      - uses: ros-industrial/industrial_ci@master
         env:
           # CMAKE_ARGS: -DJRL_CMAKEMODULES_BUILD_TESTS=ON
           VERBOSE_OUTPUT: true
