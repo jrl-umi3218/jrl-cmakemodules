@@ -2097,6 +2097,7 @@ endfunction()
 
 ```cpp
 _jrl_export_dependencies(
+    [COMPONENT <component_name>]
     TARGETS <target1...>
     [GEN_DIR <gen_dir>]
     [INSTALL_DESTINATION <destination>]
@@ -2112,6 +2113,7 @@ _jrl_export_dependencies(
 
 
 ### Arguments
+* `COMPONENT`: The export component name. Use to get the full list of targets
 * `TARGETS`: List of targets to analyze.
 * `GEN_DIR`: Directory to generate the file.
 * `INSTALL_DESTINATION`: Directory to install the file.
@@ -2124,7 +2126,7 @@ _jrl_export_dependencies(TARGETS my_target)
 #]============================================================================]
 function(_jrl_export_dependencies)
     set(options)
-    set(oneValueArgs INSTALL_DESTINATION GEN_DIR)
+    set(oneValueArgs INSTALL_DESTINATION GEN_DIR COMPONENT)
     set(multiValueArgs TARGETS)
     cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
     _jrl_check_no_unrecognized_arguments(arg)
@@ -2160,11 +2162,21 @@ function(_jrl_export_dependencies)
 
     list(REMOVE_DUPLICATES all_interface_link_libraries)
 
+    # Get the complete list of exported targets
+    # This is used to filter out the INTERFACE_LINK_LIBRARIES that are actually part of the same package
+    # (and should not be added as dependencies in the generated <export_name>-dependencies.cmake file)
+    set(all_exported_targets "")
+    foreach(component ${declared_components})
+        get_property(targets GLOBAL PROPERTY _jrl_${PROJECT_NAME}_${component}_targets)
+        list(APPEND all_exported_targets ${targets})
+    endforeach()
+
     message(
         DEBUG
         "All interface link libraries for targets '${arg_TARGETS}': ${all_interface_link_libraries}"
     )
 
+    # Get the list of external dependencies recorded with jrl_find_package() and jrl_export_dependency()
     get_property(
         package_dependencies_json_content
         GLOBAL
@@ -2180,7 +2192,10 @@ function(_jrl_export_dependencies)
         CONTENT
             "
 # Generated file - do not edit
-# The targets declared via jrl_add_export_component(NAME <component_name> TARGETS <target1> <target2> ...)
+set(component_name [[${arg_COMPONENT}]])
+set(all_exported_targets [[${all_exported_targets}]])
+
+# The targets declared via jrl_add_export_component(NAME ${arg_COMPONENT} TARGETS ${arg_TARGETS})
 set(export_component_targets [[${arg_TARGETS}]])
 
 # The resolved list of all interface link libraries the targets above, after generator expression evaluation.
@@ -2663,6 +2678,7 @@ function(jrl_export_package)
 
         # <package>/<component>/dependencies.cmake
         _jrl_export_dependencies(
+            COMPONENT ${component}
             TARGETS ${targets}
             GEN_DIR ${GEN_DIR}/${component}
             INSTALL_DESTINATION ${cmake_files_install_dir}/${component}
