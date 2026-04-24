@@ -51,7 +51,7 @@ jobs:
 
       - name: Install C++ dependencies (via vcpkg)
         run: |
-          ${{ env.VCPKG_COMMAND }} install catch2 boost-python eigen3
+          ${{ env.VCPKG_COMMAND }} install catch2 boost-python eigen3 matio simde
 
       - name: Save vcpkg binary cache
         if: always()
