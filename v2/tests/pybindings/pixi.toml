@@ -9,4 +9,4 @@ pb-library = { path = "pb-library" }
 pytest = ">=8.0.0,<10"
 
 [tasks]
-test = { cmd = "pytest pybindings-consumer/tests/test_pybindings_consumer.py" }
+test = { cmd = "pytest pb-consumer/tests/test_pybindings_consumer.py" }
