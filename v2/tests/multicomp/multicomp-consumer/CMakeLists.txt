@@ -11,3 +11,4 @@ target_link_libraries(
         multicomp-library::extra_utils
         multicomp-library::extra_formatter
 )
+install(TARGETS multicomp-consumer DESTINATION bin)
