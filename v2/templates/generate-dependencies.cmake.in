@@ -5,11 +5,13 @@ cmake_minimum_required(VERSION 3.22)
 
 include("${CMAKE_CURRENT_LIST_DIR}/imported-libraries.cmake")
 
+message(DEBUG "[@PROJECT_NAME@::${component_name}] Generating dependencies.cmake")
+
 # Check if the required variables are defined
-if(NOT DEFINED export_component_targets)
+if(NOT DEFINED all_exported_targets)
     message(
         FATAL_ERROR
-        "export_component_targets variable is not defined in @IMPORTED_LIBRARIES_TO_EXPORT_FILE@."
+        "all_exported_targets variable is not defined in @IMPORTED_LIBRARIES_TO_EXPORT_FILE@."
     )
 endif()
 
@@ -49,8 +51,8 @@ foreach(ll IN LISTS all_interface_link_libraries)
 
     message(DEBUG "       Processing imported library: ${ll}")
 
-    # Filter the libraries present the export_component_targets.
-    if(ll IN_LIST export_component_targets)
+    # Filter the libraries present the all_exported_targets.
+    if(ll IN_LIST all_exported_targets)
         message(DEBUG "            ==> Target ${ll} is part of the export component, skipping.")
         continue()
     endif()
@@ -141,13 +143,10 @@ endforeach()
 if(unknwon_libraries)
     message(
         WARNING
-        "
-The following dependencies/libraries were found in the 'INTERFACE_LINK_LIBRARIES' of the export component, but have not been imported via jrl_find_package():
-
+        "[@PROJECT_NAME@] The following dependencies/libraries were found in the 'INTERFACE_LINK_LIBRARIES' of the export component, but have not been imported via jrl_find_package():
 '${unknwon_libraries}'
-
 This means we cannot generate the appropriate 'find_dependency()' call in the export component's dependencies.cmake file, so that consumers can import them transitively.
-Please make sure to call jrl_find_package() to import these dependencies, or _jrl_export_component() to explicitly mark them as part of the export component (not recommended).
+Please make sure to call jrl_find_package() to import these targets, or jrl_export_dependency() to explicitly mark them as part of the export component (not recommended).
         "
     )
 endif()
