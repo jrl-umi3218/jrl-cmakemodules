@@ -8,7 +8,7 @@ version = "1.2.0"
 description = "jrl-cmakemodules"
 authors = ["Antoine Hoarau <703240+ahoarau@users.noreply.github.com>"]
 channels = ["conda-forge"]
-platforms = ["osx-arm64", "osx-64", "linux-64", "win-64"]
+platforms = ["osx-arm64", "osx-64", "linux-64", "linux-aarch64", "win-64"]
 preview = ["pixi-build"]
 
 # ============================================================================
@@ -17,7 +17,7 @@ preview = ["pixi-build"]
 
 [dependencies]
 cmake = ">=3.22"
-ninja = ">=1.13.2,<2"
+ninja = "*"
 
 # ============================================================================
 # DEFAULT TASKS
@@ -43,16 +43,18 @@ doc = { cmd = "cmake -DJRL_GENERATE_API_DOC=ON -P v2/modules/jrl.cmake" }
 # ============================================================================
 
 [feature.test.dependencies]
-cxx-compiler = ">=1.10.0,<2"
-ccache = ">=4.0.0,<5"
-catch2 = ">=3.1.0,<4"
+cxx-compiler = "*"
+cmake = ">=3.22"
+ninja = "*"
+uv = "*"
 python = ">=3.10"
+eigen = ">=3.4"
 nanobind = ">=2.5.0"
-pytest = ">=9.0.0,<10"
 libboost-python-devel = ">=1.82.0,<2"
-numpy = ">=2.4.2,<3"
-uv = ">=0.6.0"
-eigen=">=3.4.0"
+catch2 = ">=3"
+pytest = "*"
+libmatio = "*"
+simde = "*"
 
 [feature.test.tasks]
 _configure = { cmd = [
@@ -70,10 +72,11 @@ _ctest = { cmd = "ctest --test-dir build/test --output-on-failure", depends-on =
 ] }
 _test-scripts = { cmd = "uv run --no-project v2/scripts/test_jrl_release.py" }
 _test-scripts-coverage = { cmd = "uv run --no-project test_jrl_release.py --cov=jrl_release --cov-report=term-missing --cov-report=html:htmlcov", cwd = "v2/scripts" }
-test = { depends-on = ["_ctest", "_test-scripts", "_test-scripts-coverage"] }
+test = { depends-on = ["_test-scripts", "_test-scripts-coverage", "_ctest"] }
 
 [environments.test]
 features = ["test"]
+no-default-feature = true
 
 # ============================================================================
 # CMAKE 3.22 TEST ENVIRONMENT
