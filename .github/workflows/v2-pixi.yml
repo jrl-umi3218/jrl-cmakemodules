@@ -41,5 +41,8 @@ jobs:
       - name: Run tests (cmake 3.22)
         run: pixi run -e cmake322 test
 
-      - name: Run tests (pixi build)
+      - name: Run pixi build test
         run: pixi run -e test-pixi-build test-packaging-pixi-build
+
+      - name: Run tests with pixi
+        run: pixi run -m v2/tests/pixi.toml test
