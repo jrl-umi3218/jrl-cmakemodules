@@ -3,7 +3,7 @@
 find_path(simde_INCLUDE_DIR NAMES simde/simde-common.h)
 
 # Read the version number from simde-common.h
-if(simde_INCLUDE_DIR)
+if(simde_INCLUDE_DIR AND NOT TARGET simde::simde)
     file(READ ${simde_INCLUDE_DIR}/simde/simde-common.h simde_common_h)
     string(REGEX MATCH "#define SIMDE_VERSION_MAJOR[ \t]+([0-9]+)" _match_major ${simde_common_h})
     set(simde_VERSION_MAJOR ${CMAKE_MATCH_1})
@@ -19,7 +19,7 @@ mark_as_advanced(simde_INCLUDE_DIR simde_VERSION)
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(simde REQUIRED_VARS simde_INCLUDE_DIR VERSION_VAR simde_VERSION)
 
-if(simde_FOUND)
+if(simde_FOUND AND NOT TARGET simde::simde)
     add_library(simde::simde INTERFACE IMPORTED)
     set_target_properties(
         simde::simde

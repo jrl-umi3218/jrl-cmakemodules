@@ -1,12 +1,12 @@
 # Copyright 2025-2026 Inria
 
-find_library(matio_LIBRARY NAMES matio libmatio REQUIRED)
-find_path(matio_INCLUDE_DIR matio.h matio_pubconf.h REQUIRED)
+find_library(matio_LIBRARY NAMES matio libmatio)
+find_path(matio_INCLUDE_DIR matio.h matio_pubconf.h)
 
 mark_as_advanced(matio_LIBRARY matio_INCLUDE_DIR)
 
 # read the version from the matio_pubconf.h file
-if(NOT TARGET matio::matio)
+if(matio_INCLUDE_DIR AND NOT TARGET matio::matio)
     file(READ "${matio_INCLUDE_DIR}/matio_pubconf.h" matio_pubconf_h)
     string(REGEX MATCH "#define[ \t]+MATIO_MAJOR_VERSION[ \t]+([0-9]+)" _ ${matio_pubconf_h})
     set(MATIO_MAJOR_VERSION "${CMAKE_MATCH_1}")
@@ -24,7 +24,7 @@ find_package_handle_standard_args(
     VERSION_VAR matio_VERSION
 )
 
-if(NOT TARGET matio::matio)
+if(matio_FOUND AND NOT TARGET matio::matio)
     add_library(matio::matio UNKNOWN IMPORTED)
     set_target_properties(
         matio::matio
