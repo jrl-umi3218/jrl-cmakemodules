@@ -760,11 +760,25 @@ function(jrl_configure_default_build_type build_type)
         )
     endif()
 
+    # Check if environment variable CMAKE_BUILD_TYPE is set (single-config generators)
+    if(DEFINED ENV{CMAKE_BUILD_TYPE})
+        message(
+            DEBUG
+            "Environment variable CMAKE_BUILD_TYPE is set to '$ENV{CMAKE_BUILD_TYPE}', will not override it."
+        )
+        return()
+    endif()
+
     if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
         message(STATUS "Setting build type to '${build_type}' as none was specified.")
         set(CMAKE_BUILD_TYPE ${build_type} CACHE STRING "Choose the type of build." FORCE)
         # set the possible values of build type for cmake-gui
         set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS ${allowed_build_types})
+    else()
+        message(
+            STATUS
+            "Build type CMAKE_BUILD_TYPE: '${CMAKE_BUILD_TYPE}' CMAKE_CONFIGURATION_TYPES: '${CMAKE_CONFIGURATION_TYPES}'"
+        )
     endif()
 endfunction()
 
