@@ -56,6 +56,7 @@ if(JRL_CMAKEMODULES_GENERATE_API_DOC)
 endif()
 
 if(JRL_CMAKEMODULES_BUILD_TESTS)
+  message(STATUS "[jrl-cmakemodules] Building tests")
   jrl_include_ctest()
   enable_testing()
   add_subdirectory(v2/tests)
