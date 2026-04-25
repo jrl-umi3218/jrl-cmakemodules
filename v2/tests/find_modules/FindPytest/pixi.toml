@@ -9,7 +9,6 @@ cmake = ">=3.22"
 ninja = "*"
 python = ">=3.10"
 pytest = "*"
-jrl-cmakemodules = { path = "../../../.." }
 
 [tasks]
 clear = { cmd = "rm -rf build" }

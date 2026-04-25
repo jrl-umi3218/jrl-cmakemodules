@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.22)
 project(FindPytestQuietTest)
 
-find_package(jrl-cmakemodules 1.2.0 CONFIG REQUIRED)
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/../../../find-modules")
 
 # Python::Interpreter is required by FindPytest.cmake before it can proceed.
 # Find it with full search paths before restricting them.
@@ -20,7 +20,7 @@ set(CMAKE_FIND_USE_PACKAGE_ROOT_PATH false)
 # Clear any cached result from a previous run to ensure a fresh search.
 unset(Pytest_EXECUTABLE CACHE)
 
-jrl_find_package(Pytest QUIET)
+find_package(Pytest QUIET)
 
 message(
     STATUS
