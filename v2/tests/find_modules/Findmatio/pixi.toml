@@ -8,7 +8,6 @@ cxx-compiler = "*"
 cmake = ">=3.22"
 ninja = "*"
 libmatio = "*"
-jrl-cmakemodules = { path = "../../../.." }
 
 [tasks]
 clear = { cmd = "rm -rf build" }

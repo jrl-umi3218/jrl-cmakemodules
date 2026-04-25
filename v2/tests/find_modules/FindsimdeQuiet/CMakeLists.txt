@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.22)
 project(FindsimdeQuietTest)
 
-find_package(jrl-cmakemodules 1.2.0 CONFIG REQUIRED)
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/../../../find-modules")
 
 # Restrict search paths to ensure Pytest is not found on the system.
 set(CMAKE_FIND_USE_CMAKE_SYSTEM_PATH false)
@@ -13,7 +13,7 @@ set(CMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY false)
 set(CMAKE_FIND_USE_PACKAGE_REGISTRY false)
 set(CMAKE_FIND_USE_PACKAGE_ROOT_PATH false)
 
-jrl_find_package(simde QUIET)
+find_package(simde QUIET)
 
 message(
     STATUS
