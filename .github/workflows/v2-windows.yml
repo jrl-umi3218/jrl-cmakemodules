@@ -10,7 +10,6 @@ env:
   VCPKG_COMMAND: C:/vcpkg/vcpkg.exe --vcpkg-root=C:/vcpkg
   VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}/vcpkg-bincache
   VCPKG_BINARY_SOURCES: "clear;files,${{ github.workspace }}/vcpkg-bincache,readwrite"
-  CMAKE_TOOLCHAIN_FILE: C:/vcpkg/scripts/buildsystems/vcpkg.cmake
 
 jobs:
   windows-with-vcpkg:
@@ -46,7 +45,7 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
-          key: vcpkg-${{ matrix.image }}-${{ matrix.arch }}-${{ github.ref }}
+          key: vcpkg-${{ matrix.image }}-${{ matrix.arch }}-${{ github.sha }}
           restore-keys: vcpkg-${{ matrix.image }}-${{ matrix.arch }}-
 
       - name: Install C++ dependencies (via vcpkg)
@@ -66,6 +65,9 @@ jobs:
           C:/vcpkg/installed/${{ matrix.arch }}-windows/tools/python3/python.exe -m pip install nanobind pytest numpy
 
       - name: Configure project
+        env:
+          Python_ROOT: C:/vcpkg/installed/${{ matrix.arch }}-windows/tools/python3
+          CMAKE_TOOLCHAIN_FILE: C:/vcpkg/scripts/buildsystems/vcpkg.cmake
         run: cmake -G Ninja -S . -B build --log-level=DEBUG -DCMAKE_BUILD_TYPE=RelWithDebInfo -DJRL_CMAKEMODULES_BUILD_TESTS=ON
 
       - name: Build project
