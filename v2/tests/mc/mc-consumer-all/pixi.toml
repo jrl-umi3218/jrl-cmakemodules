@@ -1,0 +1,16 @@
+[workspace]
+name = "mc-consumer-all"
+version = "1.0.0"
+channels = ["conda-forge"]
+platforms = ["linux-64", "linux-aarch64", "osx-arm64", "osx-64", "win-64"]
+preview = ["pixi-build"]
+
+[package]
+name = { workspace = true }
+version = { workspace = true }
+
+[package.host-dependencies]
+mc-library = { path = "../mc-library" }
+
+[package.build]
+backend = { name = "pixi-build-cmake", version = "*" }
