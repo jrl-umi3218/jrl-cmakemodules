@@ -23,6 +23,20 @@ build = { cmd = "cmake --build build --verbose" }
 install = { cmd = "cmake --install build" }
 test = { depends-on = ["clear", "configure", "build", "install"] }
 
+[environments]
+intel = { features = ["intel"] }
+
+[feature.intel]
+platforms = ["osx-64"]
+
+[feature.intel.tasks]
+clear = { cmd = "rm -rf build-intel" }
+configure = { cmd = "cmake --log-level=DEBUG -G Ninja -S . -B build-intel" }
+build = { cmd = "cmake --build build-intel --verbose" }
+install = { cmd = "cmake --install build-intel" }
+test = { depends-on = ["clear", "configure", "build", "install"] }
+
+
 [package]
 name = { workspace = true }
 version = { workspace = true }
