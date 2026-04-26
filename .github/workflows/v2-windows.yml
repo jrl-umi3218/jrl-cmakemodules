@@ -68,13 +68,17 @@ jobs:
 
       - name: Install Python dependencies (via pip)
         run: |
-          Get-Command python | Select-Object -ExpandProperty Source
-          Get-Command pip | Select-Object -ExpandProperty Source
-          python --version
-          pip --version
           python -m ensurepip --upgrade
           python -m pip install --upgrade pip
           python -m pip install nanobind pytest numpy
+
+      - name: Print Python Info
+        run: |
+          python --version
+          pip --version
+          python -c "import sysconfig; print(sysconfig.get_path('purelib'))"
+          python -c "import sys; print(sys.executable)"
+          pip list -v
 
       - name: Configure project
         run: cmake -G Ninja -S . -B build --log-level=DEBUG -DJRL_CMAKEMODULES_BUILD_TESTS=ON
