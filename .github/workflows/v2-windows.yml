@@ -62,11 +62,12 @@ jobs:
       - name: Install Python dependencies (via pip)
         run: |
           C:/vcpkg/installed/${{ matrix.arch }}-windows/tools/python3/python.exe -m ensurepip --upgrade
+          C:/vcpkg/installed/${{ matrix.arch }}-windows/tools/python3/python.exe -m pip install --upgrade pip
           C:/vcpkg/installed/${{ matrix.arch }}-windows/tools/python3/python.exe -m pip install nanobind pytest numpy
 
       - name: Configure project
         env:
-          PATH: C:/vcpkg/installed/${{ matrix.arch }}-windows/tools/python3;${{ env.PATH }}
+          PATH: C:/vcpkg/installed/${{ matrix.arch }}-windows/tools/python3;C:/vcpkg/installed/${{ matrix.arch }}-windows/tools/python3/Scripts;${{ env.PATH }}
           CMAKE_TOOLCHAIN_FILE: C:/vcpkg/scripts/buildsystems/vcpkg.cmake
           CMAKE_BUILD_TYPE: RelWithDebInfo
         run: |
