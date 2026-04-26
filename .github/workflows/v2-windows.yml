@@ -59,23 +59,26 @@ jobs:
           path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
           key: ${{ steps.cache-vcpkg-restore.outputs.cache-primary-key }}
 
-      - name: Install Python dependencies (via pip)
+      - name: Add vcpkg Python to PATH
         run: |
-          C:/vcpkg/installed/${{ matrix.arch }}-windows/tools/python3/python.exe -m ensurepip --upgrade
-          C:/vcpkg/installed/${{ matrix.arch }}-windows/tools/python3/python.exe -m pip install --upgrade pip
-          C:/vcpkg/installed/${{ matrix.arch }}-windows/tools/python3/python.exe -m pip install nanobind pytest numpy
+          echo "C:/vcpkg/installed/${{ matrix.arch }}-windows/tools/python3" >> $env:GITHUB_PATH
+          echo "C:/vcpkg/installed/${{ matrix.arch }}-windows/tools/python3/Scripts" >> $env:GITHUB_PATH
 
-      - name: Configure project
-        env:
-          PATH: C:/vcpkg/installed/${{ matrix.arch }}-windows/tools/python3;C:/vcpkg/installed/${{ matrix.arch }}-windows/tools/python3/Scripts;${{ env.PATH }}
-          CMAKE_TOOLCHAIN_FILE: C:/vcpkg/scripts/buildsystems/vcpkg.cmake
-          CMAKE_BUILD_TYPE: RelWithDebInfo
+      - name: Install Python dependencies (via pip)
         run: |
           Get-Command python | Select-Object -ExpandProperty Source
           Get-Command pip | Select-Object -ExpandProperty Source
           python --version
           pip --version
-          cmake -G Ninja -S . -B build --log-level=DEBUG -DJRL_CMAKEMODULES_BUILD_TESTS=ON
+          python -m ensurepip --upgrade
+          python -m pip install --upgrade pip
+          python -m pip install nanobind pytest numpy
+
+      - name: Configure project
+        env:
+          CMAKE_TOOLCHAIN_FILE: C:/vcpkg/scripts/buildsystems/vcpkg.cmake
+          CMAKE_BUILD_TYPE: RelWithDebInfo
+        run: cmake -G Ninja -S . -B build --log-level=DEBUG -DJRL_CMAKEMODULES_BUILD_TESTS=ON
 
       - name: Build project
         run: cmake --build build --verbose
