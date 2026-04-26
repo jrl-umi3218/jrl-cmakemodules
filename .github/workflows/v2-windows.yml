@@ -66,9 +66,15 @@ jobs:
 
       - name: Configure project
         env:
-          Python_ROOT: C:/vcpkg/installed/${{ matrix.arch }}-windows/tools/python3
+          PATH: C:/vcpkg/installed/${{ matrix.arch }}-windows/tools/python3;${{ env.PATH }}
           CMAKE_TOOLCHAIN_FILE: C:/vcpkg/scripts/buildsystems/vcpkg.cmake
-        run: cmake -G Ninja -S . -B build --log-level=DEBUG -DCMAKE_BUILD_TYPE=RelWithDebInfo -DJRL_CMAKEMODULES_BUILD_TESTS=ON
+          CMAKE_BUILD_TYPE: RelWithDebInfo
+        run: |
+          Get-Command python | Select-Object -ExpandProperty Source
+          Get-Command pip | Select-Object -ExpandProperty Source
+          python --version
+          pip --version
+          cmake -G Ninja -S . -B build --log-level=DEBUG -DJRL_CMAKEMODULES_BUILD_TESTS=ON
 
       - name: Build project
         run: cmake --build build --verbose
