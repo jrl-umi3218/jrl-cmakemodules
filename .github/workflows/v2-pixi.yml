@@ -23,8 +23,6 @@ jobs:
 
       - name: Install Pixi
         uses: prefix-dev/setup-pixi@v0.9.3
-        with:
-          pixi-version: latest
 
       - name: Configure Pixi environment
         run: pixi install
@@ -44,5 +42,7 @@ jobs:
       - name: Run pixi build test
         run: pixi run -e test-pixi-build test-packaging-pixi-build
 
+      # Cannot run the pixi tests due to a long path issue on Windows.
       - name: Run tests with pixi
+        if: runner.os != 'Windows'
         run: pixi run -m v2/tests/pixi.toml test
