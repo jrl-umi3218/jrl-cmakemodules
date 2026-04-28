@@ -97,6 +97,7 @@ add_cmake_test(NAME packaging/pixi_build DEPENDS jrl-cmakemodules BUILD_TARGET a
 add_subdirectory(modules)
 
 add_subdirectory(MinimalProj)
+add_subdirectory(exp_hdr)
 add_subdirectory(mt)
 add_subdirectory(mc)
 add_subdirectory(mcg)
