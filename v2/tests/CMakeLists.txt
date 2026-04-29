@@ -46,6 +46,15 @@ function(add_cmake_test)
         set(extra_build_options "-DCMAKE_PREFIX_PATH=${${arg_DEPENDS}_INSTALL_DIR}")
     endif()
 
+    # Clear the build and install directories before each test run to avoid stale artifacts.
+    set(cleanup_test_name "${test_name} [clean build/install]")
+    add_test(
+        NAME "${cleanup_test_name}"
+        COMMAND ${CMAKE_COMMAND} -E rm -rf "${binary_dir}" "${install_dir}"
+    )
+    set_tests_properties("${cleanup_test_name}" PROPERTIES FIXTURES_SETUP "${test_name}_fixture")
+
+    # The actual test that builds and installs the project, and checks the results.
     add_test(
         NAME "${test_name}"
         COMMAND ${CMAKE_CTEST_COMMAND}
@@ -58,6 +67,7 @@ function(add_cmake_test)
             --build-options     "${build_options}"
                                 ${extra_build_options}
     )
+    set_tests_properties("${test_name}" PROPERTIES FIXTURES_REQUIRED "${test_name}_fixture")
 
     if(arg_DEPENDS)
         if(NOT DEFINED ${arg_DEPENDS}_TEST_NAME)
