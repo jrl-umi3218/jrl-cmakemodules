@@ -1392,7 +1392,6 @@ _jrl_target_generate_header(
     TEMPLATE_FILE <template_file>
     [LIBRARY_NAME <library_name>]
     [GEN_DIR <gen_dir>]
-    [INSTALL_DESTINATION <install_destination>]
     [TEMPLATE_VARIABLES <var1> <var2> ...]
     [SKIP_INSTALL]
 )
@@ -1419,7 +1418,6 @@ _jrl_target_generate_header(
                    Default: <target_name>.
 * `GEN_DIR`: Directory where the header is generated (default: ${CMAKE_CURRENT_BINARY_DIR}/generated/include).
               GEN_DIR will be added to the target's include directories with the specified visibility.
-* `INSTALL_DESTINATION`: Install destination (default: ${CMAKE_INSTALL_INCLUDEDIR}).
 * `TEMPLATE_VARIABLES`: List of variables to be expanded in the template (they must be defined in the calling scope).
 * `SKIP_INSTALL`: Do not install the generated header.
 
@@ -1431,19 +1429,12 @@ _jrl_target_generate_header(mylib PUBLIC
     TEMPLATE_FILE ${CMAKE_CURRENT_SOURCE_DIR}/templates/my_header.hpp.in
     LIBRARY_NAME my_project
     TEMPLATE_VARIABLES "VAR1;VAR2"
-    INSTALL_DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 ```
 #]============================================================================]
 function(_jrl_target_generate_header target_name visibility)
     set(options SKIP_INSTALL)
-    set(oneValueArgs
-        LIBRARY_NAME
-        FILENAME
-        TEMPLATE_FILE
-        INSTALL_DESTINATION
-        GEN_DIR
-    )
+    set(oneValueArgs LIBRARY_NAME FILENAME TEMPLATE_FILE GEN_DIR)
     set(multiValueArgs TEMPLATE_VARIABLES)
     cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
     _jrl_check_no_unrecognized_arguments(arg)
@@ -1494,13 +1485,6 @@ function(_jrl_target_generate_header target_name visibility)
         set(gen_dir ${CMAKE_CURRENT_BINARY_DIR}/generated/include)
     endif()
 
-    if(arg_INSTALL_DESTINATION)
-        set(install_destination ${arg_INSTALL_DESTINATION})
-    else()
-        _jrl_check_var_defined(CMAKE_INSTALL_INCLUDEDIR)
-        set(install_destination ${CMAKE_INSTALL_INCLUDEDIR})
-    endif()
-
     if(arg_TEMPLATE_VARIABLES)
         foreach(var_name IN LISTS arg_TEMPLATE_VARIABLES)
             set(${var_name} ${${var_name}})
@@ -1520,7 +1504,6 @@ function(_jrl_target_generate_header target_name visibility)
     jrl_target_headers(${target_name} ${visibility}
         HEADERS ${output_filepath}
         BASE_DIRS ${gen_dir}
-        INSTALL_DESTINATION ${install_destination}
     )
 endfunction()
 
