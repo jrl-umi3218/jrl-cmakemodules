@@ -639,8 +639,8 @@ message(STATUS "jrl-cmakemodules version: ${v}")
 #]============================================================================]
 function(jrl_cmakemodules_get_version output_var)
     _jrl_check_var_defined(jrl-cmakemodules_VERSION
-        "jrl-cmakemodules_VERSION variable is not defined."
-        "It is defined when adding the top-level jrl-cmakemodules project or when found via find_package."
+        "jrl-cmakemodules_VERSION variable is not defined.
+        It is defined when adding the top-level jrl-cmakemodules CMakeLists or when found via find_package."
     )
     set(${output_var} ${jrl-cmakemodules_VERSION} PARENT_SCOPE)
 endfunction()
