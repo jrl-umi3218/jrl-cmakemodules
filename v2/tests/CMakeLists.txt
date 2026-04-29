@@ -98,6 +98,7 @@ add_subdirectory(modules)
 
 add_subdirectory(MinimalProj)
 add_subdirectory(exp_hdr)
+add_subdirectory(hdr_visibility)
 add_subdirectory(mt)
 add_subdirectory(mc)
 add_subdirectory(mcg)
