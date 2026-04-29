@@ -1299,14 +1299,14 @@ _jrl_normalize_version(
 
 ### Example
 ```cmake
-_jrl_normalize_version("1.2.3" normalized_version)
+_jrl_normalize_version("1.2.3" VERSION_FULL v VERSION_MAJOR major)
 # Examples:
-# 1.2.3       -> 1.2.3.0
-# 1.2         -> 1.2.0.0
-# 4           -> 4.0.0.0
-# 1.0.5.2023  -> 1.0.5.2023
-# ""          -> 0.0.0.0
-# 2.5-rc1     -> 2.5.0.0
+# 1.2.3       -> VERSION_FULL=1.2.3  VERSION_FULL_WITH_TWEAK=1.2.3.0
+# 1.2         -> VERSION_FULL=1.2.0  VERSION_FULL_WITH_TWEAK=1.2.0.0
+# 4           -> VERSION_FULL=4.0.0  VERSION_FULL_WITH_TWEAK=4.0.0.0
+# 1.0.5.2023  -> VERSION_FULL=1.0.5  VERSION_FULL_WITH_TWEAK=1.0.5.2023
+# ""          -> VERSION_FULL=0.0.0  VERSION_FULL_WITH_TWEAK=0.0.0.0
+# 2.5-rc1     -> VERSION_FULL=2.5.0  VERSION_FULL_WITH_TWEAK=2.5.0.0
 ```
 #]============================================================================]
 function(_jrl_normalize_version version_str)
