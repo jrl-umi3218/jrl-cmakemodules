@@ -783,7 +783,7 @@ function(jrl_configure_default_build_type build_type)
         message(STATUS "Setting build type to '${build_type}' as none was specified.")
         set(CMAKE_BUILD_TYPE ${build_type} CACHE STRING "Choose the type of build." FORCE)
         # set the possible values of build type for cmake-gui
-        set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS ${allowed_build_types})
+        set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS ${standard_build_types})
     else()
         message(
             STATUS
