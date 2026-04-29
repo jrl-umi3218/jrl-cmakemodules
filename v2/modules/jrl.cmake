@@ -49,7 +49,10 @@ endfunction()
 # `_jrl_check_dir_exists`
 
 ```cpp
-_jrl_check_dir_exists(<dirpath>)
+_jrl_check_dir_exists(
+    <dirpath>
+    [<message>]
+)
 ```
 
 **Type:** function
@@ -61,16 +64,23 @@ _jrl_check_dir_exists(<dirpath>)
 
 ### Arguments
 * `dirpath`: The directory path to check.
+* `message`: Optional error message to display if the directory does not exist.
 
 
 ### Example
 ```cmake
 _jrl_check_dir_exists(${CMAKE_CURRENT_SOURCE_DIR}/include)
+_jrl_check_dir_exists(${CMAKE_CURRENT_SOURCE_DIR}/include "include/ directory is missing")
 ```
 #]============================================================================]
 function(_jrl_check_dir_exists dirpath)
     if(NOT IS_DIRECTORY ${dirpath})
-        message(FATAL_ERROR "Directory '${dirpath}' does not exist.")
+        if(ARGC EQUAL 1)
+            set(msg "Directory '${dirpath}' does not exist.")
+        else()
+            set(msg "${ARGV1}")
+        endif()
+        message(FATAL_ERROR "${msg}")
     endif()
 endfunction()
 
