@@ -424,6 +424,8 @@ jrl_target_treat_all_warnings_as_errors(my_target PRIVATE)
 
 ```cpp
 jrl_target_generate_warning_header(
+    <target_name>
+    <visibility>
     [<args>...]
 )
 ```
@@ -432,10 +434,13 @@ jrl_target_generate_warning_header(
 
 
 ### Description
+    Generate a <library_name>/warning.hpp header for a target.
 
 
 ### Arguments
-    <args>... - Additional arguments passed to _jrl_target_generate_header.
+* `target_name`: The target to which the header belongs.
+* `visibility`: Visibility scope (PRIVATE, PUBLIC, INTERFACE).
+* `<args>...`: Additional arguments passed to `_jrl_target_generate_header`.
 
 
 ### Example
@@ -449,6 +454,8 @@ jrl_target_generate_warning_header(my_target PUBLIC
 
 ```cpp
 jrl_target_generate_deprecated_header(
+    <target_name>
+    <visibility>
     [<args>...]
 )
 ```
@@ -461,7 +468,9 @@ jrl_target_generate_deprecated_header(
 
 
 ### Arguments
-    <args>... - Additional arguments passed to _jrl_target_generate_header.
+* `target_name`: The target to which the header belongs.
+* `visibility`: Visibility scope (PRIVATE, PUBLIC, INTERFACE).
+* `<args>...`: Additional arguments passed to `_jrl_target_generate_header`.
 
 
 ### Example
@@ -475,6 +484,8 @@ jrl_target_generate_deprecated_header(my_target PUBLIC
 
 ```cpp
 jrl_target_generate_tracy_header(
+    <target_name>
+    <visibility>
     [<args>...]
 )
 ```
@@ -487,7 +498,9 @@ jrl_target_generate_tracy_header(
 
 
 ### Arguments
-    <args>... - Additional arguments passed to _jrl_target_generate_header.
+* `target_name`: The target to which the header belongs.
+* `visibility`: Visibility scope (PRIVATE, PUBLIC, INTERFACE).
+* `<args>...`: Additional arguments passed to `_jrl_target_generate_header`.
 
 
 ### Example
@@ -501,6 +514,8 @@ jrl_target_generate_tracy_header(my_target PUBLIC
 
 ```cpp
 jrl_target_generate_config_header(
+    <target_name>
+    <visibility>
     [VERSION <version>]
     [<args>...]
 )
@@ -516,8 +531,10 @@ jrl_target_generate_config_header(
 
 
 ### Arguments
+* `target_name`: The target to which the header belongs.
+* `visibility`: Visibility scope (PRIVATE, PUBLIC, INTERFACE).
 * `VERSION`: The version string to include in the generated header. Otherwise uses the target's VERSION property, and otherwise the PROJECT_VERSION.
-    <args>... - Additional arguments passed to _jrl_target_generate_header.
+* `<args>...`: Additional keyword arguments forwarded to `_jrl_target_generate_header` (e.g. `LIBRARY_NAME`, `FILENAME`, `GEN_DIR`, `SKIP_INSTALL`).
 
 
 
@@ -730,6 +747,7 @@ jrl_target_install_headers(
   Install declared header for a given target and solve the relative path using the provided base dirs.
   It is using the _jrl_install_headers and _jrl_install_headers_base_dirs properties set via jrl_target_headers().
   For a whole project, use jrl_install_headers() instead (which calls this function for each component, that contains targets).
+  NOTE: this is done automatically in jrl_export_package() for all exported targets.
 
 
 ### Arguments
