@@ -1201,6 +1201,7 @@ jrl_target_enforce_msvc_conformance(my_target INTERFACE)
 ```
 #]============================================================================]
 function(jrl_target_enforce_msvc_conformance target_name visibility)
+    _jrl_check_target_exists(${target_name})
     _jrl_check_valid_visibility(${visibility})
 
     jrl_get_cxx_compiler_id(cxx_compiler_id)
@@ -1247,6 +1248,7 @@ jrl_target_treat_all_warnings_as_errors(my_target PRIVATE)
 ```
 #]============================================================================]
 function(jrl_target_treat_all_warnings_as_errors target_name visibility)
+    _jrl_check_target_exists(${target_name})
     _jrl_check_valid_visibility(${visibility})
 
     jrl_get_cxx_compiler_id(cxx_compiler_id)
