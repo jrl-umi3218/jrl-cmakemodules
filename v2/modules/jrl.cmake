@@ -2351,6 +2351,16 @@ function(jrl_target_headers target visibility)
     # Save the headers in a property of the target
     # NOTE: The PUBLIC_HEADER technically works, but does not support base_dirs
     # cf: https://cmake.org/cmake/help/latest/command/install.html#install
+    # Only PUBLIC and INTERFACE headers are installed; skip PRIVATE headers.
+    if(visibility STREQUAL "PRIVATE")
+        message(
+            AUTHOR_WARNING
+            "Headers declared for target '${target}' with PRIVATE visibility will not be installed.
+            Only PUBLIC and INTERFACE headers are installed.
+            If you want to install these headers, change the visibility to PUBLIC or INTERFACE."
+        )
+        return()
+    endif()
     set_property(TARGET ${target} APPEND PROPERTY _jrl_install_headers "${arg_HEADERS}")
     set_property(TARGET ${target} APPEND PROPERTY _jrl_install_headers_base_dirs "${arg_BASE_DIRS}")
 endfunction()
