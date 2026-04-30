@@ -1,83 +1,93 @@
 jrl_test_case(
-  NAME "_jrl_top_dir returns existing directory"
+  NAME "_JRL_TOP_DIR is an existing directory"
   CODE [[
-    _jrl_top_dir(top_dir)
-    if(NOT IS_DIRECTORY "${top_dir}")
-      message(FATAL_ERROR "_jrl_top_dir returned non-existing directory: '${top_dir}'")
+    if(NOT IS_DIRECTORY "${_JRL_TOP_DIR}")
+      message(FATAL_ERROR "_JRL_TOP_DIR is not an existing directory: '${_JRL_TOP_DIR}'")
     endif()
   ]]
 )
 
 jrl_test_case(
-  NAME "_jrl_top_dir contains modules/ subdirectory"
+  NAME "_JRL_TOP_DIR contains modules/ subdirectory"
   CODE [[
-    _jrl_top_dir(top_dir)
-    if(NOT IS_DIRECTORY "${top_dir}/modules")
-      message(FATAL_ERROR "Expected modules/ inside top_dir '${top_dir}'")
+    if(NOT IS_DIRECTORY "${_JRL_TOP_DIR}/modules")
+      message(FATAL_ERROR "Expected modules/ inside _JRL_TOP_DIR '${_JRL_TOP_DIR}'")
     endif()
   ]]
 )
 
 jrl_test_case(
-  NAME "_jrl_templates_dir returns existing directory"
+  NAME "_JRL_MODULES_DIR is an existing directory"
   CODE [[
-    _jrl_templates_dir(templates_dir)
-    if(NOT IS_DIRECTORY "${templates_dir}")
-      message(FATAL_ERROR "_jrl_templates_dir returned non-existing directory: '${templates_dir}'")
+    if(NOT IS_DIRECTORY "${_JRL_MODULES_DIR}")
+      message(FATAL_ERROR "_JRL_MODULES_DIR is not an existing directory: '${_JRL_MODULES_DIR}'")
     endif()
   ]]
 )
 
 jrl_test_case(
-  NAME "_jrl_templates_dir is inside top_dir"
+  NAME "_JRL_MODULES_DIR is inside _JRL_TOP_DIR"
   CODE [[
-    _jrl_top_dir(top_dir)
-    _jrl_templates_dir(templates_dir)
-    string(FIND "${templates_dir}" "${top_dir}" pos)
+    string(FIND "${_JRL_MODULES_DIR}" "${_JRL_TOP_DIR}" pos)
     if(NOT pos EQUAL 0)
-      message(FATAL_ERROR "templates_dir '${templates_dir}' is not inside top_dir '${top_dir}'")
+      message(FATAL_ERROR "_JRL_MODULES_DIR '${_JRL_MODULES_DIR}' is not inside _JRL_TOP_DIR '${_JRL_TOP_DIR}'")
     endif()
   ]]
 )
 
 jrl_test_case(
-  NAME "_jrl_docs_dir returns existing directory"
+  NAME "_JRL_TEMPLATES_DIR is an existing directory"
   CODE [[
-    _jrl_docs_dir(docs_dir)
-    if(NOT IS_DIRECTORY "${docs_dir}")
-      message(FATAL_ERROR "_jrl_docs_dir returned non-existing directory: '${docs_dir}'")
+    if(NOT IS_DIRECTORY "${_JRL_TEMPLATES_DIR}")
+      message(FATAL_ERROR "_JRL_TEMPLATES_DIR is not an existing directory: '${_JRL_TEMPLATES_DIR}'")
     endif()
   ]]
 )
 
 jrl_test_case(
-  NAME "_jrl_external_modules_dir returns existing directory"
+  NAME "_JRL_TEMPLATES_DIR is inside _JRL_TOP_DIR"
   CODE [[
-    _jrl_external_modules_dir(ext_dir)
-    if(NOT IS_DIRECTORY "${ext_dir}")
-      message(FATAL_ERROR "_jrl_external_modules_dir returned non-existing directory: '${ext_dir}'")
+    string(FIND "${_JRL_TEMPLATES_DIR}" "${_JRL_TOP_DIR}" pos)
+    if(NOT pos EQUAL 0)
+      message(FATAL_ERROR "_JRL_TEMPLATES_DIR '${_JRL_TEMPLATES_DIR}' is not inside _JRL_TOP_DIR '${_JRL_TOP_DIR}'")
     endif()
   ]]
 )
 
 jrl_test_case(
-  NAME "_jrl_find_modules_dir returns existing directory"
+  NAME "_JRL_DOCS_DIR is an existing directory"
   CODE [[
-    _jrl_find_modules_dir(find_dir)
-    if(NOT IS_DIRECTORY "${find_dir}")
-      message(FATAL_ERROR "_jrl_find_modules_dir returned non-existing directory: '${find_dir}'")
+    if(NOT IS_DIRECTORY "${_JRL_DOCS_DIR}")
+      message(FATAL_ERROR "_JRL_DOCS_DIR is not an existing directory: '${_JRL_DOCS_DIR}'")
     endif()
   ]]
 )
 
 jrl_test_case(
-  NAME "_jrl_find_modules_dir contains at least one FindXxx.cmake file"
+  NAME "_JRL_EXTERNAL_MODULES_DIR is an existing directory"
   CODE [[
-    _jrl_find_modules_dir(find_dir)
-    file(GLOB find_modules "${find_dir}/Find*.cmake")
+    if(NOT IS_DIRECTORY "${_JRL_EXTERNAL_MODULES_DIR}")
+      message(FATAL_ERROR "_JRL_EXTERNAL_MODULES_DIR is not an existing directory: '${_JRL_EXTERNAL_MODULES_DIR}'")
+    endif()
+  ]]
+)
+
+jrl_test_case(
+  NAME "_JRL_FIND_MODULES_DIR is an existing directory"
+  CODE [[
+    if(NOT IS_DIRECTORY "${_JRL_FIND_MODULES_DIR}")
+      message(FATAL_ERROR "_JRL_FIND_MODULES_DIR is not an existing directory: '${_JRL_FIND_MODULES_DIR}'")
+    endif()
+  ]]
+)
+
+jrl_test_case(
+  NAME "_JRL_FIND_MODULES_DIR contains at least one FindXxx.cmake file"
+  CODE [[
+    file(GLOB find_modules "${_JRL_FIND_MODULES_DIR}/Find*.cmake")
     list(LENGTH find_modules count)
     if(count EQUAL 0)
-      message(FATAL_ERROR "find_modules_dir '${find_dir}' contains no Find*.cmake files")
+      message(FATAL_ERROR "_JRL_FIND_MODULES_DIR '${_JRL_FIND_MODULES_DIR}' contains no Find*.cmake files")
     endif()
   ]]
 )
