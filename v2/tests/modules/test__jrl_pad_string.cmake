@@ -2,7 +2,7 @@ jrl_test_case(
   NAME "Shorter string is padded to exact width"
   CODE [[
     _jrl_pad_string("foo" 6 result)
-    _jrl_check_strequal("${result}" "foo   ")
+    _jrl_check("${result}" STREQUAL "foo   ")
   ]]
 )
 
@@ -10,7 +10,7 @@ jrl_test_case(
   NAME "String at exact width is unchanged"
   CODE [[
     _jrl_pad_string("hello" 5 result)
-    _jrl_check_strequal("${result}" "hello")
+    _jrl_check("${result}" STREQUAL "hello")
   ]]
 )
 
@@ -18,7 +18,7 @@ jrl_test_case(
   NAME "String longer than width is truncated"
   CODE [[
     _jrl_pad_string("abcdefgh" 4 result)
-    _jrl_check_strequal("${result}" "abcd")
+    _jrl_check("${result}" STREQUAL "abcd")
   ]]
 )
 
@@ -26,7 +26,7 @@ jrl_test_case(
   NAME "Empty string padded to width produces all spaces"
   CODE [[
     _jrl_pad_string("" 3 result)
-    _jrl_check_strequal("${result}" "   ")
+    _jrl_check("${result}" STREQUAL "   ")
   ]]
 )
 
@@ -34,7 +34,7 @@ jrl_test_case(
   NAME "Width zero returns empty string"
   CODE [[
     _jrl_pad_string("hello" 0 result)
-    _jrl_check_strequal("${result}" "")
+    _jrl_check(NOT result)
   ]]
 )
 

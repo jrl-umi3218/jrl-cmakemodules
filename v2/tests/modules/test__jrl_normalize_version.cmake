@@ -10,12 +10,12 @@ jrl_test_case(
       VERSION_TWEAK tweak
     )
 
-    _jrl_check_strequal("${full}"       "1.2.3")
-    _jrl_check_strequal("${full_tweak}" "1.2.3.0")
-    _jrl_check_strequal("${major}"      "1")
-    _jrl_check_strequal("${minor}"      "2")
-    _jrl_check_strequal("${patch}"      "3")
-    _jrl_check_strequal("${tweak}"      "0")
+    _jrl_check("${full}" STREQUAL "1.2.3")
+    _jrl_check("${full_tweak}" STREQUAL "1.2.3.0")
+    _jrl_check("${major}" STREQUAL "1")
+    _jrl_check("${minor}" STREQUAL "2")
+    _jrl_check("${patch}" STREQUAL "3")
+    _jrl_check("${tweak}" STREQUAL "0")
   ]]
 )
 
@@ -31,12 +31,12 @@ jrl_test_case(
       VERSION_TWEAK tweak
     )
 
-    _jrl_check_strequal("${full}"       "1.2.0")
-    _jrl_check_strequal("${full_tweak}" "1.2.0.0")
-    _jrl_check_strequal("${major}"      "1")
-    _jrl_check_strequal("${minor}"      "2")
-    _jrl_check_strequal("${patch}"      "0")
-    _jrl_check_strequal("${tweak}"      "0")
+    _jrl_check("${full}" STREQUAL "1.2.0")
+    _jrl_check("${full_tweak}" STREQUAL "1.2.0.0")
+    _jrl_check("${major}" STREQUAL "1")
+    _jrl_check("${minor}" STREQUAL "2")
+    _jrl_check("${patch}" STREQUAL "0")
+    _jrl_check("${tweak}" STREQUAL "0")
   ]]
 )
 
@@ -51,11 +51,11 @@ jrl_test_case(
       VERSION_PATCH patch
     )
 
-    _jrl_check_strequal("${full}"       "4.0.0")
-    _jrl_check_strequal("${full_tweak}" "4.0.0.0")
-    _jrl_check_strequal("${major}"      "4")
-    _jrl_check_strequal("${minor}"      "0")
-    _jrl_check_strequal("${patch}"      "0")
+    _jrl_check("${full}" STREQUAL "4.0.0")
+    _jrl_check("${full_tweak}" STREQUAL "4.0.0.0")
+    _jrl_check("${major}" STREQUAL "4")
+    _jrl_check("${minor}" STREQUAL "0")
+    _jrl_check("${patch}" STREQUAL "0")
   ]]
 )
 
@@ -68,9 +68,9 @@ jrl_test_case(
       VERSION_TWEAK tweak
     )
 
-    _jrl_check_strequal("${full}"       "1.0.5")
-    _jrl_check_strequal("${full_tweak}" "1.0.5.2023")
-    _jrl_check_strequal("${tweak}"      "2023")
+    _jrl_check("${full}" STREQUAL "1.0.5")
+    _jrl_check("${full_tweak}" STREQUAL "1.0.5.2023")
+    _jrl_check("${tweak}" STREQUAL "2023")
   ]]
 )
 
@@ -86,12 +86,12 @@ jrl_test_case(
       VERSION_TWEAK tweak
     )
 
-    _jrl_check_strequal("${full}"       "0.0.0")
-    _jrl_check_strequal("${full_tweak}" "0.0.0.0")
-    _jrl_check_strequal("${major}"      "0")
-    _jrl_check_strequal("${minor}"      "0")
-    _jrl_check_strequal("${patch}"      "0")
-    _jrl_check_strequal("${tweak}"      "0")
+    _jrl_check("${full}" STREQUAL "0.0.0")
+    _jrl_check("${full_tweak}" STREQUAL "0.0.0.0")
+    _jrl_check("${major}" STREQUAL "0")
+    _jrl_check("${minor}" STREQUAL "0")
+    _jrl_check("${patch}" STREQUAL "0")
+    _jrl_check("${tweak}" STREQUAL "0")
   ]]
 )
 
@@ -106,11 +106,11 @@ jrl_test_case(
       VERSION_PATCH patch
     )
 
-    _jrl_check_strequal("${full}"       "2.5.0")
-    _jrl_check_strequal("${full_tweak}" "2.5.0.0")
-    _jrl_check_strequal("${major}"      "2")
-    _jrl_check_strequal("${minor}"      "5")
-    _jrl_check_strequal("${patch}"      "0")
+    _jrl_check("${full}" STREQUAL "2.5.0")
+    _jrl_check("${full_tweak}" STREQUAL "2.5.0.0")
+    _jrl_check("${major}" STREQUAL "2")
+    _jrl_check("${minor}" STREQUAL "5")
+    _jrl_check("${patch}" STREQUAL "0")
   ]]
 )
 
@@ -121,7 +121,7 @@ jrl_test_case(
 
     _jrl_normalize_version("3.1.4" VERSION_FULL only_full)
 
-    _jrl_check_strequal("${only_full}" "3.1.4")
+    _jrl_check("${only_full}" STREQUAL "3.1.4")
   ]]
 )
 

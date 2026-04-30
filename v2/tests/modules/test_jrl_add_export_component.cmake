@@ -34,9 +34,9 @@ jrl_test_case(
     endif()
 
     get_property(targets_a GLOBAL PROPERTY _jrl_my_project_comp_a_targets)
-    _jrl_check_strequal("${targets_a}" "lib_a")
+    _jrl_check("${targets_a}" STREQUAL "lib_a")
     get_property(targets_b GLOBAL PROPERTY _jrl_my_project_comp_b_targets)
-    _jrl_check_strequal("${targets_b}" "lib_b")
+    _jrl_check("${targets_b}" STREQUAL "lib_b")
   ]]
 )
 
