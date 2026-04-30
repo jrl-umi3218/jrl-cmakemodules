@@ -3,7 +3,7 @@ jrl_test_case(
   CODE [[
     set(CMAKE_CXX_COMPILER_ID "GNU")
     jrl_get_cxx_compiler_id(result)
-    _jrl_check_strequal("${result}" "GNU")
+    _jrl_check("${result}" STREQUAL "GNU")
   ]]
 )
 
@@ -12,7 +12,7 @@ jrl_test_case(
   CODE [[
     set(CMAKE_CXX_COMPILER_ID "Clang")
     jrl_get_cxx_compiler_id(result)
-    _jrl_check_strequal("${result}" "Clang")
+    _jrl_check("${result}" STREQUAL "Clang")
   ]]
 )
 
@@ -21,7 +21,7 @@ jrl_test_case(
   CODE [[
     set(CMAKE_CXX_COMPILER_ID "AppleClang")
     jrl_get_cxx_compiler_id(result)
-    _jrl_check_strequal("${result}" "Clang")
+    _jrl_check("${result}" STREQUAL "Clang")
   ]]
 )
 
@@ -30,7 +30,7 @@ jrl_test_case(
   CODE [[
     set(CMAKE_CXX_COMPILER_ID "MSVC")
     jrl_get_cxx_compiler_id(result)
-    _jrl_check_strequal("${result}" "MSVC")
+    _jrl_check("${result}" STREQUAL "MSVC")
   ]]
 )
 
@@ -40,7 +40,7 @@ jrl_test_case(
     set(CMAKE_CXX_COMPILER_ID "Clang")
     set(CMAKE_CXX_SIMULATE_ID "MSVC")
     jrl_get_cxx_compiler_id(result)
-    _jrl_check_strequal("${result}" "MSVC")
+    _jrl_check("${result}" STREQUAL "MSVC")
   ]]
 )
 
@@ -51,7 +51,7 @@ jrl_test_case(
     set(CMAKE_CXX_SIMULATE_ID "MSVC")
     set(CMAKE_CXX_COMPILER_FRONTEND_VARIANT "MSVC")
     jrl_get_cxx_compiler_id(result)
-    _jrl_check_strequal("${result}" "MSVC")
+    _jrl_check("${result}" STREQUAL "MSVC")
   ]]
 )
 
@@ -61,7 +61,7 @@ jrl_test_case(
     set(CMAKE_CXX_COMPILER_ID "Clang")
     set(CMAKE_CXX_COMPILER_FRONTEND_VARIANT "GNU")
     jrl_get_cxx_compiler_id(result)
-    _jrl_check_strequal("${result}" "GNU")
+    _jrl_check("${result}" STREQUAL "GNU")
   ]]
 )
 

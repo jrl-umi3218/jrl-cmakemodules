@@ -35,7 +35,7 @@ jrl_test_case(
     NAME "My variable check fails"
     WILL_FAIL
     CODE [[
-        _jrl_check_var_defined(UNDEFINED_VAR)
+        _jrl_check(DEFINED UNDEFINED_VAR)
     ]]
 )
 ```

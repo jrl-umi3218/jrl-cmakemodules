@@ -6,8 +6,8 @@ jrl_test_case(
 
     jrl_option(TEST_OPTION_1 "Test option 1" ON)
 
-    _jrl_check_var_defined(TEST_OPTION_1)
-    _jrl_check_strequal("${TEST_OPTION_1}" "ON")
+    _jrl_check(DEFINED TEST_OPTION_1)
+    _jrl_check("${TEST_OPTION_1}" STREQUAL "ON")
   ]]
 )
 
@@ -20,8 +20,8 @@ jrl_test_case(
 
     jrl_option(TEST_OPTION_2 "Test option 2" ON CONDITION "MY_DEP_ENABLED" FALLBACK OFF)
 
-    _jrl_check_var_defined(TEST_OPTION_2)
-    _jrl_check_strequal("${TEST_OPTION_2}" "ON")
+    _jrl_check(DEFINED TEST_OPTION_2)
+    _jrl_check("${TEST_OPTION_2}" STREQUAL "ON")
   ]]
 )
 
@@ -34,8 +34,8 @@ jrl_test_case(
 
     jrl_option(TEST_OPTION_3 "Test option 3" ON CONDITION "MY_DEP_DISABLED" FALLBACK OFF)
 
-    _jrl_check_var_defined(TEST_OPTION_3)
-    _jrl_check_strequal("${TEST_OPTION_3}" "OFF")
+    _jrl_check(DEFINED TEST_OPTION_3)
+    _jrl_check("${TEST_OPTION_3}" STREQUAL "OFF")
   ]]
 )
 
@@ -48,8 +48,8 @@ jrl_test_case(
 
     jrl_option(TEST_OPTION_4 "Test option 4" ON CONDITION "ANOTHER_DEP" FALLBACK ON)
 
-    _jrl_check_var_defined(TEST_OPTION_4)
-    _jrl_check_strequal("${TEST_OPTION_4}" "ON")
+    _jrl_check(DEFINED TEST_OPTION_4)
+    _jrl_check("${TEST_OPTION_4}" STREQUAL "ON")
   ]]
 )
 
@@ -63,8 +63,8 @@ jrl_test_case(
 
     jrl_option(TEST_OPTION_5 "Test option 5" OFF LEGACY_NAME OLD_OPTION_NAME)
 
-    _jrl_check_var_defined(TEST_OPTION_5)
-    _jrl_check_strequal("${TEST_OPTION_5}" "ON")
+    _jrl_check(DEFINED TEST_OPTION_5)
+    _jrl_check("${TEST_OPTION_5}" STREQUAL "ON")
   ]]
 )
 
@@ -79,8 +79,8 @@ jrl_test_case(
 
     jrl_legacy_option(NEW_OPTION TEST_OPTION_6 OLD_OPTION OLD_OPTION_6)
 
-    _jrl_check_var_defined(TEST_OPTION_6)
-    _jrl_check_strequal("${TEST_OPTION_6}" "ON")
+    _jrl_check(DEFINED TEST_OPTION_6)
+    _jrl_check("${TEST_OPTION_6}" STREQUAL "ON")
   ]]
 )
 
@@ -95,8 +95,8 @@ jrl_test_case(
 
     jrl_option(TEST_OPTION_7 "Test option 7" ON CONDITION "COMBO_DEP" FALLBACK OFF LEGACY_NAME OLD_OPTION_7)
 
-    _jrl_check_var_defined(TEST_OPTION_7)
-    _jrl_check_strequal("${TEST_OPTION_7}" "ON")
+    _jrl_check(DEFINED TEST_OPTION_7)
+    _jrl_check("${TEST_OPTION_7}" STREQUAL "ON")
   ]]
 )
 
@@ -109,8 +109,8 @@ jrl_test_case(
 
     jrl_option(TEST_OPTION_8 "Test option 8" ON)
 
-    _jrl_check_var_defined(TEST_OPTION_8)
-    _jrl_check_strequal("${TEST_OPTION_8}" "OFF")
+    _jrl_check(DEFINED TEST_OPTION_8)
+    _jrl_check("${TEST_OPTION_8}" STREQUAL "OFF")
   ]]
 )
 
@@ -124,8 +124,8 @@ jrl_test_case(
 
     jrl_option(TEST_OPTION_9 "Test option 9" ON CONDITION "DEP_A AND NOT DEP_B" FALLBACK OFF)
 
-    _jrl_check_var_defined(TEST_OPTION_9)
-    _jrl_check_strequal("${TEST_OPTION_9}" "ON")
+    _jrl_check(DEFINED TEST_OPTION_9)
+    _jrl_check("${TEST_OPTION_9}" STREQUAL "ON")
   ]]
 )
 
@@ -139,8 +139,8 @@ jrl_test_case(
 
     jrl_option(TEST_OPTION_10 "Test option 10" ON CONDITION "DEP_C AND NOT DEP_D" FALLBACK OFF)
 
-    _jrl_check_var_defined(TEST_OPTION_10)
-    _jrl_check_strequal("${TEST_OPTION_10}" "OFF")
+    _jrl_check(DEFINED TEST_OPTION_10)
+    _jrl_check("${TEST_OPTION_10}" STREQUAL "OFF")
   ]]
 )
 
@@ -152,8 +152,8 @@ jrl_test_case(
 
     jrl_option(TEST_OPTION_11 "Test option 11" ON)
 
-    _jrl_check_var_defined(TEST_OPTION_11)
-    _jrl_check_strequal("${TEST_OPTION_11}" "ON")
+    _jrl_check(DEFINED TEST_OPTION_11)
+    _jrl_check("${TEST_OPTION_11}" STREQUAL "ON")
   ]]
 )
 
@@ -166,8 +166,8 @@ jrl_test_case(
 
     jrl_option(TEST_OPTION_12 "Test option 12" ON CONDITION "CUSTOM_DEP" FALLBACK "CUSTOM_VALUE")
 
-    _jrl_check_var_defined(TEST_OPTION_12)
-    _jrl_check_strequal("${TEST_OPTION_12}" "CUSTOM_VALUE")
+    _jrl_check(DEFINED TEST_OPTION_12)
+    _jrl_check("${TEST_OPTION_12}" STREQUAL "CUSTOM_VALUE")
   ]]
 )
 
@@ -181,8 +181,8 @@ jrl_test_case(
 
     jrl_legacy_option(NEW_OPTION TEST_OPTION_13 OLD_OPTION OLD_OPTION_13)
 
-    _jrl_check_var_defined(TEST_OPTION_13)
-    _jrl_check_strequal("${TEST_OPTION_13}" "OFF")
+    _jrl_check(DEFINED TEST_OPTION_13)
+    _jrl_check("${TEST_OPTION_13}" STREQUAL "OFF")
   ]]
 )
 
@@ -197,8 +197,8 @@ jrl_test_case(
 
     jrl_legacy_option(NEW_OPTION TEST_OPTION_14 OLD_OPTION OLD_OPTION_14)
 
-    _jrl_check_var_defined(TEST_OPTION_14)
-    _jrl_check_strequal("${TEST_OPTION_14}" "OFF")
+    _jrl_check(DEFINED TEST_OPTION_14)
+    _jrl_check("${TEST_OPTION_14}" STREQUAL "OFF")
     get_property(help_text CACHE TEST_OPTION_14 PROPERTY HELPSTRING)
     if(NOT "${help_text}" STREQUAL "Custom help text for option 14")
       message(FATAL_ERROR "FAIL: Help text was not preserved: '${help_text}'")
@@ -218,12 +218,12 @@ jrl_test_case(
     set(OLD_OPTION_15B OFF CACHE BOOL "Second old option")
 
     jrl_legacy_option(NEW_OPTION TEST_OPTION_15 OLD_OPTION OLD_OPTION_15A)
-    _jrl_check_var_defined(TEST_OPTION_15)
-    _jrl_check_strequal("${TEST_OPTION_15}" "ON")
+    _jrl_check(DEFINED TEST_OPTION_15)
+    _jrl_check("${TEST_OPTION_15}" STREQUAL "ON")
 
     jrl_legacy_option(NEW_OPTION TEST_OPTION_15 OLD_OPTION OLD_OPTION_15B)
-    _jrl_check_var_defined(TEST_OPTION_15)
-    _jrl_check_strequal("${TEST_OPTION_15}" "OFF")
+    _jrl_check(DEFINED TEST_OPTION_15)
+    _jrl_check("${TEST_OPTION_15}" STREQUAL "OFF")
   ]]
 )
 
@@ -236,8 +236,8 @@ jrl_test_case(
 
     jrl_option(TEST_OPTION_16 "Test option 16" ON LEGACY_NAME OLD_OPTION_16)
 
-    _jrl_check_var_defined(TEST_OPTION_16)
-    _jrl_check_strequal("${TEST_OPTION_16}" "ON")
+    _jrl_check(DEFINED TEST_OPTION_16)
+    _jrl_check("${TEST_OPTION_16}" STREQUAL "ON")
   ]]
 )
 
