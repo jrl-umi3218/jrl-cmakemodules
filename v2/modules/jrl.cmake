@@ -351,6 +351,50 @@ function(_jrl_check_no_unrecognized_arguments prefix)
 endfunction()
 
 #[============================================================================[
+# `_jrl_check`
+
+```cpp
+_jrl_check(
+    <condition...>
+    [ERROR_MESSAGE <msg>]
+)
+```
+
+**Type:** function
+
+
+### Description
+  Evaluates a CMake `if()` condition. If the condition is false, raises a fatal error.
+  Accepts the same condition syntax as CMake's `if()` command.
+
+
+### Arguments
+* `condition`: One or more condition tokens, using the same syntax as `if()`.
+* `ERROR_MESSAGE`: Optional custom error message. If not provided, the condition tokens are shown.
+
+
+### Example
+```cmake
+_jrl_check(DEFINED MY_VAR)
+_jrl_check(TARGET my_target ERROR_MESSAGE "Call find_package first.")
+_jrl_check("${MY_VAR}" STREQUAL "expected")
+_jrl_check(3 GREATER 1)
+```
+#]============================================================================]
+function(_jrl_check)
+    cmake_parse_arguments(arg "" "ERROR_MESSAGE" "" ${ARGN})
+    if(NOT (${arg_UNPARSED_ARGUMENTS}))
+        if(arg_ERROR_MESSAGE)
+            set(msg "${arg_ERROR_MESSAGE}")
+        else()
+            string(REPLACE ";" " " _cond_str "${arg_UNPARSED_ARGUMENTS}")
+            set(msg "Condition failed: ${_cond_str}")
+        endif()
+        message(FATAL_ERROR "${msg}")
+    endif()
+endfunction()
+
+#[============================================================================[
 # `_jrl_top_dir`
 
 ```cpp
