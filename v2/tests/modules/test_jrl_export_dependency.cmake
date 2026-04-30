@@ -18,13 +18,13 @@ jrl_test_case(
     endif()
 
     string(JSON num_deps LENGTH "${pd_json}" "package_dependencies")
-    _jrl_check_strequal("${num_deps}" "1")
+    _jrl_check("${num_deps}" STREQUAL "1")
 
     string(JSON pkg_name GET "${pd_json}" "package_dependencies" 0 "package_name")
-    _jrl_check_strequal("${pkg_name}" "Eigen3")
+    _jrl_check("${pkg_name}" STREQUAL "Eigen3")
 
     string(JSON pkg_targets GET "${pd_json}" "package_dependencies" 0 "package_targets")
-    _jrl_check_strequal("${pkg_targets}" "Eigen3::Eigen")
+    _jrl_check("${pkg_targets}" STREQUAL "Eigen3::Eigen")
   ]]
 )
 
@@ -47,10 +47,10 @@ jrl_test_case(
     get_property(pd_json GLOBAL PROPERTY _jrl_${PROJECT_NAME}_package_dependencies)
 
     string(JSON num_deps LENGTH "${pd_json}" "package_dependencies")
-    _jrl_check_strequal("${num_deps}" "2")
+    _jrl_check("${num_deps}" STREQUAL "2")
 
     string(JSON pkg2_name GET "${pd_json}" "package_dependencies" 1 "package_name")
-    _jrl_check_strequal("${pkg2_name}" "Boost")
+    _jrl_check("${pkg2_name}" STREQUAL "Boost")
   ]]
 )
 
@@ -68,7 +68,8 @@ jrl_test_case(
     get_property(pd_json GLOBAL PROPERTY _jrl_${PROJECT_NAME}_package_dependencies)
 
     string(JSON fp_args GET "${pd_json}" "package_dependencies" 0 "find_package_args")
-    _jrl_check_strequal("${fp_args}" "Eigen3;3.4;REQUIRED")
+    set(_expected_fp_args "Eigen3;3.4;REQUIRED")
+    _jrl_check(fp_args STREQUAL _expected_fp_args)
   ]]
 )
 
@@ -82,10 +83,10 @@ jrl_test_case(
     get_property(pd_json GLOBAL PROPERTY _jrl_${PROJECT_NAME}_package_dependencies)
 
     string(JSON num_deps LENGTH "${pd_json}" "package_dependencies")
-    _jrl_check_strequal("${num_deps}" "1")
+    _jrl_check("${num_deps}" STREQUAL "1")
 
     string(JSON pkg_name GET "${pd_json}" "package_dependencies" 0 "package_name")
-    _jrl_check_strequal("${pkg_name}" "MinimalPkg")
+    _jrl_check("${pkg_name}" STREQUAL "MinimalPkg")
   ]]
 )
 
@@ -129,7 +130,7 @@ jrl_test_case(
 
     get_property(components GLOBAL PROPERTY _jrl_${PROJECT_NAME}_export_components)
     list(LENGTH components num_components)
-    _jrl_check_strequal("${num_components}" "2")
+    _jrl_check("${num_components}" STREQUAL "2")
   ]]
 )
 
