@@ -4,245 +4,6 @@ include_guard(GLOBAL)
 cmake_minimum_required(VERSION 3.22)
 
 #[============================================================================[
-# `_jrl_check_var_defined`
-
-```cpp
-_jrl_check_var_defined(
-    <var>
-    [<message>]
-)
-```
-
-**Type:** function
-
-
-### Description
-  Checks if a variable is defined. If not, it raises a fatal error with the provided message.
-
-
-### Arguments
-* `var`: The variable to check.
-* `message`: Optional error message to display if the variable is not defined.
-
-
-### Example
-```cmake
-# Will print "MY_VAR is not defined."
-_jrl_check_var_defined(MY_VAR)
-
-# Custom message
-_jrl_check_var_defined(MY_VAR "MY_VAR must be set to build this project")
-```
-#]============================================================================]
-function(_jrl_check_var_defined var)
-    if(NOT DEFINED ${var})
-        if(ARGC EQUAL 1)
-            set(msg "Required variable '${ARGV0}' is not defined.")
-        else()
-            set(msg "${ARGV1}")
-        endif()
-        message(FATAL_ERROR "${msg}")
-    endif()
-endfunction()
-
-#[============================================================================[
-# `_jrl_check_var_not_defined`
-
-```cpp
-_jrl_check_var_not_defined(
-    <var>
-    [<message>]
-)
-```
-
-**Type:** function
-
-
-### Description
-  Checks if a variable is NOT defined. If it is defined, it raises a fatal error with the provided message.
-
-
-### Arguments
-* `var`: The variable to check.
-* `message`: Optional error message to display if the variable is defined.
-
-
-### Example
-```cmake
-_jrl_check_var_not_defined(MY_VAR)
-```
-#]============================================================================]
-function(_jrl_check_var_not_defined var)
-    if(DEFINED ${var})
-        if(ARGC EQUAL 1)
-            set(msg "Variable '${ARGV0}' is defined but should not be. Value: '${${var}}'")
-        else()
-            set(msg "${ARGV1}")
-        endif()
-        message(FATAL_ERROR "${msg}")
-    endif()
-endfunction()
-
-#[============================================================================[
-# `_jrl_check_strequal`
-
-```cpp
-_jrl_check_strequal(
-    <actual>
-    <expected>
-    [<message>]
-)
-```
-
-**Type:** function
-
-
-### Description
-  Checks if two strings are equal. If not, it raises a fatal error with the provided message.
-
-
-### Arguments
-* `actual`: The actual string value.
-* `expected`: The expected string value.
-* `message`: Optional error message to display if the strings are not equal.
-
-
-### Example
-```cmake
-_jrl_check_strequal("${MY_VAR}" "ON")
-```
-#]============================================================================]
-function(_jrl_check_strequal actual expected)
-    if(NOT "${actual}" STREQUAL "${expected}")
-        if(ARGC EQUAL 2)
-            set(msg
-                "String equality check failed:\n  Expected: '${expected}'\n  Actual:   '${actual}'"
-            )
-        else()
-            set(msg "${ARGV2}")
-        endif()
-        message(FATAL_ERROR "${msg}")
-    endif()
-endfunction()
-
-#[============================================================================[
-# `_jrl_check_dir_exists`
-
-```cpp
-_jrl_check_dir_exists(
-    <dirpath>
-    [<message>]
-)
-```
-
-**Type:** function
-
-
-### Description
-  Check if a directory exists, otherwise raise a fatal error.
-
-
-### Arguments
-* `dirpath`: The directory path to check.
-* `message`: Optional error message to display if the directory does not exist.
-
-
-### Example
-```cmake
-_jrl_check_dir_exists(${CMAKE_CURRENT_SOURCE_DIR}/include)
-_jrl_check_dir_exists(${CMAKE_CURRENT_SOURCE_DIR}/include "include/ directory is missing")
-```
-#]============================================================================]
-function(_jrl_check_dir_exists dirpath)
-    if(NOT IS_DIRECTORY ${dirpath})
-        if(ARGC EQUAL 1)
-            set(msg "Directory '${dirpath}' does not exist.")
-        else()
-            set(msg "${ARGV1}")
-        endif()
-        message(FATAL_ERROR "${msg}")
-    endif()
-endfunction()
-
-#[============================================================================[
-# `_jrl_check_target_exists`
-
-```cpp
-_jrl_check_target_exists(
-    <target_name>
-    [<message>]
-)
-```
-
-**Type:** function
-
-
-### Description
-  Check if a target exists, otherwise raise a fatal error.
-
-
-### Arguments
-* `target_name`: The target to check.
-* `message`: Optional error message to display if the target does not exist.
-
-
-### Example
-```cmake
-_jrl_check_target_exists(Python::Interpreter)
-_jrl_check_target_exists(Python::Interpreter "Call find_package(Python REQUIRED COMPONENTS Interpreter) first.")
-```
-#]============================================================================]
-function(_jrl_check_target_exists target_name)
-    if(NOT TARGET ${target_name})
-        if(ARGC EQUAL 1)
-            set(msg "Target '${target_name}' does not exist.")
-        else()
-            set(msg "${ARGV1}")
-        endif()
-        message(FATAL_ERROR "${msg}")
-    endif()
-endfunction()
-
-#[============================================================================[
-# `_jrl_check_command_exists`
-
-```cpp
-_jrl_check_command_exists(
-    <command_name>
-    [<message>]
-)
-```
-
-**Type:** function
-
-
-### Description
-  Check if a command exists, otherwise raise a fatal error.
-
-
-### Arguments
-* `command_name`: The command to check.
-* `message`: Optional error message to display if the command does not exist.
-
-
-### Example
-```cmake
-_jrl_check_command_exists(nanobind_add_stubs)
-_jrl_check_command_exists(nanobind_add_stubs "nanobind_add_stubs command not found. Call find_package(nanobind 2.5.0 REQUIRED) first.")
-```
-#]============================================================================]
-function(_jrl_check_command_exists command_name)
-    if(NOT COMMAND ${command_name})
-        if(ARGC EQUAL 1)
-            set(msg "Command '${command_name}' does not exist.")
-        else()
-            set(msg "${ARGV1}")
-        endif()
-        message(FATAL_ERROR "${msg}")
-    endif()
-endfunction()
-
-#[============================================================================[
 # `_jrl_check_valid_visibility`
 
 ```cpp
@@ -274,44 +35,6 @@ function(_jrl_check_valid_visibility visibility)
             FATAL_ERROR
             "visibility (${visibility}) must be one of PRIVATE, PUBLIC or INTERFACE"
         )
-    endif()
-endfunction()
-
-#[============================================================================[
-# `_jrl_check_file_exists`
-
-```cpp
-_jrl_check_file_exists(
-    <filepath>
-    [<message>]
-)
-```
-
-**Type:** function
-
-
-### Description
-  Check if a file exists, otherwise raise a fatal error.
-
-
-### Arguments
-* `filepath`: The file path to check.
-* `message`: Optional error message to display if the file does not exist.
-
-
-### Example
-```cmake
-_jrl_check_file_exists(${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt)
-```
-#]============================================================================]
-function(_jrl_check_file_exists filepath)
-    if(NOT EXISTS ${filepath})
-        if(ARGC EQUAL 1)
-            set(msg "File '${filepath}' does not exist.")
-        else()
-            set(msg "${ARGV1}")
-        endif()
-        message(FATAL_ERROR "${msg}")
     endif()
 endfunction()
 
@@ -421,7 +144,7 @@ function(_jrl_top_dir output_var)
     cmake_path(CONVERT "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/.." TO_CMAKE_PATH_LIST top_dir NORMALIZE)
     # remove trailing slash if any
     string(REGEX REPLACE "/$" "" top_dir "${top_dir}")
-    _jrl_check_dir_exists(${top_dir})
+    _jrl_check(IS_DIRECTORY ${top_dir})
     set(${output_var} ${top_dir} PARENT_SCOPE)
 endfunction()
 
@@ -451,7 +174,7 @@ _jrl_templates_dir(TEMPLATES_DIR)
 function(_jrl_templates_dir output_var)
     _jrl_top_dir(top_dir)
     set(templates_dir ${top_dir}/templates)
-    _jrl_check_dir_exists(${templates_dir})
+    _jrl_check(IS_DIRECTORY ${templates_dir})
     set(${output_var} ${templates_dir} PARENT_SCOPE)
 endfunction()
 
@@ -481,7 +204,7 @@ _jrl_docs_dir(docs_dir)
 function(_jrl_docs_dir output_var)
     _jrl_top_dir(top_dir)
     set(docs_dir ${top_dir}/docs)
-    _jrl_check_dir_exists(${docs_dir})
+    _jrl_check(IS_DIRECTORY ${docs_dir})
     set(${output_var} ${docs_dir} PARENT_SCOPE)
 endfunction()
 
@@ -511,7 +234,7 @@ _jrl_external_modules_dir(EXTERNAL_MODULES_DIR)
 function(_jrl_external_modules_dir output_var)
     _jrl_top_dir(top_dir)
     set(external_modules_dir ${top_dir}/external-modules)
-    _jrl_check_dir_exists(${external_modules_dir})
+    _jrl_check(IS_DIRECTORY ${external_modules_dir})
     set(${output_var} ${external_modules_dir} PARENT_SCOPE)
 endfunction()
 
@@ -541,7 +264,7 @@ _jrl_find_modules_dir(FIND_MODULES_DIR)
 function(_jrl_find_modules_dir output_var)
     _jrl_top_dir(top_dir)
     set(find_modules_dir ${top_dir}/find-modules)
-    _jrl_check_dir_exists(${find_modules_dir})
+    _jrl_check(IS_DIRECTORY ${find_modules_dir})
     set(${output_var} ${find_modules_dir} PARENT_SCOPE)
 endfunction()
 
@@ -762,8 +485,8 @@ message(STATUS "jrl-cmakemodules version: ${v}")
 ```
 #]============================================================================]
 function(jrl_cmakemodules_get_version output_var)
-    _jrl_check_var_defined(jrl-cmakemodules_VERSION
-        "jrl-cmakemodules_VERSION variable is not defined.
+    _jrl_check(DEFINED jrl-cmakemodules_VERSION
+        ERROR_MESSAGE "jrl-cmakemodules_VERSION variable is not defined.
         It is defined when adding the top-level jrl-cmakemodules CMakeLists or when found via find_package."
     )
     set(${output_var} ${jrl-cmakemodules_VERSION} PARENT_SCOPE)
@@ -991,8 +714,8 @@ function(jrl_target_set_output_directory target_name)
     set(multiValueArgs)
     cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
     _jrl_check_no_unrecognized_arguments(arg)
-    _jrl_check_target_exists(${target_name})
-    _jrl_check_var_defined(arg_OUTPUT_DIRECTORY)
+    _jrl_check(TARGET ${target_name})
+    _jrl_check(DEFINED arg_OUTPUT_DIRECTORY)
 
     set(dir ${arg_OUTPUT_DIRECTORY})
 
@@ -1198,7 +921,7 @@ message(STATUS "Compiler ID: ${cxx_compiler_id}")
 ```
 #]============================================================================]
 function(jrl_get_cxx_compiler_id output_var)
-    _jrl_check_var_defined(CMAKE_CXX_COMPILER_ID)
+    _jrl_check(DEFINED CMAKE_CXX_COMPILER_ID)
 
     if(CMAKE_CXX_COMPILER_FRONTEND_VARIANT)
         set(cxx_compiler_id ${CMAKE_CXX_COMPILER_FRONTEND_VARIANT})
@@ -1260,7 +983,7 @@ jrl_target_set_default_compile_options(my_target INTERFACE)
 ```
 #]============================================================================]
 function(jrl_target_set_default_compile_options target_name visibility)
-    _jrl_check_target_exists(${target_name})
+    _jrl_check(TARGET ${target_name})
     _jrl_check_valid_visibility(${visibility})
 
     jrl_get_cxx_compiler_id(cxx_compiler_id)
@@ -1325,7 +1048,7 @@ jrl_target_enforce_msvc_conformance(my_target INTERFACE)
 ```
 #]============================================================================]
 function(jrl_target_enforce_msvc_conformance target_name visibility)
-    _jrl_check_target_exists(${target_name})
+    _jrl_check(TARGET ${target_name})
     _jrl_check_valid_visibility(${visibility})
 
     jrl_get_cxx_compiler_id(cxx_compiler_id)
@@ -1372,7 +1095,7 @@ jrl_target_treat_all_warnings_as_errors(my_target PRIVATE)
 ```
 #]============================================================================]
 function(jrl_target_treat_all_warnings_as_errors target_name visibility)
-    _jrl_check_target_exists(${target_name})
+    _jrl_check(TARGET ${target_name})
     _jrl_check_valid_visibility(${visibility})
 
     jrl_get_cxx_compiler_id(cxx_compiler_id)
@@ -1563,10 +1286,10 @@ function(_jrl_target_generate_header target_name visibility)
     cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
     _jrl_check_no_unrecognized_arguments(arg)
 
-    _jrl_check_target_exists(${target_name})
+    _jrl_check(TARGET ${target_name})
     _jrl_check_valid_visibility(${visibility})
-    _jrl_check_var_defined(arg_TEMPLATE_FILE)
-    _jrl_check_file_exists(${arg_TEMPLATE_FILE})
+    _jrl_check(DEFINED arg_TEMPLATE_FILE)
+    _jrl_check(EXISTS ${arg_TEMPLATE_FILE})
 
     if(arg_LIBRARY_NAME)
         set(library_name ${arg_LIBRARY_NAME})
@@ -1804,7 +1527,7 @@ function(jrl_target_generate_config_header target_name visibility)
     set(multiValueArgs)
     cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-    _jrl_check_target_exists(${target_name})
+    _jrl_check(TARGET ${target_name})
     _jrl_check_valid_visibility(${visibility})
 
     if(arg_VERSION)
@@ -1965,7 +1688,7 @@ function(jrl_export_dependency)
     cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
     _jrl_check_no_unrecognized_arguments(arg)
 
-    _jrl_check_var_defined(arg_PACKAGE_NAME)
+    _jrl_check(DEFINED arg_PACKAGE_NAME)
 
     get_property(pd_json GLOBAL PROPERTY _jrl_${PROJECT_NAME}_package_dependencies)
     if(NOT pd_json)
@@ -2267,7 +1990,7 @@ function(_jrl_export_dependencies)
     cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
     _jrl_check_no_unrecognized_arguments(arg)
 
-    _jrl_check_var_defined(arg_TARGETS)
+    _jrl_check(DEFINED arg_TARGETS)
 
     if(arg_GEN_DIR)
         set(GEN_DIR ${arg_GEN_DIR})
@@ -2278,7 +2001,7 @@ function(_jrl_export_dependencies)
     if(arg_INSTALL_DESTINATION)
         set(INSTALL_DESTINATION ${arg_INSTALL_DESTINATION})
     else()
-        _jrl_check_var_defined(CMAKE_INSTALL_LIBDIR)
+        _jrl_check(DEFINED CMAKE_INSTALL_LIBDIR)
         set(INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
     endif()
 
@@ -2388,9 +2111,9 @@ function(jrl_add_export_component)
     cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
     _jrl_check_no_unrecognized_arguments(arg)
 
-    _jrl_check_var_defined(PROJECT_NAME)
-    _jrl_check_var_defined(arg_TARGETS)
-    _jrl_check_var_defined(arg_NAME)
+    _jrl_check(DEFINED PROJECT_NAME)
+    _jrl_check(DEFINED arg_TARGETS)
+    _jrl_check(DEFINED arg_NAME)
 
     # Check export component is not already declared
     get_property(existing_components GLOBAL PROPERTY _jrl_${PROJECT_NAME}_export_components)
@@ -2468,8 +2191,8 @@ function(jrl_target_headers target visibility)
     cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
     _jrl_check_no_unrecognized_arguments(arg)
 
-    _jrl_check_var_defined(arg_HEADERS)
-    _jrl_check_target_exists(${target})
+    _jrl_check(DEFINED arg_HEADERS)
+    _jrl_check(TARGET ${target})
     _jrl_check_valid_visibility(${visibility})
 
     # Save the headers in a property of the target
@@ -2526,12 +2249,12 @@ function(jrl_target_install_headers target)
     cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
     _jrl_check_no_unrecognized_arguments(arg)
 
-    _jrl_check_target_exists(${target})
+    _jrl_check(TARGET ${target})
 
     if(arg_DESTINATION)
         set(install_destination ${arg_DESTINATION})
     else()
-        _jrl_check_var_defined(CMAKE_INSTALL_INCLUDEDIR)
+        _jrl_check(DEFINED CMAKE_INSTALL_INCLUDEDIR)
         set(install_destination ${CMAKE_INSTALL_INCLUDEDIR})
     endif()
 
@@ -2623,7 +2346,7 @@ function(jrl_install_headers)
     cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
     _jrl_check_no_unrecognized_arguments(arg)
 
-    _jrl_check_var_defined(PROJECT_NAME)
+    _jrl_check(DEFINED PROJECT_NAME)
 
     if(NOT arg_DESTINATION)
         set(install_destination ${CMAKE_INSTALL_INCLUDEDIR})
@@ -2736,14 +2459,14 @@ function(jrl_export_package)
     )
 
     include(CMakePackageConfigHelpers)
-    _jrl_check_var_defined(PROJECT_NAME)
-    _jrl_check_var_defined(PROJECT_VERSION)
-    _jrl_check_var_defined(CMAKE_INSTALL_BINDIR
-        "CMAKE_INSTALL_BINDIR is not defined.
+    _jrl_check(DEFINED PROJECT_NAME)
+    _jrl_check(DEFINED PROJECT_VERSION)
+    _jrl_check(DEFINED CMAKE_INSTALL_BINDIR
+        ERROR_MESSAGE "CMAKE_INSTALL_BINDIR is not defined.
         Use jrl_configure_defaults(), or jrl_configure_default_install_dirs(), or include(GNUInstallDirs)."
     )
-    _jrl_check_var_defined(CMAKE_INSTALL_LIBDIR)
-    _jrl_check_var_defined(CMAKE_INSTALL_INCLUDEDIR)
+    _jrl_check(DEFINED CMAKE_INSTALL_LIBDIR)
+    _jrl_check(DEFINED CMAKE_INSTALL_INCLUDEDIR)
 
     if(arg_PACKAGE_CONFIG_TEMPLATE)
         set(package_config_template ${arg_PACKAGE_CONFIG_TEMPLATE})
@@ -2929,8 +2652,8 @@ function(jrl_legacy_option)
     _jrl_check_no_unrecognized_arguments(arg)
 
     # Validate required arguments
-    _jrl_check_var_defined(arg_NEW_OPTION)
-    _jrl_check_var_defined(arg_OLD_OPTION)
+    _jrl_check(DEFINED arg_NEW_OPTION)
+    _jrl_check(DEFINED arg_OLD_OPTION)
 
     # Check that NEW_OPTION exists in cache
     get_property(cache_exists CACHE ${arg_NEW_OPTION} PROPERTY VALUE SET)
@@ -3024,7 +2747,7 @@ function(jrl_option option_name help_text default_value)
 
     if(DEFINED arg_CONDITION)
         message(DEBUG "    Option has condition: ${arg_CONDITION}")
-        _jrl_check_var_defined(arg_FALLBACK "FALLBACK argument must be provided when CONDITION is used.")
+        _jrl_check(DEFINED arg_FALLBACK ERROR_MESSAGE "FALLBACK argument must be provided when CONDITION is used.")
     endif()
 
     if(DEFINED arg_FALLBACK)
@@ -3251,8 +2974,8 @@ execute_process(COMMAND ${python_interpreter} -c "print('Hello from Python!')")
 ```
 #]============================================================================]
 function(jrl_python_get_interpreter output_var)
-    _jrl_check_target_exists(Python::Interpreter
-    "
+    _jrl_check(TARGET Python::Interpreter
+        ERROR_MESSAGE "
         Python::Interpreter target not found.
         Call (jrl_)find_package(Python REQUIRED COMPONENTS Interpreter) first.
     "
@@ -3437,7 +3160,7 @@ function(jrl_python_compile_all)
     cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
     _jrl_check_no_unrecognized_arguments(arg)
 
-    _jrl_check_var_defined(arg_DIRECTORY)
+    _jrl_check(DEFINED arg_DIRECTORY)
     jrl_python_get_interpreter(python)
 
     if(arg_VERBOSE)
@@ -3521,8 +3244,8 @@ function(jrl_python_generate_init_py name)
     cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
     _jrl_check_no_unrecognized_arguments(arg)
 
-    _jrl_check_target_exists(${name})
-    _jrl_check_var_defined(arg_OUTPUT_PATH)
+    _jrl_check(TARGET ${name})
+    _jrl_check(DEFINED arg_OUTPUT_PATH)
 
     if(arg_TEMPLATE_FILE)
         set(template_file ${arg_TEMPLATE_FILE})
@@ -3566,10 +3289,10 @@ function(jrl_python_generate_init_py name)
     set(all_rel_paths "")
     foreach(dll_name IN LISTS dlls_to_link)
         get_target_property(python_module_dir ${name} LIBRARY_OUTPUT_DIRECTORY)
-        _jrl_check_var_defined(python_module_dir "LIBRARY_OUTPUT_DIRECTORY not set for target '${name}', add it using 'set_target_properties(<target> PROPERTIES LIBRARY_OUTPUT_DIRECTORY <dir>)'")
+        _jrl_check(DEFINED python_module_dir ERROR_MESSAGE "LIBRARY_OUTPUT_DIRECTORY not set for target '${name}', add it using 'set_target_properties(<target> PROPERTIES LIBRARY_OUTPUT_DIRECTORY <dir>)'")
 
         get_target_property(dll_dir ${dll_name} RUNTIME_OUTPUT_DIRECTORY)
-        _jrl_check_var_defined(dll_dir)
+        _jrl_check(DEFINED dll_dir)
 
         file(RELATIVE_PATH rel_path ${python_module_dir} ${dll_dir})
         list(APPEND all_rel_paths ${rel_path})
@@ -3931,7 +3654,7 @@ function(jrl_python_compute_install_dir output)
     # ref: https://github.com/cmake-wheel/cmeel/issues/252
     if(WIN32 AND DEFINED CMAKE_INSTALL_PREFIX)
         if(CMAKE_INSTALL_PREFIX MATCHES "cmeel.prefix")
-            _jrl_check_var_defined(PYTHON_SITELIB "PYTHON_SITELIB variable must be defined when using CMeel environment.")
+            _jrl_check(DEFINED PYTHON_SITELIB ERROR_MESSAGE "PYTHON_SITELIB variable must be defined when using CMeel environment.")
             if(WIN32)
                 cmake_path(CONVERT "${PYTHON_SITELIB}" TO_CMAKE_PATH_LIST PYTHON_SITELIB NORMALIZE)
             endif()
@@ -4009,7 +3732,7 @@ jrl_check_python_module_name(my_module)
 ```
 #]============================================================================]
 function(jrl_check_python_module_name target)
-    _jrl_check_target_exists(${target})
+    _jrl_check(TARGET ${target})
     set(script ${CMAKE_BINARY_DIR}/generated/cmake/${PROJECT_NAME}/check-python-module-name.cmake)
     file(
         CONFIGURE
@@ -4098,8 +3821,8 @@ jrl_boostpy_add_module(my_module module.cpp)
 ```
 #]============================================================================]
 function(jrl_boostpy_add_module name)
-    _jrl_check_command_exists(python_add_library
-        "
+    _jrl_check(COMMAND python_add_library
+        ERROR_MESSAGE "
     python_add_library(<name>) command not found.
     It is available in the FindPython module shipped with CMake.
     Use (jrl_)find_package(Python REQUIRED) before calling jrl_boostpy_add_module.
@@ -4107,8 +3830,8 @@ function(jrl_boostpy_add_module name)
     "
     )
 
-    _jrl_check_target_exists(Boost::python
-        "
+    _jrl_check(TARGET Boost::python
+        ERROR_MESSAGE "
     Boost::python target not found.
     Make sure you have Boost.Python using (jrl_)find_package(Boost REQUIRED COMPONENTS python).
     "
@@ -4160,8 +3883,8 @@ function(jrl_boostpy_add_stubs name)
     cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
     _jrl_check_no_unrecognized_arguments(arg)
 
-    _jrl_check_var_defined(arg_MODULE)
-    _jrl_check_var_defined(arg_OUTPUT_PATH)
+    _jrl_check(DEFINED arg_MODULE)
+    _jrl_check(DEFINED arg_OUTPUT_PATH)
 
     if(NOT arg_PYTHON_PATH)
         set(pythonpath "")
@@ -4176,7 +3899,7 @@ function(jrl_boostpy_add_stubs name)
     _jrl_external_modules_dir(external_modules_dir)
     set(stubgen_py ${external_modules_dir}/pybind11-stubgen-e48d1f1/pybind11_stubgen.py)
     cmake_path(CONVERT ${stubgen_py} TO_CMAKE_PATH_LIST stubgen_py NORMALIZE)
-    _jrl_check_file_exists(${stubgen_py})
+    _jrl_check(EXISTS ${stubgen_py})
 
     jrl_python_get_interpreter(python)
 
@@ -4295,8 +4018,8 @@ function(jrl_generate_ros2_package_files)
 
     if(install_cpp_package_files)
         if(arg_PACKAGE_XML_PATH)
-            _jrl_check_file_exists(${CMAKE_CURRENT_SOURCE_DIR}/${arg_PACKAGE_XML_PATH}
-                "
+            _jrl_check(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${arg_PACKAGE_XML_PATH}
+                ERROR_MESSAGE "
             PACKAGE_XML_PATH file '${arg_PACKAGE_XML_PATH}' does not exist.
             Please provide a valid path to the package.xml file of your ROS 2 package.
             "
@@ -4304,8 +4027,8 @@ function(jrl_generate_ros2_package_files)
             set(package_xml_path ${CMAKE_CURRENT_SOURCE_DIR}/${arg_PACKAGE_XML_PATH})
         else()
             set(package_xml_path ${CMAKE_CURRENT_SOURCE_DIR}/package.xml)
-            _jrl_check_file_exists(${package_xml_path}
-                "
+            _jrl_check(EXISTS ${package_xml_path}
+                ERROR_MESSAGE "
                 package.xml file not found at default location: '${package_xml_path}'.
                 Please provide a valid path to the package.xml file of your ROS 2 package
                 using the PACKAGE_XML_PATH argument.
@@ -4323,8 +4046,8 @@ function(jrl_generate_ros2_package_files)
     if(arg_DESTINATION)
         set(install_destination ${arg_DESTINATION})
     else()
-        _jrl_check_var_defined(CMAKE_INSTALL_DATAROOTDIR
-            "CMAKE_INSTALL_DATAROOTDIR is not defined.
+        _jrl_check(DEFINED CMAKE_INSTALL_DATAROOTDIR
+            ERROR_MESSAGE "CMAKE_INSTALL_DATAROOTDIR is not defined.
             Use jrl_configure_defaults(), or jrl_configure_default_install_dirs(), or include(GNUInstallDirs)."
         )
         set(install_destination ${CMAKE_INSTALL_DATAROOTDIR})
@@ -4413,7 +4136,7 @@ cmake -DGENERATE_API_DOC=ON -P v2/modules/jrl.cmake
 ```
 #]============================================================================]
 function(_jrl_generate_api_doc input_file output_file)
-    _jrl_check_file_exists(${input_file})
+    _jrl_check(EXISTS ${input_file})
 
     file(READ "${input_file}" content_raw)
     string(REGEX REPLACE "\r" "" content_raw "${content_raw}")
