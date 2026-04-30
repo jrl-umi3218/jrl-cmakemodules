@@ -4,6 +4,55 @@ include_guard(GLOBAL)
 cmake_minimum_required(VERSION 3.22)
 
 #[============================================================================[
+# `_jrl_init_dirs`
+
+```cpp
+_jrl_init_dirs()
+```
+
+**Type:** function
+
+
+### Description
+  Initialize the `_JRL_*_DIR` cache variables that point to well-known directories
+  inside the jrl-cmakemodules repository (`top`, `modules`, `templates`, `docs`,
+  `external-modules`, `find-modules`).
+  Uses `CMAKE_CURRENT_FUNCTION_LIST_DIR` so the paths are always relative to this
+  file, regardless of where `jrl.cmake` is included from.
+  Variables are stored as `CACHE INTERNAL` so they are visible in every scope.
+  The function is a no-op when the variables are already in the cache.
+
+
+### Arguments
+  None
+
+
+### Example
+```cmake
+_jrl_init_dirs()
+```
+#]============================================================================]
+function(_jrl_init_dirs)
+    set(_JRL_TOP_DIR "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/.." CACHE INTERNAL "")
+    set(_JRL_MODULES_DIR "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/../modules" CACHE INTERNAL "")
+    set(_JRL_TEMPLATES_DIR "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/../templates" CACHE INTERNAL "")
+    set(_JRL_DOCS_DIR "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/../docs" CACHE INTERNAL "")
+    set(_JRL_EXTERNAL_MODULES_DIR
+        "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/../external-modules"
+        CACHE INTERNAL
+        ""
+    )
+    set(_JRL_FIND_MODULES_DIR
+        "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/../find-modules"
+        CACHE INTERNAL
+        ""
+    )
+endfunction()
+
+# Intialize the dirs variables.
+_jrl_init_dirs()
+
+#[============================================================================[
 # `_jrl_check_valid_visibility`
 
 ```cpp
@@ -115,157 +164,6 @@ function(_jrl_check)
         endif()
         message(FATAL_ERROR "${msg}")
     endif()
-endfunction()
-
-#[============================================================================[
-# `_jrl_top_dir`
-
-```cpp
-_jrl_top_dir(<output_var>)
-```
-
-**Type:** function
-
-
-### Description
-  Get the top-level directory of the jrl-cmakemodules v2 repository.
-
-
-### Arguments
-* `output_var`: Variable to store the top-level directory path.
-
-
-### Example
-```cmake
-_jrl_top_dir(TOP_DIR)
-```
-#]============================================================================]
-function(_jrl_top_dir output_var)
-    cmake_path(CONVERT "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/.." TO_CMAKE_PATH_LIST top_dir NORMALIZE)
-    # remove trailing slash if any
-    string(REGEX REPLACE "/$" "" top_dir "${top_dir}")
-    _jrl_check(IS_DIRECTORY ${top_dir})
-    set(${output_var} ${top_dir} PARENT_SCOPE)
-endfunction()
-
-#[============================================================================[
-# `_jrl_templates_dir`
-
-```cpp
-_jrl_templates_dir(<output_var>)
-```
-
-**Type:** function
-
-
-### Description
-  Get the templates directory of the jrl-cmakemodules v2 repository.
-
-
-### Arguments
-* `output_var`: Variable to store the templates directory path.
-
-
-### Example
-```cmake
-_jrl_templates_dir(TEMPLATES_DIR)
-```
-#]============================================================================]
-function(_jrl_templates_dir output_var)
-    _jrl_top_dir(top_dir)
-    set(templates_dir ${top_dir}/templates)
-    _jrl_check(IS_DIRECTORY ${templates_dir})
-    set(${output_var} ${templates_dir} PARENT_SCOPE)
-endfunction()
-
-#[============================================================================[
-# `_jrl_docs_dir`
-
-```cpp
-_jrl_docs_dir(<output_var>)
-```
-
-**Type:** function
-
-
-### Description
-  Get the docs directory of the jrl-cmakemodules v2 repository.
-
-
-### Arguments
-* `output_var`: Variable to store the docs directory path.
-
-
-### Example
-```cmake
-_jrl_docs_dir(docs_dir)
-```
-#]============================================================================]
-function(_jrl_docs_dir output_var)
-    _jrl_top_dir(top_dir)
-    set(docs_dir ${top_dir}/docs)
-    _jrl_check(IS_DIRECTORY ${docs_dir})
-    set(${output_var} ${docs_dir} PARENT_SCOPE)
-endfunction()
-
-#[============================================================================[
-# `_jrl_external_modules_dir`
-
-```cpp
-_jrl_external_modules_dir(<output_var>)
-```
-
-**Type:** function
-
-
-### Description
-  Get the external-modules directory of the jrl-cmakemodules v2 repository.
-
-
-### Arguments
-* `output_var`: Variable to store the external-modules directory path.
-
-
-### Example
-```cmake
-_jrl_external_modules_dir(EXTERNAL_MODULES_DIR)
-```
-#]============================================================================]
-function(_jrl_external_modules_dir output_var)
-    _jrl_top_dir(top_dir)
-    set(external_modules_dir ${top_dir}/external-modules)
-    _jrl_check(IS_DIRECTORY ${external_modules_dir})
-    set(${output_var} ${external_modules_dir} PARENT_SCOPE)
-endfunction()
-
-#[============================================================================[
-# `_jrl_find_modules_dir`
-
-```cpp
-_jrl_find_modules_dir(<output_var>)
-```
-
-**Type:** function
-
-
-### Description
-  Get the find-modules directory of the jrl-cmakemodules v2 repository.
-
-
-### Arguments
-* `output_var`: Variable to store the find-modules directory path.
-
-
-### Example
-```cmake
-_jrl_find_modules_dir(FIND_MODULES_DIR)
-```
-#]============================================================================]
-function(_jrl_find_modules_dir output_var)
-    _jrl_top_dir(top_dir)
-    set(find_modules_dir ${top_dir}/find-modules)
-    _jrl_check(IS_DIRECTORY ${find_modules_dir})
-    set(${output_var} ${find_modules_dir} PARENT_SCOPE)
 endfunction()
 
 #[============================================================================[
@@ -524,11 +422,9 @@ function(jrl_cmakemodules_get_commit output_var)
         return()
     endif()
 
-    _jrl_top_dir(top_dir)
-
     execute_process(
         COMMAND ${GIT} rev-parse HEAD
-        WORKING_DIRECTORY ${top_dir}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_FUNCTION_LIST_DIR}
         OUTPUT_VARIABLE git_commit
         OUTPUT_STRIP_TRAILING_WHITESPACE
         ERROR_QUIET
@@ -843,10 +739,8 @@ function(jrl_configure_uninstall_target)
         return()
     endif()
 
-    _jrl_templates_dir(templates_dir)
-
     configure_file(
-        "${templates_dir}/cmake_uninstall.cmake.in"
+        "${_JRL_TEMPLATES_DIR}/cmake_uninstall.cmake.in"
         "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
         @ONLY
     )
@@ -1387,10 +1281,9 @@ jrl_target_generate_warning_header(my_target PUBLIC
 ```
 #]============================================================================]
 function(jrl_target_generate_warning_header)
-    _jrl_templates_dir(templates_dir)
     _jrl_target_generate_header(
         ${ARGV}
-        TEMPLATE_FILE ${templates_dir}/warning.hpp.in
+        TEMPLATE_FILE ${_JRL_TEMPLATES_DIR}/warning.hpp.in
     )
 endfunction()
 
@@ -1427,10 +1320,9 @@ jrl_target_generate_deprecated_header(my_target PUBLIC
 ```
 #]============================================================================]
 function(jrl_target_generate_deprecated_header)
-    _jrl_templates_dir(templates_dir)
     _jrl_target_generate_header(
         ${ARGV}
-        TEMPLATE_FILE ${templates_dir}/deprecated.hpp.in
+        TEMPLATE_FILE ${_JRL_TEMPLATES_DIR}/deprecated.hpp.in
     )
 endfunction()
 
@@ -1467,10 +1359,9 @@ jrl_target_generate_tracy_header(my_target PUBLIC
 ```
 #]============================================================================]
 function(jrl_target_generate_tracy_header)
-    _jrl_templates_dir(templates_dir)
     _jrl_target_generate_header(
         ${ARGV}
-        TEMPLATE_FILE ${templates_dir}/tracy.hpp.in
+        TEMPLATE_FILE ${_JRL_TEMPLATES_DIR}/tracy.hpp.in
     )
 endfunction()
 
@@ -1561,10 +1452,9 @@ function(jrl_target_generate_config_header target_name visibility)
         JRL_LIBRARY_VERSION_PATCH
     )
 
-    _jrl_templates_dir(templates_dir)
     _jrl_target_generate_header(${target_name} ${visibility}
         ${arg_UNPARSED_ARGUMENTS}
-        TEMPLATE_FILE ${templates_dir}/config.hpp.in
+        TEMPLATE_FILE ${_JRL_TEMPLATES_DIR}/config.hpp.in
         TEMPLATE_VARIABLES ${template_variables}
     )
 endfunction()
@@ -1603,9 +1493,7 @@ function(_jrl_search_package_module_file package_name output_filepath)
     set(found_module_file "")
     # QUESTION: Should we look into cmake builtin modules?
     # set(cmake_builtin_modules_path "${CMAKE_ROOT}/Modules")
-    _jrl_find_modules_dir(find_modules_dir)
-
-    foreach(module_path IN LISTS CMAKE_MODULE_PATH find_modules_dir)
+    foreach(module_path IN LISTS CMAKE_MODULE_PATH _JRL_FIND_MODULES_DIR)
         set(candidate_filepath "${module_path}/${module_filename}")
         message(DEBUG "        Searching for package module file at: ${candidate_filepath}")
         if(EXISTS ${candidate_filepath})
@@ -2065,9 +1953,8 @@ set(package_dependencies_json_content [[${package_dependencies_json_content}]])
 "
     )
     # needs @INSTALL_DESTINATION@
-    _jrl_templates_dir(templates_dir)
     configure_file(
-        ${templates_dir}/generate-dependencies.cmake.in
+        ${_JRL_TEMPLATES_DIR}/generate-dependencies.cmake.in
         ${GEN_DIR}/generate-dependencies.cmake
         @ONLY
     )
@@ -2471,8 +2358,7 @@ function(jrl_export_package)
     if(arg_PACKAGE_CONFIG_TEMPLATE)
         set(package_config_template ${arg_PACKAGE_CONFIG_TEMPLATE})
     else()
-        _jrl_templates_dir(templates_dir)
-        set(package_config_template ${templates_dir}/config-components.cmake.in)
+        set(package_config_template ${_JRL_TEMPLATES_DIR}/config-components.cmake.in)
         set(using_default_template True)
     endif()
 
@@ -3250,8 +3136,7 @@ function(jrl_python_generate_init_py name)
     if(arg_TEMPLATE_FILE)
         set(template_file ${arg_TEMPLATE_FILE})
     else()
-        _jrl_templates_dir(templates_dir)
-        set(template_file ${templates_dir}/__init__.py.in)
+        set(template_file ${_JRL_TEMPLATES_DIR}/__init__.py.in)
     endif()
 
     get_target_property(python_module_link_libraries ${name} LINK_LIBRARIES)
@@ -3309,8 +3194,7 @@ function(jrl_python_generate_init_py name)
     # Configure the __init__.py with PYTHON_MODULE_NAME and optional dll_dirs
     set(__MODULE_NAME__ "${name}")
     set(__DLL_DIRS__ "${dll_dirs}")
-    _jrl_templates_dir(templates_dir)
-    configure_file(${templates_dir}/__init__.py.in ${arg_OUTPUT_PATH} @ONLY)
+    configure_file(${_JRL_TEMPLATES_DIR}/__init__.py.in ${arg_OUTPUT_PATH} @ONLY)
 endfunction()
 
 #[============================================================================[
@@ -3896,8 +3780,7 @@ function(jrl_boostpy_add_stubs name)
         set(loglevel "--log-level=DEBUG")
     endif()
 
-    _jrl_external_modules_dir(external_modules_dir)
-    set(stubgen_py ${external_modules_dir}/pybind11-stubgen-e48d1f1/pybind11_stubgen.py)
+    set(stubgen_py ${_JRL_EXTERNAL_MODULES_DIR}/pybind11-stubgen-e48d1f1/pybind11_stubgen.py)
     cmake_path(CONVERT ${stubgen_py} TO_CMAKE_PATH_LIST stubgen_py NORMALIZE)
     _jrl_check(EXISTS ${stubgen_py})
 
@@ -4194,8 +4077,7 @@ function(_jrl_generate_api_doc input_file output_file)
 
     set(tmp_output_file ${output_file}.tmp)
 
-    _jrl_templates_dir(templates_dir)
-    configure_file(${templates_dir}/api.md.in ${tmp_output_file} @ONLY)
+    configure_file(${_JRL_TEMPLATES_DIR}/api.md.in ${tmp_output_file} @ONLY)
 
     # Check if the file is new or has been updated
     if(output_file_old_content STREQUAL "")
@@ -4216,6 +4098,5 @@ function(_jrl_generate_api_doc input_file output_file)
 endfunction()
 
 if(JRL_GENERATE_API_DOC)
-    _jrl_docs_dir(docs_dir)
-    _jrl_generate_api_doc(${CMAKE_CURRENT_LIST_FILE} ${docs_dir}/api.md)
+    _jrl_generate_api_doc(${CMAKE_CURRENT_LIST_FILE} ${_JRL_DOCS_DIR}/api.md)
 endif()
