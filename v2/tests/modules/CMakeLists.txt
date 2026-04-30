@@ -7,6 +7,7 @@ enable_testing()
 include(${CMAKE_CURRENT_SOURCE_DIR}/jrl_test_case.cmake)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/test_jrl_option.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/test__jrl_check.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/test__jrl_check_var_defined.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/test__jrl_check_var_not_defined.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/test__jrl_check_strequal.cmake)
