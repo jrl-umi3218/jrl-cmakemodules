@@ -46,6 +46,86 @@ function(_jrl_check_var_defined var)
 endfunction()
 
 #[============================================================================[
+# `_jrl_check_var_not_defined`
+
+```cpp
+_jrl_check_var_not_defined(
+    <var>
+    [<message>]
+)
+```
+
+**Type:** function
+
+
+### Description
+  Checks if a variable is NOT defined. If it is defined, it raises a fatal error with the provided message.
+
+
+### Arguments
+* `var`: The variable to check.
+* `message`: Optional error message to display if the variable is defined.
+
+
+### Example
+```cmake
+_jrl_check_var_not_defined(MY_VAR)
+```
+#]============================================================================]
+function(_jrl_check_var_not_defined var)
+    if(DEFINED ${var})
+        if(ARGC EQUAL 1)
+            set(msg "Variable '${ARGV0}' is defined but should not be. Value: '${${var}}'")
+        else()
+            set(msg "${ARGV1}")
+        endif()
+        message(FATAL_ERROR "${msg}")
+    endif()
+endfunction()
+
+#[============================================================================[
+# `_jrl_check_strequal`
+
+```cpp
+_jrl_check_strequal(
+    <actual>
+    <expected>
+    [<message>]
+)
+```
+
+**Type:** function
+
+
+### Description
+  Checks if two strings are equal. If not, it raises a fatal error with the provided message.
+
+
+### Arguments
+* `actual`: The actual string value.
+* `expected`: The expected string value.
+* `message`: Optional error message to display if the strings are not equal.
+
+
+### Example
+```cmake
+_jrl_check_strequal("${MY_VAR}" "ON")
+```
+#]============================================================================]
+function(_jrl_check_strequal actual expected)
+    if(NOT "${actual}" STREQUAL "${expected}")
+        if(ARGC EQUAL 2)
+            set(msg
+                "String equality check failed:\n  Expected: '${expected}'\n  Actual:   '${actual}'"
+            )
+        else()
+            set(msg "${ARGV2}")
+        endif()
+        message(FATAL_ERROR "${msg}")
+    endif()
+endfunction()
+
+#[============================================================================[
 # `_jrl_check_dir_exists`
 
 ```cpp
