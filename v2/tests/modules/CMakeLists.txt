@@ -1,8 +1,25 @@
 # Copyright 2025-2026 Inria
 
-# Add unit tests for jrl-cmakemodules functions
+cmake_minimum_required(VERSION 3.22)
+project(jrl-tests-modules LANGUAGES NONE)
+enable_testing()
 
-add_test(
-    NAME test_jrl_option
-    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/test_jrl_option.cmake
-)
+include(${CMAKE_CURRENT_SOURCE_DIR}/jrl_test_case.cmake)
+
+include(${CMAKE_CURRENT_SOURCE_DIR}/test_jrl_option.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/test__jrl_check_var_defined.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/test__jrl_check_var_not_defined.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/test__jrl_check_strequal.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/test__jrl_check_dir_exists.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/test__jrl_check_file_exists.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/test__jrl_check_valid_visibility.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/test__jrl_check_no_unrecognized_arguments.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/test__jrl_check_command_exists.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/test__jrl_log.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/test__jrl_normalize_version.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/test__jrl_dir_helpers.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/test__jrl_pad_string.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/test_jrl_get_cxx_compiler_id.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/test_jrl_add_export_component.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/test_jrl_configure_default_build_type.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/test_jrl_export_dependency.cmake)
