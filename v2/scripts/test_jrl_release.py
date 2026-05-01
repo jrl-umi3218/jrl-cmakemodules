@@ -236,9 +236,9 @@ def test_xml_extractor_update_version(sample_package_xml):
 
 
 def test_xml_extractor_missing_version_tag(malformed_xml):
-    """Test XmlVersionExtractor raises error for missing version tag."""
+    """Test XmlVersionExtractor raises VersionNotPresent for missing version tag."""
     extractor = release.XmlVersionExtractor(malformed_xml)
-    with pytest.raises(ValueError, match="Could not find <version> tag"):
+    with pytest.raises(release.VersionNotPresent, match="No <version> tag found"):
         extractor.get_version()
 
 
@@ -307,11 +307,13 @@ def test_toml_extractor_pixi_format(sample_pixi_toml):
 
 
 def test_toml_extractor_missing_key(sample_pyproject_toml):
-    """Test TomlVersionExtractor raises error for missing key."""
+    """Test TomlVersionExtractor raises VersionNotPresent for missing key."""
     extractor = release.TomlVersionExtractor(
         sample_pyproject_toml, ["nonexistent", "key"]
     )
-    with pytest.raises(ValueError, match="Key 'nonexistent.key' not found"):
+    with pytest.raises(
+        release.VersionNotPresent, match="Key 'nonexistent.key' not found"
+    ):
         extractor.get_version()
 
 
@@ -362,9 +364,9 @@ def test_yaml_extractor_update_version(sample_citation_cff):
 
 
 def test_yaml_extractor_missing_key(sample_citation_cff):
-    """Test YamlVersionExtractor raises error for missing key."""
+    """Test YamlVersionExtractor raises VersionNotPresent for missing key."""
     extractor = release.YamlVersionExtractor(sample_citation_cff, ["nonexistent"])
-    with pytest.raises(ValueError, match="Key 'nonexistent' not found"):
+    with pytest.raises(release.VersionNotPresent, match="Key 'nonexistent' not found"):
         extractor.get_version()
 
 
@@ -516,7 +518,7 @@ project(TestProject DESCRIPTION "No version here")
     file_path.write_text(content, encoding="utf-8")
 
     extractor = release.CMakeListsVersionExtractor(file_path)
-    with pytest.raises(ValueError, match="No version found|Pattern not found"):
+    with pytest.raises(release.VersionNotPresent, match="No version found"):
         extractor.get_version()
 
 
@@ -615,7 +617,7 @@ def test_changelog_extractor_no_released_version(tmp_path):
     file_path.write_text(content, encoding="utf-8")
 
     extractor = release.ChangelogVersionExtractor(file_path, "")
-    with pytest.raises(ValueError, match="No released version found"):
+    with pytest.raises(release.VersionNotPresent, match="No released version found"):
         extractor.get_version()
 
 
