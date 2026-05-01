@@ -114,6 +114,12 @@ STYLE_UNCHANGED_VALUE = "dim"
 STYLE_HIGHLIGHT = "cyan"
 
 
+class VersionNotPresent(Exception):
+    """Raised when a file exists but has no version field configured."""
+
+    pass
+
+
 class VersionExtractor(ABC):
     def __init__(self, file_path: Path):
         self.file_path = file_path
@@ -146,7 +152,7 @@ class XmlVersionExtractor(VersionExtractor):
         match = re.search(r"<version>(.*?)</version>", content)
         if match:
             return match.group(1).strip()
-        raise ValueError("Could not find <version> tag in package.xml")
+        raise VersionNotPresent(f"No <version> tag found in {self.name}")
 
     def update_version(self, new_version: str) -> None:
         with open(self.file_path, "r", encoding="utf-8") as f:
@@ -178,7 +184,7 @@ class TomlVersionExtractor(VersionExtractor):
             if key in value:
                 value = value[key]
             else:
-                raise ValueError(
+                raise VersionNotPresent(
                     f"Key '{'.'.join(self.keys)}' not found in {self.name}"
                 )
 
@@ -218,7 +224,7 @@ class YamlVersionExtractor(VersionExtractor):
             if key in value:
                 value = value[key]
             else:
-                raise ValueError(
+                raise VersionNotPresent(
                     f"Key '{'.'.join(self.keys)}' not found in {self.name}"
                 )
 
@@ -285,11 +291,10 @@ class CMakeListsVersionExtractor(VersionExtractor):
             if project_version:
                 return project_version
 
-            raise ValueError(f"No version found in {self.name}")
-
         except Exception:
-            # Fallback to regex if cmake-parser fails
-            return self._get_version_regex(content)
+            pass  # cmake-parser failed, fall back to regex
+
+        return self._get_version_regex(content)
 
     def _get_command_args(self, node) -> List[str]:
         """Extract arguments from a cmake command node."""
@@ -319,7 +324,7 @@ class CMakeListsVersionExtractor(VersionExtractor):
         if project_match and project_match.group(1).startswith("${"):
             if fallback_match:
                 return fallback_match.group(1)
-            raise ValueError(
+            raise VersionNotPresent(
                 f"{self.name} reads version from variable {project_match.group(1)}, no fallback found"
             )
 
@@ -327,7 +332,7 @@ class CMakeListsVersionExtractor(VersionExtractor):
         if project_match and not project_match.group(1).startswith("${"):
             return project_match.group(1)
 
-        raise ValueError(f"Pattern not found in {self.name}")
+        raise VersionNotPresent(f"No version found in {self.name}")
 
     def update_version(self, new_version: str) -> None:
         with open(self.file_path, "r", encoding="utf-8") as f:
@@ -371,7 +376,7 @@ class ChangelogVersionExtractor(VersionExtractor):
         for version in matches:
             if version.lower() != "unreleased":
                 return version
-        raise ValueError("No released version found in CHANGELOG.md")
+        raise VersionNotPresent(f"No released version found in {self.name}")
 
     def update_version(self, new_version: str) -> None:
         with open(self.file_path, "r", encoding="utf-8") as f:
@@ -440,6 +445,8 @@ def get_current_version(checks: List[VersionExtractor]) -> Optional[str]:
             try:
                 version = check.get_version()
                 versions_found.add(version)
+            except VersionNotPresent:
+                pass  # file exists but has no version configured; skip
             except Exception as e:
                 errors.append(f"{check.name}: {e}")
 
@@ -871,6 +878,9 @@ def handle_check_version(checks: List[VersionExtractor], args) -> int:
                 result["version"] = version
                 result["status"] = "Found"
                 versions_found.add(version)
+            except VersionNotPresent as e:
+                result["status"] = "Warning"
+                result["message"] = str(e)
             except Exception as e:
                 result["status"] = "Error"
                 result["message"] = str(e)
@@ -907,6 +917,8 @@ def handle_check_version(checks: List[VersionExtractor], args) -> int:
             status_style = f"[{STYLE_SUCCESS}]Found[/{STYLE_SUCCESS}]"
         elif res["status"] == "Missing":
             status_style = f"[{STYLE_WARNING}]Missing[/{STYLE_WARNING}]"
+        elif res["status"] == "Warning":
+            status_style = f"[{STYLE_WARNING}]Warning[/{STYLE_WARNING}]"
         elif res["status"] == "Error":
             status_style = f"[{STYLE_ERROR}]Error[/{STYLE_ERROR}]"
 
@@ -947,7 +959,7 @@ def handle_check_version(checks: List[VersionExtractor], args) -> int:
     else:
         if not args.short:
             console.print(
-                f"\n[{STYLE_SUCCESS_STRONG}]SUCCESS:[/{STYLE_SUCCESS_STRONG}] All files match version [bold]{consensus_version}[/bold]."
+                f"\n[{STYLE_SUCCESS_STRONG}]SUCCESS:[/{STYLE_SUCCESS_STRONG}] All files match version [{STYLE_SUCCESS}]{consensus_version}[/{STYLE_SUCCESS}]."
             )
         return 0
 
@@ -976,6 +988,8 @@ def perform_version_updates(
                 else:
                     try:
                         old_version = check.get_version()
+                    except VersionNotPresent:
+                        continue
                     except Exception:
                         old_version = "?"
                     check.update_version(target_version)
@@ -988,6 +1002,8 @@ def perform_version_updates(
                     console.print(line)
                 updated_files.append(check.name)
                 updated_file_paths.append(str(check.file_path))
+            except VersionNotPresent:
+                pass  # file exists but has no version configured; skip
             except Exception as e:
                 console.print(
                     f"[{STYLE_ERROR}]Failed to update {check.name}: {e}[/{STYLE_ERROR}]"
