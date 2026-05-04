@@ -1,0 +1,10 @@
+[workspace]
+channels = ["conda-forge"]
+platforms = ["linux-64", "linux-aarch64", "osx-arm64", "osx-64", "win-64"]
+preview = ["pixi-build"]
+
+[dependencies]
+MinP-consumer = { path = "MinP-consumer" }
+
+[tasks]
+test = { cmd = "echo Test completed successfully!" }

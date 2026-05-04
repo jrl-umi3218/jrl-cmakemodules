@@ -1,0 +1,93 @@
+name: V2 - Windows
+
+on: [push, pull_request]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  VCPKG_COMMAND: C:/vcpkg/vcpkg.exe --vcpkg-root=C:/vcpkg
+  VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}/vcpkg-bincache
+  VCPKG_BINARY_SOURCES: "clear;files,${{ github.workspace }}/vcpkg-bincache,readwrite"
+  CMAKE_TOOLCHAIN_FILE: C:/vcpkg/scripts/buildsystems/vcpkg.cmake
+  CMAKE_BUILD_TYPE: RelWithDebInfo
+
+jobs:
+  windows-with-vcpkg:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.image }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: windows-2022
+            name: Windows Server 2022
+            arch: x64
+
+          - image: windows-2025
+            name: Windows Server 2025
+            arch: x64
+
+          - image: windows-11-arm
+            name: Windows 11 ARM64
+            arch: arm64
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: ${{ matrix.arch }}
+
+      - name: Create vcpkg binary cache directory
+        run: mkdir -p ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
+
+      - name: Restore vcpkg binary cache
+        id: cache-vcpkg-restore
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
+          key: vcpkg-${{ matrix.image }}-${{ matrix.arch }}-${{ github.sha }}
+          restore-keys: vcpkg-${{ matrix.image }}-${{ matrix.arch }}-
+
+      - name: Install C++ dependencies (via vcpkg)
+        run: |
+          ${{ env.VCPKG_COMMAND }} install catch2 boost-python eigen3 matio simde
+
+      - name: Save vcpkg binary cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
+          key: ${{ steps.cache-vcpkg-restore.outputs.cache-primary-key }}
+
+      - name: Add vcpkg Python to PATH
+        run: |
+          echo "C:/vcpkg/installed/${{ matrix.arch }}-windows/tools/python3" >> $env:GITHUB_PATH
+          echo "C:/vcpkg/installed/${{ matrix.arch }}-windows/tools/python3/Scripts" >> $env:GITHUB_PATH
+
+      - name: Install Python dependencies (via pip)
+        run: |
+          python -m ensurepip --upgrade
+          python -m pip install --upgrade pip
+          python -m pip install nanobind pytest numpy
+
+      - name: Print Python Info
+        run: |
+          python --version
+          pip --version
+          python -c "import sysconfig; print(sysconfig.get_path('purelib'))"
+          python -c "import sys; print(sys.executable)"
+          pip list -v
+
+      - name: Configure project
+        run: cmake -G Ninja -S . -B build --log-level=DEBUG -DJRL_CMAKEMODULES_BUILD_TESTS=ON
+
+      - name: Build project
+        run: cmake --build build --verbose
+
+      - name: Install project
+        run: cmake --install build --prefix ./install
+
+      - name: Run tests
+        run: ctest --test-dir build --output-on-failure
