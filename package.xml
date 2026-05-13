@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="3">
   <name>jrl_cmakemodules</name>
-  <version>1.1.2</version>
+  <version>1.2.0</version>
   <description>CMake utility toolbox</description>
   <url type="website">https://github.com/jrl-umi3218/jrl-cmakemodules</url>
 
@@ -106,9 +106,22 @@
   -->
 
   <buildtool_depend>cmake</buildtool_depend>
+  <buildtool_depend>ninja-build</buildtool_depend>
 
   <!-- Dependency for the documentation building. -->
   <depend>doxygen</depend>
+
+  <!-- Test dependencies (mirrors pixi.toml [feature.test.dependencies]) -->
+  <test_depend>git</test_depend>
+  <test_depend>eigen</test_depend>
+  <test_depend>nanobind-dev</test_depend>
+  <test_depend>libboost-python-dev</test_depend>
+  <test_depend>catch2</test_depend>
+  <test_depend>python3-pytest</test_depend>
+  <test_depend>python3-numpy</test_depend>
+  <test_depend>python3-typing-extensions</test_depend>
+  <test_depend>matio</test_depend>
+  <test_depend>simde</test_depend>
 
   <!-- Handles some search through pkg-config. -->
   <depend>pkg-config</depend>
