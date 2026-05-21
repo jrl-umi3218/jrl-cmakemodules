@@ -614,3 +614,4 @@ macro(FIND_SCIPY)
 endmacro()
 
 include(${CMAKE_CURRENT_LIST_DIR}/python-helpers.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/pypa-metadata.cmake)

@@ -51,6 +51,7 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND NOT ${PROJECT_NAME}_POPULATED)
       ./git-archive-all.sh
       ./gitlog-to-changelog
       ./pixi.py
+      ./pypa-metadata.py
       ./pyproject.py
     DESTINATION ${INSTALL_DIR}
   )
@@ -116,6 +117,7 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND NOT ${PROJECT_NAME}_POPULATED)
       ./portability.cmake
       ./post-project.cmake
       ./pthread.cmake
+      ./pypa-metadata.cmake
       ./python.cmake
       ./python-helpers.cmake
       ./qhull.cmake
