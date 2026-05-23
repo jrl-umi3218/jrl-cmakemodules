@@ -23,6 +23,8 @@ def generate_metadata(pyproject: Path, site_packages: Path):
 
     dist = f"{metadata.name.replace('-', '_')}-{metadata.version}"
     dist_info = site_packages / f"{dist}.dist-info"
+    # This print is not a debugging information but is parsed by the CMake script
+    # to know where to install generated file.
     print(dist_info)
     dist_info.mkdir(parents=True)
 
