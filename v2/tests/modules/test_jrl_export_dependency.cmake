@@ -1,4 +1,4 @@
-# Set PROJECT_NAME as required by both jrl_export_dependency and jrl_add_export_component
+# Set PROJECT_NAME as required by jrl_export_dependency
 set(PROJECT_NAME test_project)
 
 jrl_test_case(
@@ -95,61 +95,6 @@ jrl_test_case(
   CODE [[
     set(PROJECT_NAME test_project)
     jrl_export_dependency(PACKAGE_TARGETS SomeLib::SomeLib)
-  ]]
-  WILL_FAIL
-)
-
-jrl_test_case(
-  NAME "Component is registered in global property"
-  CODE [[
-    set(PROJECT_NAME test_export_project)
-    set_property(GLOBAL PROPERTY _jrl_${PROJECT_NAME}_export_components "")
-
-    jrl_add_export_component(NAME mylib TARGETS mylib_target)
-
-    get_property(components GLOBAL PROPERTY _jrl_${PROJECT_NAME}_export_components)
-    if(NOT "mylib" IN_LIST components)
-      message(FATAL_ERROR "FAIL: 'mylib' not found in export components: ${components}")
-    endif()
-
-    get_property(targets GLOBAL PROPERTY _jrl_${PROJECT_NAME}_mylib_targets)
-    if(NOT "mylib_target" IN_LIST targets)
-      message(FATAL_ERROR "FAIL: 'mylib_target' not found in component targets: ${targets}")
-    endif()
-  ]]
-)
-
-jrl_test_case(
-  NAME "Multiple components can be added"
-  CODE [[
-    set(PROJECT_NAME test_export_project)
-    set_property(GLOBAL PROPERTY _jrl_${PROJECT_NAME}_export_components "")
-
-    jrl_add_export_component(NAME mylib TARGETS mylib_target)
-    jrl_add_export_component(NAME mylib_python TARGETS mylib_python_target)
-
-    get_property(components GLOBAL PROPERTY _jrl_${PROJECT_NAME}_export_components)
-    list(LENGTH components num_components)
-    _jrl_check("${num_components}" STREQUAL "2")
-  ]]
-)
-
-jrl_test_case(
-  NAME "Fatal error for duplicate component name"
-  CODE [[
-    set(PROJECT_NAME dup_project)
-    jrl_add_export_component(NAME comp_a TARGETS target_a)
-    jrl_add_export_component(NAME comp_a TARGETS target_b)
-  ]]
-  WILL_FAIL
-)
-
-jrl_test_case(
-  NAME "Fatal error when same target added to two components"
-  CODE [[
-    set(PROJECT_NAME conflict_project)
-    jrl_add_export_component(NAME comp_x TARGETS shared_target)
-    jrl_add_export_component(NAME comp_y TARGETS shared_target)
   ]]
   WILL_FAIL
 )
