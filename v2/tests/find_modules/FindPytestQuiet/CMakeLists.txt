@@ -7,7 +7,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/../../../find-modules")
 # Find it with full search paths before restricting them.
 find_package(Python REQUIRED COMPONENTS Interpreter)
 
-# Restrict search paths to ensure Pytest is not found on the system.
+# Restrict search paths to ensure we don't search the system.
 set(CMAKE_FIND_USE_CMAKE_SYSTEM_PATH false)
 set(CMAKE_FIND_USE_CMAKE_PATH false)
 set(CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH false)
