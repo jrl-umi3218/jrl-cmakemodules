@@ -1,11 +1,7 @@
 cmake_minimum_required(VERSION 3.22)
-project(FindPytestQuietTest)
+project(FindmatioNotFoundTest)
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/../../../find-modules")
-
-# Python::Interpreter is required by FindPytest.cmake before it can proceed.
-# Find it with full search paths before restricting them.
-find_package(Python REQUIRED COMPONENTS Interpreter)
 
 # Restrict search paths to ensure we don't search the system.
 set(CMAKE_FIND_USE_CMAKE_SYSTEM_PATH false)
@@ -17,19 +13,26 @@ set(CMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY false)
 set(CMAKE_FIND_USE_PACKAGE_REGISTRY false)
 set(CMAKE_FIND_USE_PACKAGE_ROOT_PATH false)
 
-# Clear any cached result from a previous run to ensure a fresh search.
-unset(Pytest_EXECUTABLE CACHE)
+find_package(matio QUIET)
 
-find_package(Pytest QUIET)
+if(TARGET matio::matio)
+    set(target_exists true)
+else()
+    set(target_exists false)
+endif()
 
 message(
     STATUS
     "
-Pytest_EXECUTABLE=${Pytest_EXECUTABLE}
-Pytest_FOUND=${Pytest_FOUND}
+matio_FOUND=${matio_FOUND}
+matio_LIBRARY=${matio_LIBRARY}
+matio_INCLUDE_DIR=${matio_INCLUDE_DIR}
+matio::matio exists ? ${target_exists}
 "
 )
-
-if(Pytest_FOUND)
-    message(FATAL_ERROR "Pytest_FOUND should be FALSE when no search paths are available")
+if(matio_FOUND OR TARGET matio::matio)
+    message(
+        FATAL_ERROR
+        "matio_FOUND (${matio_FOUND}) or matio::matio (${target_exists}) found but should not."
+    )
 endif()
