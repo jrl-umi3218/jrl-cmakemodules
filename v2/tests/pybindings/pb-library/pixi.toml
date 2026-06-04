@@ -6,7 +6,7 @@ platforms = ["osx-arm64", "osx-64", "linux-64", "linux-aarch64", "win-64"]
 preview = ["pixi-build"]
 
 [dependencies]
-cxx-compiler = ">=1.10.0,<2"
+cxx-compiler = "*"
 cmake = ">=3.22"
 ninja = "*"
 jrl-cmakemodules = { path = "../../../.." }
