@@ -9,35 +9,48 @@ concurrency:
 jobs:
   ubuntu22:
     name: Ubuntu 22.04
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
+    container:
+      image: docker://ubuntu:22.04
 
     steps:
       - uses: actions/checkout@v6
-      - uses: jwlawson/actions-setup-cmake@v2
-        with:
-          cmake-version: "3.22"
-      - uses: actions/setup-python@v6
-        with:
-          python-version: "3.10"
-      - name: Install c++ dependencies (via apt)
+      - name: Install dependencies (via apt)
         run: |
-          sudo apt-get update
-          sudo apt-get install -y ninja-build g++ unzip libboost-python-dev libeigen3-dev libmatio-dev libsimde-dev
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends  \
+            git \
+            cmake \
+            ninja-build \
+            g++ \
+            wget \
+            unzip \
+            python3 \
+            python3-pip \
+            python3-venv \
+            libboost-python-dev \
+            libeigen3-dev \
+            libmatio-dev \
+            libsimde-dev
+
+      - name: Setup Python Virtual Environment
+        run: |
+          python3 -m venv /opt/venv
+          echo "/opt/venv/bin" >> $GITHUB_PATH
 
       - name: Install python dependencies (via pip)
         run: |
-          which python3
-          which pip3
-          pip3 install nanobind pytest numpy
+          pip install --upgrade pip
+          pip install nanobind pytest numpy
 
       - name: Build Catch2 (Ubuntu 22.04 has Catch2 v2, we need v3)
         run: |
-          cd /home/runner/work/
+          cd /tmp
           wget https://github.com/catchorg/Catch2/archive/refs/tags/v3.11.0.zip -O catch2.zip
           unzip catch2.zip
           cmake -B catch2-build -S Catch2-3.11.0 -G Ninja -DCMAKE_BUILD_TYPE=Release
           cmake --build catch2-build --config Release
-          sudo cmake --install catch2-build
+          cmake --install catch2-build
 
       - name: Configure project
         run: cmake -G Ninja -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo -DJRL_CMAKEMODULES_BUILD_TESTS=ON
@@ -53,26 +66,38 @@ jobs:
 
   ubuntu24:
     name: Ubuntu 24.04
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
+    container:
+      image: docker://ubuntu:24.04
 
     steps:
       - uses: actions/checkout@v6
-      - uses: jwlawson/actions-setup-cmake@v2
-        with:
-          cmake-version: "3.28"
-      - uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
-      - name: Install c++ dependencies (via apt)
+      - name: Install dependencies (via apt)
         run: |
-          sudo apt-get update
-          sudo apt-get install -y ninja-build g++ catch2 libboost-python-dev libeigen3-dev libmatio-dev libsimde-dev
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+            git \
+            g++ \
+            cmake \
+            ninja-build \
+            catch2 \
+            python3 \
+            python3-pip \
+            python3-venv \
+            libboost-python-dev \
+            libeigen3-dev \
+            libmatio-dev \
+            libsimde-dev
+
+      - name: Setup Python Virtual Environment
+        run: |
+          python3 -m venv /opt/venv
+          echo "/opt/venv/bin" >> $GITHUB_PATH
 
       - name: Install python dependencies (via pip)
         run: |
-          which python3
-          which pip3
-          pip3 install nanobind pytest numpy
+          pip install --upgrade pip
+          pip install nanobind pytest numpy
 
       - name: Configure project
         run: cmake -G Ninja -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo -DJRL_CMAKEMODULES_BUILD_TESTS=ON
