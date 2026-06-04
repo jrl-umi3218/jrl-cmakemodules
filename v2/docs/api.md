@@ -563,6 +563,7 @@ jrl_export_dependency(
         [FIND_PACKAGE_ARGS <args>...]
         [PACKAGE_VARIABLES <vars>...]
         [PACKAGE_TARGETS <targets>...]
+        [EXPECTED_TARGETS <targets>...]
         [MODULE_FILE <path>]
 )
 ```
@@ -589,6 +590,7 @@ are relevant.
 * `FIND_PACKAGE_ARGS`: The arguments originally passed to `find_package()` (list).
 * `PACKAGE_VARIABLES`: Variables created by `find_package()` that should be tracked (list).
 * `PACKAGE_TARGETS`: Imported targets created by `find_package()` that should be tracked (list).
+* `EXPECTED_TARGETS`: The expected targets passed to `jrl_find_package()`. Only used for debugging in generate-dependencies.cmake.
 * `MODULE_FILE`: Absolute path to the Find<Package>.cmake module used, if any.
 
 
@@ -625,6 +627,7 @@ jrl_find_package(
     [version]
     [COMPONENTS <comp>...]
     [REQUIRED]
+    [EXPECTED_TARGETS <target>...]
 )
 ```
 
@@ -641,12 +644,15 @@ jrl_find_package(
 
 ### Arguments
     <PackageName> [<version>] [REQUIRED] [COMPONENTS <components>...] - The same as find_package.
+    EXPECTED_TARGETS <target>... - Optional list of targets expected to be imported by find_package().
+    If all listed targets already exist (imported by another project for example), find_package() is skipped.
 
 
 ### Example
 ```cmake
 jrl_find_package(Eigen 3.3 REQUIRED)
 jrl_find_package(Boost REQUIRED COMPONENTS filesystem system)
+jrl_find_package(Eigen3 CONFIG REQUIRED EXPECTED_TARGETS Eigen3::Eigen)
 ```
 # `jrl_print_dependencies_summary`
 

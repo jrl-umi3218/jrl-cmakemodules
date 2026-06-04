@@ -1,8 +1,8 @@
 # gersemi: off
 function(add_cmake_test)
     set(options "")
-    set(oneValueArgs "NAME" "SOURCE_DIR" "BUILD_TARGET")
-    set(multiValueArgs "EXTRA_OPTIONS" "DEPENDS")
+    set(oneValueArgs "NAME" "SOURCE_DIR" "BUILD_TARGET" "PASS_REGULAR_EXPRESSION" "WILL_FAIL")
+    set(multiValueArgs "DEPENDS")
     cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     if(NOT arg_NAME)
@@ -75,6 +75,14 @@ function(add_cmake_test)
         endif()
         set_tests_properties("${test_name}" PROPERTIES DEPENDS ${${arg_DEPENDS}_TEST_NAME})
     endif()
+
+    if(arg_WILL_FAIL)
+        set_tests_properties("${test_name}" PROPERTIES WILL_FAIL ${arg_WILL_FAIL})
+    endif()
+
+    if(arg_PASS_REGULAR_EXPRESSION)
+        set_tests_properties("${test_name}" PROPERTIES PASS_REGULAR_EXPRESSION "${arg_PASS_REGULAR_EXPRESSION}")
+    endif()
 endfunction()
 # gersemi: on
 
@@ -100,6 +108,16 @@ add_cmake_test(NAME packaging/find_package_v1 DEPENDS jrl-cmakemodules)
 add_cmake_test(NAME packaging/find_package_v2 DEPENDS jrl-cmakemodules)
 
 add_cmake_test(NAME rfp DEPENDS jrl-cmakemodules)
+
+add_cmake_test(
+    NAME expected_targets_warn
+    DEPENDS jrl-cmakemodules
+    PASS_REGULAR_EXPRESSION
+        "EXPECTED_TARGETS Dummy::A Dummy::B|EXPECTED_TARGETS Dummy::B Dummy::A"
+)
+add_cmake_test(NAME expected_targets_skip DEPENDS jrl-cmakemodules PASS_REGULAR_EXPRESSION "Skipping find_package")
+add_cmake_test(NAME expected_targets_ok DEPENDS jrl-cmakemodules)
+add_cmake_test(NAME expected_targets_invalid DEPENDS jrl-cmakemodules WILL_FAIL TRUE)
 
 add_cmake_test(NAME packaging/fetchcontent)
 add_cmake_test(NAME packaging/pixi_build DEPENDS jrl-cmakemodules BUILD_TARGET all)

@@ -91,6 +91,25 @@ jrl_test_case(
 )
 
 jrl_test_case(
+  NAME "EXPECTED_TARGETS are stored"
+  CODE [[
+    set_property(GLOBAL PROPERTY _jrl_${PROJECT_NAME}_package_dependencies "")
+
+    jrl_export_dependency(
+      PACKAGE_NAME Eigen3
+      FIND_PACKAGE_ARGS "Eigen3;3.4;REQUIRED"
+      PACKAGE_TARGETS "Eigen3::Eigen"
+      EXPECTED_TARGETS "Eigen3::Eigen"
+    )
+
+    get_property(pd_json GLOBAL PROPERTY _jrl_${PROJECT_NAME}_package_dependencies)
+
+    string(JSON exp_tgts GET "${pd_json}" "package_dependencies" 0 "expected_targets")
+    _jrl_check(exp_tgts STREQUAL "Eigen3::Eigen")
+  ]]
+)
+
+jrl_test_case(
   NAME "Fatal error when PACKAGE_NAME is missing"
   CODE [[
     set(PROJECT_NAME test_project)

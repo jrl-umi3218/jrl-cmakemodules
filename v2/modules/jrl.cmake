@@ -1648,6 +1648,7 @@ jrl_export_dependency(
         [FIND_PACKAGE_ARGS <args>...]
         [PACKAGE_VARIABLES <vars>...]
         [PACKAGE_TARGETS <targets>...]
+        [EXPECTED_TARGETS <targets>...]
         [MODULE_FILE <path>]
 )
 ```
@@ -1674,6 +1675,7 @@ are relevant.
 * `FIND_PACKAGE_ARGS`: The arguments originally passed to `find_package()` (list).
 * `PACKAGE_VARIABLES`: Variables created by `find_package()` that should be tracked (list).
 * `PACKAGE_TARGETS`: Imported targets created by `find_package()` that should be tracked (list).
+* `EXPECTED_TARGETS`: The expected targets passed to `jrl_find_package()`. Only used for debugging in generate-dependencies.cmake.
 * `MODULE_FILE`: Absolute path to the Find<Package>.cmake module used, if any.
 
 
@@ -1706,7 +1708,7 @@ endif()
 function(jrl_export_dependency)
     set(options)
     set(oneValueArgs PACKAGE_NAME MODULE_FILE)
-    set(multiValueArgs FIND_PACKAGE_ARGS PACKAGE_VARIABLES PACKAGE_TARGETS)
+    set(multiValueArgs FIND_PACKAGE_ARGS PACKAGE_VARIABLES PACKAGE_TARGETS EXPECTED_TARGETS)
     cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
     _jrl_check_no_unrecognized_arguments(arg)
 
@@ -1723,6 +1725,7 @@ function(jrl_export_dependency)
     string(JSON json SET "${json}" "find_package_args" "\"${arg_FIND_PACKAGE_ARGS}\"")
     string(JSON json SET "${json}" "package_variables" "\"${arg_PACKAGE_VARIABLES}\"")
     string(JSON json SET "${json}" "package_targets" "\"${arg_PACKAGE_TARGETS}\"")
+    string(JSON json SET "${json}" "expected_targets" "\"${arg_EXPECTED_TARGETS}\"")
     string(JSON json SET "${json}" "module_file" "\"${arg_MODULE_FILE}\"")
     string(JSON package_dependencies_length LENGTH "${pd_json}" "package_dependencies")
     string(
@@ -1747,6 +1750,7 @@ jrl_find_package(
     [version]
     [COMPONENTS <comp>...]
     [REQUIRED]
+    [EXPECTED_TARGETS <target>...]
 )
 ```
 
@@ -1763,15 +1767,23 @@ jrl_find_package(
 
 ### Arguments
     <PackageName> [<version>] [REQUIRED] [COMPONENTS <components>...] - The same as find_package.
+    EXPECTED_TARGETS <target>... - Optional list of targets expected to be imported by find_package().
+    If all listed targets already exist (imported by another project for example), find_package() is skipped.
 
 
 ### Example
 ```cmake
 jrl_find_package(Eigen 3.3 REQUIRED)
 jrl_find_package(Boost REQUIRED COMPONENTS filesystem system)
+jrl_find_package(Eigen3 CONFIG REQUIRED EXPECTED_TARGETS Eigen3::Eigen)
 ```
 #]============================================================================]
 macro(jrl_find_package)
+    set(options)
+    set(oneValueArgs)
+    set(multiValueArgs EXPECTED_TARGETS)
+    cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
     # Check at least 1 argument (the package name) is provided
     if(ARGC EQUAL 0)
         message(
@@ -1785,7 +1797,34 @@ macro(jrl_find_package)
 
     # Pkg name is the first argument of find_package(<pkg_name> ...)
     set(package_name ${ARGV0})
-    set(find_package_args "${ARGV}")
+
+    # Throw an error if user provides EXPECTED_TARGETS without any value.
+    if(arg_KEYWORDS_MISSING_VALUES)
+        string(REPLACE ";" ", " missing_values_pp "${arg_KEYWORDS_MISSING_VALUES}")
+        message(FATAL_ERROR "Missing values for keyword(s): ${missing_values_pp}")
+    endif()
+
+    set(expected_targets ${arg_EXPECTED_TARGETS})
+    set(find_package_args ${arg_UNPARSED_ARGUMENTS})
+
+    # We want to skip the find_package call if all expected targets are already present,
+    # imported by another package for example.
+    set(all_expected_targets_present TRUE)
+    if(expected_targets)
+        foreach(tgt IN LISTS expected_targets)
+            if(NOT TARGET ${tgt})
+                set(all_expected_targets_present FALSE)
+                break()
+            endif()
+        endforeach()
+    else()
+        set(all_expected_targets_present FALSE)
+    endif()
+
+    set(skip_find_package FALSE)
+    if(expected_targets AND all_expected_targets_present)
+        set(skip_find_package TRUE)
+    endif()
 
     # search for the module file only if CONFIG is not in the find_package args
     if(NOT "CONFIG" IN_LIST find_package_args)
@@ -1796,6 +1835,7 @@ macro(jrl_find_package)
         cmake_path(CONVERT "${module_file}" TO_CMAKE_PATH_LIST module_file NORMALIZE)
         # Add the parent path to the CMAKE_MODULE_PATH
         cmake_path(GET module_file PARENT_PATH module_dir)
+        set(cmake_module_path_backup ${CMAKE_MODULE_PATH})
         list(APPEND CMAKE_MODULE_PATH ${module_dir})
         message(STATUS "   Using custom module file: ${module_file}")
     endif()
@@ -1804,15 +1844,37 @@ macro(jrl_find_package)
     string(REPLACE ";" " " fp_pp "${find_package_args}")
     message(STATUS "   Executing find_package(${fp_pp})")
 
-    # Saving the list of imported targets and variables BEFORE the call to find_package
-    get_property(
-        imported_targets_before
-        DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        PROPERTY IMPORTED_TARGETS
-    )
-    get_property(variables_before DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VARIABLES)
+    if(skip_find_package)
+        message(
+            STATUS
+            "   All expected targets for ${package_name} are already present. Skipping find_package."
+        )
+        # Simulate how a regular jrl_find_package would detect the imported targets,
+        # so that the rest of the code (logging, jrl_export_dependency) works as if we had called find_package.
+        set(${package_name}_FOUND TRUE)
+        set(package_targets ${expected_targets})
+        set(package_variables "")
+    else()
+        # Saving the list of imported targets and variables BEFORE the call to find_package
+        get_property(
+            imported_targets_before
+            DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            PROPERTY IMPORTED_TARGETS
+        )
+        get_property(variables_before DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VARIABLES)
 
-    find_package(${find_package_args}) # TODO: handle QUIET properly
+        find_package(${find_package_args})
+
+        # Getting the list of imported targets and variables AFTER the call to find_package
+        get_property(package_variables DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VARIABLES)
+        get_property(
+            package_targets
+            DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            PROPERTY IMPORTED_TARGETS
+        )
+        list(REMOVE_ITEM package_variables ${variables_before} variables_before)
+        list(REMOVE_ITEM package_targets ${imported_targets_before})
+    endif()
 
     if(${package_name}_FOUND)
         message(STATUS "   Executing find_package()...✅")
@@ -1822,14 +1884,38 @@ macro(jrl_find_package)
 
     # Put back CMAKE_MODULE_PATH to its previous value
     if(module_dir)
-        list(REMOVE_ITEM CMAKE_MODULE_PATH ${module_dir})
+        set(CMAKE_MODULE_PATH ${cmake_module_path_backup})
     endif()
 
-    # Getting the list of imported targets and variables AFTER the call to find_package
-    get_property(package_variables DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VARIABLES)
-    get_property(package_targets DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY IMPORTED_TARGETS)
-    list(REMOVE_ITEM package_variables ${variables_before} variables_before)
-    list(REMOVE_ITEM package_targets ${imported_targets_before})
+    if(expected_targets)
+        set(unmatched_expected_targets "")
+        foreach(expected_target IN LISTS expected_targets)
+            if(NOT expected_target IN_LIST package_targets)
+                list(APPEND unmatched_expected_targets ${expected_target})
+            endif()
+        endforeach()
+
+        if(unmatched_expected_targets)
+            string(REPLACE ";" ", " expected_targets_pp "${expected_targets}")
+
+            if(package_targets)
+                string(REPLACE ";" ", " imported_targets_pp "${package_targets}")
+            else()
+                set(imported_targets_pp "<none>")
+            endif()
+
+            string(REPLACE ";" ", " unmatched_expected_targets_pp "${unmatched_expected_targets}")
+
+            message(
+                FATAL_ERROR
+                "
+Package '${package_name}' was expected to provide the following targets (via EXPECTED_TARGETS): ${expected_targets_pp}
+But after executing find_package(${fp_pp}), the following targets were imported: ${imported_targets_pp}
+The expected targets that were not imported are: ${unmatched_expected_targets_pp}
+"
+            )
+        endif()
+    endif()
 
     if(${package_name}_VERSION)
         message(STATUS "   Version found: ${${package_name}_VERSION}")
@@ -1854,12 +1940,14 @@ macro(jrl_find_package)
         FIND_PACKAGE_ARGS "${find_package_args}"
         PACKAGE_VARIABLES "${package_variables}"
         PACKAGE_TARGETS "${package_targets}"
+        EXPECTED_TARGETS "${expected_targets}"
         MODULE_FILE "${module_file}"
     )
 
     # Unset temporary variables
     # jrl_find_package is a macro, so temporary variables leak into the caller scope
     unset(fp_pp)
+    unset(package_name)
     unset(package_targets)
     unset(package_targets_pp)
     unset(package_variables)
@@ -1868,6 +1956,17 @@ macro(jrl_find_package)
     unset(imported_targets_before)
     unset(module_file)
     unset(package_json)
+    unset(expected_targets)
+    unset(missing_values_pp)
+    unset(all_expected_targets_present)
+    unset(skip_find_package)
+    unset(module_dir)
+    unset(find_package_args)
+    unset(unmatched_expected_targets)
+    unset(expected_target)
+    unset(expected_targets_pp)
+    unset(imported_targets_pp)
+    unset(unmatched_expected_targets_pp)
 endmacro()
 
 #[============================================================================[
@@ -1991,6 +2090,8 @@ _jrl_export_dependencies(
 ### Description
   This function analyzes the link libraries of the provided targets,
   determines which packages are needed and generates a <export_name>-dependencies.cmake file.
+  This is more or less a cmake 3.22-compatible implementation of the cmake 3.29 export(SETUP) with CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_DEPENDENCIES.
+  # ref: https://cmake.org/cmake/help/latest/command/export.html#setup
 
 
 ### Arguments
