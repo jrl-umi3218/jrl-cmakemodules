@@ -2583,9 +2583,8 @@ function(jrl_export_package)
 
     message(
         STATUS
-        "[${PROJECT_NAME}] Exporting package (${CMAKE_CURRENT_FUNCTION})
-
-    You can disable this step by setting the option ${option_var_name} to OFF.
+        "[${PROJECT_NAME}] Exporting package (${CMAKE_CURRENT_FUNCTION}).
+        You can disable this step by setting the option ${option_var_name} to OFF.
     "
     )
 
