@@ -18,10 +18,11 @@ pytest = ">=9.0.0,<10"
 
 [tasks]
 clear = { cmd = "rm -rf build" }
-configure = { cmd = "cmake --log-level=DEBUG -G Ninja -S . -B build" }
+configure = { cmd = "cmake --log-level=DEBUG -G Ninja -S . -B build -DPB_BUILD_PYTHON_BINDINGS=ON -DPB_BUILD_TESTS=ON" }
 build = { cmd = "cmake --build build --verbose" }
 install = { cmd = "cmake --install build" }
-test = { depends-on = ["clear", "configure", "build", "install"] }
+ctest = { cmd = "ctest --test-dir build --output-on-failure" }
+test = { depends-on = ["clear", "configure", "build", "install", "ctest"] }
 
 [package]
 name = { workspace = true }
