@@ -28,21 +28,18 @@ jobs:
         run: pixi install
 
       - name: Configure project
-        run: pixi run configure
+        run: pixi run --skip-deps configure
 
       - name: Build project
-        run: pixi run build
+        run: pixi run --skip-deps build
 
-      - name: Run tests (cmake latest)
-        run: pixi run -e test test
+      - name: Install project
+        run: pixi run --skip-deps install
 
-      - name: Run tests (cmake 3.22)
-        run: pixi run -e cmake322 test
-
-      - name: Run pixi build test
-        run: pixi run -e test-pixi-build test-packaging-pixi-build
+      - name: Run tests
+        run: pixi run test
 
       # Cannot run the pixi tests due to a long path issue on Windows.
-      - name: Run tests with pixi
+      - name: Run tests with pixi (uses pixi-build/publish)
         if: runner.os != 'Windows'
         run: pixi run -m v2/tests/pixi.toml test
