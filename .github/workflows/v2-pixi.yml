@@ -42,4 +42,4 @@ jobs:
       # Cannot run the pixi tests due to a long path issue on Windows.
       - name: Run tests with pixi (uses pixi-build/publish)
         if: runner.os != 'Windows'
-        run: pixi run -m v2/tests/pixi.toml test
+        run: pixi run test_with_pixi
