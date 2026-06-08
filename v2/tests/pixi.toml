@@ -6,56 +6,49 @@ platforms = ["osx-arm64", "osx-64", "linux-64", "linux-aarch64", "win-64"]
 preview = ["pixi-build"]
 
 [tasks]
-test_find_accelerate = { cmd = "pixi run test", cwd = "find_modules/FindAccelerate" }
-test_find_accelerate_notfound = { cmd = "pixi run test", cwd = "find_modules/FindAccelerateNotFound" }
-test_find_matio = { cmd = "pixi run test", cwd = "find_modules/Findmatio" }
-test_find_matio_notfound = { cmd = "pixi run test", cwd = "find_modules/FindmatioNotFound" }
-test_find_simde = { cmd = "pixi run test", cwd = "find_modules/Findsimde" }
-test_find_simde_notfound = { cmd = "pixi run test", cwd = "find_modules/FindsimdeNotFound" }
-test_find_pytest = { cmd = "pixi run test", cwd = "find_modules/FindPytest" }
-test_find_pytest_notfound = { cmd = "pixi run test", cwd = "find_modules/FindPytestNotFound" }
-test_mcg = { cmd = "pixi run test", cwd = "mcg" }
-test_minimalProj = { cmd = "pixi run test", cwd = "MinimalProj" }
+test_find_modules = { cmd = "pixi run test", cwd = "find_modules" }
+test_camel_case = { cmd = "pixi run test", cwd = "camel_case" }
+test_comp_genexp = { cmd = "pixi run test", cwd = "comp_genexp" }
+test_minimal_project = { cmd = "pixi run test", cwd = "minimal_project" }
 test_modules = { cmd = "pixi run test", cwd = "modules" }
-test_mc = { cmd = "pixi run test", cwd = "mc" }
-test_mt = { cmd = "pixi run test", cwd = "mt" }
+test_multi_comp = { cmd = "pixi run test", cwd = "multi_comp" }
+test_multi_targets = { cmd = "pixi run test", cwd = "multi_targets" }
 test_no_deps = { cmd = "pixi run test", cwd = "no_deps" }
-test_pybindings = { cmd = "pixi run test", cwd = "pybindings" }
-test_rfp = { cmd = "pixi run test", cwd = "rfp" }
-test_packaging_find_package_v1 = { cmd = "pixi run test", cwd = "packaging/find_package_v1" }
-test_packaging_find_package_v2 = { cmd = "pixi run test", cwd = "packaging/find_package_v2" }
-test_packaging_fetchcontent = { cmd = "pixi run test", cwd = "packaging/fetchcontent" }
-test_packaging_pixi_build = { cmd = "pixi run test", cwd = "packaging/pixi_build" }
+test_python_bindings = { cmd = "pixi run test", cwd = "python_bindings" }
+test_regular_find_package = { cmd = "pixi run test", cwd = "regular_find_package" }
+test_expected_targets_warn = { cmd = "pixi run test", cwd = "expected_targets_warn" }
+test_expected_targets_skip = { cmd = "pixi run test", cwd = "expected_targets_skip" }
+test_expected_targets_ok = { cmd = "pixi run test", cwd = "expected_targets_ok" }
+test_expected_targets_invalid = { cmd = "pixi run test", cwd = "expected_targets_invalid" }
+test_v1_api = { cmd = "pixi run test", cwd = "v1_api" }
+test_fetchcontent = { cmd = "pixi run test", cwd = "fetchcontent" }
+test_exported_headers = { cmd = "pixi run test", cwd = "exported_headers" }
+test_header_visibility = { cmd = "pixi run test", cwd = "header_visibility" }
 
 test = { depends-on = [
-    "test_find_accelerate",
-    "test_find_accelerate_notfound",
-    "test_find_matio",
-    "test_find_matio_notfound",
-    "test_find_simde",
-    "test_find_simde_notfound",
-    "test_find_pytest",
-    "test_find_pytest_notfound",
-    "test_mcg",
-    "test_minimalProj",
+    "test_find_modules",
+    "test_camel_case",
+    "test_comp_genexp",
+    "test_minimal_project",
     "test_modules",
-    "test_mc",
-    "test_mt",
+    "test_multi_comp",
+    "test_multi_targets",
     "test_no_deps",
-    "test_pybindings",
-    "test_rfp",
-    "test_packaging_find_package_v1",
-    "test_packaging_find_package_v2",
-    "test_packaging_fetchcontent",
-    "test_packaging_pixi_build",
+    "test_python_bindings",
+    "test_regular_find_package",
+    "test_expected_targets_warn",
+    "test_expected_targets_skip",
+    "test_expected_targets_ok",
+    "test_expected_targets_invalid",
+    "test_v1_api",
+    "test_fetchcontent",
+    "test_exported_headers",
+    "test_header_visibility",
 ] }
 
 [package]
 name = { workspace = true }
 version = { workspace = true }
-
-[package.host-dependencies]
-test_find_accelerate = { path = "find_modules/FindAccelerate" }
 
 [package.build]
 backend = { name = "pixi-build-cmake", version = "*" }

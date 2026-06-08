@@ -89,7 +89,7 @@ endfunction()
 # 1. Build and install the jrl-cmakemodules package itself.
 add_cmake_test(
     NAME jrl-cmakemodules
-    SOURCE_DIR ${PROJECT_SOURCE_DIR}
+    SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../.."
 )
 
 # 2. Check that the jrl.cmake is present
@@ -103,32 +103,20 @@ set_tests_properties("Check jrl.cmake" PROPERTIES DEPENDS jrl-cmakemodules)
 
 # 3. Run the tests with the local test projects
 add_subdirectory(find_modules)
-
-add_cmake_test(NAME packaging/find_package_v1 DEPENDS jrl-cmakemodules)
-add_cmake_test(NAME packaging/find_package_v2 DEPENDS jrl-cmakemodules)
-
-add_cmake_test(NAME rfp DEPENDS jrl-cmakemodules)
-
-add_cmake_test(
-    NAME expected_targets_warn
-    DEPENDS jrl-cmakemodules
-    PASS_REGULAR_EXPRESSION
-        "EXPECTED_TARGETS Dummy::A Dummy::B|EXPECTED_TARGETS Dummy::B Dummy::A"
-)
-add_cmake_test(NAME expected_targets_skip DEPENDS jrl-cmakemodules PASS_REGULAR_EXPRESSION "Skipping find_package")
-add_cmake_test(NAME expected_targets_ok DEPENDS jrl-cmakemodules)
-add_cmake_test(NAME expected_targets_invalid DEPENDS jrl-cmakemodules WILL_FAIL TRUE)
-
-add_cmake_test(NAME packaging/fetchcontent)
-add_cmake_test(NAME packaging/pixi_build DEPENDS jrl-cmakemodules BUILD_TARGET all)
-
+add_subdirectory(v1_api)
+add_subdirectory(regular_find_package)
+add_subdirectory(expected_targets_warn)
+add_subdirectory(expected_targets_skip)
+add_subdirectory(expected_targets_ok)
+add_subdirectory(expected_targets_invalid)
+add_subdirectory(fetchcontent)
 add_subdirectory(modules)
-
-add_subdirectory(MinimalProj)
-add_subdirectory(exp_hdr)
-add_subdirectory(hdr_visibility)
-add_subdirectory(mt)
-add_subdirectory(mc)
-add_subdirectory(mcg)
+add_subdirectory(minimal_project)
+add_subdirectory(camel_case)
+add_subdirectory(exported_headers)
+add_subdirectory(header_visibility)
+add_subdirectory(multi_targets)
+add_subdirectory(multi_comp)
+add_subdirectory(comp_genexp)
 add_subdirectory(no_deps)
-add_subdirectory(pybindings)
+add_subdirectory(python_bindings)

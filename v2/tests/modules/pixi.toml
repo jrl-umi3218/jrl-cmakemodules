@@ -9,5 +9,5 @@ cmake = ">=3.22"
 clear ={ cmd = "rm -rf build" }
 configure = { cmd = "cmake -S . -B build" }
 build = { cmd = "cmake --build build" }
-ctest = { cmd = "ctest --test-dir build --output-on-failure" }
+ctest = { cmd = "ctest --test-dir build --output-on-failure --no-tests=ignore" }
 test = { depends-on = ["clear", "configure", "build", "ctest"] }
