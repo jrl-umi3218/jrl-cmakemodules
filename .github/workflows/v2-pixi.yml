@@ -36,6 +36,9 @@ jobs:
       - name: Install project
         run: pixi run --skip-deps install
 
+      - name: Install only v2 project
+        run: pixi run install_v2
+
       - name: Run tests
         run: pixi run test
 

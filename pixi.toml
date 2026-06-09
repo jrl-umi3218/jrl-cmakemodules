@@ -38,6 +38,19 @@ install = { cmd = "cmake --install build", depends-on = ["build"] }
 clear = { cmd = "rm -rf build" }
 doc = { cmd = "cmake -DJRL_GENERATE_API_DOC=ON -P v2/modules/jrl.cmake" }
 
+configure_v2 = { cmd = [
+    "cmake",
+    "-S .",
+    "-G Ninja",
+    "-B build/v2",
+    "-DCMAKE_INSTALL_PREFIX=build/v2/install",
+    "-DJRL_CMAKEMODULES_GENERATE_API_DOC=OFF",
+    "-DJRL_CMAKEMODULES_BUILD_TESTS=OFF",
+    "-DJRL_CMAKEMODULES_INSTALL_V2_ONLY=ON",
+] }
+build_v2 = { cmd = "cmake --build build/v2", depends-on = ["configure_v2"] }
+install_v2 = { cmd = "cmake --install build/v2", depends-on = ["build_v2"] }
+
 # ============================================================================
 # TEST FEATURE CONFIGURATION
 # ============================================================================
