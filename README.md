@@ -4,11 +4,9 @@
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/jrl-umi3218/jrl-cmakemodules/master.svg)](https://results.pre-commit.ci/latest/github/jrl-umi3218/jrl-cmakemodules/master)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-This repository is meant to be used as a submodule (or via FetchContent) for any project
-at CNRS, LAAS/HPP, JRL and Inria.
+`jrl-cmakemodules` provide functions to factorize and write more reliable CMake code.
 
-It factorizes CMake mechanisms to provide a uniform look'n feel for
-all packages.
+It is used by teams at CNRS, LAAS/HPP, JRL and Inria, but can be integrated in any project.
 
 ## v2 API
 
