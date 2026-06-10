@@ -98,6 +98,14 @@ from rich.markdown import Markdown
 from rich.text import Text
 from packaging.version import parse as parse_version, InvalidVersion
 
+# Ensure UTF-8 output so rich box-drawing and ✓/✗ symbols render on Windows.
+# Prevents UnicodeEncodeError: 'charmap' codec can't encode characters.
+for _stream in (sys.stdout, sys.stderr):
+    try:
+        _stream.reconfigure(encoding="utf-8")
+    except (AttributeError, ValueError):
+        pass
+
 console = Console()
 
 STYLE_INFO = "bold blue"
