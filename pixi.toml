@@ -68,6 +68,7 @@ catch2 = ">=3"
 pytest = "*"
 libmatio = "*"
 simde = "*"
+suitesparse = "*"
 
 [feature.test.tasks]
 _configure = { cmd = [

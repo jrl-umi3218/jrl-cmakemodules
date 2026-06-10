@@ -31,7 +31,8 @@ jobs:
             libboost-python-dev \
             libeigen3-dev \
             libmatio-dev \
-            libsimde-dev
+            libsimde-dev \
+            libsuitesparse-dev
 
       - name: Setup Python Virtual Environment
         run: |
@@ -87,7 +88,8 @@ jobs:
             libboost-python-dev \
             libeigen3-dev \
             libmatio-dev \
-            libsimde-dev
+            libsimde-dev \
+            libsuitesparse-dev
 
       - name: Setup Python Virtual Environment
         run: |
@@ -133,7 +135,21 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: Install dependencies
-        run: pacman -Syu --noconfirm cmake ninja gcc catch2 python-pytest nanobind python-numpy boost boost-libs eigen libmatio simde
+        run: |
+          pacman -Syu --noconfirm \
+            cmake \
+            ninja \
+            gcc \
+            catch2 \
+            python-pytest \
+            nanobind \
+            python-numpy \
+            boost \
+            boost-libs \
+            eigen \
+            libmatio \
+            simde \
+            suitesparse
 
       - name: Configure project
         run: cmake -G Ninja -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo -DJRL_CMAKEMODULES_BUILD_TESTS=ON
