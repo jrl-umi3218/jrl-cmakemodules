@@ -15,3 +15,4 @@ Xcode*
 *.egg-info
 compile_commands.json
 cmake-profiling.json
+uv.lock
