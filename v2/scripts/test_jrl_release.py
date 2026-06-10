@@ -1,6 +1,6 @@
 #!/usr/bin/env uv run --no-project
 # /// script
-# requires-python = ">=3.9"
+# requires-python = ">=3.10"
 # dependencies = [
 #     "pytest>=8.4.2",
 #     "pytest-cov>=5.0.0",
@@ -10,7 +10,6 @@
 #     "ruamel.yaml",
 #     "rich",
 #     "packaging",
-#     "GitPython",
 #     "cmake-parser",
 # ]
 # ///
