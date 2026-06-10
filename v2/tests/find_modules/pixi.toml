@@ -11,6 +11,8 @@ test_find_simde = { cmd = "pixi run test", cwd = "Findsimde" }
 test_find_simde_notfound = { cmd = "pixi run test", cwd = "FindsimdeNotFound" }
 test_find_pytest = { cmd = "pixi run test", cwd = "FindPytest" }
 test_find_pytest_notfound = { cmd = "pixi run test", cwd = "FindPytestNotFound" }
+test_find_cholmod = { cmd = "pixi run test", cwd = "FindCHOLMOD" }
+test_find_cholmod_notfound = { cmd = "pixi run test", cwd = "FindCHOLMODNotFound" }
 
 test = { depends-on = [
     "test_find_accelerate",
@@ -21,4 +23,6 @@ test = { depends-on = [
     "test_find_simde_notfound",
     "test_find_pytest",
     "test_find_pytest_notfound",
+    "test_find_cholmod",
+    "test_find_cholmod_notfound",
 ] }
