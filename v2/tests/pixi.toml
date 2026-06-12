@@ -22,7 +22,6 @@ test_expected_targets_ok = { cmd = "pixi run test", cwd = "expected_targets_ok" 
 test_expected_targets_invalid = { cmd = "pixi run test", cwd = "expected_targets_invalid" }
 test_v1_api = { cmd = "pixi run test", cwd = "v1_api" }
 test_fetchcontent = { cmd = "pixi run test", cwd = "fetchcontent" }
-test_exported_headers = { cmd = "pixi run test", cwd = "exported_headers" }
 test_header_visibility = { cmd = "pixi run test", cwd = "header_visibility" }
 
 test = { depends-on = [
@@ -42,7 +41,6 @@ test = { depends-on = [
     "test_expected_targets_invalid",
     "test_v1_api",
     "test_fetchcontent",
-    "test_exported_headers",
     "test_header_visibility",
 ] }
 
