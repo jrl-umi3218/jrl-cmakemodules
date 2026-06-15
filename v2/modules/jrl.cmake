@@ -2058,7 +2058,16 @@ function(jrl_print_dependencies_summary)
             _jrl_log("")
             _jrl_log("  Properties for target [${target}]:")
 
+            get_property(target_is_imported TARGET ${target} PROPERTY IMPORTED)
+
             foreach(prop IN LISTS properties_to_print)
+                # The LOCATION property cannot be read from non-imported targets
+                # (CMP0026). This happens when a dependency is built in-tree
+                # (FetchContent / add_subdirectory / workspace scenario)
+                if(prop STREQUAL "LOCATION" AND NOT target_is_imported)
+                    continue()
+                endif()
+
                 get_property(is_property_set TARGET ${target} PROPERTY "${prop}" SET)
 
                 if(is_property_set)
