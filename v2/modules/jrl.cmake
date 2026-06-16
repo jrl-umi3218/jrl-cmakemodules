@@ -1886,9 +1886,9 @@ macro(jrl_find_package)
     endif()
 
     if(${package_name}_FOUND)
-        message(STATUS "   Executing find_package()...✅")
+        message(DEBUG "   Executing find_package()...[OK]")
     else()
-        message(STATUS "   Executing find_package()...❌")
+        message(DEBUG "   Executing find_package()...[NOT_FOUND]")
     endif()
 
     # Put back CMAKE_MODULE_PATH to its previous value
@@ -3168,7 +3168,7 @@ macro(jrl_find_python)
     endif()
 
     message(STATUS "   Python::Interpreter      : ${python_interpreter_found}")
-    message(STATUS "     => location property   : ${python_interpreter}")
+    message(STATUS "     LOCATION               : ${python_interpreter}")
     message(STATUS "   Python_FOUND             : ${Python_FOUND}")
     message(STATUS "   Python_EXECUTABLE        : ${Python_EXECUTABLE}")
     message(STATUS "   Python_VERSION           : ${Python_VERSION}")
