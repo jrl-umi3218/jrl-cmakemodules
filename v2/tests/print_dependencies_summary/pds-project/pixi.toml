@@ -7,8 +7,9 @@ preview = ["pixi-build"]
 
 [dependencies]
 cxx-compiler = "*"
-jrl-cmakemodules = { path = "../../../.." }
 cmake = ">=3.22"
+ninja = "*"
+jrl-cmakemodules = { path = "../../../../" }
 
 [tasks]
 clear = { cmd = "rm -rf build" }

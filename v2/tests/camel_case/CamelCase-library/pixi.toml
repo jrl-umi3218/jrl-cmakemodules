@@ -6,7 +6,9 @@ platforms = ["linux-64", "linux-aarch64", "osx-arm64", "osx-64", "win-64"]
 preview = ["pixi-build"]
 
 [dependencies]
+cxx-compiler = "*"
 jrl-cmakemodules = { path = "../../../.." }
+cmake = ">=3.22"
 
 [tasks]
 clear = { cmd = "rm -rf build" }
