@@ -18,7 +18,7 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/jrl-umi3218/jrl-cmakemodules"
+homepage = "https://github.com/jrl-umi3218/jrl-cmakemodules"
 
 [project.optional-dependencies]
 test = [
