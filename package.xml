@@ -106,7 +106,6 @@
   -->
 
   <buildtool_depend>cmake</buildtool_depend>
-  <buildtool_depend>ninja-build</buildtool_depend>
 
   <!-- Dependency for the documentation building. -->
   <depend>doxygen</depend>
