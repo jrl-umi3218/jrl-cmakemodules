@@ -3024,6 +3024,112 @@ function(jrl_option option_name help_text default_value)
 endfunction()
 
 #[============================================================================[
+# `jrl_generate_options_markdown_summary`
+
+```cpp
+jrl_generate_options_markdown_summary(OUTPUT_FILE <output_file>)
+```
+
+**Type:** function
+
+
+### Description
+  Write a Markdown file summarising all options declared via `jrl_option()` for the current project.
+  This helps maintaining an up-to-date documentation of the available options.
+  The table contains the following columns:
+  *Option*, *Type*, *Default value*, *Condition*, *Legacy Name*, *Description*.
+
+
+### Arguments
+* `OUTPUT_FILE`: Path of the Markdown file to generate (default: ${CMAKE_BINARY_DIR}/${PROJECT_NAME}_options.md).
+
+
+### Example
+```cmake
+jrl_generate_options_markdown_summary(OUTPUT_FILE ${CMAKE_BINARY_DIR}/OPTIONS.md)
+```
+#]============================================================================]
+function(jrl_generate_options_markdown_summary)
+    set(options)
+    set(oneValueArgs OUTPUT_FILE)
+    set(multiValueArgs)
+    cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+    _jrl_check_no_unrecognized_arguments(arg)
+
+    if(arg_OUTPUT_FILE)
+        set(output_file ${arg_OUTPUT_FILE})
+    else()
+        set(output_file "${CMAKE_BINARY_DIR}/${PROJECT_NAME}_options.md")
+    endif()
+
+    get_property(option_names GLOBAL PROPERTY _jrl_${PROJECT_NAME}_option_names)
+
+    set(md "# ${PROJECT_NAME} - Declared Options\n\n")
+
+    if(NOT option_names)
+        string(APPEND md "_No options defined via `jrl_option`._\n")
+        file(WRITE "${output_file}" "${md}")
+        message(STATUS "[${PROJECT_NAME}] Options markdown summary written to: ${output_file}")
+        return()
+    endif()
+
+    string(APPEND md "| Option | Type | Default value | Condition | Legacy Name | Description |\n")
+    string(APPEND md "| ------ | ---- | ------------- | --------- | ----------- | ----------- |\n")
+
+    foreach(option_name ${option_names})
+        get_property(_type CACHE ${option_name} PROPERTY TYPE)
+        get_property(_help CACHE ${option_name} PROPERTY HELPSTRING)
+        get_property(
+            _default
+            GLOBAL
+            PROPERTY _jrl_${PROJECT_NAME}_option_${option_name}_default_value
+        )
+        get_property(_cond GLOBAL PROPERTY _jrl_${PROJECT_NAME}_option_${option_name}_condition)
+        get_property(
+            _legacy
+            GLOBAL
+            PROPERTY _jrl_${PROJECT_NAME}_option_${option_name}_legacy_option
+        )
+
+        if(_cond)
+            set(_cond_md "`${_cond}`")
+        else()
+            set(_cond_md "")
+        endif()
+
+        if(_legacy)
+            set(_legacy_md "`${_legacy}`")
+        else()
+            set(_legacy_md "")
+        endif()
+
+        # Escape pipe characters that would break the Markdown table
+        string(REPLACE "|" "\\|" _help "${_help}")
+        string(REPLACE "|" "\\|" _cond_md "${_cond_md}")
+
+        string(
+            APPEND md
+            "| `${option_name}` | `${_type}` | `${_default}` | ${_cond_md} | ${_legacy_md} | ${_help} |\n"
+        )
+    endforeach()
+
+    # Check if the content of the file is different before writing to avoid unnecessary rewrites
+    if(EXISTS "${output_file}")
+        file(READ "${output_file}" existing_content)
+        if(existing_content STREQUAL md)
+            message(
+                STATUS
+                "[${PROJECT_NAME}] Options markdown summary is up-to-date: ${output_file}"
+            )
+            return()
+        endif()
+    endif()
+
+    file(WRITE "${output_file}" "${md}")
+    message(STATUS "[${PROJECT_NAME}] Options markdown summary written to: ${output_file}")
+endfunction()
+
+#[============================================================================[
 # `_jrl_pad_string`
 
 ```cpp

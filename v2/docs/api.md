@@ -929,6 +929,30 @@ jrl_option(
     LEGACY_NAME BUILD_PYTHON_BINDINGS
 )
 ```
+# `jrl_generate_options_markdown_summary`
+
+```cpp
+jrl_generate_options_markdown_summary(OUTPUT_FILE <output_file>)
+```
+
+**Type:** function
+
+
+### Description
+  Write a Markdown file summarising all options declared via `jrl_option()` for the current project.
+  This helps maintaining an up-to-date documentation of the available options.
+  The table contains the following columns:
+  *Option*, *Type*, *Default value*, *Condition*, *Legacy Name*, *Description*.
+
+
+### Arguments
+* `OUTPUT_FILE`: Path of the Markdown file to generate (default: ${CMAKE_BINARY_DIR}/${PROJECT_NAME}_options.md).
+
+
+### Example
+```cmake
+jrl_generate_options_markdown_summary(OUTPUT_FILE ${CMAKE_BINARY_DIR}/OPTIONS.md)
+```
 # `jrl_print_options_summary`
 
 ```cpp
