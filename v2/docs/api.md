@@ -814,7 +814,12 @@ jrl_export_package(
    - <INSTALL_DIR>/<package>/<package>/<componentA>/dependencies.cmake
    - <INSTALL_DIR>/<package>/<package>/<componentB>/targets.cmake
    - <INSTALL_DIR>/<package>/<package>/<componentB>/dependencies.cmake
-  NOTE: This is for CMake package export only. Python bindings are handled separately.
+  This is for c++ package export only. Python bindings should be handled separately.
+
+  This function allows users to set the variable `<PACKAGE_NAME>_EXPORT_PACKAGE` to OFF to disable package export.
+  The priority is as follows:
+    1. Check if the environment variable is set
+    2. Check if the CMake variable is set (can be a jrl_option() or a regular set())
 
 
 ### Arguments

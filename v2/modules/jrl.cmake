@@ -2588,7 +2588,12 @@ jrl_export_package(
    - <INSTALL_DIR>/<package>/<package>/<componentA>/dependencies.cmake
    - <INSTALL_DIR>/<package>/<package>/<componentB>/targets.cmake
    - <INSTALL_DIR>/<package>/<package>/<componentB>/dependencies.cmake
-  NOTE: This is for CMake package export only. Python bindings are handled separately.
+  This is for c++ package export only. Python bindings should be handled separately.
+
+  This function allows users to set the variable `<PACKAGE_NAME>_EXPORT_PACKAGE` to OFF to disable package export.
+  The priority is as follows:
+    1. Check if the environment variable is set
+    2. Check if the CMake variable is set (can be a jrl_option() or a regular set())
 
 
 ### Arguments
@@ -2613,8 +2618,24 @@ function(jrl_export_package)
     string(TOUPPER ${project_name_identifier} project_name_identifier_upper)
     set(option_var_name "${project_name_identifier_upper}_EXPORT_PACKAGE")
 
-    if(DEFINED ${option_var_name} AND NOT ${option_var_name})
-        message(STATUS "Skipping package export because ${option_var_name} is set to OFF")
+    # 1. Check if the environment variable is set
+    # 2. Check if the variable is set
+
+    if(DEFINED ENV{${option_var_name}})
+        set(execute_export_package $ENV{${option_var_name}})
+        set(env "environment ")
+    elseif(DEFINED ${option_var_name})
+        set(execute_export_package ${${option_var_name}})
+        set(env "")
+    else()
+        set(execute_export_package ON)
+    endif()
+
+    if(NOT ${execute_export_package})
+        message(
+            STATUS
+            "(${CMAKE_CURRENT_FUNCTION}) Skipping package export because ${env}variable ${option_var_name} is set to OFF"
+        )
         return()
     endif()
 
