@@ -22,6 +22,7 @@ test_expected_targets_invalid = { cmd = "pixi run test", cwd = "expected_targets
 test_v1_api = { cmd = "pixi run test", cwd = "v1_api" }
 test_fetchcontent = { cmd = "pixi run test", cwd = "fetchcontent" }
 test_header_visibility = { cmd = "pixi run test", cwd = "header_visibility" }
+test_export_package_control = { cmd = "pixi run test", cwd = "export_package_control" }
 
 test = { depends-on = [
     "test_find_modules",
@@ -41,4 +42,5 @@ test = { depends-on = [
     "test_v1_api",
     "test_fetchcontent",
     "test_header_visibility",
+    "test_export_package_control",
 ] }
