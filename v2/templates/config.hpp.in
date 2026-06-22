@@ -1,0 +1,90 @@
+/// Copyright 2025-2026 Inria. All rights reserved.
+#pragma once
+
+// Package version (header).
+#define @JRL_LIBRARY_NAME_UPPERCASE@_VERSION_UNKNOWN_TAG 0 // Used to mention that the current version is unknown.
+#define @JRL_LIBRARY_NAME_UPPERCASE@_VERSION "@JRL_LIBRARY_VERSION@"
+#define @JRL_LIBRARY_NAME_UPPERCASE@_MAJOR_VERSION @JRL_LIBRARY_VERSION_MAJOR@
+#define @JRL_LIBRARY_NAME_UPPERCASE@_MINOR_VERSION @JRL_LIBRARY_VERSION_MINOR@
+#define @JRL_LIBRARY_NAME_UPPERCASE@_PATCH_VERSION @JRL_LIBRARY_VERSION_PATCH@
+
+#define @JRL_LIBRARY_NAME_UPPERCASE@_VERSION_AT_LEAST(major, minor, patch) (@JRL_LIBRARY_NAME_UPPERCASE@_MAJOR_VERSION>major || (@JRL_LIBRARY_NAME_UPPERCASE@_MAJOR_VERSION>=major && \
+                                                                           (@JRL_LIBRARY_NAME_UPPERCASE@_MINOR_VERSION>minor || (@JRL_LIBRARY_NAME_UPPERCASE@_MINOR_VERSION>=minor && \
+                                                                                                                                 @JRL_LIBRARY_NAME_UPPERCASE@_PATCH_VERSION>=patch))))
+
+#define @JRL_LIBRARY_NAME_UPPERCASE@_VERSION_AT_MOST(major, minor, patch) (@JRL_LIBRARY_NAME_UPPERCASE@_MAJOR_VERSION<major || (@JRL_LIBRARY_NAME_UPPERCASE@_MAJOR_VERSION<=major && \
+                                                                          (@JRL_LIBRARY_NAME_UPPERCASE@_MINOR_VERSION<minor || (@JRL_LIBRARY_NAME_UPPERCASE@_MINOR_VERSION<=minor && \
+                                                                                                                                @JRL_LIBRARY_NAME_UPPERCASE@_PATCH_VERSION<=patch))))
+
+// Handle portable symbol export.
+// Defining manually which symbol should be exported is required
+// under Windows whether MinGW or MSVC is used.
+//
+// The headers then have to be able to work in two different modes:
+// - dllexport when one is building the library,
+// - dllimport for clients using the library.
+//
+// On Linux, set the visibility accordingly. If C++ symbol visibility
+// is handled by the compiler, see: http://gcc.gnu.org/wiki/Visibility
+//
+// Explicit template instantiation on Windows need to add
+// dllexport on the definition and dllimport on the declaration.
+// The XXX_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI macro
+// should be set on the declaration while
+// the XXX_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI macro
+// should be set on the definition.
+#if defined _WIN32 || defined __CYGWIN__
+// On Microsoft Windows, use dllimport and dllexport to tag symbols.
+# define @JRL_LIBRARY_NAME_UPPERCASE@_DLLIMPORT __declspec(dllimport)
+# define @JRL_LIBRARY_NAME_UPPERCASE@_DLLEXPORT __declspec(dllexport)
+# define @JRL_LIBRARY_NAME_UPPERCASE@_DLLLOCAL
+# define @JRL_LIBRARY_NAME_UPPERCASE@_EXPLICIT_INSTANTIATION_DECLARATION_DLLIMPORT __declspec(dllimport)
+# define @JRL_LIBRARY_NAME_UPPERCASE@_EXPLICIT_INSTANTIATION_DECLARATION_DLLEXPORT
+# define @JRL_LIBRARY_NAME_UPPERCASE@_EXPLICIT_INSTANTIATION_DEFINITION_DLLIMPORT __declspec(dllimport)
+# define @JRL_LIBRARY_NAME_UPPERCASE@_EXPLICIT_INSTANTIATION_DEFINITION_DLLEXPORT __declspec(dllexport)
+#else
+// On Linux, for GCC >= 4, tag symbols using GCC extension.
+# if __GNUC__ >= 4
+#  define @JRL_LIBRARY_NAME_UPPERCASE@_DLLIMPORT __attribute__ ((visibility("default")))
+#  define @JRL_LIBRARY_NAME_UPPERCASE@_DLLEXPORT __attribute__ ((visibility("default")))
+#  define @JRL_LIBRARY_NAME_UPPERCASE@_DLLLOCAL  __attribute__ ((visibility("hidden")))
+#  define @JRL_LIBRARY_NAME_UPPERCASE@_EXPLICIT_INSTANTIATION_DECLARATION_DLLIMPORT __attribute__ ((visibility("default")))
+#  define @JRL_LIBRARY_NAME_UPPERCASE@_EXPLICIT_INSTANTIATION_DECLARATION_DLLEXPORT __attribute__ ((visibility("default")))
+#  define @JRL_LIBRARY_NAME_UPPERCASE@_EXPLICIT_INSTANTIATION_DEFINITION_DLLIMPORT
+#  define @JRL_LIBRARY_NAME_UPPERCASE@_EXPLICIT_INSTANTIATION_DEFINITION_DLLEXPORT
+# else
+// Otherwise (GCC < 4 or another compiler is used), export everything.
+#  define @JRL_LIBRARY_NAME_UPPERCASE@_DLLIMPORT
+#  define @JRL_LIBRARY_NAME_UPPERCASE@_DLLEXPORT
+#  define @JRL_LIBRARY_NAME_UPPERCASE@_DLLLOCAL
+#  define @JRL_LIBRARY_NAME_UPPERCASE@_EXPLICIT_INSTANTIATION_DECLARATION_DLLIMPORT
+#  define @JRL_LIBRARY_NAME_UPPERCASE@_EXPLICIT_INSTANTIATION_DECLARATION_DLLEXPORT
+#  define @JRL_LIBRARY_NAME_UPPERCASE@_EXPLICIT_INSTANTIATION_DEFINITION_DLLIMPORT
+#  define @JRL_LIBRARY_NAME_UPPERCASE@_EXPLICIT_INSTANTIATION_DEFINITION_DLLEXPORT
+# endif // __GNUC__ >= 4
+#endif // defined _WIN32 || defined __CYGWIN__
+
+#ifdef @JRL_LIBRARY_NAME_UPPERCASE@_STATIC
+// If one is using the library statically, get rid of
+// extra information and use standard explicit template
+// instantiation keyword.
+# define @JRL_LIBRARY_NAME_UPPERCASE@_DLLAPI
+# define @JRL_LIBRARY_NAME_UPPERCASE@_LOCAL
+# define @JRL_LIBRARY_NAME_UPPERCASE@_EXPLICIT_INSTANTIATION_DECLARATION extern template
+#else
+// Depending on whether one is building or using the
+// library define DLLAPI to import or export and
+// define the right explicit template instantiation keyword.
+// NOTE: @JRL_LIBRARY_NAME@_EXPORTS is automatically defined by CMake when building a shared library.
+// More info at https://cmake.org/cmake/help/latest/prop_tgt/DEFINE_SYMBOL.html
+# ifdef @JRL_LIBRARY_NAME@_EXPORTS
+#  define @JRL_LIBRARY_NAME_UPPERCASE@_DLLAPI @JRL_LIBRARY_NAME_UPPERCASE@_DLLEXPORT
+#  define @JRL_LIBRARY_NAME_UPPERCASE@_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI @JRL_LIBRARY_NAME_UPPERCASE@_EXPLICIT_INSTANTIATION_DECLARATION_DLLEXPORT
+#  define @JRL_LIBRARY_NAME_UPPERCASE@_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI @JRL_LIBRARY_NAME_UPPERCASE@_EXPLICIT_INSTANTIATION_DEFINITION_DLLEXPORT
+# else
+#  define @JRL_LIBRARY_NAME_UPPERCASE@_DLLAPI @JRL_LIBRARY_NAME_UPPERCASE@_DLLIMPORT
+#  define @JRL_LIBRARY_NAME_UPPERCASE@_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI @JRL_LIBRARY_NAME_UPPERCASE@_EXPLICIT_INSTANTIATION_DECLARATION_DLLIMPORT
+#  define @JRL_LIBRARY_NAME_UPPERCASE@_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI @JRL_LIBRARY_NAME_UPPERCASE@_EXPLICIT_INSTANTIATION_DEFINITION_DLLIMPORT
+# endif // @PROJECT_NAME@_EXPORTS
+# define @JRL_LIBRARY_NAME_UPPERCASE@_LOCAL @JRL_LIBRARY_NAME_UPPERCASE@_DLLLOCAL
+#endif // @JRL_LIBRARY_NAME_UPPERCASE@_STATIC

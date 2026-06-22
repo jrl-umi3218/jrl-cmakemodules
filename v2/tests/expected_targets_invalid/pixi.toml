@@ -1,0 +1,12 @@
+[workspace]
+channels = ["conda-forge"]
+platforms = ["linux-64", "linux-aarch64", "osx-arm64", "osx-64", "win-64"]
+preview = ["pixi-build"]
+
+[dependencies]
+jrl-cmakemodules = { path = "../../.." }
+cmake = ">=3.22"
+ninja = "*"
+
+[tasks]
+test = { cmd = "cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -S eti-project -B eti-project/build && (echo 'FAIL: cmake configure should have errored'; exit 1) || (rm -rf eti-project/build && echo 'Test completed successfully')" }

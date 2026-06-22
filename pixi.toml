@@ -1,0 +1,125 @@
+# ============================================================================
+# WORKSPACE CONFIGURATION
+# ============================================================================
+
+[workspace]
+name = "jrl-cmakemodules"
+version = "1.2.0"
+description = "jrl-cmakemodules"
+authors = ["Antoine Hoarau <703240+ahoarau@users.noreply.github.com>"]
+channels = ["conda-forge"]
+platforms = ["osx-arm64", "osx-64", "linux-64", "linux-aarch64", "win-64"]
+preview = ["pixi-build"]
+
+# ============================================================================
+# DEFAULT DEPENDENCIES
+# ============================================================================
+
+[dependencies]
+cmake = ">=3.22"
+ninja = "*"
+
+# ============================================================================
+# DEFAULT TASKS
+# ============================================================================
+
+[tasks]
+configure = { cmd = [
+    "cmake",
+    "-S .",
+    "-G Ninja",
+    "-B build",
+    "-DCMAKE_INSTALL_PREFIX=build/install",
+    "-DJRL_CMAKEMODULES_GENERATE_API_DOC=OFF",
+    "-DJRL_CMAKEMODULES_BUILD_TESTS=OFF",
+] }
+build = { cmd = "cmake --build build", depends-on = ["configure"] }
+install = { cmd = "cmake --install build", depends-on = ["build"] }
+clear = { cmd = "rm -rf build" }
+doc = { cmd = "cmake -DJRL_GENERATE_API_DOC=ON -P v2/modules/jrl.cmake" }
+
+configure_v2 = { cmd = [
+    "cmake",
+    "-S .",
+    "-G Ninja",
+    "-B build/v2",
+    "-DCMAKE_INSTALL_PREFIX=build/v2/install",
+    "-DJRL_CMAKEMODULES_GENERATE_API_DOC=OFF",
+    "-DJRL_CMAKEMODULES_BUILD_TESTS=OFF",
+    "-DJRL_CMAKEMODULES_INSTALL_V2_ONLY=ON",
+] }
+build_v2 = { cmd = "cmake --build build/v2", depends-on = ["configure_v2"] }
+install_v2 = { cmd = "cmake --install build/v2", depends-on = ["build_v2"] }
+
+# ============================================================================
+# TEST FEATURE CONFIGURATION
+# ============================================================================
+
+[feature.test.dependencies]
+cxx-compiler = "*"
+cmake = ">=3.22"
+ninja = "*"
+uv = "*"
+python = ">=3.10"
+eigen = ">=3.4"
+nanobind = ">=2.5.0"
+libboost-python-devel = ">=1.82.0,<2"
+catch2 = ">=3"
+pytest = "*"
+libmatio = "*"
+simde = "*"
+suitesparse = "*"
+
+[feature.test.tasks]
+_configure = { cmd = [
+    "cmake",
+    "-S .",
+    "-G Ninja",
+    "-B build/test",
+    "-DCMAKE_INSTALL_PREFIX=build/install",
+    "-DJRL_CMAKEMODULES_GENERATE_API_DOC=ON",
+    "-DJRL_CMAKEMODULES_BUILD_TESTS=ON",
+] }
+_build = { cmd = "cmake --build build/test", depends-on = ["_configure"] }
+_ctest = { cmd = "ctest --test-dir build/test --output-on-failure", depends-on = [
+    "_build",
+] }
+_test-scripts = { cmd = "uv run --no-project v2/scripts/test_jrl_release.py" }
+_test-scripts-coverage = { cmd = "uv run --no-project test_jrl_release.py --cov=jrl_release --cov-report=term-missing --cov-report=html:htmlcov", cwd = "v2/scripts" }
+test = { depends-on = ["_test-scripts", "_test-scripts-coverage", "_ctest"] }
+test_with_pixi = { cmd = "pixi run test", cwd = "v2/tests" }
+
+[environments.test]
+features = ["test"]
+no-default-feature = true
+
+# ============================================================================
+# PRE-COMMIT HOOKS CONFIGURATION
+# ============================================================================
+
+[feature.prek.dependencies]
+prek = "*"
+
+[feature.prek.tasks]
+prek = "prek run -a"
+
+[environments.prek]
+features = ["prek"]
+no-default-feature = true
+
+# ============================================================================
+# PACKAGE BUILD CONFIGURATION
+# ============================================================================
+
+[package]
+name = { workspace = true }
+version = { workspace = true }
+
+[package.build]
+backend = { name = "pixi-build-cmake", version = "*" }
+
+[package.build.config]
+extra-args = [
+    "-DJRL_CMAKEMODULES_BUILD_TESTS=OFF",
+    "-DJRL_CMAKEMODULES_GENERATE_API_DOC=OFF",
+]

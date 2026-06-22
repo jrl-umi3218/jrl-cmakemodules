@@ -1,0 +1,46 @@
+[workspace]
+name = "jrl-tests"
+version = "1.0.0"
+channels = ["conda-forge"]
+platforms = ["osx-arm64", "osx-64", "linux-64", "linux-aarch64", "win-64"]
+
+[tasks]
+test_find_modules = { cmd = "pixi run test", cwd = "find_modules" }
+test_camel_case = { cmd = "pixi run test", cwd = "camel_case" }
+test_comp_genexp = { cmd = "pixi run test", cwd = "comp_genexp" }
+test_minimal_project = { cmd = "pixi run test", cwd = "minimal_project" }
+test_modules = { cmd = "pixi run test", cwd = "modules" }
+test_multi_comp = { cmd = "pixi run test", cwd = "multi_comp" }
+test_multi_targets = { cmd = "pixi run test", cwd = "multi_targets" }
+test_no_deps = { cmd = "pixi run test", cwd = "no_deps" }
+test_python_bindings = { cmd = "pixi run test", cwd = "python_bindings" }
+test_regular_find_package = { cmd = "pixi run test", cwd = "regular_find_package" }
+test_expected_targets_warn = { cmd = "pixi run test", cwd = "expected_targets_warn" }
+test_expected_targets_skip = { cmd = "pixi run test", cwd = "expected_targets_skip" }
+test_expected_targets_ok = { cmd = "pixi run test", cwd = "expected_targets_ok" }
+test_expected_targets_invalid = { cmd = "pixi run test", cwd = "expected_targets_invalid" }
+test_v1_api = { cmd = "pixi run test", cwd = "v1_api" }
+test_fetchcontent = { cmd = "pixi run test", cwd = "fetchcontent" }
+test_header_visibility = { cmd = "pixi run test", cwd = "header_visibility" }
+test_export_package_control = { cmd = "pixi run test", cwd = "export_package_control" }
+
+test = { depends-on = [
+    "test_find_modules",
+    "test_camel_case",
+    "test_comp_genexp",
+    "test_minimal_project",
+    "test_modules",
+    "test_multi_comp",
+    "test_multi_targets",
+    "test_no_deps",
+    "test_python_bindings",
+    "test_regular_find_package",
+    "test_expected_targets_warn",
+    "test_expected_targets_skip",
+    "test_expected_targets_ok",
+    "test_expected_targets_invalid",
+    "test_v1_api",
+    "test_fetchcontent",
+    "test_header_visibility",
+    "test_export_package_control",
+] }
