@@ -3008,6 +3008,18 @@ function(jrl_option option_name help_text default_value)
         GLOBAL
         PROPERTY _jrl_${PROJECT_NAME}_option_${option_name}_default_value ${default_value}
     )
+    if(DEFINED arg_CONDITION)
+        set_property(
+            GLOBAL
+            PROPERTY _jrl_${PROJECT_NAME}_option_${option_name}_condition "${arg_CONDITION}"
+        )
+    endif()
+    if(DEFINED arg_LEGACY_NAME)
+        set_property(
+            GLOBAL
+            PROPERTY _jrl_${PROJECT_NAME}_option_${option_name}_legacy_option "${arg_LEGACY_NAME}"
+        )
+    endif()
     set_property(GLOBAL PROPERTY _jrl_${PROJECT_NAME}_option_names ${option_name} APPEND)
 endfunction()
 
