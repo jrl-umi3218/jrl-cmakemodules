@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "jrl-cmakemodules-scripts"
 version = "1.2.0"
 description = "Release scripting tools for JRL CMake modules"
-readme = "v2/scripts/README.md"
+readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "BSD-3-Clause"}
 dependencies = [
@@ -32,10 +32,10 @@ jrl-release = "jrl_release:main"
 
 [tool.setuptools]
 py-modules = ["jrl_release"]
-package-dir = {"" = "v2/scripts"}
+package-dir = {"" = "."}
 
 [tool.pytest.ini_options]
-testpaths = ["v2/scripts"]
+testpaths = ["."]
 python_files = ["test_*.py"]
 addopts = "-v"
 

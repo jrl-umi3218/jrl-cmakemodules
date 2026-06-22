@@ -10,6 +10,9 @@ jobs:
   test-python:
     name: Test Python Scripts (${{ matrix.os }}, Python ${{ matrix.python-version }})
     runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: v2/scripts
     strategy:
       fail-fast: false
       matrix:
