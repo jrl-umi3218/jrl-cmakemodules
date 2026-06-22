@@ -18,6 +18,22 @@ jrl_export_dependency(PACKAGE_NAME InTreeDep PACKAGE_TARGETS "in_tree_dep")
 #   The LOCATION property may not be read from target "eigenpy".  Use the
 #   target name directly with add_custom_command, or use the generator
 #   expression $<TARGET_FILE>, as appropriate.
+
+# Test DEPENDS with a false condition (should return early and not print)
+jrl_print_dependencies_summary(DEPENDS FALSE)
+
+# Test DEPENDS with a false bracketed condition (should return early and not print)
+jrl_print_dependencies_summary(DEPENDS [[DEFINED ENV{NON_EXISTENT_VAR_123456}]])
+
+# Test DEPENDS with a true condition (should run normally)
+set(MY_TRUE_VAR TRUE)
+jrl_print_dependencies_summary(DEPENDS MY_TRUE_VAR)
+
+# Test DEPENDS with a true env condition (should run normally)
+set(ENV{MY_TRUE_ENV_VAR} TRUE)
+jrl_print_dependencies_summary(DEPENDS [[DEFINED ENV{MY_TRUE_ENV_VAR}]])
+
+# regular call (should run normally)
 jrl_print_dependencies_summary()
 
 # Add a fake install code
