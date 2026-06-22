@@ -657,7 +657,7 @@ jrl_find_package(Eigen3 CONFIG REQUIRED EXPECTED_TARGETS Eigen3::Eigen)
 # `jrl_print_dependencies_summary`
 
 ```cpp
-jrl_print_dependencies_summary()
+jrl_print_dependencies_summary([DEPENDS <condition>])
 ```
 
 **Type:** function
@@ -668,12 +668,13 @@ jrl_print_dependencies_summary()
 
 
 ### Arguments
-  None
+* `DEPENDS`: A conditional variable or expression that must evaluate to true for the summary to be printed.
 
 
 ### Example
 ```cmake
-jrl_print_dependencies_summary()
+jrl_print_dependencies_summary(DEPENDS MY_TRUE_VAR)
+jrl_print_dependencies_summary(DEPENDS [[DEFINED ENV{GITHUB_ACTION}]])
 ```
 # `jrl_add_export_component`
 

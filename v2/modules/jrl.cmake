@@ -1982,7 +1982,7 @@ endmacro()
 # `jrl_print_dependencies_summary`
 
 ```cpp
-jrl_print_dependencies_summary()
+jrl_print_dependencies_summary([DEPENDS <condition>])
 ```
 
 **Type:** function
@@ -1993,15 +1993,43 @@ jrl_print_dependencies_summary()
 
 
 ### Arguments
-  None
+* `DEPENDS`: A conditional variable or expression that must evaluate to true for the summary to be printed.
 
 
 ### Example
 ```cmake
-jrl_print_dependencies_summary()
+jrl_print_dependencies_summary(DEPENDS MY_TRUE_VAR)
+jrl_print_dependencies_summary(DEPENDS [[DEFINED ENV{GITHUB_ACTION}]])
 ```
 #]============================================================================]
 function(jrl_print_dependencies_summary)
+    set(options)
+    set(oneValueArgs)
+    set(multiValueArgs DEPENDS)
+    cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+    _jrl_check_no_unrecognized_arguments(arg)
+
+    if(DEFINED arg_DEPENDS)
+        set(eval_result ON)
+        cmake_language(
+            EVAL CODE
+                "
+            if(${arg_DEPENDS})
+                set(eval_result ON)
+            else()
+                set(eval_result OFF)
+            endif()
+            "
+        )
+        if(NOT eval_result)
+            message(
+                DEBUG
+                "jrl_print_dependencies_summary: DEPENDS condition '${arg_DEPENDS}' evaluated to false. Skipping summary."
+            )
+            return()
+        endif()
+    endif()
+
     _jrl_log_clear()
 
     get_property(deps GLOBAL PROPERTY _jrl_${PROJECT_NAME}_package_dependencies)
