@@ -1,0 +1,49 @@
+/// Copyright 2025-2026 Inria. All rights reserved.
+#pragma once
+
+// Define a suffix which can be used to tag a type, a function or a a
+// variable as deprecated (i.e. it will emit a warning when using it).
+//
+// Tagging a function as deprecated:
+//  void foo () @JRL_LIBRARY_NAME_UPPERCASE@_DEPRECATED;
+//
+// Tagging a type as deprecated:
+//  class Foo {};
+//  typedef Foo Bar @JRL_LIBRARY_NAME_UPPERCASE@_DEPRECATED;
+//
+// Tagging a variable as deprecated:
+//  int a @JRL_LIBRARY_NAME_UPPERCASE@_DEPRECATED = 0;
+//
+// The use of a macro is required as this is /not/ a standardized
+// feature of C++ language or preprocessor, even if most of the
+// compilers support it.
+#if defined(__cplusplus) && (__cplusplus >= 201402L)
+# define @JRL_LIBRARY_NAME_UPPERCASE@_DEPRECATED [[deprecated]]
+# define @JRL_LIBRARY_NAME_UPPERCASE@_DEPRECATED_MESSAGE(message) [[deprecated(#message)]]
+#elif defined(__GNUC__) || defined(__clang__)
+# define @JRL_LIBRARY_NAME_UPPERCASE@_DEPRECATED __attribute__ ((deprecated))
+# define @JRL_LIBRARY_NAME_UPPERCASE@_DEPRECATED_MESSAGE(message) __attribute__ (( deprecated(#message) ))
+#else
+# if defined(_MSC_VER) && !defined(__INTEL_COMPILER)
+#  define @JRL_LIBRARY_NAME_UPPERCASE@_DEPRECATED __declspec (deprecated)
+#  define @JRL_LIBRARY_NAME_UPPERCASE@_DEPRECATED_MESSAGE(message) __declspec ( deprecated(#message) )
+# else
+/ If the compiler is not recognized, drop the feature.
+#  define @JRL_LIBRARY_NAME_UPPERCASE@_DEPRECATED /* nothing */
+#  define @JRL_LIBRARY_NAME_UPPERCASE@_DEPRECATED_MESSAGE(message)
+# endif // __MSVC__
+#endif // __cplusplus
+
+#if defined(__GNUC__) || defined(__clang__)
+# ifndef @JRL_LIBRARY_NAME_UPPERCASE@_PRAGMA
+#  define @JRL_LIBRARY_NAME_UPPERCASE@_PRAGMA(X) _Pragma(#X)
+# endif
+# define @JRL_LIBRARY_NAME_UPPERCASE@_DEPRECATED_HEADER(MSG) @JRL_LIBRARY_NAME_UPPERCASE@_PRAGMA(GCC warning MSG)
+#elif defined(_MSC_VER) && !defined(__INTEL_COMPILER)
+# define @JRL_LIBRARY_NAME_UPPERCASE@_STRING_LITERAL(MSG) #MSG
+# define @JRL_LIBRARY_NAME_UPPERCASE@_STRINGIZE(MSG) @JRL_LIBRARY_NAME_UPPERCASE@_STRING_LITERAL(MSG)
+# define @JRL_LIBRARY_NAME_UPPERCASE@_DEPRECATED_HEADER(MSG) \
+  __pragma(message(__FILE__ "(" @JRL_LIBRARY_NAME_UPPERCASE@_STRINGIZE(__LINE__) ") : Warning: " MSG))
+#else
+# define @JRL_LIBRARY_NAME_UPPERCASE@_DEPRECATED_HEADER(MSG)
+#endif

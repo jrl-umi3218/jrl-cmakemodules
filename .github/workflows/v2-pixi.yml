@@ -1,0 +1,48 @@
+name: V2 - Pixi
+
+on: [push, pull_request]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pixi-ci:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+          - os: macos-15-intel
+          - os: macos-26
+          - os: windows-2025
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install Pixi
+        uses: prefix-dev/setup-pixi@v0.9.3
+
+      - name: Configure Pixi environment
+        run: pixi install
+
+      - name: Configure project
+        run: pixi run --skip-deps configure
+
+      - name: Build project
+        run: pixi run --skip-deps build
+
+      - name: Install project
+        run: pixi run --skip-deps install
+
+      - name: Install only v2 project
+        run: pixi run install_v2
+
+      - name: Run tests
+        run: pixi run test
+
+      # Cannot run the pixi tests due to a long path issue on Windows.
+      - name: Run tests with pixi (uses pixi-build/publish)
+        if: runner.os != 'Windows'
+        run: pixi run test_with_pixi
