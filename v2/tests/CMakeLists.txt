@@ -15,7 +15,7 @@ add_test(
         ${CMAKE_COMMAND} -E cat
         "${jrl-cmakemodules_INSTALL_DIR}/share/cmake/jrl-cmakemodules/v2/modules/jrl.cmake"
 )
-set_tests_properties("Check jrl.cmake" PROPERTIES DEPENDS jrl-cmakemodules)
+set_tests_properties("Check jrl.cmake" PROPERTIES DEPENDS jrl-cmakemodules RUN_SERIAL TRUE)
 
 # 3. Run the tests with the local test projects
 add_subdirectory(find_modules)
