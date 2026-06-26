@@ -2170,8 +2170,7 @@ function(_jrl_export_dependencies)
     if(arg_INSTALL_DESTINATION)
         set(INSTALL_DESTINATION ${arg_INSTALL_DESTINATION})
     else()
-        _jrl_check_var_defined(CMAKE_INSTALL_LIBDIR)
-        set(INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
+        set(INSTALL_DESTINATION lib/cmake/${PROJECT_NAME})
     endif()
 
     # Gather the interface link libraries of all targets present in the export component.
@@ -2653,7 +2652,6 @@ function(jrl_export_package)
         "CMAKE_INSTALL_BINDIR is not defined.
         Use jrl_configure_defaults(), or jrl_configure_default_install_dirs(), or include(GNUInstallDirs)."
     )
-    _jrl_check_var_defined(CMAKE_INSTALL_LIBDIR)
     _jrl_check_var_defined(CMAKE_INSTALL_INCLUDEDIR)
 
     if(arg_PACKAGE_CONFIG_TEMPLATE)
@@ -2666,7 +2664,7 @@ function(jrl_export_package)
     if(arg_CMAKE_FILES_INSTALL_DIR)
         set(cmake_files_install_dir ${arg_CMAKE_FILES_INSTALL_DIR})
     else()
-        set(cmake_files_install_dir ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
+        set(cmake_files_install_dir lib/cmake/${PROJECT_NAME})
     endif()
 
     # NOTE: Expose as options if needed
