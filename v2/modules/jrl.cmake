@@ -3495,7 +3495,7 @@ function(jrl_python_generate_init_py name)
     # Configure the __init__.py with PYTHON_MODULE_NAME and optional dll_dirs
     set(__MODULE_NAME__ "${name}")
     set(__DLL_DIRS__ "${dll_dirs}")
-    configure_file(${_JRL_TEMPLATES_DIR}/__init__.py.in ${arg_OUTPUT_PATH} @ONLY)
+    configure_file(${template_file} ${arg_OUTPUT_PATH} @ONLY)
 endfunction()
 
 #[============================================================================[
