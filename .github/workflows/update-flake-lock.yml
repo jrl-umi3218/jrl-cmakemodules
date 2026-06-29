@@ -14,8 +14,8 @@ jobs:
         id: app-token
         uses: actions/create-github-app-token@v3
         with:
-          app-id: ${{ secrets.GEPETTO_NIX_APP_ID }}
-          private-key: ${{ secrets.GEPETTO_NIX_APP_PRIVATE_KEY }}
+          app-id: ${{ secrets.MC_RTC_NIX_APP_ID }}
+          private-key: ${{ secrets.MC_RTC_NIX_APP_PRIVATE_KEY }}
       - name: Checkout repository
         uses: actions/checkout@v6
         with:
