@@ -56,6 +56,7 @@ uv run --no-project jrl_release.py --bump patch --git-commit --git-tag
 | `--git-commit [MSG]` | Commit changes. Optional message (`{version}` placeholder). |
 | `--git-tag [NAME]` | Create a tag. Optional name (`{version}` placeholder). |
 | `--git-tag-message <MSG>` | Tag annotation (`{version}` placeholder). |
+| `--sign-tag` | GPG-sign the tag (`git tag -s`). Needs a configured signing key. |
 
 **Git defaults**: commit `chore: bump version to {version}`, tag `v{version}`, tag message `Release version {version}`.
 
@@ -675,8 +676,13 @@ def git_tag_version(
     auto_confirm: bool,
     custom_tag_name: Optional[str] = None,
     custom_tag_message: Optional[str] = None,
+    sign: bool = False,
 ) -> bool:
-    """Create a git tag for the version."""
+    """Create a git tag for the version.
+
+    When ``sign`` is True the tag is GPG-signed (``git tag -s``); otherwise an
+    annotated tag is created (``git tag -a``).
+    """
     success, _ = run_git_command(["rev-parse", "--git-dir"], root_dir)
     if not success:
         console.print(
@@ -708,11 +714,12 @@ def git_tag_version(
             console.print(f"[{STYLE_WARNING}]Git tag skipped.[/{STYLE_WARNING}]")
             return False
 
+    tag_flag = "-s" if sign else "-a"
     console.print(
-        f"[{STYLE_MUTED}]$ git tag -a {tag_name} -m '{tag_message}'[/{STYLE_MUTED}]"
+        f"[{STYLE_MUTED}]$ git tag {tag_flag} {tag_name} -m '{tag_message}'[/{STYLE_MUTED}]"
     )
     success, output = run_git_command(
-        ["tag", "-a", tag_name, "-m", tag_message], root_dir
+        ["tag", tag_flag, tag_name, "-m", tag_message], root_dir
     )
     if success:
         console.print(f"[{STYLE_SUCCESS}]✓ Created tag: {tag_name}[/{STYLE_SUCCESS}]")
@@ -1153,6 +1160,11 @@ def main():
         help="Custom git tag message. Use {version} as placeholder for version number. Default: 'Release version {version}'",
     )
     parser.add_argument(
+        "--sign-tag",
+        action="store_true",
+        help="GPG-sign the git tag (uses 'git tag -s' instead of '-a'). Requires a configured signing key (git config user.signingkey). Only meaningful with --git-tag.",
+    )
+    parser.add_argument(
         "--short",
         action="store_true",
         help="Output only the final version string.",
@@ -1388,7 +1400,8 @@ def main():
                 if args.git_tag_message
                 else f"Release version {target_version}"
             )
-            git_lines.append(f"$ git tag -a {tag_name} -m '{tag_message}'")
+            tag_flag = "-s" if args.sign_tag else "-a"
+            git_lines.append(f"$ git tag {tag_flag} {tag_name} -m '{tag_message}'")
 
         show_dry_run_panel(dry_run_rows, pixi_lock_would_update, git_lines)
         sys.exit(0)
@@ -1400,6 +1413,11 @@ def main():
         if args.git_tag is not None and args.git_commit is None:
             console.print(
                 f"[{STYLE_WARNING}]Warning: --git-tag used without --git-commit. The tag will point to the current HEAD, not the version bump commit.[/{STYLE_WARNING}]"
+            )
+
+        if args.sign_tag and args.git_tag is None:
+            console.print(
+                f"[{STYLE_WARNING}]Warning: --sign-tag has no effect without --git-tag.[/{STYLE_WARNING}]"
             )
 
         if args.git_commit is not None:
@@ -1420,6 +1438,7 @@ def main():
                 args.confirm,
                 custom_tag_name,
                 args.git_tag_message,
+                args.sign_tag,
             )
 
 

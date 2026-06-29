@@ -944,6 +944,41 @@ def test_git_tag_version_success(mocker, tmp_path, capsys):
     assert "v1.2.3" in clean_output
 
 
+def test_git_tag_version_signed(mocker, tmp_path, capsys):
+    """Test git_tag_version signs the tag with 'git tag -s' when sign=True."""
+    mock_run = mocker.patch("jrl_release.run_git_command")
+    mock_run.side_effect = [
+        (True, ""),  # rev-parse --git-dir
+        (False, ""),  # rev-parse v1.2.3 (tag doesn't exist)
+        (True, "tag created"),  # tag -s
+    ]
+
+    result = release.git_tag_version(tmp_path, "1.2.3", auto_confirm=True, sign=True)
+
+    assert result is True
+    # The actual tag creation is the third git call.
+    tag_call_args = mock_run.call_args_list[2].args[0]
+    assert tag_call_args[:3] == ["tag", "-s", "v1.2.3"]
+    assert "-a" not in tag_call_args
+
+
+def test_git_tag_version_unsigned_uses_annotated(mocker, tmp_path):
+    """Test git_tag_version defaults to an annotated tag ('git tag -a')."""
+    mock_run = mocker.patch("jrl_release.run_git_command")
+    mock_run.side_effect = [
+        (True, ""),  # rev-parse --git-dir
+        (False, ""),  # rev-parse v1.2.3 (tag doesn't exist)
+        (True, "tag created"),  # tag -a
+    ]
+
+    result = release.git_tag_version(tmp_path, "1.2.3", auto_confirm=True)
+
+    assert result is True
+    tag_call_args = mock_run.call_args_list[2].args[0]
+    assert tag_call_args[:3] == ["tag", "-a", "v1.2.3"]
+    assert "-s" not in tag_call_args
+
+
 def test_git_tag_version_already_exists(mocker, tmp_path, capsys):
     """Test git_tag_version when tag already exists."""
     mock_run = mocker.patch("jrl_release.run_git_command")
