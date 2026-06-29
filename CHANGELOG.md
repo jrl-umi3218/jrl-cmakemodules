@@ -8,8 +8,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [2.0.0] - 2026-06-29
 
-## [2.0.0] - 2026-06-29
-
 - Rework everything from scratch in v2/ opt-in directory by @ahoarau
 - Added jrl-cmakemodules-script python project by @ahoarau
 
