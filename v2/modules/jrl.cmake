@@ -2376,6 +2376,11 @@ function(jrl_target_headers target visibility)
         return()
     endif()
     set_property(TARGET ${target} APPEND PROPERTY _jrl_install_headers "${arg_HEADERS}")
+    set_property(
+        TARGET ${target}
+        APPEND
+        PROPERTY _jrl_install_headers_current_source_dir "${CMAKE_CURRENT_SOURCE_DIR}"
+    )
     set_property(TARGET ${target} APPEND PROPERTY _jrl_install_headers_base_dirs "${arg_BASE_DIRS}")
 endfunction()
 
@@ -2426,6 +2431,7 @@ function(jrl_target_install_headers target)
     endif()
 
     get_target_property(headers ${target} _jrl_install_headers)
+    get_target_property(current_source_dir ${target} _jrl_install_headers_current_source_dir)
     get_target_property(base_dirs ${target} _jrl_install_headers_base_dirs)
 
     if(NOT headers)
@@ -2453,7 +2459,7 @@ foreach(header \${headers})
     if(IS_ABSOLUTE \${header})
         set(header_path \${header})
     else()
-        set(header_path ${CMAKE_CURRENT_SOURCE_DIR}/\${header})
+        set(header_path ${current_source_dir}/\${header})
     endif()
 
     if(relative_header_path)
