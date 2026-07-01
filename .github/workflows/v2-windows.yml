@@ -44,7 +44,7 @@ jobs:
 
       - name: Restore vcpkg binary cache
         id: cache-vcpkg-restore
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v6
         with:
           path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
           key: vcpkg-${{ matrix.image }}-${{ matrix.arch }}-${{ github.sha }}
@@ -56,7 +56,7 @@ jobs:
 
       - name: Save vcpkg binary cache
         if: always()
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v6
         with:
           path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
           key: ${{ steps.cache-vcpkg-restore.outputs.cache-primary-key }}
