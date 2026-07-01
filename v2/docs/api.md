@@ -722,7 +722,7 @@ jrl_target_headers(
   Declare headers for target to be installed later.
   * This function does not target_include_directories(), only stores them for installation.
   * Only PUBLIC and INTERFACE will be installed.
-  * It populates the _jrl_install_headers and _jrl_install_headers_base_dirs properties of the target.
+  * Each call is recorded as an object in the _jrl_install_headers_json target property, replayed by jrl_target_install_headers().
   * In CMake 3.23, we will use FILE_SETS instead of this trick.
   cf: https://cmake.org/cmake/help/latest/command/target_sources.html#file-sets
 
@@ -752,7 +752,7 @@ jrl_target_install_headers(
 
 ### Description
   Install declared header for a given target and solve the relative path using the provided base dirs.
-  It is using the _jrl_install_headers and _jrl_install_headers_base_dirs properties set via jrl_target_headers().
+  It replays the per-call records stored as a JSON array in the _jrl_install_headers_json property set via jrl_target_headers().
   For a whole project, use jrl_install_headers() instead (which calls this function for each component, that contains targets).
   NOTE: this is done automatically in jrl_export_package() for all exported targets.
 

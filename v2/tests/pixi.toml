@@ -23,6 +23,7 @@ test_v1_api = { cmd = "pixi run test", cwd = "v1_api" }
 test_fetchcontent = { cmd = "pixi run test", cwd = "fetchcontent" }
 test_header_visibility = { cmd = "pixi run test", cwd = "header_visibility" }
 test_export_package_control = { cmd = "pixi run test", cwd = "export_package_control" }
+test_target_headers_relative = { cmd = "pixi run test", cwd = "target_headers_relative" }
 
 test = { depends-on = [
     "test_find_modules",
@@ -43,4 +44,5 @@ test = { depends-on = [
     "test_fetchcontent",
     "test_header_visibility",
     "test_export_package_control",
+    "test_target_headers_relative",
 ] }
