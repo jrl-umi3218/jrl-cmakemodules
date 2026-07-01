@@ -2334,7 +2334,7 @@ jrl_target_headers(
   Declare headers for target to be installed later.
   * This function does not target_include_directories(), only stores them for installation.
   * Only PUBLIC and INTERFACE will be installed.
-  * It populates the _jrl_install_headers and _jrl_install_headers_base_dirs properties of the target.
+  * Each call is recorded as an object in the _jrl_install_headers_json target property, replayed by jrl_target_install_headers().
   * In CMake 3.23, we will use FILE_SETS instead of this trick.
   cf: https://cmake.org/cmake/help/latest/command/target_sources.html#file-sets
 
@@ -2375,13 +2375,23 @@ function(jrl_target_headers target visibility)
         )
         return()
     endif()
-    set_property(TARGET ${target} APPEND PROPERTY _jrl_install_headers "${arg_HEADERS}")
-    set_property(
-        TARGET ${target}
-        APPEND
-        PROPERTY _jrl_install_headers_current_source_dir "${CMAKE_CURRENT_SOURCE_DIR}"
-    )
-    set_property(TARGET ${target} APPEND PROPERTY _jrl_install_headers_base_dirs "${arg_BASE_DIRS}")
+    # Record this call as an object in a JSON array on the target so each header keeps its own source dir and base dirs.
+    get_target_property(headers_json ${target} _jrl_install_headers_json)
+    if(NOT headers_json)
+        string(JSON headers_json SET "{}" "records" "[]")
+    endif()
+
+    # Save the information about this call in a json object.
+    set(record "{}")
+    string(JSON record SET "${record}" "source_dir" "\"${CMAKE_CURRENT_SOURCE_DIR}\"")
+    string(JSON record SET "${record}" "headers" "\"${arg_HEADERS}\"")
+    string(JSON record SET "${record}" "base_dirs" "\"${arg_BASE_DIRS}\"")
+
+    # Append the record to the "records" array.
+    string(JSON records_length LENGTH "${headers_json}" "records")
+    string(JSON headers_json SET "${headers_json}" "records" ${records_length} "${record}")
+
+    set_property(TARGET ${target} PROPERTY _jrl_install_headers_json "${headers_json}")
 endfunction()
 
 #[============================================================================[
@@ -2399,7 +2409,7 @@ jrl_target_install_headers(
 
 ### Description
   Install declared header for a given target and solve the relative path using the provided base dirs.
-  It is using the _jrl_install_headers and _jrl_install_headers_base_dirs properties set via jrl_target_headers().
+  It replays the per-call records stored as a JSON array in the _jrl_install_headers_json property set via jrl_target_headers().
   For a whole project, use jrl_install_headers() instead (which calls this function for each component, that contains targets).
   NOTE: this is done automatically in jrl_export_package() for all exported targets.
 
@@ -2430,23 +2440,31 @@ function(jrl_target_install_headers target)
         set(install_destination ${CMAKE_INSTALL_INCLUDEDIR})
     endif()
 
-    get_target_property(headers ${target} _jrl_install_headers)
-    get_target_property(current_source_dir ${target} _jrl_install_headers_current_source_dir)
-    get_target_property(base_dirs ${target} _jrl_install_headers_base_dirs)
+    get_target_property(headers_json ${target} _jrl_install_headers_json)
 
-    if(NOT headers)
+    if(NOT headers_json)
         message(DEBUG "No headers declared for target '${target}'. Skipping installation.")
         return()
     endif()
 
-    install(
-        CODE
-            "
+    # Replay each recorded call as its own install block (see jrl_target_headers).
+    string(JSON num_records LENGTH "${headers_json}" "records")
+    math(EXPR max_idx "${num_records} - 1")
+    foreach(record_index RANGE 0 ${max_idx})
+        string(JSON current_source_dir GET "${headers_json}" "records" ${record_index} "source_dir")
+        string(JSON headers GET "${headers_json}" "records" ${record_index} "headers")
+        string(JSON base_dirs GET "${headers_json}" "records" ${record_index} "base_dirs")
+
+        install(
+            CODE
+                "
 # Generated file - do not edit
-# This file contains the list of headers declared for target '${target}' with visibility '${visibility}'
+# Headers declared for target '${target}' (record ${record_index})
 set(headers \"${headers}\")
 set(base_dirs \"${base_dirs}\")
 foreach(header \${headers})
+    set(relative_header_path \"\")
+    set(header_dir \"\")
     foreach(base_dir \${base_dirs})
         string(FIND \${header} \${base_dir} pos)
         if(pos EQUAL 0)
@@ -2481,7 +2499,8 @@ foreach(header \${headers})
     endif()
 endforeach()
 "
-    )
+        )
+    endforeach()
 endfunction()
 
 #[============================================================================[

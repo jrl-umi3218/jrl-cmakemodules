@@ -15,5 +15,12 @@ target_include_directories(
 # Add the subdirectory where target headers are defined with relative paths
 add_subdirectory(my_subdir)
 
+# Check the generated JSON property from jrl_target_headers()
+get_target_property(headers_json mylib _jrl_install_headers_json)
+string(JSON src GET "${headers_json}" "records" 0 "source_dir")
+if(NOT src STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}/my_subdir")
+    message(FATAL_ERROR "Expected record source_dir to be my_subdir, got: ${src}")
+endif()
+
 jrl_add_export_component(NAME AllComponents TARGETS mylib)
 jrl_export_package()
