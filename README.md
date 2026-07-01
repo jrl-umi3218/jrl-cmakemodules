@@ -22,16 +22,16 @@ We provide a Python version management script to automate version synchronizatio
 
 To install `jrl-release` globally using `uv`:
 ```bash
-uv tool install jrl-cmakemodules-scripts --from git+https://github.com/jrl-umi3218/jrl-cmakemodules.git
+uv tool install jrl-cmakemodules-scripts --from git+https://github.com/jrl-umi3218/jrl-cmakemodules.git#subdirectory=v2/scripts
 ```
 
 Alternatively, if you have cloned the repository locally, run this from the repo root:
 ```bash
-uv tool install --editable .
+uv tool install --editable v2/scripts
 ```
 or with pip:
 ```bash
-pip install -e .
+pip install -e v2/scripts
 ```
 
 ### Usage
