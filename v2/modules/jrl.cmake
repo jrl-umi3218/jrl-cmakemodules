@@ -549,10 +549,16 @@ message(STATUS "jrl-cmakemodules commit: ${commit}")
 ```
 #]============================================================================]
 function(jrl_cmakemodules_get_commit output_var)
+    if(DEFINED CACHE{_JRL_COMMIT})
+        set(${output_var} "${_JRL_COMMIT}" PARENT_SCOPE)
+        return()
+    endif()
+
     find_program(GIT git QUIET)
 
     if(NOT GIT)
         message(DEBUG "Git executable not found, cannot get jrl-cmakemodules commit hash.")
+        set(_JRL_COMMIT "" CACHE INTERNAL "Cached commit hash of jrl-cmakemodules")
         return()
     endif()
 
@@ -567,10 +573,12 @@ function(jrl_cmakemodules_get_commit output_var)
     # It might not be a git repository (e.g. downloaded zip archive)
     if(NOT git_commit)
         message(DEBUG "Could not get jrl-cmakemodules commit hash.")
+        set(_JRL_COMMIT "" CACHE INTERNAL "Cached commit hash of jrl-cmakemodules")
         return()
     endif()
 
-    set(${output_var} ${git_commit} PARENT_SCOPE)
+    set(_JRL_COMMIT "${git_commit}" CACHE INTERNAL "Cached commit hash of jrl-cmakemodules")
+    set(${output_var} "${git_commit}" PARENT_SCOPE)
 endfunction()
 
 #[============================================================================[
