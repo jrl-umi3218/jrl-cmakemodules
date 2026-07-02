@@ -164,11 +164,17 @@ jrl_configure_default_build_type(RelWithDebInfo)
 jrl_configure_default_binary_dirs()
 ```
 
-**Type:** function
+**Type:** macro
 
 
 ### Description
-  Configures the default output directory for binaries and libraries.
+  Configures the default output directory for binaries and libraries to
+  `${CMAKE_BINARY_DIR}/bin` and `${CMAKE_BINARY_DIR}/lib`.
+  Implemented as a macro setting plain (non-cache) variables: it must be
+  called directly from a project's `CMakeLists.txt` (not wrapped in a
+  `function()`, or the variables it sets are lost), and it does not leak into
+  a project that embeds this one via `add_subdirectory()`/`FetchContent`.
+  Calling it from inside a `function()` throws an error.
 
 
 ### Arguments
@@ -279,17 +285,19 @@ jrl_configure_uninstall_target()
 jrl_configure_defaults()
 ```
 
-**Type:** function
+**Type:** macro
 
 
 ### Description
   Setup the default options for a project (opinionated defaults).
   * Default build type: Release
-  * Default binary directories: ${CMAKE_BINARY_DIR}/bin and ${CMAKE_BINARY_DIR}/lib (top-level, allows for superbuilds)
+  * Default binary directories: ${CMAKE_BINARY_DIR}/bin and ${CMAKE_BINARY_DIR}/lib
   * Default install directories: via GNUInstallDirs (bin, lib, include, etc.)
   * Default install prefix: ${CMAKE_BINARY_DIR}/install
   * Copy compile_commands.json to source directory for clangd support (only if the build directory is not <source_dir>/build)
   * Add a `uninstall` target to uninstall the project.
+
+  Must be called directly from a project's `CMakeLists.txt`, not wrapped in a `function()`. See `jrl_configure_default_binary_dirs`.
 
 
 ### Arguments
