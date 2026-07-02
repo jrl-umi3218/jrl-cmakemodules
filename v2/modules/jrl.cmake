@@ -613,11 +613,8 @@ function(jrl_print_banner)
 
     message(
         STATUS
-        "
-        🚧 Welcome to JRL CMake Modules v${v} ${commit_msg}
-        🚧 Loaded from: ${CMAKE_CURRENT_FUNCTION_LIST_FILE}
-        🚧 This v2 API is still under heavy development.
-        🚧 API may change without notice.
+        "JRL CMake Modules v${v} ${commit_msg}
+   Loaded from: ${CMAKE_CURRENT_FUNCTION_LIST_FILE}
     "
     )
 endfunction()
