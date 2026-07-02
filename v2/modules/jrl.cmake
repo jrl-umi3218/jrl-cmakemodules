@@ -676,11 +676,17 @@ endfunction()
 jrl_configure_default_binary_dirs()
 ```
 
-**Type:** function
+**Type:** macro
 
 
 ### Description
-  Configures the default output directory for binaries and libraries.
+  Configures the default output directory for binaries and libraries to
+  `${CMAKE_BINARY_DIR}/bin` and `${CMAKE_BINARY_DIR}/lib`.
+  Implemented as a macro setting plain (non-cache) variables: it must be
+  called directly from a project's `CMakeLists.txt` (not wrapped in a
+  `function()`, or the variables it sets are lost), and it does not leak into
+  a project that embeds this one via `add_subdirectory()`/`FetchContent`.
+  Calling it from inside a `function()` throws an error.
 
 
 ### Arguments
@@ -692,30 +698,30 @@ jrl_configure_default_binary_dirs()
 jrl_configure_default_binary_dirs()
 ```
 #]============================================================================]
-function(jrl_configure_default_binary_dirs)
+macro(jrl_configure_default_binary_dirs)
+    if(DEFINED CMAKE_CURRENT_FUNCTION)
+        message(
+            FATAL_ERROR
+            "jrl_configure_default_binary_dirs() must be called directly from a CMakeLists.txt, not from inside function '${CMAKE_CURRENT_FUNCTION}()'.
+            the output directories it sets would be lost when that function returns.
+            "
+        )
+    endif()
+
     # doc: https://cmake.org/cmake/help/v3.22/manual/cmake-buildsystem.7.html#id47
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin CACHE PATH "") # For Unix/MacOS executables, Windows: .exe, .dll, .pyd
-    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib CACHE PATH "") # for Unix/MacOS shared libraries .so/.dylib and Windows: .lib (import libraries for shared libraries)
-    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib CACHE PATH "") # For static libraries add_library(STATIC ...) .a and Windows: .lib
-    mark_as_advanced(
-        CMAKE_RUNTIME_OUTPUT_DIRECTORY
-        CMAKE_LIBRARY_OUTPUT_DIRECTORY
-        CMAKE_ARCHIVE_OUTPUT_DIRECTORY
-    )
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin) # For Unix/MacOS executables, Windows: .exe, .dll, .pyd
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib) # for Unix/MacOS shared libraries .so/.dylib and Windows: .lib (import libraries for shared libraries)
+    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib) # For static libraries add_library(STATIC ...) .a and Windows: .lib
     # /!\ MODULE libraries are dynamic libraries. On Windows, python modules are MODULE libraries, with pyd extension.
     #     They should be placed explicitely in lib/site-packages when building python extensions.
-    foreach(config Debug Release MinSizeRel RelWithDebInfo)
-        string(TOUPPER ${config} config)
-        set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${config} ${CMAKE_BINARY_DIR}/bin CACHE PATH "")
-        set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_${config} ${CMAKE_BINARY_DIR}/lib CACHE PATH "")
-        set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${config} ${CMAKE_BINARY_DIR}/lib CACHE PATH "")
-        mark_as_advanced(
-            CMAKE_RUNTIME_OUTPUT_DIRECTORY_${config}
-            CMAKE_LIBRARY_OUTPUT_DIRECTORY_${config}
-            CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${config}
-        )
+    foreach(_jrl_config Debug Release MinSizeRel RelWithDebInfo)
+        string(TOUPPER ${_jrl_config} _jrl_config)
+        set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${_jrl_config} ${CMAKE_BINARY_DIR}/bin)
+        set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_${_jrl_config} ${CMAKE_BINARY_DIR}/lib)
+        set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${_jrl_config} ${CMAKE_BINARY_DIR}/lib)
     endforeach()
-endfunction()
+    unset(_jrl_config)
+endmacro()
 
 #[============================================================================[
 # `jrl_target_set_output_directory`
@@ -901,17 +907,19 @@ endfunction()
 jrl_configure_defaults()
 ```
 
-**Type:** function
+**Type:** macro
 
 
 ### Description
   Setup the default options for a project (opinionated defaults).
   * Default build type: Release
-  * Default binary directories: ${CMAKE_BINARY_DIR}/bin and ${CMAKE_BINARY_DIR}/lib (top-level, allows for superbuilds)
+  * Default binary directories: ${CMAKE_BINARY_DIR}/bin and ${CMAKE_BINARY_DIR}/lib
   * Default install directories: via GNUInstallDirs (bin, lib, include, etc.)
   * Default install prefix: ${CMAKE_BINARY_DIR}/install
   * Copy compile_commands.json to source directory for clangd support (only if the build directory is not <source_dir>/build)
   * Add a `uninstall` target to uninstall the project.
+
+  Must be called directly from a project's `CMakeLists.txt`, not wrapped in a `function()`. See `jrl_configure_default_binary_dirs`.
 
 
 ### Arguments
@@ -923,14 +931,14 @@ jrl_configure_defaults()
 jrl_configure_defaults()
 ```
 #]============================================================================]
-function(jrl_configure_defaults)
+macro(jrl_configure_defaults)
     jrl_configure_default_build_type(Release)
     jrl_configure_default_binary_dirs()
     jrl_configure_default_install_dirs()
     jrl_configure_default_install_prefix(${CMAKE_BINARY_DIR}/install)
     jrl_configure_copy_compile_commands_in_source_dir()
     jrl_configure_uninstall_target()
-endfunction()
+endmacro()
 
 #[============================================================================[
 # `jrl_get_cxx_compiler_id`
