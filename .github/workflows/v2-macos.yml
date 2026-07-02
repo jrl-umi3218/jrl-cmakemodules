@@ -24,7 +24,7 @@ jobs:
             name: macOS 15 (Intel)
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Install dependencies (via brew)
         run: |
           brew install catch2 boost-python3 robin-map nanobind pytest numpy eigen libmatio simde suite-sparse
