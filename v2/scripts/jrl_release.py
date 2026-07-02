@@ -602,7 +602,7 @@ def get_current_version(checks: List[VersionExtractor]) -> Optional[str]:
             f"[{STYLE_ERROR}]Error: Multiple versions found: {', '.join(sorted(versions_found))}[/{STYLE_ERROR}]"
         )
         console.print(
-            f"[{STYLE_WARNING}]Please run --check-version first to resolve conflicts.[/{STYLE_WARNING}]"
+            f"[{STYLE_INFO}]Tip:[/{STYLE_INFO}] use --update-version X.Y.Z to set a single version across all files."
         )
         return None
     else:
@@ -1101,7 +1101,10 @@ def handle_check_version(checks: List[VersionExtractor], args) -> int:
     if errors:
         if len(versions_found) > 1:
             console.print(
-                f"\n[{STYLE_ERROR_STRONG}]FAILURE:[/{STYLE_ERROR_STRONG}] Found conflicting versions: {', '.join(sorted(versions_found))}"
+                f"\n[{STYLE_ERROR_STRONG}]MISMATCH:[/{STYLE_ERROR_STRONG}] Found conflicting versions: {', '.join(sorted(versions_found))}"
+            )
+            console.print(
+                f"[{STYLE_INFO}]Tip:[/{STYLE_INFO}] use --update-version X.Y.Z to set a single version across all files."
             )
         elif tag_check_failed:
             if not tag_format_is_valid:
