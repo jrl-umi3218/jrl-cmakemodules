@@ -199,6 +199,66 @@ def project_dir(
     return tmp_path
 
 
+@pytest.fixture
+def meta_package_dir(tmp_path):
+    """Create a meta-package repository: root aggregator + nested ROS packages."""
+    changelog_content = """# Changelog
+
+## [Unreleased]
+
+## [1.0.0] - 2024-01-15
+
+### Added
+- Initial release
+"""
+    (tmp_path / "CHANGELOG.md").write_text(changelog_content, encoding="utf-8")
+    (tmp_path / "CMakeLists.txt").write_text(
+        "cmake_minimum_required(VERSION 3.10)\n"
+        "project(meta_pkg VERSION 1.0.0)\n"
+        "add_subdirectory(pkg_a)\n"
+        "add_subdirectory(pkg_b)\n",
+        encoding="utf-8",
+    )
+
+    for package_name in ("pkg_a", "pkg_b"):
+        package_dir = tmp_path / package_name
+        package_dir.mkdir()
+        (package_dir / "package.xml").write_text(
+            f"""<?xml version="1.0"?>
+<package format="2">
+  <name>{package_name}</name>
+  <version>1.0.0</version>
+  <description>{package_name}</description>
+</package>
+""",
+            encoding="utf-8",
+        )
+        (package_dir / "CMakeLists.txt").write_text(
+            f"cmake_minimum_required(VERSION 3.10)\nproject({package_name} VERSION 1.0.0)\n",
+            encoding="utf-8",
+        )
+
+    return tmp_path
+
+
+@pytest.fixture
+def nested_packages_only_dir(tmp_path):
+    """Create a repository containing only nested ROS packages (no root files)."""
+    for package_name in ("pkg_a", "pkg_b"):
+        package_dir = tmp_path / package_name
+        package_dir.mkdir()
+        (package_dir / "package.xml").write_text(
+            f"<package><name>{package_name}</name><version>1.0.0</version></package>",
+            encoding="utf-8",
+        )
+        (package_dir / "CMakeLists.txt").write_text(
+            f"project({package_name} VERSION 1.0.0)\n",
+            encoding="utf-8",
+        )
+
+    return tmp_path
+
+
 # ============================================================================
 # TEST VersionExtractor Base Class
 # ============================================================================
@@ -1214,6 +1274,8 @@ def test_cli_check_version_mismatch(tmp_path, mocker, capsys):
         release.main()
 
     assert exc_info.value.code == 1
+    captured = capsys.readouterr()
+    assert "--update-version" in captured.out
 
 
 def test_cli_check_version_json_output(project_dir, mocker, capsys):
@@ -1251,6 +1313,57 @@ def test_cli_check_version_short_output(project_dir, mocker, capsys):
 
     captured = capsys.readouterr()
     assert captured.out.strip() == "1.0.0"
+
+
+def test_cli_check_version_short_output_nested_packages_only(
+    nested_packages_only_dir, mocker, capsys
+):
+    """--check-version --short works when only nested packages carry the version."""
+    mocker.patch(
+        "sys.argv",
+        [
+            "jrl_release.py",
+            "--root",
+            str(nested_packages_only_dir),
+            "--check-version",
+            "--short",
+        ],
+    )
+
+    with pytest.raises(SystemExit):
+        release.main()
+
+    captured = capsys.readouterr()
+    assert captured.out.strip() == "1.0.0"
+
+
+def test_cli_update_version_meta_package(meta_package_dir, mocker):
+    """--update-version updates the root and every nested ROS package."""
+    mocker.patch(
+        "sys.argv",
+        [
+            "jrl_release.py",
+            "--root",
+            str(meta_package_dir),
+            "--update-version",
+            "2.3.4",
+        ],
+    )
+
+    try:
+        release.main()
+    except SystemExit as e:
+        assert e.code == 0
+
+    for package_name in ("pkg_a", "pkg_b"):
+        package_xml = (meta_package_dir / package_name / "package.xml").read_text()
+        cmake_lists = (meta_package_dir / package_name / "CMakeLists.txt").read_text()
+        assert "<version>2.3.4</version>" in package_xml
+        assert "VERSION 2.3.4" in cmake_lists
+
+    # Root files updated too.
+    assert "VERSION 2.3.4" in (meta_package_dir / "CMakeLists.txt").read_text()
+    assert "## [2.3.4] - " in (meta_package_dir / "CHANGELOG.md").read_text()
 
 
 def test_cli_list_files(project_dir, mocker, capsys):
@@ -1427,7 +1540,7 @@ def test_cli_git_commit_and_tag(project_dir, mocker, capsys):
     mock_run.side_effect = [
         (True, ""),  # rev-parse --git-dir (commit check)
         (True, "M file.txt"),  # status --porcelain
-        (True, ""),  # add -u
+        (True, ""),  # add <files_to_stage>
         (True, "committed"),  # commit
         (True, ""),  # rev-parse --git-dir (tag check)
         (False, ""),  # rev-parse v1.0.1 (tag doesn't exist)
@@ -1529,6 +1642,206 @@ def test_list_version_files_display(project_dir):
         assert "pyproject.toml" in output
     finally:
         release.console = old_console
+
+
+# ============================================================================
+# TEST Meta-package Discovery
+# ============================================================================
+
+
+def test_discover_package_roots_meta_package(meta_package_dir):
+    """discover_package_roots returns only the nested package roots (root excluded)."""
+    roots = release.discover_package_roots(meta_package_dir)
+
+    assert roots == [
+        meta_package_dir / "pkg_a",
+        meta_package_dir / "pkg_b",
+    ]
+
+
+def test_discover_package_roots_single_package_excludes_root(project_dir):
+    """A single package at the root yields no *nested* roots."""
+    assert release.discover_package_roots(project_dir) == []
+
+
+def test_discover_package_roots_skips_hidden_dirs(tmp_path):
+    """package.xml under any hidden dir (.git, .pixi, .cache) is skipped, no git needed."""
+    for hidden in (".git", ".pixi", ".cache"):
+        pkg = tmp_path / hidden / "pkg_x"
+        pkg.mkdir(parents=True)
+        (pkg / "package.xml").write_text(
+            "<package><version>1.0.0</version></package>", encoding="utf-8"
+        )
+
+    real_pkg = tmp_path / "pkg_a"
+    real_pkg.mkdir()
+    (real_pkg / "package.xml").write_text(
+        "<package><version>1.0.0</version></package>", encoding="utf-8"
+    )
+
+    assert release.discover_package_roots(tmp_path) == [real_pkg]
+
+
+def test_discover_package_roots_hidden_check_relative_to_root(tmp_path):
+    """A hidden component *above* the root must not exclude everything below it."""
+    root = tmp_path / ".hidden_parent" / "repo"
+    pkg = root / "pkg_a"
+    pkg.mkdir(parents=True)
+    (pkg / "package.xml").write_text(
+        "<package><version>1.0.0</version></package>", encoding="utf-8"
+    )
+
+    assert release.discover_package_roots(root) == [pkg]
+
+
+def test_discover_package_roots_no_builtin_noise_filter(tmp_path):
+    """Without a .gitignore, non-hidden dirs like build/ are NOT skipped (user's call)."""
+    build_pkg = tmp_path / "build" / "pkg_x"
+    build_pkg.mkdir(parents=True)
+    (build_pkg / "package.xml").write_text(
+        "<package><version>1.0.0</version></package>", encoding="utf-8"
+    )
+
+    assert release.discover_package_roots(tmp_path) == [build_pkg]
+
+
+def _init_git_repo(root):
+    """Initialize a minimal git repo for check-ignore tests."""
+    for cmd in (
+        ["init"],
+        ["config", "user.email", "t@t"],
+        ["config", "user.name", "t"],
+    ):
+        subprocess.run(["git"] + cmd, cwd=root, check=True, capture_output=True)
+
+
+def test_discover_package_roots_respects_gitignore(tmp_path):
+    """A package.xml under a git-ignored directory is skipped during discovery."""
+    _init_git_repo(tmp_path)
+    (tmp_path / ".gitignore").write_text("vendored/\n", encoding="utf-8")
+
+    ignored_pkg = tmp_path / "vendored" / "dep"
+    ignored_pkg.mkdir(parents=True)
+    (ignored_pkg / "package.xml").write_text(
+        "<package><version>9.9.9</version></package>", encoding="utf-8"
+    )
+
+    real_pkg = tmp_path / "pkg_a"
+    real_pkg.mkdir()
+    (real_pkg / "package.xml").write_text(
+        "<package><version>1.0.0</version></package>", encoding="utf-8"
+    )
+
+    assert release.discover_package_roots(tmp_path) == [real_pkg]
+
+
+def test_discover_package_roots_skips_submodules(tmp_path):
+    """A package.xml inside a git submodule (per .gitmodules) is skipped."""
+    _init_git_repo(tmp_path)
+    (tmp_path / ".gitmodules").write_text(
+        '[submodule "dep"]\n\tpath = ext/dep\n\turl = https://example.com/dep.git\n',
+        encoding="utf-8",
+    )
+
+    submodule_pkg = tmp_path / "ext" / "dep"
+    submodule_pkg.mkdir(parents=True)
+    (submodule_pkg / "package.xml").write_text(
+        "<package><version>9.9.9</version></package>", encoding="utf-8"
+    )
+
+    real_pkg = tmp_path / "pkg_a"
+    real_pkg.mkdir()
+    (real_pkg / "package.xml").write_text(
+        "<package><version>1.0.0</version></package>", encoding="utf-8"
+    )
+
+    assert release.discover_package_roots(tmp_path) == [real_pkg]
+
+
+def test_git_submodule_dirs_empty_without_gitmodules(tmp_path):
+    """No .gitmodules (or no repo) yields no submodule dirs."""
+    assert release.git_submodule_dirs(tmp_path) == set()
+    _init_git_repo(tmp_path)
+    assert release.git_submodule_dirs(tmp_path) == set()
+
+
+def test_drop_git_ignored_noop_without_git(tmp_path):
+    """Outside a git repo, no paths are dropped."""
+    pkg = tmp_path / "pkg_a"
+    pkg.mkdir()
+    xml = pkg / "package.xml"
+    xml.write_text("<package><version>1.0.0</version></package>", encoding="utf-8")
+
+    assert release.drop_git_ignored(tmp_path, [xml]) == [xml]
+
+
+def test_collect_version_checks_single_package_unchanged(project_dir):
+    """Single-package repos yield exactly the seven base root checks."""
+    checks = release.collect_version_checks(project_dir)
+    check_paths = {check.file_path for check in checks}
+
+    assert check_paths == {
+        project_dir / "package.xml",
+        project_dir / "pyproject.toml",
+        project_dir / "CHANGELOG.md",
+        project_dir / "pixi.toml",
+        project_dir / "CITATION.cff",
+        project_dir / "CMakeLists.txt",
+        project_dir / "debian/changelog",
+        project_dir / "conanfile.py",
+    }
+
+
+def test_collect_version_checks_meta_package(meta_package_dir):
+    """Version checks are collected from the root and every nested package."""
+    checks = release.collect_version_checks(meta_package_dir)
+    check_paths = {check.file_path for check in checks}
+
+    # Root metadata + root CMakeLists (root CMake is version-managed).
+    assert meta_package_dir / "CHANGELOG.md" in check_paths
+    assert meta_package_dir / "CMakeLists.txt" in check_paths
+    # Nested packages.
+    assert meta_package_dir / "pkg_a" / "package.xml" in check_paths
+    assert meta_package_dir / "pkg_a" / "CMakeLists.txt" in check_paths
+    assert meta_package_dir / "pkg_b" / "package.xml" in check_paths
+    assert meta_package_dir / "pkg_b" / "CMakeLists.txt" in check_paths
+
+
+def test_collect_version_checks_labels_are_root_relative(meta_package_dir):
+    """Nested files with identical basenames get distinct, root-relative labels."""
+    checks = release.collect_version_checks(meta_package_dir)
+    labels = {check.label for check in checks}
+
+    # Root files keep their bare basename.
+    assert "CMakeLists.txt" in labels
+    # Nested files are disambiguated by their relative path.
+    assert str(Path("pkg_a") / "package.xml") in labels
+    assert str(Path("pkg_b") / "package.xml") in labels
+    assert str(Path("pkg_a") / "CMakeLists.txt") in labels
+
+
+def test_create_backups_nested_no_collision(tmp_path):
+    """Nested files sharing a basename get distinct backups (no clobbering)."""
+    (tmp_path / "pkg_a").mkdir()
+    (tmp_path / "pkg_b").mkdir()
+    a = tmp_path / "pkg_a" / "package.xml"
+    b = tmp_path / "pkg_b" / "package.xml"
+    a.write_text("<version>1.0.0</version>", encoding="utf-8")
+    b.write_text("<version>2.0.0</version>", encoding="utf-8")
+
+    backups = release.create_backups([a, b])
+
+    # Both originals are backed up to distinct files.
+    assert len(backups) == 2
+    assert len(set(backups.values())) == 2
+
+    # Corrupt the originals, then restore and confirm each got its own content.
+    a.write_text("CORRUPT", encoding="utf-8")
+    b.write_text("CORRUPT", encoding="utf-8")
+    release.restore_backups(backups)
+
+    assert a.read_text() == "<version>1.0.0</version>"
+    assert b.read_text() == "<version>2.0.0</version>"
 
 
 # ============================================================================

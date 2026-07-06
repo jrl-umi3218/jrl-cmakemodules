@@ -73,10 +73,23 @@ uv run --no-project jrl_release.py --bump patch --git-commit --git-tag
 | `CMakeLists.txt` | `project(... VERSION X.Y.Z ...)` |
 
 > Requires `pixi` CLI if `pixi.lock` exists in the project root.
+
+## Meta-packages
+
+ROS meta-packages are handled automatically: every nested directory with a
+`package.xml` is treated like the repository root — the full set of
+supported files (`package.xml`, `pyproject.toml`, `CHANGELOG.md`, `pixi.toml`,
+`CITATION.cff`, `CMakeLists.txt`, `debian/changelog`) is checked there too,
+skipping any that don't exist in that nested directory.
+Discovery skips hidden directories (`.git`, `.pixi`, `.venv`, …), git submodules,
+and — honoring your `.gitignore` via `git check-ignore` — ignored dirs like
+`build/` or `dist/`. All discovered files must agree on a single
+version to bump version.
 """
 
 import sys
 import re
+import os
 import argparse
 import datetime
 import json
@@ -132,6 +145,8 @@ class VersionNotPresent(Exception):
 class VersionExtractor(ABC):
     def __init__(self, file_path: Path):
         self.file_path = file_path
+        # Display label; discovery overrides it with a root-relative path.
+        self.label = file_path.name
 
     @abstractmethod
     def get_version(self) -> str:
@@ -540,6 +555,204 @@ class ChangelogVersionExtractor(VersionExtractor):
         )
 
 
+def git_ignored_abs_dirs(repo_dir: Path) -> set:
+    """Absolute paths of git-ignored directories for the repo containing ``repo_dir``.
+
+    Runs ``git ls-files --directory`` from ``repo_dir`` so git resolves the
+    enclosing repository itself; paths are reported relative to ``repo_dir`` and
+    resolved to absolute Paths. Empty when ``repo_dir`` is not inside a repo.
+
+    Used to prune ignored dirs (e.g. build/, output/) during discovery instead
+    of walking into them.
+    """
+    try:
+        result = subprocess.run(
+            [
+                "git",
+                "ls-files",
+                "--others",
+                "--ignored",
+                "--exclude-standard",
+                "--directory",
+                "-z",
+            ],
+            cwd=repo_dir,
+            capture_output=True,
+            text=True,
+        )
+    except (FileNotFoundError, OSError):
+        return set()
+
+    if result.returncode != 0:
+        return set()
+
+    return {
+        (repo_dir / entry.rstrip("/")).resolve()
+        for entry in result.stdout.split("\0")
+        if entry
+    }
+
+
+def drop_git_ignored(root_dir: Path, paths: List[Path]) -> List[Path]:
+    """Drop paths that git ignores, honoring each path's own enclosing repo.
+
+    Candidates may live in independent nested git repositories even when
+    ``root_dir`` is not itself a repo (e.g. a plain folder holding several
+    checkouts). Anchoring a single ``git check-ignore`` at ``root_dir`` would
+    then bail out entirely and leak ignored build trees like ``output/`` into
+    the results. Instead, resolve the repository that actually contains each
+    candidate and run ``git check-ignore`` there. Paths outside any repo are
+    always kept.
+    """
+    if not paths:
+        return paths
+
+    # Group candidates by the git repo top-level that contains them.
+    groups: Dict[Path, List[Path]] = {}
+    for p in paths:
+        ok, top = run_git_command(["rev-parse", "--show-toplevel"], p.parent)
+        if not ok or not top:
+            continue  # not inside any repo -> always kept
+        groups.setdefault(Path(top).resolve(), []).append(p)
+
+    ignored: set = set()
+    for top_path, repo_paths in groups.items():
+        rel = [str(p.resolve().relative_to(top_path)) for p in repo_paths]
+        try:
+            result = subprocess.run(
+                ["git", "check-ignore", "-z", "--stdin"],
+                cwd=top_path,
+                input="\0".join(rel) + "\0",
+                capture_output=True,
+                text=True,
+            )
+        except (FileNotFoundError, OSError):
+            continue  # keep this repo's candidates on git failure
+
+        # 0 = some ignored, 1 = none ignored; anything else is an error, keep all.
+        if result.returncode not in (0, 1):
+            continue
+
+        ignored_rel = {chunk for chunk in result.stdout.split("\0") if chunk}
+        ignored.update(p for p, r in zip(repo_paths, rel) if r in ignored_rel)
+
+    return [p for p in paths if p not in ignored]
+
+
+def git_submodule_dirs(root_dir: Path) -> set:
+    """Absolute paths of git submodule working trees (empty outside a git repo)."""
+    ok, top = run_git_command(["rev-parse", "--show-toplevel"], root_dir)
+    if not ok or not top:
+        return set()
+    top = Path(top)
+
+    ok, out = run_git_command(
+        ["config", "--file", ".gitmodules", "-z", "--get-regexp", "path"], top
+    )
+    if not ok or not out:
+        return set()
+
+    dirs = set()
+    for record in out.split("\0"):
+        key, _, value = record.partition("\n")
+        if key.endswith(".path") and value:
+            dirs.add((top / value).resolve())
+    return dirs
+
+
+def drop_submodules(root_dir: Path, paths: List[Path]) -> List[Path]:
+    """Drop paths inside git submodules (they are versioned independently)."""
+    if not paths:
+        return paths
+    subdirs = git_submodule_dirs(root_dir)
+    if not subdirs:
+        return paths
+    kept = []
+    for p in paths:
+        resolved = p.resolve()
+        if any(resolved == s or s in resolved.parents for s in subdirs):
+            continue
+        kept.append(p)
+    return kept
+
+
+def discover_package_roots(root_dir: Path) -> List[Path]:
+    """Discover nested ROS package roots (dirs with a package.xml, root excluded).
+
+    Skips hidden directories (.git, .pixi, ...), git submodules, and — inside a
+    git repo — anything git ignores (.gitignore, global excludes), like `fd`.
+
+    Hidden and ignored directories are pruned during the walk so we never
+    descend into large trees like `.venv` or `build/`. Nested repositories are
+    handled too: each one's ignore rules are learned when its top-level is
+    reached, so an ignored `output/` build tree is pruned even when `root_dir`
+    itself is not a git repo.
+    """
+    # Seed from root_dir's own repo (covers root being, or living inside, a repo).
+    ignored_abs = git_ignored_abs_dirs(root_dir)
+    candidates = []
+    for dirpath, dirnames, filenames in os.walk(root_dir):
+        current = Path(dirpath)
+        # A nested repo brings its own .gitignore; learn what it ignores before
+        # descending, so its build trees are pruned regardless of root_dir.
+        if current != root_dir and (current / ".git").exists():
+            ignored_abs |= git_ignored_abs_dirs(current)
+        kept = []
+        for d in dirnames:
+            if d.startswith("."):
+                continue
+            if ignored_abs and (current / d).resolve() in ignored_abs:
+                continue
+            kept.append(d)
+        dirnames[:] = kept
+        if current != root_dir and "package.xml" in filenames:
+            candidates.append(current / "package.xml")
+    candidates = drop_git_ignored(root_dir, candidates)
+    candidates = drop_submodules(root_dir, candidates)
+    return sorted({package_xml.parent for package_xml in candidates})
+
+
+def build_root_checks(root_dir: Path) -> List[VersionExtractor]:
+    """Build the version extractors tracked at the repository root."""
+    return [
+        XmlVersionExtractor(root_dir / "package.xml"),
+        TomlVersionExtractor(root_dir / "pyproject.toml", ["project", "version"]),
+        ChangelogVersionExtractor(root_dir / "CHANGELOG.md", r""),
+        TomlVersionExtractor(root_dir / "pixi.toml", ["workspace", "version"]),
+        YamlVersionExtractor(root_dir / "CITATION.cff", ["version"]),
+        CMakeListsVersionExtractor(root_dir / "CMakeLists.txt"),
+        DebianChangelogVersionExtractor(root_dir / "debian/changelog"),
+        ConanfileVersionExtractor(root_dir / "conanfile.py"),
+    ]
+
+
+def collect_version_checks(root_dir: Path) -> List[VersionExtractor]:
+    """Root checks plus the same set of checks for each nested package.
+
+    Each nested package is treated exactly like the repository root: the same
+    file/key combinations are checked, and any that don't exist in the nested
+    package directory are simply skipped (VersionExtractor.check_file_exists()).
+    """
+    checks = list(build_root_checks(root_dir))
+    seen_paths = {check.file_path for check in checks}
+
+    for package_root in discover_package_roots(root_dir):
+        for check in build_root_checks(package_root):
+            if check.file_path in seen_paths:
+                continue
+            checks.append(check)
+            seen_paths.add(check.file_path)
+
+    # Label nested files by their relative path so identical basenames stay distinct.
+    for check in checks:
+        try:
+            check.label = str(check.file_path.relative_to(root_dir))
+        except ValueError:
+            check.label = check.file_path.name
+
+    return checks
+
+
 def validate_semver(version: str) -> str:
     try:
         parsed = parse_version(version)
@@ -572,22 +785,25 @@ def bump_version(version: str, bump_type: str) -> str:
         raise ValueError(f"Invalid bump type: {bump_type}")
 
 
-def get_current_version(checks: List[VersionExtractor]) -> Optional[str]:
-    """Get the current consensus version from all files."""
-    versions_found = set()
-    errors = []
-
+def collect_versions(
+    checks: List[VersionExtractor],
+) -> Tuple[set, List[str]]:
+    """Collect distinct versions and parse errors across all files. No console output."""
+    versions: set = set()
+    errors: List[str] = []
     for check in checks:
         if check.check_file_exists():
             try:
-                version = check.get_version()
-                versions_found.add(version)
+                versions.add(check.get_version())
             except VersionNotPresent:
                 pass  # file exists but has no version configured; skip
             except Exception as e:
-                errors.append(f"{check.name}: {e}")
+                errors.append(f"{check.label}: {e}")
+    return versions, errors
 
-    # Report parsing errors
+
+def report_version_problems(versions: set, errors: List[str]) -> None:
+    """Print parse warnings and version-mismatch errors from collect_versions()."""
     if errors:
         console.print(
             f"[{STYLE_WARNING}]Warning: Failed to parse version from some files:[/{STYLE_WARNING}]"
@@ -595,21 +811,25 @@ def get_current_version(checks: List[VersionExtractor]) -> Optional[str]:
         for error in errors:
             console.print(f"  [{STYLE_MUTED}]• {error}[/{STYLE_MUTED}]")
 
-    if len(versions_found) == 1:
-        return list(versions_found)[0]
-    elif len(versions_found) > 1:
-        console.print(
-            f"[{STYLE_ERROR}]Error: Multiple versions found: {', '.join(sorted(versions_found))}[/{STYLE_ERROR}]"
-        )
+    if len(versions) > 1:
         console.print(
             f"[{STYLE_INFO}]Tip:[/{STYLE_INFO}] use --update-version X.Y.Z to set a single version across all files."
         )
-        return None
-    else:
+        console.print(
+            f"[{STYLE_ERROR}]Error: version mismatch — multiple versions found: "
+            f"{', '.join(sorted(versions))}[/{STYLE_ERROR}]"
+        )
+    elif not versions:
         console.print(
             f"[{STYLE_ERROR}]Error: No version found in any files.[/{STYLE_ERROR}]"
         )
-        return None
+
+
+def get_current_version(checks: List[VersionExtractor]) -> Optional[str]:
+    """Consensus version across all files, reporting any problems."""
+    versions, errors = collect_versions(checks)
+    report_version_problems(versions, errors)
+    return next(iter(versions)) if len(versions) == 1 else None
 
 
 def infer_change_type(
@@ -927,9 +1147,10 @@ def create_backups(file_paths: List[Path]) -> Dict[Path, Path]:
     backups = {}
     temp_dir = Path(tempfile.mkdtemp(prefix="release_backup_"))
 
-    for file_path in file_paths:
+    # Index-prefix the name so files sharing a basename don't collide.
+    for index, file_path in enumerate(file_paths):
         if file_path.exists():
-            backup_path = temp_dir / file_path.name
+            backup_path = temp_dir / f"{index:04d}_{file_path.name}"
             shutil.copy2(file_path, backup_path)
             backups[file_path] = backup_path
 
@@ -984,16 +1205,16 @@ def list_version_files(checks: List[VersionExtractor]) -> None:
             else f"[{STYLE_ERROR}]✗[/{STYLE_ERROR}]"
         )
         file_type = check.__class__.__name__.replace("VersionExtractor", "")
-        table.add_row(check.name, str(check.file_path), exists, file_type)
+        table.add_row(check.label, str(check.file_path), exists, file_type)
 
     console.print(table)
     sys.exit(0)
 
 
-def handle_check_version(checks: List[VersionExtractor], args) -> int:
+def handle_check_version(checks: List[VersionExtractor], args) -> bool:
     """Handle the --check-version command.
 
-    Returns the exit code.
+    Returns True if all files agree on one version, False otherwise.
     """
     results = []
     versions_found = set()
@@ -1006,7 +1227,7 @@ def handle_check_version(checks: List[VersionExtractor], args) -> int:
 
     for check in checks:
         result = {
-            "file": check.name,
+            "file": check.label,
             "version": None,
             "status": "Unknown",
             "message": "",
@@ -1039,13 +1260,14 @@ def handle_check_version(checks: List[VersionExtractor], args) -> int:
         consensus_version = "MISMATCH"
 
     if args.output_format == "json":
+        consistent = not errors and len(versions_found) == 1
         out_payload = {
             "consensus_version": consensus_version,
             "files": results,
-            "consistent": not errors and len(versions_found) == 1,
+            "consistent": consistent,
         }
         print(json.dumps(out_payload, indent=2))
-        return 1 if errors else 0
+        return consistent
 
     # Standard Rich table output
     table = Table(title="Version Check Summary", box=box.ROUNDED)
@@ -1074,7 +1296,7 @@ def handle_check_version(checks: List[VersionExtractor], args) -> int:
             ):
                 version_display = f"[{STYLE_SUCCESS}]{res['version']}[/{STYLE_SUCCESS}]"
             elif consensus_version == "MISMATCH":
-                version_display = f"[{STYLE_WARNING}]{res['version']}[/{STYLE_WARNING}]"
+                version_display = f"[{STYLE_ERROR}]{res['version']}[/{STYLE_ERROR}]"
 
         table.add_row(res["file"], version_display, status_style, res["message"])
 
@@ -1101,10 +1323,10 @@ def handle_check_version(checks: List[VersionExtractor], args) -> int:
     if errors:
         if len(versions_found) > 1:
             console.print(
-                f"\n[{STYLE_ERROR_STRONG}]MISMATCH:[/{STYLE_ERROR_STRONG}] Found conflicting versions: {', '.join(sorted(versions_found))}"
+                f"\n[{STYLE_INFO}]Tip:[/{STYLE_INFO}] use --update-version X.Y.Z to set a single version across all files."
             )
             console.print(
-                f"[{STYLE_INFO}]Tip:[/{STYLE_INFO}] use --update-version X.Y.Z to set a single version across all files."
+                f"[{STYLE_ERROR_STRONG}]FAILURE:[/{STYLE_ERROR_STRONG}] version mismatch — conflicting versions: {', '.join(sorted(versions_found))}"
             )
         elif tag_check_failed:
             if not tag_format_is_valid:
@@ -1117,20 +1339,20 @@ def handle_check_version(checks: List[VersionExtractor], args) -> int:
                 )
         else:
             console.print(
-                f"\n[{STYLE_ERROR_STRONG}]FAILURE:[/{STYLE_ERROR_STRONG}] Errors encountered (parsing errors)."
+                f"\n[{STYLE_ERROR_STRONG}]FAILURE:[/{STYLE_ERROR_STRONG}] parsing errors encountered."
             )
-        return 1
+        return False
     elif not versions_found:
         console.print(
             f"\n[{STYLE_ERROR_STRONG}]FAILURE:[/{STYLE_ERROR_STRONG}] No version files found in {args.root}."
         )
-        return 1
+        return False
     else:
         if not args.short:
             console.print(
                 f"\n[{STYLE_SUCCESS_STRONG}]SUCCESS:[/{STYLE_SUCCESS_STRONG}] All files match version [{STYLE_SUCCESS}]{consensus_version}[/{STYLE_SUCCESS}]."
             )
-        return 0
+        return True
 
 
 def perform_version_updates(
@@ -1153,7 +1375,7 @@ def perform_version_updates(
             try:
                 if dry_run:
                     curr = check.get_version()
-                    dry_run_rows.append((check.name, curr, target_version))
+                    dry_run_rows.append((check.label, curr, target_version))
                 else:
                     try:
                         old_version = check.get_version()
@@ -1162,20 +1384,20 @@ def perform_version_updates(
                     except Exception:
                         old_version = "?"
                     check.update_version(target_version)
-                    dry_run_rows.append((check.name, old_version, target_version))
+                    dry_run_rows.append((check.label, old_version, target_version))
                     line = Text()
-                    line.append(f"  {check.name:<22}", style="cyan")
+                    line.append(f"  {check.label:<28}", style="cyan")
                     line.append(old_version, style=STYLE_OLD_VALUE)
                     line.append("  →  ", style="dim")
                     line.append(target_version, style=STYLE_NEW_VALUE)
                     console.print(line)
-                updated_files.append(check.name)
+                updated_files.append(check.label)
                 updated_file_paths.append(str(check.file_path))
             except VersionNotPresent:
                 pass  # file exists but has no version configured; skip
             except Exception as e:
                 console.print(
-                    f"[{STYLE_ERROR}]Failed to update {check.name}: {e}[/{STYLE_ERROR}]"
+                    f"[{STYLE_ERROR}]Failed to update {check.label}: {e}[/{STYLE_ERROR}]"
                 )
                 if not dry_run:
                     failed = True
@@ -1198,14 +1420,14 @@ def show_dry_run_panel(
     console.print(f"  [dim]{'─' * 44}[/dim]")
     for name, old, new in dry_run_rows:
         line = Text()
-        line.append(f"  {name:<22}", style="cyan")
+        line.append(f"  {name:<28}", style="cyan")
         line.append(old, style=STYLE_OLD_VALUE)
         line.append("  →  ", style="dim")
         line.append(new, style=STYLE_NEW_VALUE)
         console.print(line)
     if pixi_lock_would_update:
         line = Text()
-        line.append(f"  {'pixi.lock':<22}", style="cyan")
+        line.append(f"  {'pixi.lock':<28}", style="cyan")
         line.append("regenerated via pixi list", style="dim")
         console.print(line)
 
@@ -1224,7 +1446,7 @@ def show_result_panel(
     """Display a polished summary of completed version updates."""
     if pixi_lock_updated:
         line = Text()
-        line.append(f"  {'pixi.lock':<22}", style="cyan")
+        line.append(f"  {'pixi.lock':<28}", style="cyan")
         line.append("regenerated via pixi list", style="dim")
         console.print(line)
     console.print()
@@ -1382,16 +1604,7 @@ def main():
             )
             sys.exit(1)
 
-    checks: List[VersionExtractor] = [
-        XmlVersionExtractor(root_dir / "package.xml"),
-        TomlVersionExtractor(root_dir / "pyproject.toml", ["project", "version"]),
-        ChangelogVersionExtractor(root_dir / "CHANGELOG.md", r""),
-        TomlVersionExtractor(root_dir / "pixi.toml", ["workspace", "version"]),
-        YamlVersionExtractor(root_dir / "CITATION.cff", ["version"]),
-        CMakeListsVersionExtractor(root_dir / "CMakeLists.txt"),
-        DebianChangelogVersionExtractor(root_dir / "debian/changelog"),
-        ConanfileVersionExtractor(root_dir / "conanfile.py"),
-    ]
+    checks: List[VersionExtractor] = collect_version_checks(root_dir)
 
     if args.list_files:
         if args.output_format == "json":
@@ -1399,7 +1612,7 @@ def main():
             for check in checks:
                 files_list.append(
                     {
-                        "name": check.name,
+                        "name": check.label,
                         "path": str(check.file_path),
                         "exists": check.check_file_exists(),
                         "type": check.__class__.__name__.replace(
@@ -1413,14 +1626,15 @@ def main():
         sys.exit(0)
 
     if args.check_version:
-        sys.exit(handle_check_version(checks, args))
+        sys.exit(0 if handle_check_version(checks, args) else 1)
 
     current_version = None
     new_version_str = None
 
     if args.update_version:
         new_version_str = args.update_version
-        current_version = get_current_version(checks)
+        versions, _ = collect_versions(checks)
+        current_version = next(iter(versions)) if len(versions) == 1 else None
         if not args.dry_run:
             console.print(
                 f"[{STYLE_INFO}]Updating versions to {new_version_str} in {root_dir}...[/{STYLE_INFO}]"
