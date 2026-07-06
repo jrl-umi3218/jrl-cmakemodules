@@ -77,7 +77,7 @@ macro(SPHINX_SETUP)
 
       if(INSTALL_DOCUMENTATION)
         install(
-          CODE "EXECUTE_PROCESS(COMMAND ${CMAKE_MAKE_PROGRAM} sphinx-doc)"
+          CODE "EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} --build ${PROJECT_BINARY_DIR} --target sphinx-doc)"
         )
       endif(INSTALL_DOCUMENTATION)
     else() # UNIX
@@ -97,7 +97,7 @@ macro(SPHINX_SETUP)
 
       if(INSTALL_DOCUMENTATION)
         install(
-          CODE "EXECUTE_PROCESS(COMMAND ${CMAKE_MAKE_PROGRAM} sphinx-doc)"
+          CODE "EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} --build ${PROJECT_BINARY_DIR} --target sphinx-doc)"
         )
       endif(INSTALL_DOCUMENTATION)
     endif(MSVC)

@@ -589,7 +589,7 @@ macro(_SETUP_PROJECT_DOCUMENTATION)
       if(INSTALL_DOCUMENTATION)
         install(
           CODE
-            "EXECUTE_PROCESS(COMMAND ${CMAKE_MAKE_PROGRAM} ${PROJECT_NAME}-doc)"
+            "EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} --build ${PROJECT_BINARY_DIR} --target ${PROJECT_NAME}-doc)"
         )
       endif(INSTALL_DOCUMENTATION)
     endif(MSVC)
