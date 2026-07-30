@@ -536,6 +536,8 @@ class ChangelogVersionExtractor(VersionExtractor):
 
         today = datetime.date.today().isoformat()
 
+        # Insert new release section
+
         pattern = r"^## \[Unreleased\]"
         if not re.search(pattern, content, re.MULTILINE):
             console.print(
@@ -547,12 +549,23 @@ class ChangelogVersionExtractor(VersionExtractor):
 
         new_content = re.sub(pattern, replacement, content, count=1, flags=re.MULTILINE)
 
+        # Add new release link and update unreleased link
+
+        pattern = r"^\[Unreleased\]: (https://.+)/(v.+)\.\.\.HEAD$"
+
+        if match := re.search(pattern, new_content, re.MULTILINE):
+            url, old_version = match.groups()
+            replacement = f"[Unreleased]: {url}/v{new_version}...HEAD\n[{new_version}]: {url}/{old_version}...v{new_version}"
+            new_content = re.sub(pattern, replacement, new_content, flags=re.MULTILINE)
+        else:
+            console.print(
+                f"[{STYLE_WARNING}]Warning: Link definitions in CHANGELOG.md can't be updated automatically.[/{STYLE_WARNING}]"
+            )
+
         with open(self.file_path, "w", encoding="utf-8") as f:
             f.write(new_content)
 
-        console.print(
-            f"[{STYLE_INFO}]Updated CHANGELOG.md header. Note: Link definitions at the bottom were not updated automatically.[/{STYLE_INFO}]"
-        )
+        console.print(f"[{STYLE_INFO}]Updated CHANGELOG.md.[/{STYLE_INFO}]")
 
 
 def git_ignored_abs_dirs(repo_dir: Path) -> set:

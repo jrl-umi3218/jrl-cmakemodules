@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - jrl_release: add `ConanFileVersionExtractor` by @arntanguy
 - jrl_release: add `--check-version --check-tag vX.Y.Z` by @arntanguy
 - jrl_release: add `DebianChangelogVersionExtractor` by @arntanguy
+- jrl_release: update links `ChangelogVersionExtractor` by @nim65s
 
 ## [2.1.0] - 2026-07-03
 
