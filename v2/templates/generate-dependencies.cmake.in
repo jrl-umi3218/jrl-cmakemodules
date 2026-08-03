@@ -5,6 +5,30 @@ cmake_minimum_required(VERSION 3.22)
 
 include("${CMAKE_CURRENT_LIST_DIR}/imported-libraries.cmake")
 
+# One file per target and per configuration, each appending to all_interface_link_libraries.
+# A consumer may build in any configuration, so take the union.
+set(interface_link_libraries_files "@INTERFACE_LINK_LIBRARIES_FILES@")
+set(all_interface_link_libraries "")
+foreach(interface_link_libraries_file IN LISTS interface_link_libraries_files)
+    include("${CMAKE_CURRENT_LIST_DIR}/${interface_link_libraries_file}")
+endforeach()
+list(REMOVE_DUPLICATES all_interface_link_libraries)
+
+# $<LINK_LIBRARY:feature,lib...> could not be evaluated, its parameters were kept as one
+# marked item. Split them back and drop the feature name, which is not a library.
+set(expanded_interface_link_libraries "")
+foreach(ll IN LISTS all_interface_link_libraries)
+    string(STRIP "${ll}" ll)
+    string(FIND "${ll}" "@LINK_LIBRARY_MARKER@" marker_position)
+    if(marker_position EQUAL 0)
+        string(REPLACE "@LINK_LIBRARY_MARKER@" "" ll "${ll}")
+        string(REPLACE "," ";" ll "${ll}")
+        list(POP_FRONT ll)
+    endif()
+    list(APPEND expanded_interface_link_libraries ${ll})
+endforeach()
+set(all_interface_link_libraries ${expanded_interface_link_libraries})
+
 message(DEBUG "[@PROJECT_NAME@::${component_name}] Generating dependencies.cmake")
 
 # Check if the required variables are defined
@@ -15,11 +39,8 @@ if(NOT DEFINED all_exported_targets)
     )
 endif()
 
-if(NOT DEFINED all_interface_link_libraries)
-    message(
-        FATAL_ERROR
-        "all_interface_link_libraries variable is not defined in @IMPORTED_LIBRARIES_TO_EXPORT_FILE@."
-    )
+if(NOT interface_link_libraries_files)
+    message(FATAL_ERROR "No interface-link-libraries file listed for this component.")
 endif()
 
 if(NOT DEFINED package_dependencies_json_content)
@@ -46,6 +67,10 @@ set(fd "")
 set(unknwon_libraries "")
 set(missing_expected_dep_indices "")
 foreach(ll IN LISTS all_interface_link_libraries)
+    # A quoted multi-line expression keeps its line breaks: "$<INSTALL_INTERFACE:\n Foo\n>"
+    # evaluates to "\n Foo\n". A link library has no surrounding whitespace, see CMP0004.
+    string(STRIP "${ll}" ll)
+
     if(NOT ll)
         continue()
     endif()
