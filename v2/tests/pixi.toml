@@ -25,6 +25,8 @@ test_header_visibility = { cmd = "pixi run test", cwd = "header_visibility" }
 test_export_package_control = { cmd = "pixi run test", cwd = "export_package_control" }
 test_target_headers_relative = { cmd = "pixi run test", cwd = "target_headers_relative" }
 test_output_dirs = { cmd = "pixi run test", cwd = "output_dirs" }
+test_link_with_build_interface = { cmd = "pixi run test", cwd = "link_with_build_interface" }
+test_find_package_build_interface = { cmd = "pixi run test", cwd = "find_package_build_interface" }
 
 test = { depends-on = [
     "test_find_modules",
@@ -47,4 +49,6 @@ test = { depends-on = [
     "test_export_package_control",
     "test_target_headers_relative",
     "test_output_dirs",
+    "test_link_with_build_interface",
+    "test_find_package_build_interface",
 ] }
