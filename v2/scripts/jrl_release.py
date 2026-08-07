@@ -57,6 +57,10 @@ uv run --no-project jrl_release.py --bump patch --git-commit --git-tag
 | `--git-tag [NAME]` | Create a tag. Optional name (`{version}` placeholder). |
 | `--git-tag-message <MSG>` | Tag annotation (`{version}` placeholder). |
 | `--sign-tag` | GPG-sign the tag (`git tag -s`). Needs a configured signing key. |
+| `--push-tag` | Push the tag to the main repository. Only works with github for now. |
+| `--git-archive` | Create a .tar.gz archive. |
+| `--sign-archive` | GPG-sign the archive. Needs a configured signing key. |
+| `--gh-release` | Create Github release. Needs a configured gh cli. |
 
 **Git defaults**: commit `chore: bump version to {version}`, tag `v{version}`, tag message `Release version {version}`.
 
@@ -64,13 +68,15 @@ uv run --no-project jrl_release.py --bump patch --git-commit --git-tag
 
 | File | Key |
 | :--- | :--- |
-| `package.xml` | `<version>` tag |
-| `pyproject.toml` | `project.version` |
+| `package.xml` | `<version> and <url>` tag |
+| `pyproject.toml` | `project.version` and `project.urls` |
 | `CHANGELOG.md` | First `## [X.Y.Z]` section (not Unreleased) |
 | `pixi.toml` | `[workspace] version` |
 | `pixi.lock` | Regenerated via `pixi list` |
 | `CITATION.cff` | `version` key |
-| `CMakeLists.txt` | `project(... VERSION X.Y.Z ...)` |
+| `CMakeLists.txt` | `project(... VERSION X.Y.Z ... HOMEPAGE_URL ...)` |
+| `debian/changelog` | `version = ...` |
+| `conanfile.py` | `version = ...` |
 
 > Requires `pixi` CLI if `pixi.lock` exists in the project root.
 
@@ -135,6 +141,8 @@ STYLE_NEW_VALUE = "green"
 STYLE_UNCHANGED_VALUE = "dim"
 STYLE_HIGHLIGHT = "cyan"
 
+GITHUB_URL = "https://github.com/"
+
 
 class VersionNotPresent(Exception):
     """Raised when a file exists but has no version field configured."""
@@ -167,6 +175,17 @@ class VersionExtractor(ABC):
     def path(self) -> str:
         return str(self.file_path)
 
+    def get_url(self) -> str | None:
+        return None
+
+    def validate_url(self, url: str) -> str | None:
+        if match := re.match(GITHUB_URL + r"[^/]+/[^/]+", url.strip("/").lower()):
+            valid_url = match.group()
+            console.print(
+                f"[{STYLE_INFO}]Found url {valid_url} in '{self.file_path}'[/{STYLE_INFO}]"
+            )
+            return valid_url
+
 
 class XmlVersionExtractor(VersionExtractor):
     def get_version(self) -> str:
@@ -192,6 +211,14 @@ class XmlVersionExtractor(VersionExtractor):
 
         with open(self.file_path, "w", encoding="utf-8") as f:
             f.write(new_content)
+
+    def get_url(self) -> str | None:
+        with open(self.file_path, "r", encoding="utf-8") as f:
+            content = f.read()
+        for url in re.findall(r"<url[^>]*>(.*?)</url>", content, re.I):
+            if valid_url := self.validate_url(url):
+                return valid_url
+        return None
 
 
 class TomlVersionExtractor(VersionExtractor):
@@ -230,6 +257,15 @@ class TomlVersionExtractor(VersionExtractor):
 
         with open(self.file_path, "w", encoding="utf-8") as f:
             tomlkit.dump(data, f)
+
+    def get_url(self) -> str | None:
+        with open(self.file_path, "r", encoding="utf-8") as f:
+            data = tomlkit.load(f)
+        if "project" in data and "urls" in data["project"]:
+            for url in data["project"]["urls"].values():
+                if valid_url := self.validate_url(url):
+                    return valid_url
+        return None
 
 
 class YamlVersionExtractor(VersionExtractor):
@@ -337,6 +373,13 @@ class CMakeListsVersionExtractor(VersionExtractor):
             pass  # cmake-parser failed, fall back to regex
 
         return self._get_version_regex(content)
+
+    def get_url(self) -> str | None:
+        with open(self.file_path, "r", encoding="utf-8") as f:
+            content = f.read()
+        if match := re.search(r'HOMEPAGE_URL\s+"([^"]+)"', content):
+            return self.validate_url(match.group(1))
+        return None
 
     def _get_command_args(self, node) -> List[str]:
         """Extract arguments from a cmake command node."""
@@ -1038,7 +1081,7 @@ def git_tag_version(
     custom_tag_name: Optional[str] = None,
     custom_tag_message: Optional[str] = None,
     sign: bool = False,
-) -> bool:
+) -> Tuple[bool, str]:
     """Create a git tag for the version.
 
     When ``sign`` is True the tag is GPG-signed (``git tag -s``); otherwise an
@@ -1049,7 +1092,7 @@ def git_tag_version(
         console.print(
             f"[{STYLE_WARNING}]Not a git repository, skipping git tag.[/{STYLE_WARNING}]"
         )
-        return False
+        return False, ""
 
     tag_name = (
         custom_tag_name.format(version=version) if custom_tag_name else f"v{version}"
@@ -1065,7 +1108,7 @@ def git_tag_version(
         console.print(
             f"[{STYLE_WARNING}]Tag {tag_name} already exists.[/{STYLE_WARNING}]"
         )
-        return False
+        return False, ""
 
     if not auto_confirm:
         confirmed = Confirm.ask(
@@ -1087,10 +1130,89 @@ def git_tag_version(
         console.print(
             f"[{STYLE_MUTED}]  To push: git push origin {tag_name}[/{STYLE_MUTED}]"
         )
-        return True
+        return True, tag_name
     else:
         console.print(f"[{STYLE_ERROR}]Failed to create tag: {output}[/{STYLE_ERROR}]")
-        return False
+        return False, ""
+
+
+def push_tag(root_dir: Path, tag_name: str, project_url: str) -> tuple[bool, str]:
+    url = project_url.replace(GITHUB_URL, "git@github.com:")
+    git_args = ["push", url, tag_name]
+    return run_git_command(git_args, cwd=root_dir)
+
+
+def git_archive(
+    root_dir: Path, archive_name: str, sign: bool = False
+) -> Tuple[bool, str]:
+    """Create a .tar.gz archive from git for the version.
+
+    When ``sign`` is True, a detached GPG .tar.gz.sig file is added.
+    """
+    git_args = ["archive", "--format", "tgz", "--output", archive_name]
+    success, ret = run_git_command(git_args, cwd=root_dir)
+    if not success:
+        return False, ret
+
+    if sign:
+        call = ["gpg", "--detach-sign", "--armor", f"{archive_name}.sig", archive_name]
+        result = subprocess.run(call, cwd=root_dir, capture_output=True, text=True)
+        if result.returncode != 0:
+            return False, result.stderr.strip()
+
+    return True, ""
+
+
+def gh_release(
+    root_dir: Path,
+    target_version: str,
+    project_url: str,
+    archive_name: str | None = None,
+    sign: bool = False,
+    dry_run: bool = False,
+) -> Tuple[bool, str]:
+    """Create a github release and return (success, output)."""
+
+    title = f"Release v{target_version}"
+    repo = project_url.removeprefix(GITHUB_URL)
+    call = ["gh", "release", "create", "--title", title, "--repo", repo]
+
+    # include latest release notes
+    changelog = root_dir / "CHANGELOG.md"
+    if changelog.is_file():
+        notes = changelog.read_text().split("\n## ")
+        if len(notes) >= 3:  # 0: header, 1: unreleased, 2: latest
+            today = datetime.date.today().isoformat()
+            call = [
+                *call,
+                "--notes",
+                notes[1].replace("[Unreleased]", f"[{target_version}] - {today}")
+                if dry_run
+                else notes[2],
+            ]
+        else:
+            console.print(
+                f"[{STYLE_WARNING}]Warning: No release notes available in CHANGELOG.md yet.[/{STYLE_WARNING}]"
+            )
+
+    call = [*call, f"v{target_version}"]
+
+    # include .tar.gz archive and .tar.gz.sig signature
+    if archive_name is not None:
+        call = [*call, archive_name]
+        if sign:
+            call = [*call, f"{archive_name}.sig"]
+
+    if dry_run:
+        return True, "$ '" + "' '".join(c.replace("'", "\\'") for c in call) + "'"
+
+    try:
+        result = subprocess.run(call, cwd=root_dir, capture_output=True, text=True)
+        if result.returncode != 0:
+            return False, result.stderr.strip()
+        return True, result.stdout.strip()
+    except subprocess.CalledProcessError as e:
+        return False, e.stderr or ""
 
 
 def update_pixi_lock(root_dir: Path, dry_run: bool = False) -> Optional[str]:
@@ -1554,6 +1676,28 @@ def main():
         help="GPG-sign the git tag (uses 'git tag -s' instead of '-a'). Requires a configured signing key (git config user.signingkey). Only meaningful with --git-tag.",
     )
     parser.add_argument(
+        "--push-tag",
+        action="store_true",
+        help="Push the tag to the main repository. Only works with github for now.",
+    )
+
+    parser.add_argument(
+        "--git-archive",
+        action="store_true",
+        help="Create a .tar.gz archive of the project with git",
+    )
+    parser.add_argument(
+        "--sign-archive",
+        action="store_true",
+        help="GPG-sign the git archive. Requires a configured signing key. Only meaningful with --git-archive.",
+    )
+    parser.add_argument(
+        "--gh-release",
+        action="store_true",
+        help="Create Github release. Requires a configured gh cli.",
+    )
+
+    parser.add_argument(
         "--short",
         action="store_true",
         help="Output only the final version string.",
@@ -1762,6 +1906,22 @@ def main():
     elif args.short:
         print(target_version)
 
+    project_url = ""
+    archive_name = ""
+    if args.push_tag:
+        for check in checks:
+            if url := check.get_url():
+                project_url = url
+                break
+        else:
+            where = "CMakeLists.txt, package.xml, or pyproject.toml"
+            console.print(
+                f"[{STYLE_ERROR_STRONG}]Error: can't push tag without a github homepage in {where}.[/{STYLE_ERROR_STRONG}]"
+            )
+            sys.exit(1)
+        if args.git_archive:
+            archive_name = f"{project_url.split('/')[-1]}-{target_version}.tar.gz"
+
     if args.dry_run:
         pixi_lock_would_update = (root_dir / "pixi.lock").exists()
 
@@ -1780,6 +1940,7 @@ def main():
             )
             git_lines.append(f"$ git add {' '.join(rel_paths) if rel_paths else '-u'}")
             git_lines.append(f"$ git commit -m '{commit_message}'")
+
         if args.git_tag is not None:
             custom_tag_name = None if args.git_tag is True else args.git_tag
             tag_name = (
@@ -1794,6 +1955,28 @@ def main():
             )
             tag_flag = "-s" if args.sign_tag else "-a"
             git_lines.append(f"$ git tag {tag_flag} {tag_name} -m '{tag_message}'")
+            if args.push_tag:
+                url = project_url.replace(GITHUB_URL, "git@github.com:")
+                git_lines.append(f"$ git push {url} {tag_name}")
+
+        if args.git_archive:
+            git_lines.append(f"$ git archive --format tgz --output {archive_name}")
+
+            if args.sign_archive:
+                git_lines.append(
+                    f"$ gpg --detach-sign --armor {archive_name}.sig {archive_name}"
+                )
+
+        if args.gh_release:
+            _, call = gh_release(
+                root_dir,
+                target_version,
+                project_url,
+                archive_name,
+                args.sign_archive,
+                dry_run=True,
+            )
+            git_lines.append(call)
 
         show_dry_run_panel(dry_run_rows, pixi_lock_would_update, git_lines)
         sys.exit(0)
@@ -1812,6 +1995,31 @@ def main():
                 f"[{STYLE_WARNING}]Warning: --sign-tag has no effect without --git-tag.[/{STYLE_WARNING}]"
             )
 
+        if args.gh_release and not args.push_tag:
+            console.print(
+                f"[{STYLE_WARNING}]Warning: --gh-release has no effect without --push-tag.[/{STYLE_WARNING}]"
+            )
+
+        if args.sign_archive and args.git_archive is None:
+            console.print(
+                f"[{STYLE_WARNING}]Warning: --sign-archive has no effect without --git-archive.[/{STYLE_WARNING}]"
+            )
+
+        if args.git_archive and (root_dir / archive_name).is_file():
+            console.print(
+                f"[{STYLE_WARNING_STRONG}]Warning: {archive_name} already exists ![/{STYLE_WARNING_STRONG}]"
+            )
+            if Confirm.ask(
+                "[bold]Remove this file (and the .sig if it is also there) and continue ?[/bold]",
+                default=True,
+            ):
+                (root_dir / archive_name).unlink()
+                sig = root_dir / f"{archive_name}.sig"
+                if sig.is_file():
+                    sig.unlink()
+            else:
+                sys.exit(1)
+
         if args.git_commit is not None:
             custom_message = None if args.git_commit is True else args.git_commit
             git_commit_version(
@@ -1824,7 +2032,7 @@ def main():
 
         if args.git_tag is not None:
             custom_tag_name = None if args.git_tag is True else args.git_tag
-            git_tag_version(
+            _success, tag_name = git_tag_version(
                 root_dir,
                 target_version,
                 args.confirm,
@@ -1832,6 +2040,30 @@ def main():
                 args.git_tag_message,
                 args.sign_tag,
             )
+
+            if args.push_tag:
+                _success, _error = push_tag(root_dir, tag_name, project_url)
+
+        if args.git_archive and archive_name:
+            _success, _error = git_archive(root_dir, archive_name, args.sign_archive)
+
+        if args.gh_release:
+            if args.git_tag is None:
+                console.print(
+                    f"[{STYLE_WARNING}]Warning: --gh-release has no effect without --git-tag.[/{STYLE_WARNING}]"
+                )
+            elif not args.push_tag:
+                console.print(
+                    f"[{STYLE_WARNING}]Warning: --gh-release has no effect without --push-tag.[/{STYLE_WARNING}]"
+                )
+            else:
+                gh_release(
+                    root_dir,
+                    target_version,
+                    project_url,
+                    archive_name,
+                    args.sign_archive,
+                )
 
 
 if __name__ == "__main__":

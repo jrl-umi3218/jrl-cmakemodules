@@ -1153,7 +1153,7 @@ def test_git_tag_version_success(mocker, tmp_path, capsys):
         (True, "tag created"),  # tag -a
     ]
 
-    result = release.git_tag_version(tmp_path, "1.2.3", auto_confirm=True)
+    result, _ = release.git_tag_version(tmp_path, "1.2.3", auto_confirm=True)
 
     assert result is True
     captured = capsys.readouterr()
@@ -1172,7 +1172,7 @@ def test_git_tag_version_signed(mocker, tmp_path, capsys):
         (True, "tag created"),  # tag -s
     ]
 
-    result = release.git_tag_version(tmp_path, "1.2.3", auto_confirm=True, sign=True)
+    result, _ = release.git_tag_version(tmp_path, "1.2.3", auto_confirm=True, sign=True)
 
     assert result is True
     # The actual tag creation is the third git call.
@@ -1190,7 +1190,7 @@ def test_git_tag_version_unsigned_uses_annotated(mocker, tmp_path):
         (True, "tag created"),  # tag -a
     ]
 
-    result = release.git_tag_version(tmp_path, "1.2.3", auto_confirm=True)
+    result, _ = release.git_tag_version(tmp_path, "1.2.3", auto_confirm=True)
 
     assert result is True
     tag_call_args = mock_run.call_args_list[2].args[0]
@@ -1206,7 +1206,7 @@ def test_git_tag_version_already_exists(mocker, tmp_path, capsys):
         (True, "abc123"),  # rev-parse v1.2.3 (tag exists)
     ]
 
-    result = release.git_tag_version(tmp_path, "1.2.3", auto_confirm=True)
+    result, _ = release.git_tag_version(tmp_path, "1.2.3", auto_confirm=True)
 
     assert result is False
     captured = capsys.readouterr()
