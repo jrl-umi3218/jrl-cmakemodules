@@ -1,5 +1,13 @@
+# LTO is disabled on macos: conda-forge clang-22 (build >= default_h131685f_4) no longer
+# ships lib/clang/22/lib/libLTO.dylib, but its driver still passes
+# -lto_library, so any -flto link fails on macOS.
+# https://github.com/conda-forge/clangdev-feedstock/pull/471/changes#diff-c4675104941d429a6f6dc63794d5c9db91e7c3130998c2963d9ae7662d4cd62aL18-L34
+if(NOT APPLE)
+    set(LTO "LTO")
+endif()
+
 nanobind_add_module(pb_pywrap
-    NB_STATIC STABLE_ABI LTO NB_SUPPRESS_WARNINGS
+    NB_STATIC ${LTO} STABLE_ABI NB_SUPPRESS_WARNINGS
     bindings.cpp
 )
 jrl_check_python_module_name(pb_pywrap)
