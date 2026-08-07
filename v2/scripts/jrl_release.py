@@ -1169,6 +1169,7 @@ def gh_release(
     project_url: str,
     archive_name: str | None = None,
     sign: bool = False,
+    dry_run: bool = False,
 ) -> Tuple[bool, str]:
     """Create a github release and return (success, output)."""
 
@@ -1181,7 +1182,14 @@ def gh_release(
     if changelog.is_file():
         notes = changelog.read_text().split("\n## ")
         if len(notes) >= 3:  # 0: header, 1: unreleased, 2: latest
-            call = [*call, "--notes", notes[2]]
+            today = datetime.date.today().isoformat()
+            call = [
+                *call,
+                "--notes",
+                notes[1].replace("[Unreleased]", f"[{target_version}] - {today}")
+                if dry_run
+                else notes[2],
+            ]
         else:
             console.print(
                 f"[{STYLE_WARNING}]Warning: No release notes available in CHANGELOG.md yet.[/{STYLE_WARNING}]"
@@ -1194,6 +1202,9 @@ def gh_release(
         call = [*call, archive_name]
         if sign:
             call = [*call, f"{archive_name}.sig"]
+
+    if dry_run:
+        return True, "$ '" + "' '".join(c.replace("'", "\\'") for c in call) + "'"
 
     try:
         result = subprocess.run(call, cwd=root_dir, capture_output=True, text=True)
@@ -1895,6 +1906,21 @@ def main():
     elif args.short:
         print(target_version)
 
+    project_url = ""
+    archive_name = ""
+    if args.push_tag:
+        for check in checks:
+            if url := check.get_url():
+                project_url = url
+                break
+        else:
+            where = "CMakeLists.txt, package.xml, or pyproject.toml"
+            console.print(
+                f"[{STYLE_ERROR_STRONG}]Error: can't push tag without a github homepage in {where}.[/{STYLE_ERROR_STRONG}]"
+            )
+            sys.exit(1)
+        archive_name = f"{project_url.split('/')[-1]}-{target_version}.tar.gz"
+
     if args.dry_run:
         pixi_lock_would_update = (root_dir / "pixi.lock").exists()
 
@@ -1913,6 +1939,7 @@ def main():
             )
             git_lines.append(f"$ git add {' '.join(rel_paths) if rel_paths else '-u'}")
             git_lines.append(f"$ git commit -m '{commit_message}'")
+
         if args.git_tag is not None:
             custom_tag_name = None if args.git_tag is True else args.git_tag
             tag_name = (
@@ -1927,6 +1954,28 @@ def main():
             )
             tag_flag = "-s" if args.sign_tag else "-a"
             git_lines.append(f"$ git tag {tag_flag} {tag_name} -m '{tag_message}'")
+            if args.push_tag:
+                url = project_url.replace(GITHUB_URL, "git@github.com:")
+                git_lines.append(f"$ git push {url} {tag_name}")
+
+        if args.git_archive:
+            git_lines.append(f"$ git archive --format tgz --output {archive_name}")
+
+            if args.sign_archive:
+                git_lines.append(
+                    f"$ gpg --detach-sign --armor {archive_name}.sig {archive_name}"
+                )
+
+        if args.gh_release:
+            _, call = gh_release(
+                root_dir,
+                target_version,
+                project_url,
+                archive_name,
+                args.sign_archive,
+                dry_run=True,
+            )
+            git_lines.append(call)
 
         show_dry_run_panel(dry_run_rows, pixi_lock_would_update, git_lines)
         sys.exit(0)
@@ -1949,21 +1998,6 @@ def main():
             console.print(
                 f"[{STYLE_WARNING}]Warning: --gh-release has no effect without --push-tag.[/{STYLE_WARNING}]"
             )
-
-        project_url = ""
-        archive_name = ""
-        if args.push_tag:
-            for check in checks:
-                if url := check.get_url():
-                    project_url = url
-                    break
-            else:
-                where = "CMakeLists.txt, package.xml, or pyproject.toml"
-                console.print(
-                    f"[{STYLE_ERROR_STRONG}]Error: can't push tag without a github homepage in {where}.[/{STYLE_ERROR_STRONG}]"
-                )
-                sys.exit(1)
-            archive_name = f"{project_url.split('/')[-1]}-{target_version}.tar.gz"
 
         if args.sign_archive and args.git_archive is None:
             console.print(
