@@ -3691,7 +3691,8 @@ jrl_check_python_module(
 
 ### Description
   Find if a python module is available, fills <module_name>_FOUND variable.
-  Also fills <module_name>_VERSION variable if the module has a __version__ attribute.
+  Also fills <module_name>_VERSION variable if the module has a __version__ attribute,
+  falling back to importlib.metadata.version(<module_name>) otherwise.
   Displays messages based on REQUIRED and QUIET options.
 
 
@@ -3724,6 +3725,24 @@ function(jrl_check_python_module module_name)
         ERROR_QUIET
         OUTPUT_STRIP_TRAILING_WHITESPACE
     )
+
+    # Fallback: some modules do not expose a __version__ attribute, ask the
+    # package metadata instead (works only if the distribution name matches
+    # the module name).
+    if(module_found STREQUAL 0 AND NOT module_version)
+        execute_process(
+            COMMAND
+                ${python} -c
+                "import importlib.metadata; print(importlib.metadata.version('${module_name}'), end='')"
+            RESULT_VARIABLE metadata_found
+            OUTPUT_VARIABLE metadata_version
+            ERROR_QUIET
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+        if(metadata_found STREQUAL 0)
+            set(module_version "${metadata_version}")
+        endif()
+    endif()
 
     if(module_found STREQUAL 0)
         set(${module_name}_FOUND true PARENT_SCOPE)

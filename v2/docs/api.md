@@ -1137,7 +1137,8 @@ jrl_check_python_module(
 
 ### Description
   Find if a python module is available, fills <module_name>_FOUND variable.
-  Also fills <module_name>_VERSION variable if the module has a __version__ attribute.
+  Also fills <module_name>_VERSION variable if the module has a __version__ attribute,
+  falling back to importlib.metadata.version(<module_name>) otherwise.
   Displays messages based on REQUIRED and QUIET options.
 
 
