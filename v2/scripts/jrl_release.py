@@ -1127,40 +1127,49 @@ def git_tag_version(
     )
     if success:
         console.print(f"[{STYLE_SUCCESS}]✓ Created tag: {tag_name}[/{STYLE_SUCCESS}]")
-        console.print(
-            f"[{STYLE_MUTED}]  To push: git push origin {tag_name}[/{STYLE_MUTED}]"
-        )
         return True, tag_name
     else:
         console.print(f"[{STYLE_ERROR}]Failed to create tag: {output}[/{STYLE_ERROR}]")
         return False, ""
 
 
-def push_tag(root_dir: Path, tag_name: str, project_url: str) -> tuple[bool, str]:
+def push_tag(root_dir: Path, tag_name: str, project_url: str) -> bool:
     url = project_url.replace(GITHUB_URL, "git@github.com:")
     git_args = ["push", url, tag_name]
-    return run_git_command(git_args, cwd=root_dir)
+    console.print(f"[{STYLE_MUTED}]$ git {' '.join(git_args)}")
+    success, output = run_git_command(git_args, cwd=root_dir)
+    if success:
+        console.print(f"[{STYLE_SUCCESS}]✓ Pushed tag: {tag_name}[/{STYLE_SUCCESS}]")
+    else:
+        console.print(f"[{STYLE_ERROR}]Failed to push tag: {output}[/{STYLE_ERROR}]")
+    return success
 
 
-def git_archive(
-    root_dir: Path, archive_name: str, sign: bool = False
-) -> Tuple[bool, str]:
+def git_archive(root_dir: Path, archive_name: str, sign: bool = False) -> bool:
     """Create a .tar.gz archive from git for the version.
 
     When ``sign`` is True, a detached GPG .tar.gz.sig file is added.
     """
     git_args = ["archive", "--format", "tgz", "--output", archive_name]
-    success, ret = run_git_command(git_args, cwd=root_dir)
+    console.print(f"[{STYLE_MUTED}]$ git {' '.join(git_args)}")
+    success, output = run_git_command(git_args, cwd=root_dir)
     if not success:
-        return False, ret
+        console.print(
+            f"[{STYLE_ERROR}]Failed to create archive: {output}[/{STYLE_ERROR}]"
+        )
+        return False
 
     if sign:
         call = ["gpg", "--detach-sign", "--armor", f"{archive_name}.sig", archive_name]
+        console.print(f"[{STYLE_MUTED}]$ {' '.join(call)}")
         result = subprocess.run(call, cwd=root_dir, capture_output=True, text=True)
         if result.returncode != 0:
-            return False, result.stderr.strip()
+            console.print(
+                f"[{STYLE_ERROR}]Failed to sign archive: {result.stderr}[/{STYLE_ERROR}]"
+            )
+            return False
 
-    return True, ""
+    return True
 
 
 def gh_release(
@@ -1203,9 +1212,11 @@ def gh_release(
         if sign:
             call = [*call, f"{archive_name}.sig"]
 
+    print_call = "$ '" + "' '".join(c.replace("'", "\\'") for c in call) + "'"
     if dry_run:
-        return True, "$ '" + "' '".join(c.replace("'", "\\'") for c in call) + "'"
+        return True, print_call
 
+    console.print(f"[{STYLE_MUTED}]$ {print_call}")
     try:
         result = subprocess.run(call, cwd=root_dir, capture_output=True, text=True)
         if result.returncode != 0:
@@ -2042,10 +2053,14 @@ def main():
             )
 
             if args.push_tag:
-                _success, _error = push_tag(root_dir, tag_name, project_url)
+                success = push_tag(root_dir, tag_name, project_url)
+                if not success:
+                    sys.exit(1)
 
         if args.git_archive and archive_name:
-            _success, _error = git_archive(root_dir, archive_name, args.sign_archive)
+            success = git_archive(root_dir, archive_name, args.sign_archive)
+            if not success:
+                sys.exit(1)
 
         if args.gh_release:
             if args.git_tag is None:
@@ -2057,13 +2072,15 @@ def main():
                     f"[{STYLE_WARNING}]Warning: --gh-release has no effect without --push-tag.[/{STYLE_WARNING}]"
                 )
             else:
-                gh_release(
+                success, _ = gh_release(
                     root_dir,
                     target_version,
                     project_url,
                     archive_name,
                     args.sign_archive,
                 )
+                if not success:
+                    sys.exit(1)
 
 
 if __name__ == "__main__":
