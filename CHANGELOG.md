@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - jrl_release: add `ConanFileVersionExtractor` by @arntanguy
 - jrl_release: add `--check-version --check-tag vX.Y.Z` by @arntanguy
 - jrl_release: add `DebianChangelogVersionExtractor` by @arntanguy
+- jrl_release: update links `ChangelogVersionExtractor` by @nim65s
 - jrl_check_python_module: fall back to `importlib.metadata` when the module has no `__version__` by @ahoarau
 - jrl: change jrl_configure_default_install_dirs() to macro to make GNUInstallDirs in caller's scope by @ahoarau
 - jrl: fix resolution of `$<BUILD_INTERFACE` generator expressions during jrl_export_package
@@ -50,7 +51,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 First release
 
 
-[Unreleased]: https://github.com/coal-library/coal/compare/v1.1.2...HEAD
+[Unreleased]: https://github.com/coal-library/coal/compare/v2.1.0...HEAD
+[2.1.0]: https://github.com/jrl-umi3218/jrl-cmakemodules/compare/v2.0.0...v2.1.0
+[2.0.0]: https://github.com/jrl-umi3218/jrl-cmakemodules/compare/v1.1.2...v2.0.0
 [1.1.2]: https://github.com/jrl-umi3218/jrl-cmakemodules/compare/v1.1.1...v1.1.2
 [1.1.1]: https://github.com/jrl-umi3218/jrl-cmakemodules/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/jrl-umi3218/jrl-cmakemodules/compare/v1.0.0...v1.1.0

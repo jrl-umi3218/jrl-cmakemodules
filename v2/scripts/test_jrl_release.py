@@ -151,8 +151,17 @@ All notable changes to this project will be documented in this file.
 
 ## [1.0.0] - 2024-01-15
 
+### Fixed
+- Added links in changelog
+
+## [0.1.0] - 2024-01-14
+
 ### Added
 - Initial release
+
+[Unreleased]: https://github.com/example/project/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/example/project/compare/v0.1.0...v1.0.0
+[0.1.0]: https://github.com/example/project/releases/tag/v0.1.0
 """
     file_path = tmp_path / "CHANGELOG.md"
     file_path.write_text(content, encoding="utf-8")
@@ -781,7 +790,19 @@ def test_changelog_extractor_update_version(sample_changelog, capsys):
     # New version should be after Unreleased
     unreleased_idx = content.index("## [Unreleased]")
     new_version_idx = content.index(f"## [1.1.0] - {today}")
-    assert unreleased_idx < new_version_idx
+    old_version_idx = content.index("## [1.0.0] - 2024-01-15")
+    assert unreleased_idx < new_version_idx < old_version_idx
+
+    # Should have both Unreleased and new version links
+    assert "\n[Unreleased]: " in content
+    assert "\n[1.1.0]: " in content
+    assert "\n[1.0.0]: " in content
+
+    # New link should be between old and Unreleased
+    unreleased_link_idx = content.index("\n[Unreleased]: ")
+    new_version_link_idx = content.index("\n[1.1.0]: ")
+    old_version_link_idx = content.index("\n[1.0.0]: ")
+    assert unreleased_link_idx < new_version_link_idx < old_version_link_idx
 
 
 def test_changelog_extractor_no_unreleased(tmp_path, capsys):
