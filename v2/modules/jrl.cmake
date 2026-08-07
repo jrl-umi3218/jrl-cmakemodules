@@ -796,12 +796,16 @@ endfunction()
 jrl_configure_default_install_dirs()
 ```
 
-**Type:** function
+**Type:** macro
 
 
 ### Description
   Configures the default install directories using GNUInstallDirs (bin, lib, include, etc.).
   Works on all platforms.
+
+  Must be called directly from a project's `CMakeLists.txt`, not wrapped in a `function()`:
+  `CMAKE_INSTALL_DOCDIR`, `DATADIR`, `MANDIR`, `INFODIR`, `LOCALEDIR` and every
+  `CMAKE_INSTALL_FULL_*` are not cache entries and would be lost when the function returns.
 
 
 ### Arguments
@@ -813,19 +817,37 @@ jrl_configure_default_install_dirs()
 jrl_configure_default_install_dirs()
 ```
 #]============================================================================]
-function(jrl_configure_default_install_dirs)
+macro(jrl_configure_default_install_dirs)
+    if(DEFINED CMAKE_CURRENT_FUNCTION)
+        message(
+            FATAL_ERROR
+            "jrl_configure_default_install_dirs() must be called directly from a CMakeLists.txt, not from inside function '${CMAKE_CURRENT_FUNCTION}()'.
+            The GNUInstallDirs variables that are not cache entries (CMAKE_INSTALL_DOCDIR, DATADIR, MANDIR,
+            INFODIR, LOCALEDIR and all CMAKE_INSTALL_FULL_*) would be lost when that function returns.
+            "
+        )
+    endif()
+
     # Prevent the following warning on pure-cmake projects (i.e. defined with LANGUAGES NONE, like jrl-cmakemodules):
     # "Unable to determine default CMAKE_INSTALL_LIBDIR directory because no target architecture is known.
     # Please enable at least one language before including GNUInstallDirs"
     # ref: https://github.com/Kitware/CMake/blob/v4.2.3/Modules/GNUInstallDirs.cmake#L434C8-L435C75
     # issue: https://gitlab.kitware.com/cmake/cmake/-/issues/23461
-
-    if(NOT DEFINED CMAKE_SIZEOF_VOID_P)
+    if(DEFINED CMAKE_SIZEOF_VOID_P)
+        set(_cmake_sizeof_already_defined false)
+    else()
+        set(_cmake_sizeof_already_defined true)
         set(CMAKE_SIZEOF_VOID_P 0)
     endif()
 
     include(GNUInstallDirs)
-endfunction()
+
+    # Do not leak the placeholder: a defined-but-0 value is worse than an undefined one.
+    if(_cmake_sizeof_already_defined)
+        unset(CMAKE_SIZEOF_VOID_P)
+    endif()
+    unset(_cmake_sizeof_already_defined)
+endmacro()
 
 #[============================================================================[
 # `jrl_configure_default_install_prefix`
@@ -939,8 +961,9 @@ jrl_configure_defaults()
 macro(jrl_configure_defaults)
     jrl_configure_default_build_type(Release)
     jrl_configure_default_binary_dirs()
-    jrl_configure_default_install_dirs()
+    # Before install_dirs: GNUInstallDirs derives CMAKE_INSTALL_FULL_* from the prefix, once.
     jrl_configure_default_install_prefix(${CMAKE_BINARY_DIR}/install)
+    jrl_configure_default_install_dirs()
     jrl_configure_copy_compile_commands_in_source_dir()
     jrl_configure_uninstall_target()
 endmacro()
@@ -3784,7 +3807,8 @@ jrl_check_python_module(
 
 ### Description
   Find if a python module is available, fills <module_name>_FOUND variable.
-  Also fills <module_name>_VERSION variable if the module has a __version__ attribute.
+  Also fills <module_name>_VERSION variable if the module has a __version__ attribute,
+  falling back to importlib.metadata.version(<module_name>) otherwise.
   Displays messages based on REQUIRED and QUIET options.
 
 
@@ -3817,6 +3841,24 @@ function(jrl_check_python_module module_name)
         ERROR_QUIET
         OUTPUT_STRIP_TRAILING_WHITESPACE
     )
+
+    # Fallback: some modules do not expose a __version__ attribute, ask the
+    # package metadata instead (works only if the distribution name matches
+    # the module name).
+    if(module_found STREQUAL 0 AND NOT module_version)
+        execute_process(
+            COMMAND
+                ${python} -c
+                "import importlib.metadata; print(importlib.metadata.version('${module_name}'), end='')"
+            RESULT_VARIABLE metadata_found
+            OUTPUT_VARIABLE metadata_version
+            ERROR_QUIET
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+        if(metadata_found STREQUAL 0)
+            set(module_version "${metadata_version}")
+        endif()
+    endif()
 
     if(module_found STREQUAL 0)
         set(${module_name}_FOUND true PARENT_SCOPE)
