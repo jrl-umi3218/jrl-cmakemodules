@@ -26,6 +26,6 @@ jobs:
         uses: mic92/update-flake-inputs@v1
         with:
           github-token: ${{ steps.app-token.outputs.token }}
-          pr-labels: 'no-changelog'
+          pr-labels: 'no changelog'
           git-author-name: 'hrp2-14'
           git-author-email: '40568249+hrp2-14@users.noreply.github.com'
