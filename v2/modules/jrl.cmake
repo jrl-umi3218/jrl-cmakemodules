@@ -2209,35 +2209,155 @@ function(_jrl_export_dependencies)
         set(INSTALL_DESTINATION lib/cmake/${PROJECT_NAME})
     endif()
 
-    # Gather the interface link libraries of all targets present in the export component.
-    # It contains external libraries but also buildsystem target, with or without generator expressions.
-    set(all_interface_link_libraries "")
+    # Collect target interface link libraries (external libs and targets, including generator expressions).
+    #
+    # CMake's standard evaluator expands $<BUILD_INTERFACE:...> and discards $<INSTALL_INTERFACE:...>.
+    # Because of this, file(GENERATE) defaults to build-tree view rather than the installed package view.
+    # To force file(GENERATE) to evaluate the install tree, swap the interface markers to $<1:...>
+    # and $<0:...> while keeping nested generator expression syntax intact.
+    # Unfortunately we need to manually parse the generator expressions, but the expressions are
+    # simple enough to be handled with string(REPLACE).
+
+    # Mark $<LINK_LIBRARY:...> parameters for configure_file() to pass into the install script.
+    set(LINK_LIBRARY_MARKER "_jrl_link_library_feature_")
+
+    # Names of the files written by the file(GENERATE) below, listed for the install script.
+    # Naming them instead of globbing keeps what an earlier configure left in GEN_DIR, a
+    # renamed target or another build type, out of the way.
+    set(INTERFACE_LINK_LIBRARIES_FILES "")
+
     foreach(target ${arg_TARGETS})
         get_target_property(interface_link_libraries ${target} INTERFACE_LINK_LIBRARIES)
 
         if(NOT interface_link_libraries)
             message(DEBUG "Target '${target}' has no INTERFACE_LINK_LIBRARIES.")
-            continue()
+            set(interface_link_libraries "")
         endif()
 
-        list(APPEND all_interface_link_libraries ${interface_link_libraries})
-    endforeach()
+        # CMake writes $<LINK_ONLY:> itself for the private dependencies of a static
+        # library, $<COMPILE_ONLY:> for the compile-only ones. Both need a link or compile
+        # context, which file(GENERATE) has not. A consumer uses their content, so $<1:>.
+        string(
+            REPLACE "\$<LINK_ONLY:"
+            "\$<1:"
+            interface_link_libraries
+            "${interface_link_libraries}"
+        )
+        string(
+            REPLACE "\$<COMPILE_ONLY:"
+            "\$<1:"
+            interface_link_libraries
+            "${interface_link_libraries}"
+        )
 
-    list(REMOVE_DUPLICATES all_interface_link_libraries)
+        # Handle $<LINK_LIBRARY:...> and $<LINK_GROUP:...> expressions, where the first argument
+        # is a link feature rather than a library name.
+        #
+        # Wrapping the parameters in $<1:...> preserves the comma-separated list as a single
+        # token during CMake evaluation. The marker signals the install script to split the
+        # list and strip the feature parameter.
+        string(
+            REPLACE "\$<LINK_LIBRARY:"
+            "\$<1:${LINK_LIBRARY_MARKER}"
+            interface_link_libraries
+            "${interface_link_libraries}"
+        )
+        string(
+            REPLACE "\$<LINK_GROUP:"
+            "\$<1:${LINK_LIBRARY_MARKER}"
+            interface_link_libraries
+            "${interface_link_libraries}"
+        )
+
+        string(
+            REPLACE "\$<BUILD_LOCAL_INTERFACE:"
+            "\$<0:"
+            interface_link_libraries
+            "${interface_link_libraries}"
+        )
+        string(
+            REPLACE "\$<BUILD_INTERFACE:"
+            "\$<0:"
+            interface_link_libraries
+            "${interface_link_libraries}"
+        )
+        string(
+            REPLACE "\$<INSTALL_INTERFACE:"
+            "\$<1:"
+            interface_link_libraries
+            "${interface_link_libraries}"
+        )
+
+        # The consumer resolves these, in its own configuration and link language, and the
+        # last two need a link context. Export the union of both answers: an unused
+        # find_dependency() beats a missing target.
+        #
+        # $<CONFIG:$<CONFIG>,...> lists the current configuration, so it is always 1.
+        # A configuration or language name is never a platform id, so $<PLATFORM_ID:...>
+        # is always 0. Both take any number of parameters, $<BOOL:> and $<STREQUAL:> do not.
+        set(condition_matches "${interface_link_libraries}")
+        set(condition_does_not_match "${interface_link_libraries}")
+        foreach(condition "\$<CONFIG:" "\$<LINK_LANGUAGE:" "\$<LINK_LANG_AND_ID:")
+            string(
+                REPLACE "${condition}"
+                "\$<CONFIG:\$<CONFIG>,"
+                condition_matches
+                "${condition_matches}"
+            )
+            string(
+                REPLACE "${condition}"
+                "\$<PLATFORM_ID:"
+                condition_does_not_match
+                "${condition_does_not_match}"
+            )
+        endforeach()
+
+        # Use file(GENERATE) instead of file(WRITE) to force generator expression evaluation.
+        # Explicitly setting TARGET is required so target-dependent generator expressions
+        # (e.g., $<TARGET_PROPERTY:...>, $<CXX_COMPILER_ID:...>) have context to evaluate.
+        #
+        # Generate one file per target and configuration to accommodate multi-config
+        # generators where expressions vary across configurations.
+        file(
+            GENERATE OUTPUT ${GEN_DIR}/interface-link-libraries-${target}-$<CONFIG>.cmake
+            CONTENT
+                "
+# Generated file - do not edit
+# Link libraries of target '${target}', as a consumer of the installed package sees them.
+list(APPEND all_interface_link_libraries \"${condition_matches}\" \"${condition_does_not_match}\")
+"
+            TARGET ${target}
+        )
+
+        # file(GENERATE) writes one file per configuration: the CMAKE_CONFIGURATION_TYPES
+        # entries for a multi-config generator, CMAKE_BUILD_TYPE otherwise. An empty
+        # CMAKE_BUILD_TYPE is valid, $<CONFIG> then expands to nothing.
+        if(CMAKE_CONFIGURATION_TYPES)
+            foreach(config IN LISTS CMAKE_CONFIGURATION_TYPES)
+                list(
+                    APPEND INTERFACE_LINK_LIBRARIES_FILES
+                    interface-link-libraries-${target}-${config}.cmake
+                )
+            endforeach()
+        else()
+            list(
+                APPEND INTERFACE_LINK_LIBRARIES_FILES
+                interface-link-libraries-${target}-${CMAKE_BUILD_TYPE}.cmake
+            )
+        endif()
+    endforeach()
 
     # Get the complete list of exported targets
     # This is used to filter out the INTERFACE_LINK_LIBRARIES that are actually part of the same package
     # (and should not be added as dependencies in the generated <export_name>-dependencies.cmake file)
+    # Namespaced names are listed too, $<INSTALL_INTERFACE:> entries usually use them.
     set(all_exported_targets "")
     foreach(component ${declared_components})
         get_property(targets GLOBAL PROPERTY _jrl_${PROJECT_NAME}_${component}_targets)
-        list(APPEND all_exported_targets ${targets})
+        foreach(target ${targets})
+            list(APPEND all_exported_targets ${target} ${PROJECT_NAME}::${target})
+        endforeach()
     endforeach()
-
-    message(
-        DEBUG
-        "All interface link libraries for targets '${arg_TARGETS}': ${all_interface_link_libraries}"
-    )
 
     # Get the list of external dependencies recorded with jrl_find_package() and jrl_export_dependency()
     get_property(
@@ -2250,24 +2370,20 @@ function(_jrl_export_dependencies)
         message(DEBUG "No package dependencies recorded with jrl_find_package()")
     endif()
 
+    # file(WRITE) and not file(GENERATE): nothing here needs to be evaluated, and
+    # file(GENERATE) would expand any generator expression found in those values.
     file(
-        GENERATE OUTPUT ${GEN_DIR}/imported-libraries.cmake
-        CONTENT
-            "
+        WRITE ${GEN_DIR}/imported-libraries.cmake
+        "
 # Generated file - do not edit
 set(component_name [[${arg_COMPONENT}]])
 set(all_exported_targets [[${all_exported_targets}]])
-
-# The targets declared via jrl_add_export_component(NAME ${arg_COMPONENT} TARGETS ${arg_TARGETS})
-set(export_component_targets [[${arg_TARGETS}]])
-
-# The resolved list of all interface link libraries the targets above, after generator expression evaluation.
-set(all_interface_link_libraries [[${all_interface_link_libraries}]])
 
 # The list of external dependencies recorded via jrl_find_package()
 set(package_dependencies_json_content [[${package_dependencies_json_content}]])
 "
     )
+
     # needs @INSTALL_DESTINATION@
     configure_file(
         ${_JRL_TEMPLATES_DIR}/generate-dependencies.cmake.in
@@ -2792,13 +2908,6 @@ function(jrl_export_package)
             jrl_target_install_headers(${target} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
         endforeach()
 
-        # <package>/<component>/dependencies.cmake
-        _jrl_export_dependencies(
-            COMPONENT ${component}
-            TARGETS ${targets}
-            GEN_DIR ${GEN_DIR}/${component}
-            INSTALL_DESTINATION ${cmake_files_install_dir}/${component}
-        )
         # Create the export for the component targets
         # AND the install rules for the targets (see jrl_add_export_component() comment)
         install(
@@ -2814,6 +2923,13 @@ function(jrl_export_package)
             FILE targets.cmake
             NAMESPACE ${PACKAGE_NAMESPACE}
             DESTINATION ${cmake_files_install_dir}/${component}
+        )
+        # <package>/<component>/dependencies.cmake
+        _jrl_export_dependencies(
+            COMPONENT ${component}
+            TARGETS ${targets}
+            GEN_DIR ${GEN_DIR}/${component}
+            INSTALL_DESTINATION ${cmake_files_install_dir}/${component}
         )
     endforeach()
 endfunction()
