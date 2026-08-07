@@ -1919,7 +1919,8 @@ def main():
                 f"[{STYLE_ERROR_STRONG}]Error: can't push tag without a github homepage in {where}.[/{STYLE_ERROR_STRONG}]"
             )
             sys.exit(1)
-        archive_name = f"{project_url.split('/')[-1]}-{target_version}.tar.gz"
+        if args.git_archive:
+            archive_name = f"{project_url.split('/')[-1]}-{target_version}.tar.gz"
 
     if args.dry_run:
         pixi_lock_would_update = (root_dir / "pixi.lock").exists()
@@ -2043,7 +2044,7 @@ def main():
             if args.push_tag:
                 _success, _error = push_tag(root_dir, tag_name, project_url)
 
-        if archive_name is not None:
+        if args.git_archive and archive_name:
             _success, _error = git_archive(root_dir, archive_name, args.sign_archive)
 
         if args.gh_release:
