@@ -1145,12 +1145,14 @@ def push_tag(root_dir: Path, tag_name: str, project_url: str) -> bool:
     return success
 
 
-def git_archive(root_dir: Path, archive_name: str, sign: bool = False) -> bool:
+def git_archive(
+    root_dir: Path, archive_name: str, tag_name: str, sign: bool = False
+) -> bool:
     """Create a .tar.gz archive from git for the version.
 
     When ``sign`` is True, a detached GPG .tar.gz.sig file is added.
     """
-    git_args = ["archive", "--format", "tgz", "--output", archive_name]
+    git_args = ["archive", "--format", "tgz", "--output", archive_name, tag_name]
     console.print(f"[{STYLE_MUTED}]$ git {' '.join(git_args)}")
     success, output = run_git_command(git_args, cwd=root_dir)
     if not success:
@@ -1971,7 +1973,9 @@ def main():
                 git_lines.append(f"$ git push {url} {tag_name}")
 
         if args.git_archive:
-            git_lines.append(f"$ git archive --format tgz --output {archive_name}")
+            git_lines.append(
+                f"$ git archive --format tgz --output {archive_name} {tag_name}"
+            )
 
             if args.sign_archive:
                 git_lines.append(
@@ -2058,7 +2062,7 @@ def main():
                     sys.exit(1)
 
         if args.git_archive and archive_name:
-            success = git_archive(root_dir, archive_name, args.sign_archive)
+            success = git_archive(root_dir, archive_name, tag_name, args.sign_archive)
             if not success:
                 sys.exit(1)
 
