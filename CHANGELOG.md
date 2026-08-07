@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [2.2.3] - 2026-08-07
+
 - jrl_release: fix archive signature
 
 ## [2.2.2] - 2026-08-07
@@ -64,7 +66,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 First release
 
 
-[Unreleased]: https://github.com/coal-library/coal/compare/v2.2.2...HEAD
+[Unreleased]: https://github.com/coal-library/coal/compare/v2.2.3...HEAD
+[2.2.3]: https://github.com/coal-library/coal/compare/v2.2.2...v2.2.3
 [2.2.2]: https://github.com/coal-library/coal/compare/v2.2.1...v2.2.2
 [2.2.1]: https://github.com/coal-library/coal/compare/v2.2.0...v2.2.1
 [2.2.0]: https://github.com/coal-library/coal/compare/v2.1.0...v2.2.0
