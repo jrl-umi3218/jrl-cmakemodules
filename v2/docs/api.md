@@ -219,12 +219,16 @@ jrl_target_set_output_directory(my_python_module_target OUTPUT_DIRECTORY ${CMAKE
 jrl_configure_default_install_dirs()
 ```
 
-**Type:** function
+**Type:** macro
 
 
 ### Description
   Configures the default install directories using GNUInstallDirs (bin, lib, include, etc.).
   Works on all platforms.
+
+  Must be called directly from a project's `CMakeLists.txt`, not wrapped in a `function()`:
+  `CMAKE_INSTALL_DOCDIR`, `DATADIR`, `MANDIR`, `INFODIR`, `LOCALEDIR` and every
+  `CMAKE_INSTALL_FULL_*` are not cache entries and would be lost when the function returns.
 
 
 ### Arguments
