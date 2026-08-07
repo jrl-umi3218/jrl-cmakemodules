@@ -4,7 +4,7 @@ project(
   jrl-cmakemodules
   DESCRIPTION "JRL CMake utility toolbox"
   HOMEPAGE_URL "http://github.com/jrl-umi3218/jrl-cmakemodules"
-  VERSION 2.2.1
+  VERSION 2.2.2
   LANGUAGES NONE
 )
 
