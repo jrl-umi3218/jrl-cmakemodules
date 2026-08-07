@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+- jrl_release: fix archive signature
+
 ## [2.2.2] - 2026-08-07
 
 - jrl_release: fix archive creation

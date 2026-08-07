@@ -1162,7 +1162,14 @@ def git_archive(
         return False
 
     if sign:
-        call = ["gpg", "--detach-sign", "--armor", f"{archive_name}.sig", archive_name]
+        call = [
+            "gpg",
+            "--detach-sign",
+            "--armor",
+            "-o",
+            f"{archive_name}.sig",
+            archive_name,
+        ]
         console.print(f"[{STYLE_MUTED}]$ {' '.join(call)}")
         result = subprocess.run(call, cwd=root_dir, capture_output=True, text=True)
         if result.returncode != 0:
@@ -1979,7 +1986,7 @@ def main():
 
             if args.sign_archive:
                 git_lines.append(
-                    f"$ gpg --detach-sign --armor {archive_name}.sig {archive_name}"
+                    f"$ gpg --detach-sign --armor -o {archive_name}.sig {archive_name}"
                 )
 
         if args.gh_release:
