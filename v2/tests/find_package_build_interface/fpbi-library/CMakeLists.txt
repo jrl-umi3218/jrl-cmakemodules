@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.22)
 
 project(fpbi-library VERSION 1.0.0 LANGUAGES CXX)
 
-find_package(jrl-cmakemodules 1.2.0 CONFIG REQUIRED)
+find_package(jrl-cmakemodules 2.0.0 CONFIG REQUIRED)
 jrl_configure_defaults()
 
 # The fake packages live in the build tree, under a prefix laid out the way find_package()

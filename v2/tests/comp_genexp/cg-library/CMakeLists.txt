@@ -8,7 +8,7 @@ project(
     LANGUAGES CXX
 )
 
-find_package(jrl-cmakemodules 1.2.0 CONFIG REQUIRED)
+find_package(jrl-cmakemodules 2.0.0 CONFIG REQUIRED)
 jrl_configure_defaults()
 
 jrl_option(CG_BUILD_WITH_EXTRA "Build with something" ON)

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.22)
 
 project(expected_targets_ok VERSION 1.0.0)
 
-find_package(jrl-cmakemodules 1.2.0 CONFIG REQUIRED)
+find_package(jrl-cmakemodules 2.0.0 CONFIG REQUIRED)
 jrl_configure_defaults()
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
