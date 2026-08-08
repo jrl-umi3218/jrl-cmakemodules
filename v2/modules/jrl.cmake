@@ -1302,6 +1302,148 @@ function(_jrl_normalize_version version_str)
 endfunction()
 
 #[============================================================================[
+# `_jrl_version_is_compatible`
+
+```cpp
+_jrl_version_is_compatible(
+    <found_version>
+    <version_request>
+    OUTPUT <var>
+    [EXACT]
+)
+```
+
+**Type:** function
+
+
+### Description
+    Tells whether <found_version> satisfies <version_request>, using the same
+    semantics as the version argument of find_package():
+      * `<min>`             : found version must be >= <min>
+      * `<min>...<max>`     : found version must be >= <min> and <= <max>
+      * `<min>...<<max>`    : found version must be >= <min> and < <max>
+      * `EXACT`             : found version must match <version_request> on the
+                              components explicitly given (1.2 EXACT matches 1.2.7)
+    Versions are compared on their leading numeric components only, so Python
+    suffixes such as `.post1`, `rc1` or `.dev0` are ignored (2.0.0rc1 compares
+    as 2.0.0).
+    An empty <version_request> is always compatible. A <found_version> without
+    any numeric component is never compatible with a non-empty request.
+    A <version_request> that does not start with a version number is a caller
+    error and raises a fatal error, so that a malformed constraint cannot be
+    silently read as "no constraint".
+
+
+### Arguments
+* `found_version`: The version that was detected.
+* `version_request`: The requested version or version range, may be empty.
+* `OUTPUT`: Variable to store the result (true/false).
+* `EXACT`: If set, request an exact version match. Requires a version, not allowed with a range.
+
+
+### Example
+```cmake
+_jrl_version_is_compatible("4.12.2" "4.5" OUTPUT ok) # -> ok is true
+_jrl_version_is_compatible("4.12.2" "4.5" EXACT OUTPUT ok) # -> ok is false
+_jrl_version_is_compatible("4.12.2" "4.0...<5" OUTPUT ok) # -> ok is true
+_jrl_version_is_compatible("4.12.2" "beta" OUTPUT ok) # -> fatal error
+```
+#]============================================================================]
+function(_jrl_version_is_compatible found_version version_request)
+    set(options EXACT)
+    set(oneValueArgs OUTPUT)
+    set(multiValueArgs)
+    cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+    _jrl_check_no_unrecognized_arguments(arg)
+    _jrl_check_var_defined(arg_OUTPUT "_jrl_version_is_compatible requires an OUTPUT argument.")
+
+    if(NOT version_request)
+        if(arg_EXACT)
+            message(FATAL_ERROR "EXACT requires a version to compare against.")
+        endif()
+        set(${arg_OUTPUT} true PARENT_SCOPE)
+        return()
+    endif()
+
+    # Split an optional version range (1.2...<2.0 -> min 1.2, exclusive max 2.0).
+    if(version_request MATCHES "^(.+)\\.\\.\\.(<?)(.+)$")
+        set(version_min "${CMAKE_MATCH_1}")
+        set(upper_bound_exclusive "${CMAKE_MATCH_2}")
+        set(version_max "${CMAKE_MATCH_3}")
+        if(arg_EXACT)
+            message(FATAL_ERROR "EXACT cannot be used with the version range '${version_request}'.")
+        endif()
+    else()
+        set(version_min "${version_request}")
+        set(version_max "")
+    endif()
+
+    # A bound without a leading version number would degrade to 0.0.0 and make the
+    # whole request meaningless, so report it instead of answering.
+    if(NOT version_min MATCHES "^[0-9]+(\\.[0-9]+)*")
+        message(
+            FATAL_ERROR
+            "Invalid version request '${version_request}': '${version_min}' does not start with a version number."
+        )
+    endif()
+    if(version_max AND NOT version_max MATCHES "^[0-9]+(\\.[0-9]+)*")
+        message(
+            FATAL_ERROR
+            "Invalid version request '${version_request}': '${version_max}' does not start with a version number."
+        )
+    endif()
+
+    # Only the leading numeric components are compared (2.0.0rc1 -> 2.0.0).
+    string(REGEX MATCH "^[0-9]+(\\.[0-9]+)*" found_clean "${found_version}")
+    if(NOT found_clean)
+        set(${arg_OUTPUT} false PARENT_SCOPE)
+        return()
+    endif()
+
+    _jrl_normalize_version("${found_clean}" VERSION_FULL_WITH_TWEAK found)
+    _jrl_normalize_version("${version_min}" VERSION_FULL_WITH_TWEAK min)
+
+    if(arg_EXACT)
+        # EXACT only compares the components explicitly requested (1.2 matches 1.2.7).
+        string(REGEX MATCH "^[0-9]+(\\.[0-9]+)*" min_clean "${version_min}")
+        string(REPLACE "." ";" min_components "${min_clean}")
+        list(LENGTH min_components component_count)
+        if(component_count GREATER 4)
+            set(component_count 4)
+        endif()
+
+        string(REPLACE "." ";" found_padded "${found}")
+        string(REPLACE "." ";" min_padded "${min}")
+        list(SUBLIST found_padded 0 ${component_count} found_head)
+        list(SUBLIST min_padded 0 ${component_count} min_head)
+
+        if(found_head STREQUAL min_head)
+            set(result true)
+        else()
+            set(result false)
+        endif()
+        set(${arg_OUTPUT} ${result} PARENT_SCOPE)
+        return()
+    endif()
+
+    set(result true)
+    if(found VERSION_LESS min)
+        set(result false)
+    elseif(version_max)
+        _jrl_normalize_version("${version_max}" VERSION_FULL_WITH_TWEAK max)
+        if(upper_bound_exclusive STREQUAL "<")
+            if(NOT found VERSION_LESS max)
+                set(result false)
+            endif()
+        elseif(found VERSION_GREATER max)
+            set(result false)
+        endif()
+    endif()
+
+    set(${arg_OUTPUT} ${result} PARENT_SCOPE)
+endfunction()
+
+#[============================================================================[
 # `_jrl_target_generate_header`
 
 ```cpp
@@ -3797,6 +3939,8 @@ endfunction()
 ```cpp
 jrl_check_python_module(
     <module_name>
+    [<version>|<version_range>]
+    [EXACT]
     [REQUIRED]
     [QUIET]
 )
@@ -3811,9 +3955,21 @@ jrl_check_python_module(
   falling back to importlib.metadata.version(<module_name>) otherwise.
   Displays messages based on REQUIRED and QUIET options.
 
+  An optional version constraint may be given as the first argument, with the
+  same syntax as find_package():
+    * `<version>`               : the module version must be >= <version>
+    * `<min>...<max>`           : the module version must be >= <min> and <= <max>
+    * `<min>...<<max>`          : the module version must be >= <min> and < <max>
+    * `<version> EXACT`         : the module version must match the components given
+  A module whose version does not satisfy the constraint (or whose version cannot
+  be determined) is reported as not found. Only the leading numeric components are
+  compared, so Python suffixes such as `.post1`, `rc1` or `.dev0` are ignored.
+
 
 ### Arguments
 * `module_name`: The python module name.
+* `version`: Optional version or version range the module must satisfy.
+* `EXACT`: If set, request an exact version match. Requires a version, not allowed with a range.
 * `REQUIRED`: If set, the package is required.
 * `QUIET`: If set, do not print messages.
 
@@ -3821,14 +3977,41 @@ jrl_check_python_module(
 ### Example
 ```cmake
 jrl_check_python_module(numpy REQUIRED)
+jrl_check_python_module(typing_extensions 4.5 REQUIRED)
+jrl_check_python_module(numpy 1.21...<3 REQUIRED)
 ```
 #]============================================================================]
 function(jrl_check_python_module module_name)
-    set(options REQUIRED QUIET)
+    set(options REQUIRED QUIET EXACT)
     set(oneValueArgs)
     set(multiValueArgs)
-    cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+    # Like find_package(), the version is an optional positional argument (numpy 1.21 REQUIRED).
+    set(remaining_args ${ARGN})
+    set(version_request "")
+    if(remaining_args)
+        list(GET remaining_args 0 first_arg)
+        if(first_arg MATCHES "^[0-9]+(\\.[0-9]+)*(\\.\\.\\.<?[0-9]+(\\.[0-9]+)*)?$")
+            set(version_request "${first_arg}")
+            list(REMOVE_AT remaining_args 0)
+        endif()
+    endif()
+
+    cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${remaining_args})
     _jrl_check_no_unrecognized_arguments(arg)
+
+    if(arg_EXACT AND NOT version_request)
+        message(
+            FATAL_ERROR
+            "jrl_check_python_module(${module_name} EXACT) requires a version to be given."
+        )
+    endif()
+
+    if(version_request)
+        set(version_request_message " (version ${version_request} required)")
+    else()
+        set(version_request_message "")
+    endif()
 
     jrl_python_get_interpreter(python)
 
@@ -3860,10 +4043,42 @@ function(jrl_check_python_module module_name)
         endif()
     endif()
 
-    if(module_found STREQUAL 0)
+    if(module_version)
+        set(${module_name}_VERSION "${module_version}" PARENT_SCOPE)
+    endif()
+
+    set(version_is_compatible true)
+    set(version_error_message "")
+    if(module_found STREQUAL 0 AND version_request)
+        if(arg_EXACT)
+            set(exact_option EXACT)
+        else()
+            set(exact_option)
+        endif()
+
+        if(NOT module_version)
+            set(version_is_compatible false)
+            set(version_error_message
+                "Python module '${module_name}' found but its version could not be determined${version_request_message}."
+            )
+        else()
+            _jrl_version_is_compatible(
+                "${module_version}"
+                "${version_request}"
+                ${exact_option}
+                OUTPUT version_is_compatible
+            )
+            if(NOT version_is_compatible)
+                set(version_error_message
+                    "Python module '${module_name}' found (version: ${module_version}) but it does not satisfy the requested version ${version_request}."
+                )
+            endif()
+        endif()
+    endif()
+
+    if(module_found STREQUAL 0 AND version_is_compatible)
         set(${module_name}_FOUND true PARENT_SCOPE)
         if(module_version)
-            set(${module_name}_VERSION "${module_version}" PARENT_SCOPE)
             if(NOT arg_QUIET)
                 message(STATUS "Python module '${module_name}' found (version: ${module_version}).")
             endif()
@@ -3874,10 +4089,17 @@ function(jrl_check_python_module module_name)
         endif()
     else()
         set(${module_name}_FOUND false PARENT_SCOPE)
+        if(version_error_message)
+            set(not_found_message "${version_error_message}")
+        else()
+            set(not_found_message
+                "Python module '${module_name}' not found${version_request_message}."
+            )
+        endif()
         if(arg_REQUIRED)
-            message(FATAL_ERROR "Required Python module '${module_name}' not found.")
+            message(FATAL_ERROR "${not_found_message}")
         elseif(NOT arg_QUIET)
-            message(WARNING "Python module '${module_name}' not found.")
+            message(WARNING "${not_found_message}")
         endif()
     endif()
 endfunction()

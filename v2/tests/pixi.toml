@@ -14,6 +14,7 @@ test_multi_comp = { cmd = "pixi run test", cwd = "multi_comp" }
 test_multi_targets = { cmd = "pixi run test", cwd = "multi_targets" }
 test_no_deps = { cmd = "pixi run test", cwd = "no_deps" }
 test_python_bindings = { cmd = "pixi run test", cwd = "python_bindings" }
+test_python_module_version = { cmd = "pixi run test", cwd = "python_module_version" }
 test_regular_find_package = { cmd = "pixi run test", cwd = "regular_find_package" }
 test_expected_targets_warn = { cmd = "pixi run test", cwd = "expected_targets_warn" }
 test_expected_targets_skip = { cmd = "pixi run test", cwd = "expected_targets_skip" }
@@ -39,6 +40,7 @@ test = { depends-on = [
     "test_multi_targets",
     "test_no_deps",
     "test_python_bindings",
+    "test_python_module_version",
     "test_regular_find_package",
     "test_expected_targets_warn",
     "test_expected_targets_skip",
