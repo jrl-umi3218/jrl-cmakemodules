@@ -1,12 +1,12 @@
 cmake_minimum_required(VERSION 3.22)
+project(eti-project VERSION 1.0.0 LANGUAGES NONE)
 
-project(expected_targets_invalid VERSION 1.0.0)
+include(${CMAKE_CURRENT_SOURCE_DIR}/../../add_cmake_test.cmake)
+enable_testing()
 
-find_package(jrl-cmakemodules 1.2.0 CONFIG REQUIRED)
-jrl_configure_defaults()
+add_cmake_test(NAME jrl-cmakemodules SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../..")
+add_cmake_test(NAME failing-eti-project DEPENDS jrl-cmakemodules
+    PASS_REGULAR_EXPRESSION "The expected targets that were not imported are: Dummy::DoesNotExist"
+)
 
-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-
-# Dummy provides Dummy::A and Dummy::B. Requesting a non-existent target must
-# fail and report the actually-imported targets in the error message.
-jrl_find_package(Dummy REQUIRED EXPECTED_TARGETS Dummy::DoesNotExist)
+install(CODE "message(STATUS \"Fake install\")")
