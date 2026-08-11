@@ -69,6 +69,7 @@ pytest = "*"
 libmatio = "*"
 simde = "*"
 suitesparse = "*"
+mpfr = "*"
 gmp = "*"
 
 [feature.test.tasks]

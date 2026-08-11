@@ -15,6 +15,8 @@ test_find_cholmod = { cmd = "pixi run test", cwd = "FindCHOLMOD" }
 test_find_cholmod_notfound = { cmd = "pixi run test", cwd = "FindCHOLMODNotFound" }
 test_find_gmp = { cmd = "pixi run test", cwd = "FindGMP" }
 test_find_gmp_notfound = { cmd = "pixi run test", cwd = "FindGMPNotFound" }
+test_find_mpfr = { cmd = "pixi run test", cwd = "FindMPFR" }
+test_find_mpfr_notfound = { cmd = "pixi run test", cwd = "FindMPFRNotFound" }
 
 test = { depends-on = [
     "test_find_accelerate",
@@ -29,4 +31,6 @@ test = { depends-on = [
     "test_find_cholmod_notfound",
     "test_find_gmp",
     "test_find_gmp_notfound",
+    "test_find_mpfr",
+    "test_find_mpfr_notfound",
 ] }

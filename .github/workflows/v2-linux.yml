@@ -33,7 +33,8 @@ jobs:
             libmatio-dev \
             libsimde-dev \
             libsuitesparse-dev \
-            libgmp-dev
+            libgmp-dev \
+            libmpfr-dev
 
       - name: Setup Python Virtual Environment
         run: |
@@ -91,7 +92,8 @@ jobs:
             libmatio-dev \
             libsimde-dev \
             libsuitesparse-dev \
-            libgmp-dev
+            libgmp-dev \
+            libmpfr-dev
 
       - name: Setup Python Virtual Environment
         run: |
@@ -152,7 +154,8 @@ jobs:
             libmatio \
             simde \
             suitesparse \
-            gmp
+            gmp \
+            mpfr
 
       - name: Configure project
         run: cmake -G Ninja -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo -DJRL_CMAKEMODULES_BUILD_TESTS=ON
