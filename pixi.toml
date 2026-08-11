@@ -69,6 +69,7 @@ pytest = "*"
 libmatio = "*"
 simde = "*"
 suitesparse = "*"
+gmp = "*"
 
 [feature.test.tasks]
 _configure = { cmd = [

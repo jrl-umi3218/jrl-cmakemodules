@@ -13,6 +13,8 @@ test_find_pytest = { cmd = "pixi run test", cwd = "FindPytest" }
 test_find_pytest_notfound = { cmd = "pixi run test", cwd = "FindPytestNotFound" }
 test_find_cholmod = { cmd = "pixi run test", cwd = "FindCHOLMOD" }
 test_find_cholmod_notfound = { cmd = "pixi run test", cwd = "FindCHOLMODNotFound" }
+test_find_gmp = { cmd = "pixi run test", cwd = "FindGMP" }
+test_find_gmp_notfound = { cmd = "pixi run test", cwd = "FindGMPNotFound" }
 
 test = { depends-on = [
     "test_find_accelerate",
@@ -25,4 +27,6 @@ test = { depends-on = [
     "test_find_pytest_notfound",
     "test_find_cholmod",
     "test_find_cholmod_notfound",
+    "test_find_gmp",
+    "test_find_gmp_notfound",
 ] }
