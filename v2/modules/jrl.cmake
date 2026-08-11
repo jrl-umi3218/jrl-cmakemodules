@@ -3130,7 +3130,8 @@ jrl_legacy_option(
 
 ### Description
   Migrate a legacy option value to a new option name and emit a deprecation warning.
-  If the old option is defined, its value is migrated to the new option.
+  If the old option is defined, its value is migrated to the new option and the old cache
+  entry is removed, so the migration happens only once.
   The NEW_OPTION must already exist in the cache (created via jrl_option or option()).
   The help text is automatically retrieved from the NEW_OPTION cache property.
 
@@ -3189,6 +3190,10 @@ function(jrl_legacy_option)
         # Override NEW_OPTION with legacy value
         message(DEBUG "jrl_legacy_option: Migrating legacy value to '${arg_NEW_OPTION}'")
         set(${arg_NEW_OPTION} "${${arg_OLD_OPTION}}" CACHE BOOL "${help_text}" FORCE)
+
+        # Migrate only once. If kept, the old name would be re-applied with FORCE on every
+        # configure, so -D${arg_NEW_OPTION}=... would never work again.
+        unset(${arg_OLD_OPTION} CACHE)
     endif()
 endfunction()
 
@@ -3209,10 +3214,17 @@ jrl_option(
 
 
 ### Description
-  Declare a cache BOOL option with optional conditional availability and legacy name migration.
-  When `CONDITION` evaluates to false, the option is forced to the `FALLBACK` value (default OFF) with FORCE and hidden.
+  Declare a cache BOOL (all CMake options are booleans) option, with an optional condition and an optional legacy name.
+  When `CONDITION` is false, the option is forced to the `FALLBACK` value and hidden.
+  When `CONDITION` becomes true again on a reconfigure, the option is shown again and
+  gets back the value the user asked for, or `<default_value>` if they never set one.
   When `LEGACY_NAME` is set, its value is migrated to `<name>` and a deprecation
   warning is emitted.
+
+  Like CMake `option()` with policy `CMP0077`, a normal variable of the same name takes
+  precedence without creating a cache entry, allowing a parent project to set options
+  before `add_subdirectory()` or `FetchContent`. If `CONDITION` evaluates to false, the
+  fallback value is still enforced.
 
 
 ### Arguments
@@ -3220,8 +3232,9 @@ jrl_option(
 * `help_text`: The cache entry help string.
 * `default_value`: The default value (ON/OFF).
 * `CONDITION`: CMake condition string to evaluate (optional). If false, the option will be forced to FALLBACK value.
-* `FALLBACK`: Value to force when CONDITION is false (optional).
-* `LEGACY_NAME`: Deprecated option name to migrate (optional).
+    A semicolon-separated list is also accepted, in which case every element must be true, as in `cmake_dependent_option()`.
+* `FALLBACK`: Value to force when CONDITION is false (required when CONDITION is given).
+* `LEGACY_NAME`: Deprecated option name to migrate (optional). It is an alias for `<name>`, so it goes through `CONDITION` as well.
 
 
 ### Example
@@ -3236,13 +3249,37 @@ jrl_option(
     LEGACY_NAME BUILD_PYTHON_BINDINGS
 )
 ```
+
+`BUILD_PYTHON` follows its condition from one configure to the next:
+```bash
+cmake -B build -DBUILD_SHARED_LIBS=OFF # BUILD_PYTHON is forced to OFF and hidden
+cmake build -DBUILD_SHARED_LIBS=ON     # BUILD_PYTHON is ON and visible again
+```
 #]============================================================================]
 function(jrl_option option_name help_text default_value)
     set(options)
     set(oneValueArgs CONDITION FALLBACK LEGACY_NAME)
     set(multiValueArgs)
-    cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+    cmake_parse_arguments(PARSE_ARGV 3 arg "${options}" "${oneValueArgs}" "${multiValueArgs}")
     _jrl_check_no_unrecognized_arguments(arg)
+
+    if(ARGC GREATER 3)
+        math(EXPR last_arg_index "${ARGC} - 1")
+        foreach(arg_index RANGE 3 ${last_arg_index})
+            set(keyword "${ARGV${arg_index}}")
+            if(NOT "${keyword}" IN_LIST oneValueArgs)
+                continue()
+            endif()
+            if(NOT DEFINED arg_${keyword} OR "${arg_${keyword}}" STREQUAL "")
+                message(
+                    FATAL_ERROR
+                    "jrl_option: the ${keyword} keyword of option '${option_name}' was given an empty value.
+        If it was written as ${keyword} \"\${SOME_VAR}\", pass the expression unexpanded instead,
+        e.g. CONDITION \"SOME_VAR AND OTHER_VAR\"."
+                )
+            endif()
+        endforeach()
+    endif()
 
     message(
         DEBUG
@@ -3259,22 +3296,33 @@ function(jrl_option option_name help_text default_value)
         message(DEBUG "    Fallback value when condition is false: ${fallback_value}")
     endif()
 
-    # Evaluate condition
+    if(DEFINED arg_LEGACY_NAME AND DEFINED ${arg_LEGACY_NAME})
+        message(DEBUG "    Handling legacy option name '${arg_LEGACY_NAME}' for '${option_name}'")
+        if(NOT DEFINED CACHE{${option_name}})
+            set(${option_name} "${default_value}" CACHE BOOL "${help_text}")
+        endif()
+        jrl_legacy_option(
+            NEW_OPTION ${option_name}
+            OLD_OPTION ${arg_LEGACY_NAME}
+        )
+    endif()
+
     set(enable_option ON)
-    if(arg_CONDITION)
+    if(DEFINED arg_CONDITION)
         message(DEBUG "    Evaluating condition: ${arg_CONDITION}")
 
-        # Evaluate the string condition
-        cmake_language(
-            EVAL CODE
-                "
-            if(${arg_CONDITION})
-                set(enable_option ON)
-            else()
-                set(enable_option OFF)
-            endif()
-        "
-        )
+        # All conditions in the list must be true (like cmake_dependent_option)
+        foreach(condition IN LISTS arg_CONDITION)
+            cmake_language(
+                EVAL CODE
+                    "
+                if(${condition})
+                else()
+                    set(enable_option OFF)
+                endif()
+            "
+            )
+        endforeach()
 
         if(enable_option)
             message(DEBUG "    Condition passed")
@@ -3286,11 +3334,107 @@ function(jrl_option option_name help_text default_value)
         endif()
     endif()
 
-    # Set the option
+    set_property(
+        GLOBAL
+        PROPERTY _jrl_${PROJECT_NAME}_option_${option_name}_default_value ${default_value}
+    )
+    if(DEFINED arg_CONDITION)
+        set_property(
+            GLOBAL
+            PROPERTY _jrl_${PROJECT_NAME}_option_${option_name}_condition "${arg_CONDITION}"
+        )
+        set_property(
+            GLOBAL
+            PROPERTY _jrl_${PROJECT_NAME}_option_${option_name}_available ${enable_option}
+        )
+    endif()
+    if(DEFINED arg_LEGACY_NAME)
+        set_property(
+            GLOBAL
+            PROPERTY _jrl_${PROJECT_NAME}_option_${option_name}_legacy_option "${arg_LEGACY_NAME}"
+        )
+    endif()
+    set_property(GLOBAL PROPERTY _jrl_${PROJECT_NAME}_option_names ${option_name} APPEND)
+
+    # If the parent project set this as a normal variable (e.g. before add_subdirectory),
+    # use its value and do not create a cache entry (CMP0077).
+    if(DEFINED ${option_name} AND NOT DEFINED CACHE{${option_name}})
+        if(NOT enable_option)
+            if(NOT "${${option_name}}" STREQUAL "${fallback_value}")
+                message(
+                    STATUS
+                    "[${PROJECT_NAME}] Option ${option_name} is forced to '${fallback_value}' because its condition '${arg_CONDITION}' is false (set to '${${option_name}}' by the parent project)."
+                )
+            endif()
+            set(${option_name} "${fallback_value}" PARENT_SCOPE)
+        endif()
+        return()
+    endif()
+
+    set(forced_value_var "_jrl_option_${option_name}_forced_value")
+    set(user_value_var "_jrl_option_${option_name}_user_value")
+    set(managed_var "_jrl_option_${option_name}_managed")
+
+    set(has_cached_value OFF)
+    set(cached_value "")
+    if(DEFINED CACHE{${option_name}})
+        set(has_cached_value ON)
+        set(cached_value "$CACHE{${option_name}}")
+    endif()
+
+    set(has_forced_value OFF)
+    set(forced_value "")
+    if(DEFINED CACHE{${forced_value_var}})
+        set(has_forced_value ON)
+        set(forced_value "$CACHE{${forced_value_var}}")
+    endif()
+
+    set(has_remembered_value OFF)
+    set(remembered_value "")
+    if(DEFINED CACHE{${user_value_var}})
+        set(has_remembered_value ON)
+        set(remembered_value "$CACHE{${user_value_var}}")
+    endif()
+
+    set(is_managed OFF)
+    if(DEFINED CACHE{${managed_var}})
+        set(is_managed ON)
+    endif()
+
+    set(was_forced OFF)
+    set(value_is_forced OFF)
+    if(has_forced_value)
+        set(was_forced ON)
+        if(has_cached_value AND "${cached_value}" STREQUAL "${forced_value}")
+            set(value_is_forced ON)
+        endif()
+    elseif(DEFINED arg_CONDITION AND has_cached_value AND NOT is_managed)
+        # Compatibility with older jrl_option() cache entries
+        get_property(is_advanced CACHE ${option_name} PROPERTY ADVANCED)
+        if(is_advanced AND "${cached_value}" STREQUAL "${fallback_value}")
+            set(was_forced ON)
+            set(value_is_forced ON)
+        endif()
+    endif()
+
     if(enable_option)
-        if(DEFINED CACHE{${option_name}})
-            message(DEBUG "    Option '${option_name}' already set to '${${option_name}}'")
-            # Get the type and force it to be initialized. Right now, only BOOL options are supported, but this can be extended in the future if needed.
+        if(value_is_forced)
+            if(has_remembered_value)
+                set(restored_value "${remembered_value}")
+            else()
+                set(restored_value "${default_value}")
+            endif()
+            message(
+                DEBUG
+                "    Condition is true again, restoring option '${option_name}' to '${restored_value}'"
+            )
+            message(
+                STATUS
+                "[${PROJECT_NAME}] Option ${option_name} is available again (its condition '${arg_CONDITION}' is now true) and set to '${restored_value}'."
+            )
+            set(${option_name} "${restored_value}" CACHE BOOL "${help_text}" FORCE)
+        elseif(has_cached_value)
+            message(DEBUG "    Option '${option_name}' already set to '${cached_value}'")
             get_property(type CACHE ${option_name} PROPERTY TYPE)
             if(type STREQUAL "UNINITIALIZED")
                 message(
@@ -3303,41 +3447,43 @@ function(jrl_option option_name help_text default_value)
             message(DEBUG "    Setting option '${option_name}' to '${default_value}'")
             set(${option_name} "${default_value}" CACHE BOOL "${help_text}")
         endif()
+
+        if(was_forced)
+            mark_as_advanced(CLEAR ${option_name})
+            unset(${forced_value_var} CACHE)
+            unset(${user_value_var} CACHE)
+        endif()
     else()
+        if(NOT value_is_forced AND has_cached_value)
+            set(remembered_value "${cached_value}")
+            set(has_remembered_value ON)
+            set(${user_value_var}
+                "${cached_value}"
+                CACHE INTERNAL
+                "Value of ${option_name} requested before its CONDITION disabled it"
+            )
+        endif()
+
+        if(has_remembered_value AND NOT "${remembered_value}" STREQUAL "${fallback_value}")
+            message(
+                STATUS
+                "[${PROJECT_NAME}] Option ${option_name} is forced to '${fallback_value}' because its condition '${arg_CONDITION}' is false (requested: '${remembered_value}')."
+            )
+        endif()
         message(
             DEBUG
             "    Forcing option '${option_name}' to fallback value '${fallback_value}' (hidden)"
         )
         set(${option_name} "${fallback_value}" CACHE BOOL "${help_text}" FORCE)
-        mark_as_advanced(${option_name})
+        set(${forced_value_var}
+            "${fallback_value}"
+            CACHE INTERNAL
+            "Fallback value forced on ${option_name} by jrl_option()"
+        )
+        mark_as_advanced(FORCE ${option_name})
     endif()
 
-    # Handle legacy name (after option is created)
-    if(arg_LEGACY_NAME)
-        message(DEBUG "    Handling legacy option name '${arg_LEGACY_NAME}' for '${option_name}'")
-        jrl_legacy_option(
-            NEW_OPTION ${option_name}
-            OLD_OPTION ${arg_LEGACY_NAME}
-        )
-    endif()
-
-    set_property(
-        GLOBAL
-        PROPERTY _jrl_${PROJECT_NAME}_option_${option_name}_default_value ${default_value}
-    )
-    if(DEFINED arg_CONDITION)
-        set_property(
-            GLOBAL
-            PROPERTY _jrl_${PROJECT_NAME}_option_${option_name}_condition "${arg_CONDITION}"
-        )
-    endif()
-    if(DEFINED arg_LEGACY_NAME)
-        set_property(
-            GLOBAL
-            PROPERTY _jrl_${PROJECT_NAME}_option_${option_name}_legacy_option "${arg_LEGACY_NAME}"
-        )
-    endif()
-    set_property(GLOBAL PROPERTY _jrl_${PROJECT_NAME}_option_names ${option_name} APPEND)
+    set(${managed_var} 1 CACHE INTERNAL "Option ${option_name} is managed by jrl_option()")
 endfunction()
 
 #[============================================================================[
@@ -3551,6 +3697,16 @@ function(jrl_print_options_summary)
             GLOBAL
             PROPERTY _jrl_${PROJECT_NAME}_option_${option_name}_legacy_option
         )
+        get_property(
+            _available
+            GLOBAL
+            PROPERTY _jrl_${PROJECT_NAME}_option_${option_name}_available
+        )
+        get_property(
+            _condition
+            GLOBAL
+            PROPERTY _jrl_${PROJECT_NAME}_option_${option_name}_condition
+        )
 
         _jrl_pad_string("${option_name}"      40 _name)
         _jrl_pad_string("${_type}"     8 _type)
@@ -3559,6 +3715,11 @@ function(jrl_print_options_summary)
         _jrl_pad_string("${_default}"  3 _default)
 
         _jrl_log("${_name} | ${_type} | ${_val} | ${_help} (${_default})")
+        if(DEFINED _available AND NOT _available)
+            # Without this the row just shows a value that disagrees with the default and
+            # gives no reason for it.
+            _jrl_log("  (Unavailable: condition '${_condition}' is false)")
+        endif()
         if(_legacy_option)
             _jrl_log("  (Legacy option: ${_legacy_option})")
         endif()
