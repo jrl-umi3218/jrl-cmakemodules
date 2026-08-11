@@ -48,10 +48,16 @@ jrl_option(
   OFF
 )
 
-# CppAD is missing from the Arch Linux repositories.
+# CppAD is missing from the Arch repositories and CppADCodeGen is conda-forge only.
 jrl_option(
   JRL_CMAKEMODULES_ENABLE_TEST_CPPAD
   "Run the Findcppad test (requires CppAD)"
+  OFF
+)
+
+jrl_option(
+  JRL_CMAKEMODULES_ENABLE_TEST_CPPADCG
+  "Run the Findcppadcg test (requires CppADCodeGen)"
   OFF
 )
 

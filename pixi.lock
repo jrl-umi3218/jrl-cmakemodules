@@ -182,6 +182,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/catch2-3.15.0-h171cf75_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/cmake-4.3.3-hc85cc9f_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/cppad-20260000.0-hecca717_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/cppadcodegen-2.5.0-hecca717_3.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/cxx-compiler-1.11.0-hfcd1e18_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/eigen-5.0.1-hc65338a_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/gcc-14.3.0-h6f77f03_19.conda
@@ -286,6 +287,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/catch2-3.15.0-hdc560ac_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/cmake-4.3.3-hc9d863e_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/cppad-20260000.0-hfae3067_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/cppadcodegen-2.5.0-hfae3067_3.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/cxx-compiler-1.11.0-h7b35c40_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/eigen-5.0.1-h5263460_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/gcc-14.3.0-h24a549f_19.conda
@@ -414,6 +416,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-64/cmake-4.3.3-h2426fb6_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/compiler-rt-19.1.7-he914875_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/cppad-20260000.0-h991f03e_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-64/cppadcodegen-2.5.0-hcc62823_3.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/cxx-compiler-1.11.0-h307afc9_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/eigen-5.0.1-h4ff50a2_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/gmp-6.3.0-hf036a51_2.conda
@@ -526,6 +529,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/cmake-4.3.3-h8cb302d_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/compiler-rt-19.1.7-h855ad52_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/cppad-20260000.0-hf6b4638_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/cppadcodegen-2.5.0-hf6b4638_3.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/cxx-compiler-1.11.0-h88570a1_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/eigen-5.0.1-h44d0d2d_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/gmp-6.3.0-h7bae524_2.conda
@@ -623,6 +627,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/catch2-3.15.0-h477610d_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/cmake-4.3.3-hdcbee5b_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/cppad-20260000.0-hac47afa_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/win-64/cppadcodegen-2.5.0-hac47afa_3.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/cxx-compiler-1.11.0-h1c1089f_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/eigen-5.0.1-h5112557_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/gmp-6.3.0-hfeafd45_2.conda
@@ -807,6 +812,20 @@ packages:
     - cppad >=20260000.0,<20260000.1.0a0
   size: 506200
   timestamp: 1767534859985
+- conda: https://conda.anaconda.org/conda-forge/linux-64/cppadcodegen-2.5.0-hecca717_3.conda
+  sha256: f4cf8ef4475ec607cd738b4b24770122156cfbe8adf7efb28930eb3560cc9d4f
+  md5: bafb4fadb6c3d8253fa9c66be55d7c6a
+  depends:
+  - __glibc >=2.17,<3.0.a0
+  - cppad >=20260000.0,<20260000.1.0a0
+  - libgcc >=14
+  - libstdcxx >=14
+  license: GPL-3.0-only OR EPL-2.0
+  run_exports:
+    weak:
+    - cppadcodegen >=2.5.0,<2.6.0a0
+  size: 278274
+  timestamp: 1780558326354
 - conda: https://conda.anaconda.org/conda-forge/linux-64/cxx-compiler-1.11.0-hfcd1e18_0.conda
   sha256: 3fcc97ae3e89c150401a50a4de58794ffc67b1ed0e1851468fcc376980201e25
   md5: 5da8c935dca9186673987f79cef0b2a5
@@ -1877,6 +1896,19 @@ packages:
     - cppad >=20260000.0,<20260000.1.0a0
   size: 499830
   timestamp: 1767536481671
+- conda: https://conda.anaconda.org/conda-forge/linux-aarch64/cppadcodegen-2.5.0-hfae3067_3.conda
+  sha256: 01c7771e83c13534cbeafbc86767e1ed984a950391e1e92c482b6b70c831acf8
+  md5: 30b7cdb16ddfcf0b7d687c7d5be316a2
+  depends:
+  - cppad >=20260000.0,<20260000.1.0a0
+  - libgcc >=14
+  - libstdcxx >=14
+  license: GPL-3.0-only OR EPL-2.0
+  run_exports:
+    weak:
+    - cppadcodegen >=2.5.0,<2.6.0a0
+  size: 277824
+  timestamp: 1780558359873
 - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/cxx-compiler-1.11.0-h7b35c40_0.conda
   sha256: b87cd33501867d999caa1a57e488e69dc9e08011ec8685586df754302247a7a4
   md5: 0234c63e6b36b1677fd6c5238ef0a4ec
@@ -3270,6 +3302,19 @@ packages:
     - cppad >=20260000.0,<20260000.1.0a0
   size: 491367
   timestamp: 1767535116937
+- conda: https://conda.anaconda.org/conda-forge/osx-64/cppadcodegen-2.5.0-hcc62823_3.conda
+  sha256: 46808565f0da427dd48b9cda2a363e7742821135f014f1b4f56178a202e1185c
+  md5: 1c67c018f8f38c8a4702cc64b629f869
+  depends:
+  - __osx >=11.0
+  - cppad >=20260000.0,<20260000.1.0a0
+  - libcxx >=19
+  license: GPL-3.0-only OR EPL-2.0
+  run_exports:
+    weak:
+    - cppadcodegen >=2.5.0,<2.6.0a0
+  size: 277823
+  timestamp: 1780558617684
 - conda: https://conda.anaconda.org/conda-forge/osx-64/cxx-compiler-1.11.0-h307afc9_0.conda
   sha256: d6976f8d8b51486072abfe1e76a733688380dcbd1a8e993a43d59b80f7288478
   md5: 463bb03bb27f9edc167fb3be224efe96
@@ -4422,6 +4467,19 @@ packages:
     - cppad >=20260000.0,<20260000.1.0a0
   size: 488927
   timestamp: 1767535106097
+- conda: https://conda.anaconda.org/conda-forge/osx-arm64/cppadcodegen-2.5.0-hf6b4638_3.conda
+  sha256: 91ebe1340c4e658ba56d8eab42c4ce830cc4d2b0b0060011f6b3f63e09c6b49d
+  md5: 0a0b719bc23f00ebb4f58e85c3adfdb3
+  depends:
+  - __osx >=11.0
+  - cppad >=20260000.0,<20260000.1.0a0
+  - libcxx >=19
+  license: GPL-3.0-only OR EPL-2.0
+  run_exports:
+    weak:
+    - cppadcodegen >=2.5.0,<2.6.0a0
+  size: 277993
+  timestamp: 1780558971315
 - conda: https://conda.anaconda.org/conda-forge/osx-arm64/cxx-compiler-1.11.0-h88570a1_0.conda
   sha256: 99800d97a3a2ee9920dfc697b6d4c64e46dc7296c78b1b6c746ff1c24dea5e6c
   md5: 043afed05ca5a0f2c18252ae4378bdee
@@ -5419,6 +5477,20 @@ packages:
     - cppad >=20260000.0,<20260000.1.0a0
   size: 604164
   timestamp: 1767535011874
+- conda: https://conda.anaconda.org/conda-forge/win-64/cppadcodegen-2.5.0-hac47afa_3.conda
+  sha256: 83cd12e548daa5252d38a6e0c079e565679049a8714d324b2da31292f31c156e
+  md5: a795763fbb9066323271c6052e25a51d
+  depends:
+  - cppad >=20260000.0,<20260000.1.0a0
+  - ucrt >=10.0.20348.0
+  - vc >=14.3,<15
+  - vc14_runtime >=14.44.35208
+  license: GPL-3.0-only OR EPL-2.0
+  run_exports:
+    weak:
+    - cppadcodegen >=2.5.0,<2.6.0a0
+  size: 279070
+  timestamp: 1780558412323
 - conda: https://conda.anaconda.org/conda-forge/win-64/cxx-compiler-1.11.0-h1c1089f_0.conda
   sha256: c888f4fe9ec117c1c01bfaa4c722ca475ebbb341c92d1718afa088bb0d710619
   md5: 4d94d3c01add44dc9d24359edf447507
