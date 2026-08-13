@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.22)
 
 project(lwbi-library VERSION 1.0.0 LANGUAGES CXX)
 
-find_package(jrl-cmakemodules 1.2.0 CONFIG REQUIRED)
+find_package(jrl-cmakemodules 2.0.0 CONFIG REQUIRED)
 jrl_configure_defaults()
 
 # Declares <name>::<name> as an imported target and registers it as a package dependency,

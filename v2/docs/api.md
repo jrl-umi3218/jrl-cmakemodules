@@ -1127,6 +1127,8 @@ jrl_python_generate_init_py(
 ```cpp
 jrl_check_python_module(
     <module_name>
+    [<version>|<version_range>]
+    [EXACT]
     [REQUIRED]
     [QUIET]
 )
@@ -1141,9 +1143,21 @@ jrl_check_python_module(
   falling back to importlib.metadata.version(<module_name>) otherwise.
   Displays messages based on REQUIRED and QUIET options.
 
+  An optional version constraint may be given as the first argument, with the
+  same syntax as find_package():
+    * `<version>`               : the module version must be >= <version>
+    * `<min>...<max>`           : the module version must be >= <min> and <= <max>
+    * `<min>...<<max>`          : the module version must be >= <min> and < <max>
+    * `<version> EXACT`         : the module version must match the components given
+  A module whose version does not satisfy the constraint (or whose version cannot
+  be determined) is reported as not found. Only the leading numeric components are
+  compared, so Python suffixes such as `.post1`, `rc1` or `.dev0` are ignored.
+
 
 ### Arguments
 * `module_name`: The python module name.
+* `version`: Optional version or version range the module must satisfy.
+* `EXACT`: If set, request an exact version match. Requires a version, not allowed with a range.
 * `REQUIRED`: If set, the package is required.
 * `QUIET`: If set, do not print messages.
 
@@ -1151,6 +1165,8 @@ jrl_check_python_module(
 ### Example
 ```cmake
 jrl_check_python_module(numpy REQUIRED)
+jrl_check_python_module(typing_extensions 4.5 REQUIRED)
+jrl_check_python_module(numpy 1.21...<3 REQUIRED)
 ```
 # `jrl_python_relative_site_packages`
 

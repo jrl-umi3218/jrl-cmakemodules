@@ -7,7 +7,7 @@ find_package(Dummy REQUIRED)
 
 project(expected_targets_skip VERSION 1.0.0)
 
-find_package(jrl-cmakemodules 1.2.0 CONFIG REQUIRED)
+find_package(jrl-cmakemodules 2.0.0 CONFIG REQUIRED)
 jrl_configure_defaults()
 
 # Targets already imported above: jrl_find_package() should skip the actual

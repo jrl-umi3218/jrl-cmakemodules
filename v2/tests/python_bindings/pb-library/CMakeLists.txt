@@ -14,7 +14,7 @@ if(APPLE AND CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
     set(CMAKE_OSX_DEPLOYMENT_TARGET "11.0" CACHE STRING "Minimum macOS version" FORCE)
 endif()
 
-find_package(jrl-cmakemodules 1.2.0 CONFIG REQUIRED)
+find_package(jrl-cmakemodules 2.0.0 CONFIG REQUIRED)
 # Configure default binary and install directories, build type, etc.
 jrl_configure_defaults()
 

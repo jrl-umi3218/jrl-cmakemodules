@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.22)
 
 project(expected_targets_warn VERSION 1.0.0)
 
-find_package(jrl-cmakemodules 1.2.0 CONFIG REQUIRED)
+find_package(jrl-cmakemodules 2.0.0 CONFIG REQUIRED)
 jrl_configure_defaults()
 
 # Provide a local package with two imported targets.
