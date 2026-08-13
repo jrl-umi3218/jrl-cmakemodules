@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>jrl_cmakemodules_scripts</name>
+  <version>2.2.4</version>
+  <description>Release scripting tools for JRL CMake modules</description>
+  <url type="website">https://github.com/jrl-umi3218/jrl-cmakemodules</url>
+
+  <maintainer email="guilhem.saurel@laas.fr">Guilhem Saurel</maintainer>
+  <author>Antoine Hoarau</author>
+
+  <license>BSD-3-Clause</license>
+
+  <depend>python3-tomlkit</depend>
+  <depend>python3-ruamel.yaml</depend>
+  <depend>python3-rich</depend>
+  <depend>python3-packaging</depend>
+  <!-- TODO: not in debian/ubuntu/rosdep
+   <depend>python3-cmake-parser</depend>
+  -->
+
+   <test_depend>python3-pytest</test_depend>
+   <test_depend>python3-pytest-mock</test_depend>
+   <test_depend>python3-pytest-mock</test_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>
