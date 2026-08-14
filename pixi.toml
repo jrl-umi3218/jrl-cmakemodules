@@ -86,6 +86,8 @@ _configure = { cmd = [
     "-DJRL_CMAKEMODULES_BUILD_TESTS=ON",
     "-DJRL_CMAKEMODULES_ENABLE_TEST_CPPAD=ON",
     "-DJRL_CMAKEMODULES_ENABLE_TEST_CPPADCG=ON",
+    "-DJRL_CMAKEMODULES_ENABLE_TEST_GMP=ON",
+    "-DJRL_CMAKEMODULES_ENABLE_TEST_MPFR=ON",
 ] }
 _build = { cmd = "cmake --build build/test", depends-on = ["_configure"] }
 _ctest = { cmd = "ctest --test-dir build/test --output-on-failure", depends-on = [

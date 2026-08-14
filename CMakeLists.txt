@@ -61,6 +61,18 @@ jrl_option(
   OFF
 )
 
+jrl_option(
+  JRL_CMAKEMODULES_ENABLE_TEST_GMP
+  "Run the FindGMP test (requires GMP)"
+  OFF
+)
+
+jrl_option(
+  JRL_CMAKEMODULES_ENABLE_TEST_MPFR
+  "Run the FindMPFR test (requires MPFR)"
+  OFF
+)
+
 jrl_option(JRL_CMAKEMODULES_INSTALL_V2_ONLY "Install only the v2 API" OFF)
 
 if(JRL_CMAKEMODULES_GENERATE_API_DOC)

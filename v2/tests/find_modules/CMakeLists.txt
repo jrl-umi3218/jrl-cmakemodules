@@ -8,14 +8,11 @@ add_cmake_test(NAME FindPytest BUILD_TARGET all)
 add_cmake_test(NAME FindPytestNotFound BUILD_TARGET all)
 add_cmake_test(NAME FindCHOLMOD BUILD_TARGET all)
 add_cmake_test(NAME FindCHOLMODNotFound BUILD_TARGET all)
-add_cmake_test(NAME FindGMP BUILD_TARGET all)
-add_cmake_test(NAME FindGMPNotFound BUILD_TARGET all)
-add_cmake_test(NAME FindMPFR BUILD_TARGET all)
-add_cmake_test(NAME FindMPFRNotFound BUILD_TARGET all)
-
 # The NotFound tests need no dependency installed, so they always run.
 add_cmake_test(NAME FindcppadNotFound BUILD_TARGET all)
 add_cmake_test(NAME FindcppadcgNotFound BUILD_TARGET all)
+add_cmake_test(NAME FindGMPNotFound BUILD_TARGET all)
+add_cmake_test(NAME FindMPFRNotFound BUILD_TARGET all)
 
 if(JRL_CMAKEMODULES_ENABLE_TEST_CPPAD)
     add_cmake_test(NAME Findcppad BUILD_TARGET all)
@@ -23,4 +20,12 @@ endif()
 
 if(JRL_CMAKEMODULES_ENABLE_TEST_CPPADCG)
     add_cmake_test(NAME Findcppadcg BUILD_TARGET all)
+endif()
+
+if(JRL_CMAKEMODULES_ENABLE_TEST_GMP)
+    add_cmake_test(NAME FindGMP BUILD_TARGET all)
+endif()
+
+if(JRL_CMAKEMODULES_ENABLE_TEST_MPFR)
+    add_cmake_test(NAME FindMPFR BUILD_TARGET all)
 endif()
