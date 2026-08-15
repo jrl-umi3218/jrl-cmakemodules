@@ -46,11 +46,11 @@ uv run --no-project jrl_release.py --bump patch --git-commit --git-tag
 | Option | Description |
 | :--- | :--- |
 | `--root <PATH>` | Project root (default: cwd). |
-| `--bump <major|minor|patch>` | Bump version component. |
+| `--bump {major,minor,patch}` | Bump version component. |
 | `--update-version <X.Y.Z>` | Set a specific version. |
 | `--dry-run` | Show changes without writing files. |
 | `--short` | Print only the version string. |
-| `--output-format <text|json>` | Output format (default: text). |
+| `--output-format {text,json}` | Output format (default: text). |
 | `--confirm` | Skip interactive prompts. |
 | `--list-files` | List tracked files. |
 | `--git-commit [MSG]` | Commit changes. Optional message (`{version}` placeholder). |
