@@ -50,6 +50,10 @@ jobs:
           key: vcpkg-${{ matrix.image }}-${{ matrix.arch }}-${{ github.sha }}
           restore-keys: vcpkg-${{ matrix.image }}-${{ matrix.arch }}-
 
+      - name: Update vcpkg to latest version
+        run: |
+          git -C C:/vcpkg pull
+
       - name: Install C++ dependencies (via vcpkg)
         run: |
           ${{ env.VCPKG_COMMAND }} install catch2 boost-python eigen3 matio simde suitesparse gmp mpfr cppad
