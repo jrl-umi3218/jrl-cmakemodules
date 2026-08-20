@@ -32,7 +32,10 @@ jobs:
             libeigen3-dev \
             libmatio-dev \
             libsimde-dev \
-            libsuitesparse-dev
+            libsuitesparse-dev \
+            libgmp-dev \
+            libmpfr-dev \
+            libcppad-dev
 
       - name: Setup Python Virtual Environment
         run: |
@@ -54,7 +57,7 @@ jobs:
           cmake --install catch2-build
 
       - name: Configure project
-        run: cmake -G Ninja -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo -DJRL_CMAKEMODULES_BUILD_TESTS=ON
+        run: cmake -G Ninja -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo -DJRL_CMAKEMODULES_BUILD_TESTS=ON -DJRL_CMAKEMODULES_ENABLE_TEST_CPPAD=ON -DJRL_CMAKEMODULES_ENABLE_TEST_GMP=ON -DJRL_CMAKEMODULES_ENABLE_TEST_MPFR=ON
 
       - name: Build project
         run: cmake --build build
@@ -89,7 +92,10 @@ jobs:
             libeigen3-dev \
             libmatio-dev \
             libsimde-dev \
-            libsuitesparse-dev
+            libsuitesparse-dev \
+            libgmp-dev \
+            libmpfr-dev \
+            libcppad-dev
 
       - name: Setup Python Virtual Environment
         run: |
@@ -102,7 +108,7 @@ jobs:
           pip install nanobind pytest numpy
 
       - name: Configure project
-        run: cmake -G Ninja -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo -DJRL_CMAKEMODULES_BUILD_TESTS=ON
+        run: cmake -G Ninja -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo -DJRL_CMAKEMODULES_BUILD_TESTS=ON -DJRL_CMAKEMODULES_ENABLE_TEST_CPPAD=ON -DJRL_CMAKEMODULES_ENABLE_TEST_GMP=ON -DJRL_CMAKEMODULES_ENABLE_TEST_MPFR=ON
 
       - name: Build project
         run: cmake --build build
@@ -149,10 +155,12 @@ jobs:
             eigen \
             libmatio \
             simde \
-            suitesparse
+            suitesparse \
+            gmp \
+            mpfr
 
       - name: Configure project
-        run: cmake -G Ninja -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo -DJRL_CMAKEMODULES_BUILD_TESTS=ON
+        run: cmake -G Ninja -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo -DJRL_CMAKEMODULES_BUILD_TESTS=ON -DJRL_CMAKEMODULES_ENABLE_TEST_GMP=ON -DJRL_CMAKEMODULES_ENABLE_TEST_MPFR=ON
 
       - name: Build project
         run: cmake --build build

@@ -69,8 +69,13 @@ pytest = "*"
 libmatio = "*"
 simde = "*"
 suitesparse = "*"
+cppadcodegen = "*"
+cppad = "*"
+mpfr = "*"
+gmp = "*"
 
 [feature.test.tasks]
+# conda-forge packages CppAD and CppADCodeGen on every platform, unlike apt/brew/pacman/vcpkg.
 _configure = { cmd = [
     "cmake",
     "-S .",
@@ -79,6 +84,10 @@ _configure = { cmd = [
     "-DCMAKE_INSTALL_PREFIX=build/install",
     "-DJRL_CMAKEMODULES_GENERATE_API_DOC=ON",
     "-DJRL_CMAKEMODULES_BUILD_TESTS=ON",
+    "-DJRL_CMAKEMODULES_ENABLE_TEST_CPPAD=ON",
+    "-DJRL_CMAKEMODULES_ENABLE_TEST_CPPADCG=ON",
+    "-DJRL_CMAKEMODULES_ENABLE_TEST_GMP=ON",
+    "-DJRL_CMAKEMODULES_ENABLE_TEST_MPFR=ON",
 ] }
 _build = { cmd = "cmake --build build/test", depends-on = ["_configure"] }
 _ctest = { cmd = "ctest --test-dir build/test --output-on-failure", depends-on = [

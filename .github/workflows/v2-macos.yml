@@ -27,14 +27,14 @@ jobs:
       - uses: actions/checkout@v7
       - name: Install dependencies (via brew)
         run: |
-          brew install catch2 boost-python3 robin-map nanobind pytest numpy eigen libmatio simde suite-sparse
+          brew install catch2 boost-python3 robin-map nanobind pytest numpy eigen libmatio simde suite-sparse gmp mpfr cppad
           # suite-sparse depends on libomp, but libomp is keg-only (not symlinked into the
           # default search prefix), so CMake's FindOpenMP can't see it. Force-link it so that
           # OpenMP gets found. Homebrew's CHOLMODConfig.cmake requires it via find_dependency(OpenMP).
           brew link --force --overwrite libomp
 
       - name: Configure project
-        run: cmake -G Ninja -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo -DJRL_CMAKEMODULES_BUILD_TESTS=ON
+        run: cmake -G Ninja -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo -DJRL_CMAKEMODULES_BUILD_TESTS=ON -DJRL_CMAKEMODULES_ENABLE_TEST_CPPAD=ON -DJRL_CMAKEMODULES_ENABLE_TEST_GMP=ON -DJRL_CMAKEMODULES_ENABLE_TEST_MPFR=ON
 
       - name: Build project
         run: cmake --build build

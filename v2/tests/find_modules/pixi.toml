@@ -13,6 +13,14 @@ test_find_pytest = { cmd = "pixi run test", cwd = "FindPytest" }
 test_find_pytest_notfound = { cmd = "pixi run test", cwd = "FindPytestNotFound" }
 test_find_cholmod = { cmd = "pixi run test", cwd = "FindCHOLMOD" }
 test_find_cholmod_notfound = { cmd = "pixi run test", cwd = "FindCHOLMODNotFound" }
+test_find_gmp = { cmd = "pixi run test", cwd = "FindGMP" }
+test_find_gmp_notfound = { cmd = "pixi run test", cwd = "FindGMPNotFound" }
+test_find_mpfr = { cmd = "pixi run test", cwd = "FindMPFR" }
+test_find_mpfr_notfound = { cmd = "pixi run test", cwd = "FindMPFRNotFound" }
+test_find_cppad = { cmd = "pixi run test", cwd = "Findcppad" }
+test_find_cppad_notfound = { cmd = "pixi run test", cwd = "FindcppadNotFound" }
+test_find_cppadcg = { cmd = "pixi run test", cwd = "Findcppadcg" }
+test_find_cppadcg_notfound = { cmd = "pixi run test", cwd = "FindcppadcgNotFound" }
 
 test = { depends-on = [
     "test_find_accelerate",
@@ -25,4 +33,12 @@ test = { depends-on = [
     "test_find_pytest_notfound",
     "test_find_cholmod",
     "test_find_cholmod_notfound",
+    "test_find_gmp",
+    "test_find_gmp_notfound",
+    "test_find_mpfr",
+    "test_find_mpfr_notfound",
+    "test_find_cppad",
+    "test_find_cppad_notfound",
+    "test_find_cppadcg",
+    "test_find_cppadcg_notfound",
 ] }

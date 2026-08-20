@@ -50,9 +50,13 @@ jobs:
           key: vcpkg-${{ matrix.image }}-${{ matrix.arch }}-${{ github.sha }}
           restore-keys: vcpkg-${{ matrix.image }}-${{ matrix.arch }}-
 
+      - name: Update vcpkg to latest version
+        run: |
+          git -C C:/vcpkg pull
+
       - name: Install C++ dependencies (via vcpkg)
         run: |
-          ${{ env.VCPKG_COMMAND }} install catch2 boost-python eigen3 matio simde suitesparse
+          ${{ env.VCPKG_COMMAND }} install catch2 boost-python eigen3 matio simde suitesparse gmp mpfr cppad
 
       - name: Save vcpkg binary cache
         if: always()
@@ -81,7 +85,7 @@ jobs:
           pip list -v
 
       - name: Configure project
-        run: cmake -G Ninja -S . -B build --log-level=DEBUG -DJRL_CMAKEMODULES_BUILD_TESTS=ON
+        run: cmake -G Ninja -S . -B build --log-level=DEBUG -DJRL_CMAKEMODULES_BUILD_TESTS=ON -DJRL_CMAKEMODULES_ENABLE_TEST_CPPAD=ON -DJRL_CMAKEMODULES_ENABLE_TEST_GMP=ON -DJRL_CMAKEMODULES_ENABLE_TEST_MPFR=ON
 
       - name: Build project
         run: cmake --build build --verbose
