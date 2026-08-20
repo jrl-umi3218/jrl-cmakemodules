@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 - jrl_release: add package.xml by @nim65s
+- jrl_release: add --version by @nim65s
 - jrl_check_python_module: add version handling by @ahoarau
 - jrl_option: fix condition handling on reconfigure and support parent project normal variables (CMP0077)
 - v2: add cppad, cppadcg, GMP and MPFR find-modules by @ahoarau

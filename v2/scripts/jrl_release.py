@@ -46,11 +46,11 @@ uv run --no-project jrl_release.py --bump patch --git-commit --git-tag
 | Option | Description |
 | :--- | :--- |
 | `--root <PATH>` | Project root (default: cwd). |
-| `--bump <major|minor|patch>` | Bump version component. |
+| `--bump {major,minor,patch}` | Bump version component. |
 | `--update-version <X.Y.Z>` | Set a specific version. |
 | `--dry-run` | Show changes without writing files. |
 | `--short` | Print only the version string. |
-| `--output-format <text|json>` | Output format (default: text). |
+| `--output-format {text,json}` | Output format (default: text). |
 | `--confirm` | Skip interactive prompts. |
 | `--list-files` | List tracked files. |
 | `--git-commit [MSG]` | Commit changes. Optional message (`{version}` placeholder). |
@@ -98,6 +98,7 @@ import re
 import os
 import argparse
 import datetime
+import importlib.metadata
 import json
 import subprocess
 import shutil
@@ -1731,6 +1732,11 @@ def main():
 
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument(
+        "--version",
+        action="store_true",
+        help="Show jrl-cmakemodules-scripts version and exit",
+    )
+    group.add_argument(
         "--check-version", action="store_true", help="Check versions across files."
     )
     group.add_argument(
@@ -1756,6 +1762,11 @@ def main():
     )
 
     args = parser.parse_args()
+
+    if args.version:
+        print(importlib.metadata.version("jrl_cmakemodules_scripts"))
+        sys.exit(0)
+
     root_dir = args.root
 
     # Redirect console output to stderr for clean stdout with json/short
