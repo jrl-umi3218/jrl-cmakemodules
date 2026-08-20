@@ -15,6 +15,8 @@
               fileset = lib.fileset.gitTracked ./.;
             };
             cmakeFlags = drv-prev.cmakeFlags ++ [
+              (lib.cmakeBool "JRL_CMAKEMODULES_ENABLE_TEST_CPPAD" true)
+              (lib.cmakeBool "JRL_CMAKEMODULES_ENABLE_TEST_CPPADCG" true)
               (lib.cmakeBool "JRL_CMAKEMODULES_ENABLE_TEST_GMP" true)
               (lib.cmakeBool "JRL_CMAKEMODULES_ENABLE_TEST_MPFR" true)
             ];
