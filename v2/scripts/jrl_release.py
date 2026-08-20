@@ -214,6 +214,8 @@ class XmlVersionExtractor(VersionExtractor):
             f.write(new_content)
 
     def get_url(self) -> str | None:
+        if not self.file_path.exists():
+            return None
         with open(self.file_path, "r", encoding="utf-8") as f:
             content = f.read()
         for url in re.findall(r"<url[^>]*>(.*?)</url>", content, re.I):
@@ -260,6 +262,8 @@ class TomlVersionExtractor(VersionExtractor):
             tomlkit.dump(data, f)
 
     def get_url(self) -> str | None:
+        if not self.file_path.exists():
+            return None
         with open(self.file_path, "r", encoding="utf-8") as f:
             data = tomlkit.load(f)
         if "project" in data and "urls" in data["project"]:
@@ -376,6 +380,8 @@ class CMakeListsVersionExtractor(VersionExtractor):
         return self._get_version_regex(content)
 
     def get_url(self) -> str | None:
+        if not self.file_path.exists():
+            return None
         with open(self.file_path, "r", encoding="utf-8") as f:
             content = f.read()
         if match := re.search(r'HOMEPAGE_URL\s+"([^"]+)"', content):
