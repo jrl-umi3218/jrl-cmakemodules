@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [2.3.0] - 2026-08-21
+
 - jrl_release: add package.xml by @nim65s
 - jrl_release: add --version by @nim65s
 - jrl_check_python_module: add version handling by @ahoarau
@@ -76,7 +78,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 First release
 
 
-[Unreleased]: https://github.com/coal-library/coal/compare/v2.2.4...HEAD
+[Unreleased]: https://github.com/coal-library/coal/compare/v2.3.0...HEAD
+[2.3.0]: https://github.com/coal-library/coal/compare/v2.2.4...v2.3.0
 [2.2.4]: https://github.com/coal-library/coal/compare/v2.2.3...v2.2.4
 [2.2.3]: https://github.com/coal-library/coal/compare/v2.2.2...v2.2.3
 [2.2.2]: https://github.com/coal-library/coal/compare/v2.2.1...v2.2.2
