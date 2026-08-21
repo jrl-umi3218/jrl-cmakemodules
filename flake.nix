@@ -33,39 +33,6 @@
             ];
           };
         };
-        # https://github.com/NixOS/nixpkgs/pull/390728
-        packages.cppadcodegen =
-          {
-            stdenv,
-            fetchFromGitHub,
-            cmake,
-            cppad,
-            eigen,
-          }:
-          stdenv.mkDerivation (finalAttrs: {
-            pname = "cppadcodegen";
-            version = "2.5.0";
-
-            src = fetchFromGitHub {
-              owner = "joaoleal";
-              repo = "CppADCodeGen";
-              tag = "v${finalAttrs.version}";
-              hash = "sha256-na8o+bqzign2nSk5AQdkIVQm3CIb0oFqEneGnYKQDyg=";
-            };
-
-            postPatch = ''
-              substituteInPlace CMakeLists.txt --replace-fail \
-                "ADD_SUBDIRECTORY(test EXCLUDE_FROM_ALL)" ""
-            '';
-
-            nativeBuildInputs = [
-              cmake
-            ];
-            buildInputs = [
-              cppad
-              eigen
-            ];
-          });
       }
     );
 }
