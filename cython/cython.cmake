@@ -155,7 +155,7 @@ function(_get_cython_python_install_destination python_executable output_var)
     execute_process(
       COMMAND
         ${python_executable} -c
-        "import sysconfig; scheme = 'deb_system' if 'deb_system' in sysconfig.get_scheme_names() else None; print(sysconfig.get_path('platlib', scheme=scheme, vars={'base': '/usr', 'platbase': '/usr'} if scheme is None else None))"
+        "from distutils import sysconfig; print(sysconfig.get_python_lib(plat_specific = True, standard_lib = False))"
       RESULT_VARIABLE python_install_destination_found
       OUTPUT_VARIABLE python_install_destination
       OUTPUT_STRIP_TRAILING_WHITESPACE
@@ -185,7 +185,7 @@ function(_get_cython_python_install_destination python_executable output_var)
       execute_process(
         COMMAND
           ${python_executable} -c
-          "import sysconfig; print(sysconfig.get_path('platlib', vars={'base': '${CMAKE_INSTALL_PREFIX}', 'platbase': '${CMAKE_INSTALL_PREFIX}'}))"
+          "from distutils import sysconfig; print(sysconfig.get_python_lib(prefix = '${CMAKE_INSTALL_PREFIX}', plat_specific = True))"
         RESULT_VARIABLE python_install_destination_found
         OUTPUT_VARIABLE python_install_destination
         OUTPUT_STRIP_TRAILING_WHITESPACE
