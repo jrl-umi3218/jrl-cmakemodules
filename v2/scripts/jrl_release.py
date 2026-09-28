@@ -71,7 +71,7 @@ uv run --no-project jrl_release.py --bump patch --git-commit --git-tag
 | `package.xml` | `<version> and <url>` tag |
 | `pyproject.toml` | `project.version` and `project.urls` |
 | `CHANGELOG.md` | First `## [X.Y.Z]` section (not Unreleased) |
-| `pixi.toml` | `[workspace] version` |
+| `pixi.toml` | `[workspace] version` and `[package] version` (pixi-build) |
 | `pixi.lock` | Regenerated via `pixi list` |
 | `CITATION.cff` | `version` key |
 | `CMakeLists.txt` | `project(... VERSION X.Y.Z ... HOMEPAGE_URL ...)` |
@@ -169,6 +169,11 @@ class VersionExtractor(ABC):
         return self.file_path.exists()
 
     @property
+    def id(self) -> tuple:
+        """Unique identity of the tracked version field."""
+        return (self.file_path,)
+
+    @property
     def name(self) -> str:
         return self.file_path.name
 
@@ -229,6 +234,11 @@ class TomlVersionExtractor(VersionExtractor):
         super().__init__(file_path)
         self.keys = keys
 
+    @property
+    def id(self) -> tuple:
+        # Several keys can be tracked in the same file (e.g. pixi.toml).
+        return (self.file_path, tuple(self.keys))
+
     def get_version(self) -> str:
         with open(self.file_path, "r", encoding="utf-8") as f:
             data = tomlkit.load(f)
@@ -241,6 +251,12 @@ class TomlVersionExtractor(VersionExtractor):
                 raise VersionNotPresent(
                     f"Key '{'.'.join(self.keys)}' not found in {self.name}"
                 )
+
+        # e.g. pixi-build `[package] version = { workspace = true }`
+        if isinstance(value, dict):
+            raise VersionNotPresent(
+                f"Key '{'.'.join(self.keys)}' in {self.name} is not a version string"
+            )
 
         return str(value)
 
@@ -782,6 +798,7 @@ def build_root_checks(root_dir: Path) -> List[VersionExtractor]:
         TomlVersionExtractor(root_dir / "pyproject.toml", ["project", "version"]),
         ChangelogVersionExtractor(root_dir / "CHANGELOG.md", r""),
         TomlVersionExtractor(root_dir / "pixi.toml", ["workspace", "version"]),
+        TomlVersionExtractor(root_dir / "pixi.toml", ["package", "version"]),
         YamlVersionExtractor(root_dir / "CITATION.cff", ["version"]),
         CMakeListsVersionExtractor(root_dir / "CMakeLists.txt"),
         DebianChangelogVersionExtractor(root_dir / "debian/changelog"),
@@ -797,14 +814,14 @@ def collect_version_checks(root_dir: Path) -> List[VersionExtractor]:
     package directory are simply skipped (VersionExtractor.check_file_exists()).
     """
     checks = list(build_root_checks(root_dir))
-    seen_paths = {check.file_path for check in checks}
+    seen_ids = {check.id for check in checks}
 
     for package_root in discover_package_roots(root_dir):
         for check in build_root_checks(package_root):
-            if check.file_path in seen_paths:
+            if check.id in seen_ids:
                 continue
             checks.append(check)
-            seen_paths.add(check.file_path)
+            seen_ids.add(check.id)
 
     # Label nested files by their relative path so identical basenames stay distinct.
     for check in checks:
@@ -812,6 +829,9 @@ def collect_version_checks(root_dir: Path) -> List[VersionExtractor]:
             check.label = str(check.file_path.relative_to(root_dir))
         except ValueError:
             check.label = check.file_path.name
+        # pixi.toml tracks both [workspace] and [package] versions.
+        if check.file_path.name == "pixi.toml":
+            check.label += f" [{check.keys[0]}]"
 
     return checks
 
@@ -1310,7 +1330,8 @@ def create_backups(file_paths: List[Path]) -> Dict[Path, Path]:
     temp_dir = Path(tempfile.mkdtemp(prefix="release_backup_"))
 
     # Index-prefix the name so files sharing a basename don't collide.
-    for index, file_path in enumerate(file_paths):
+    # Deduplicate: a file may carry several tracked version fields.
+    for index, file_path in enumerate(dict.fromkeys(file_paths)):
         if file_path.exists():
             backup_path = temp_dir / f"{index:04d}_{file_path.name}"
             shutil.copy2(file_path, backup_path)
@@ -1554,7 +1575,8 @@ def perform_version_updates(
                     line.append(target_version, style=STYLE_NEW_VALUE)
                     console.print(line)
                 updated_files.append(check.label)
-                updated_file_paths.append(str(check.file_path))
+                if str(check.file_path) not in updated_file_paths:
+                    updated_file_paths.append(str(check.file_path))
             except VersionNotPresent:
                 pass  # file exists but has no version configured; skip
             except Exception as e:

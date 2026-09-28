@@ -387,6 +387,88 @@ def test_toml_extractor_pixi_format(sample_pixi_toml):
     assert extractor.get_version() == "1.2.3"
 
 
+PIXI_BUILD_TOML = """[workspace]
+name = "test-workspace"
+version = "1.0.0"
+preview = ["pixi-build"]
+
+[package]
+name = "test-package"
+version = "1.0.0"
+
+[package.build]
+backend = { name = "pixi-build-cmake", version = "*" }
+"""
+
+
+def test_toml_extractor_pixi_build_package_version(tmp_path):
+    """TomlVersionExtractor reads/updates [package].version in a pixi-build pixi.toml."""
+    file_path = tmp_path / "pixi.toml"
+    file_path.write_text(PIXI_BUILD_TOML, encoding="utf-8")
+
+    extractor = release.TomlVersionExtractor(file_path, ["package", "version"])
+    assert extractor.get_version() == "1.0.0"
+
+    extractor.update_version("1.2.3")
+    assert extractor.get_version() == "1.2.3"
+    # [workspace] version is left to its own extractor.
+    workspace = release.TomlVersionExtractor(file_path, ["workspace", "version"])
+    assert workspace.get_version() == "1.0.0"
+
+
+def test_toml_extractor_pixi_build_package_version_inherited(tmp_path):
+    """[package] version = { workspace = true } is not a version of its own."""
+    file_path = tmp_path / "pixi.toml"
+    file_path.write_text(
+        PIXI_BUILD_TOML.replace(
+            'name = "test-package"\nversion = "1.0.0"',
+            'name = "test-package"\nversion = { workspace = true }',
+        ),
+        encoding="utf-8",
+    )
+
+    extractor = release.TomlVersionExtractor(file_path, ["package", "version"])
+    with pytest.raises(release.VersionNotPresent):
+        extractor.get_version()
+
+
+def test_cli_update_version_pixi_build(tmp_path, mocker):
+    """--update-version updates both [workspace] and [package] versions in pixi.toml."""
+    (tmp_path / "pixi.toml").write_text(PIXI_BUILD_TOML, encoding="utf-8")
+    mocker.patch(
+        "sys.argv",
+        ["jrl_release.py", "--root", str(tmp_path), "--update-version", "2.3.4"],
+    )
+
+    try:
+        release.main()
+    except SystemExit as e:
+        assert e.code == 0
+
+    content = (tmp_path / "pixi.toml").read_text(encoding="utf-8")
+    assert content.count('version = "2.3.4"') == 2
+    assert 'version = "*"' in content  # build backend constraint untouched
+
+
+def test_cli_check_version_pixi_build_mismatch(tmp_path, mocker):
+    """--check-version reports a mismatch between [workspace] and [package]."""
+    (tmp_path / "pixi.toml").write_text(
+        PIXI_BUILD_TOML.replace(
+            'name = "test-package"\nversion = "1.0.0"',
+            'name = "test-package"\nversion = "0.9.0"',
+        ),
+        encoding="utf-8",
+    )
+    mocker.patch(
+        "sys.argv", ["jrl_release.py", "--root", str(tmp_path), "--check-version"]
+    )
+
+    with pytest.raises(SystemExit) as exc_info:
+        release.main()
+
+    assert exc_info.value.code == 1
+
+
 def test_toml_extractor_missing_key(sample_pyproject_toml):
     """Test TomlVersionExtractor raises VersionNotPresent for missing key."""
     extractor = release.TomlVersionExtractor(
@@ -1839,6 +1921,16 @@ def test_collect_version_checks_labels_are_root_relative(meta_package_dir):
     assert str(Path("pkg_a") / "package.xml") in labels
     assert str(Path("pkg_b") / "package.xml") in labels
     assert str(Path("pkg_a") / "CMakeLists.txt") in labels
+
+
+def test_collect_version_checks_pixi_toml_both_sections(meta_package_dir):
+    """pixi.toml gets a [workspace] and a [package] check, at root and nested."""
+    checks = release.collect_version_checks(meta_package_dir)
+    labels = {check.label for check in checks}
+
+    assert "pixi.toml [workspace]" in labels
+    assert "pixi.toml [package]" in labels
+    assert f"{Path('pkg_a') / 'pixi.toml'} [package]" in labels
 
 
 def test_create_backups_nested_no_collision(tmp_path):
