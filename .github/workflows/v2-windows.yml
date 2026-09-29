@@ -74,7 +74,9 @@ jobs:
         run: |
           python -m ensurepip --upgrade
           python -m pip install --upgrade pip
-          python -m pip install nanobind pytest numpy
+          python -m pip install -v nanobind
+          python -m pip install -v pytest
+          python -m pip install -v numpy
 
       - name: Print Python Info
         run: |
