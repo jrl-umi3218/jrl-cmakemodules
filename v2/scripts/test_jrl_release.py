@@ -469,6 +469,192 @@ def test_cli_check_version_pixi_build_mismatch(tmp_path, mocker):
     assert exc_info.value.code == 1
 
 
+CARGO_TOML = """[package]
+name = "test-crate"
+version = "1.0.0"
+edition = "2021"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+"""
+
+CARGO_WORKSPACE_TOML = """[workspace]
+members = ["crates/*"]
+resolver = "2"
+
+[workspace.package]
+version = "1.0.0"
+edition = "2021"
+
+[workspace.dependencies]
+serde = "1.0"
+"""
+
+
+def test_toml_extractor_cargo_package_version(tmp_path):
+    """TomlVersionExtractor reads/updates [package].version in Cargo.toml."""
+    file_path = tmp_path / "Cargo.toml"
+    file_path.write_text(CARGO_TOML, encoding="utf-8")
+
+    extractor = release.TomlVersionExtractor(file_path, ["package", "version"])
+    assert extractor.get_version() == "1.0.0"
+
+    extractor.update_version("1.2.3")
+    assert extractor.get_version() == "1.2.3"
+    content = file_path.read_text(encoding="utf-8")
+    assert 'version = "1.0", features = ["derive"]' in content  # deps untouched
+
+
+def test_toml_extractor_cargo_workspace_package_version(tmp_path):
+    """TomlVersionExtractor reads/updates [workspace.package].version in Cargo.toml."""
+    file_path = tmp_path / "Cargo.toml"
+    file_path.write_text(CARGO_WORKSPACE_TOML, encoding="utf-8")
+
+    extractor = release.TomlVersionExtractor(
+        file_path, ["workspace", "package", "version"]
+    )
+    assert extractor.get_version() == "1.0.0"
+
+    extractor.update_version("1.2.3")
+    assert extractor.get_version() == "1.2.3"
+    # No [package] table in a virtual manifest.
+    package = release.TomlVersionExtractor(file_path, ["package", "version"])
+    with pytest.raises(release.VersionNotPresent):
+        package.get_version()
+
+
+def test_toml_extractor_cargo_version_workspace_inherited(tmp_path):
+    """Cargo `version.workspace = true` is not a version of its own."""
+    file_path = tmp_path / "Cargo.toml"
+    file_path.write_text(
+        CARGO_TOML.replace('version = "1.0.0"', "version.workspace = true"),
+        encoding="utf-8",
+    )
+
+    extractor = release.TomlVersionExtractor(file_path, ["package", "version"])
+    with pytest.raises(release.VersionNotPresent):
+        extractor.get_version()
+
+
+def test_cli_update_version_cargo_workspace(tmp_path, mocker):
+    """--update-version updates [workspace.package] and [package] in Cargo.toml."""
+    (tmp_path / "Cargo.toml").write_text(
+        CARGO_WORKSPACE_TOML + '\n[package]\nname = "root-crate"\nversion = "1.0.0"\n',
+        encoding="utf-8",
+    )
+    mocker.patch(
+        "sys.argv",
+        ["jrl_release.py", "--root", str(tmp_path), "--update-version", "2.3.4"],
+    )
+
+    try:
+        release.main()
+    except SystemExit as e:
+        assert e.code == 0
+
+    content = (tmp_path / "Cargo.toml").read_text(encoding="utf-8")
+    assert content.count('version = "2.3.4"') == 2
+    assert 'serde = "1.0"' in content
+
+
+def test_cli_check_version_cargo_mismatch(tmp_path, mocker):
+    """--check-version reports a mismatch between Cargo.toml and another file."""
+    (tmp_path / "Cargo.toml").write_text(CARGO_TOML, encoding="utf-8")
+    (tmp_path / "CITATION.cff").write_text('version: "0.9.0"\n', encoding="utf-8")
+    mocker.patch(
+        "sys.argv", ["jrl_release.py", "--root", str(tmp_path), "--check-version"]
+    )
+
+    with pytest.raises(SystemExit) as exc_info:
+        release.main()
+
+    assert exc_info.value.code == 1
+
+
+def test_update_lock_file_cargo(tmp_path, mocker):
+    """Cargo.lock is regenerated via `cargo update --workspace`."""
+    (tmp_path / "Cargo.lock").write_text("version = 4\n", encoding="utf-8")
+    mock_run = mocker.patch("subprocess.run")
+    mock_run.return_value.returncode = 0
+
+    path = release.update_cargo_lock(tmp_path)
+
+    assert path == str(tmp_path / "Cargo.lock")
+    mock_run.assert_called_once_with(
+        ["cargo", "update", "--workspace"], cwd=tmp_path, timeout=60
+    )
+
+
+def test_update_lock_file_missing_or_dry_run(tmp_path, mocker):
+    """No lock file: None. Dry run: the lock path, but nothing is executed."""
+    mock_run = mocker.patch("subprocess.run")
+
+    assert release.update_cargo_lock(tmp_path) is None
+    (tmp_path / "Cargo.lock").write_text("version = 4\n", encoding="utf-8")
+    assert release.update_cargo_lock(tmp_path, dry_run=True) == str(
+        tmp_path / "Cargo.lock"
+    )
+    mock_run.assert_not_called()
+
+
+def test_update_lock_file_tool_not_found(tmp_path, mocker):
+    """A missing tool raises RuntimeError with an install hint."""
+    (tmp_path / "Cargo.lock").write_text("version = 4\n", encoding="utf-8")
+    mocker.patch("subprocess.run", side_effect=FileNotFoundError)
+
+    with pytest.raises(RuntimeError, match="https://rustup.rs"):
+        release.update_lock_file(
+            tmp_path, "Cargo.lock", ["cargo", "update"], "https://rustup.rs"
+        )
+
+
+def test_cli_update_version_cargo_lock_failure_restores(tmp_path, mocker):
+    """A failed lock regeneration restores Cargo.toml and Cargo.lock."""
+    (tmp_path / "Cargo.toml").write_text(CARGO_TOML, encoding="utf-8")
+    (tmp_path / "Cargo.lock").write_text("version = 4\n", encoding="utf-8")
+    mock_run = mocker.patch("subprocess.run")
+    mock_run.return_value.returncode = 101
+    mocker.patch(
+        "sys.argv",
+        ["jrl_release.py", "--root", str(tmp_path), "--update-version", "2.0.0"],
+    )
+
+    with pytest.raises(SystemExit) as exc_info:
+        release.main()
+
+    assert exc_info.value.code == 1
+    assert (tmp_path / "Cargo.toml").read_text(encoding="utf-8") == CARGO_TOML
+    assert (tmp_path / "Cargo.lock").read_text(encoding="utf-8") == "version = 4\n"
+
+
+def test_cli_update_version_second_lock_failure_restores_first(tmp_path, mocker):
+    """If cargo fails after pixi regenerated pixi.lock, both locks are restored."""
+    (tmp_path / "Cargo.toml").write_text(CARGO_TOML, encoding="utf-8")
+    (tmp_path / "pixi.lock").write_text("old pixi lock\n", encoding="utf-8")
+    (tmp_path / "Cargo.lock").write_text("old cargo lock\n", encoding="utf-8")
+
+    def fake_run(command, cwd=None, **kwargs):
+        if command[0] not in ("pixi", "cargo"):  # e.g. git probes
+            return subprocess.CompletedProcess(command, 1, stdout="", stderr="")
+        lock = "pixi.lock" if command[0] == "pixi" else "Cargo.lock"
+        (cwd / lock).write_text("regenerated\n", encoding="utf-8")
+        return subprocess.CompletedProcess(command, 0 if command[0] == "pixi" else 101)
+
+    mocker.patch("subprocess.run", side_effect=fake_run)
+    mocker.patch(
+        "sys.argv",
+        ["jrl_release.py", "--root", str(tmp_path), "--update-version", "2.0.0"],
+    )
+
+    with pytest.raises(SystemExit) as exc_info:
+        release.main()
+
+    assert exc_info.value.code == 1
+    assert (tmp_path / "pixi.lock").read_text(encoding="utf-8") == "old pixi lock\n"
+    assert (tmp_path / "Cargo.lock").read_text(encoding="utf-8") == "old cargo lock\n"
+    assert (tmp_path / "Cargo.toml").read_text(encoding="utf-8") == CARGO_TOML
+
+
 def test_toml_extractor_missing_key(sample_pyproject_toml):
     """Test TomlVersionExtractor raises VersionNotPresent for missing key."""
     extractor = release.TomlVersionExtractor(
@@ -1879,7 +2065,7 @@ def test_drop_git_ignored_noop_without_git(tmp_path):
 
 
 def test_collect_version_checks_single_package_unchanged(project_dir):
-    """Single-package repos yield exactly the seven base root checks."""
+    """Single-package repos yield exactly the base root checks."""
     checks = release.collect_version_checks(project_dir)
     check_paths = {check.file_path for check in checks}
 
@@ -1888,6 +2074,7 @@ def test_collect_version_checks_single_package_unchanged(project_dir):
         project_dir / "pyproject.toml",
         project_dir / "CHANGELOG.md",
         project_dir / "pixi.toml",
+        project_dir / "Cargo.toml",
         project_dir / "CITATION.cff",
         project_dir / "CMakeLists.txt",
         project_dir / "debian/changelog",
@@ -1931,6 +2118,16 @@ def test_collect_version_checks_pixi_toml_both_sections(meta_package_dir):
     assert "pixi.toml [workspace]" in labels
     assert "pixi.toml [package]" in labels
     assert f"{Path('pkg_a') / 'pixi.toml'} [package]" in labels
+
+
+def test_collect_version_checks_cargo_toml_both_sections(meta_package_dir):
+    """Cargo.toml gets a [package] and a [workspace.package] check."""
+    checks = release.collect_version_checks(meta_package_dir)
+    labels = {check.label for check in checks}
+
+    assert "Cargo.toml [package]" in labels
+    assert "Cargo.toml [workspace.package]" in labels
+    assert f"{Path('pkg_a') / 'Cargo.toml'} [package]" in labels
 
 
 def test_create_backups_nested_no_collision(tmp_path):
