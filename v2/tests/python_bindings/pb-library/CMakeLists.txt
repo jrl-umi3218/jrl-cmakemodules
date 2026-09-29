@@ -30,7 +30,13 @@ if(PB_BUILD_PYTHON_BINDINGS)
     # - Ubuntu 22.04 does not ship nanobind at all via apt-get.
 
     jrl_find_python(3.10 REQUIRED COMPONENTS Interpreter Development.Module)
-    jrl_find_nanobind(2.5.0 CONFIG QUIET)
+    # nanobind's config version file uses SameMajorVersion, so find_package(nanobind 2.5.0)
+    # rejects nanobind 3.x (e.g. Archlinux, pip). Find any version and check the minimum here.
+    jrl_find_nanobind(CONFIG QUIET)
+    if(nanobind_FOUND AND nanobind_VERSION VERSION_LESS 2.5.0)
+        message(WARNING "[${PROJECT_NAME}] nanobind ${nanobind_VERSION} is too old (< 2.5.0).")
+        set(nanobind_FOUND FALSE)
+    endif()
     if(NOT nanobind_FOUND)
         message(
             WARNING
