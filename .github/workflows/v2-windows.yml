@@ -50,9 +50,11 @@ jobs:
           key: vcpkg-${{ matrix.image }}-${{ matrix.arch }}-${{ github.sha }}
           restore-keys: vcpkg-${{ matrix.image }}-${{ matrix.arch }}-
 
-      - name: Update vcpkg to latest version
+      - name: Update vcpkg to latest release
         run: |
-          git -C C:/vcpkg pull
+          git -C C:/vcpkg fetch --tags
+          git -C C:/vcpkg checkout $(git -C C:/vcpkg describe --tags $(git -C C:/vcpkg rev-list --tags --max-count=1))
+          C:/vcpkg/bootstrap-vcpkg.bat
 
       - name: Install C++ dependencies (via vcpkg)
         run: |
