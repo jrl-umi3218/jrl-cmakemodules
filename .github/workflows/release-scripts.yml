@@ -23,7 +23,7 @@ jobs:
           git verify-tag --raw ${{ github.ref_name }} 2>&1
           | grep -q 'VALIDSIG 9B1A79065D2F2B806C8A5A1C7D2ACDAF4653CF28'
       - run: echo "TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
-      - uses: astral-sh/setup-uv@v9.0.0
+      - uses: astral-sh/setup-uv@v10.2.0
       - run: uv --directory v2/scripts build
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
