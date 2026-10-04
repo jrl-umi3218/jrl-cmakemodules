@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 - jrl_release: add support for `[package] version` in pixi.toml (pixi-build)
+- jrl_release: add support for Cargo.toml (`[package]` and `[workspace.package]` versions) and Cargo.lock
 
 ## [2.3.0] - 2026-08-21
 
