@@ -74,6 +74,7 @@ uv run --no-project jrl_release.py --bump patch --git-commit --git-tag
 | `pixi.toml` | `[workspace] version` and `[package] version` (pixi-build) |
 | `pixi.lock` | Regenerated via `pixi list` |
 | `CITATION.cff` | `version` key |
+| `recipe.yaml` (or `recipe/recipe.yaml`, `.yml`) | `context.version` and `package.version` (conda recipe) |
 | `CMakeLists.txt` | `project(... VERSION X.Y.Z ... HOMEPAGE_URL ...)` |
 | `debian/changelog` | `version = ...` |
 | `conanfile.py` | `version = ...` |
@@ -85,7 +86,7 @@ uv run --no-project jrl_release.py --bump patch --git-commit --git-tag
 ROS meta-packages are handled automatically: every nested directory with a
 `package.xml` is treated like the repository root — the full set of
 supported files (`package.xml`, `pyproject.toml`, `CHANGELOG.md`, `pixi.toml`,
-`CITATION.cff`, `CMakeLists.txt`, `debian/changelog`) is checked there too,
+`CITATION.cff`, `recipe.yaml`, `CMakeLists.txt`, `debian/changelog`) is checked there too,
 skipping any that don't exist in that nested directory.
 Discovery skips hidden directories (`.git`, `.pixi`, `.venv`, …), git submodules,
 and — honoring your `.gitignore` via `git check-ignore` — ignored dirs like
@@ -103,6 +104,7 @@ import json
 import subprocess
 import shutil
 import tempfile
+from collections import Counter
 from pathlib import Path
 from abc import ABC, abstractmethod
 from typing import List, Optional, Tuple, Dict
@@ -295,6 +297,12 @@ class YamlVersionExtractor(VersionExtractor):
         self.keys = keys
         self.yaml = YAML()
         self.yaml.preserve_quotes = True
+        # Keep sequences indented under their key, as in conda recipes.
+        self.yaml.indent(mapping=2, sequence=4, offset=2)
+
+    @property
+    def id(self) -> tuple:
+        return (self.file_path, tuple(self.keys))
 
     def get_version(self) -> str:
         with open(self.file_path, "r", encoding="utf-8") as f:
@@ -308,6 +316,12 @@ class YamlVersionExtractor(VersionExtractor):
                 raise VersionNotPresent(
                     f"Key '{'.'.join(self.keys)}' not found in {self.name}"
                 )
+
+        # e.g. conda recipe `package.version: ${{ version }}`
+        if "${{" in str(value):
+            raise VersionNotPresent(
+                f"Key '{'.'.join(self.keys)}' in {self.name} is templated"
+            )
 
         return str(value)
 
@@ -791,6 +805,20 @@ def discover_package_roots(root_dir: Path) -> List[Path]:
     return sorted({package_xml.parent for package_xml in candidates})
 
 
+def find_recipe(root_dir: Path) -> Path:
+    """Conda recipe at the first location pixi-build searches (default: recipe.yaml)."""
+    candidates = [
+        root_dir / name
+        for name in (
+            "recipe.yaml",
+            "recipe.yml",
+            "recipe/recipe.yaml",
+            "recipe/recipe.yml",
+        )
+    ]
+    return next((path for path in candidates if path.exists()), candidates[0])
+
+
 def build_root_checks(root_dir: Path) -> List[VersionExtractor]:
     """Build the version extractors tracked at the repository root."""
     return [
@@ -800,6 +828,8 @@ def build_root_checks(root_dir: Path) -> List[VersionExtractor]:
         TomlVersionExtractor(root_dir / "pixi.toml", ["workspace", "version"]),
         TomlVersionExtractor(root_dir / "pixi.toml", ["package", "version"]),
         YamlVersionExtractor(root_dir / "CITATION.cff", ["version"]),
+        YamlVersionExtractor(find_recipe(root_dir), ["context", "version"]),
+        YamlVersionExtractor(find_recipe(root_dir), ["package", "version"]),
         CMakeListsVersionExtractor(root_dir / "CMakeLists.txt"),
         DebianChangelogVersionExtractor(root_dir / "debian/changelog"),
         ConanfileVersionExtractor(root_dir / "conanfile.py"),
@@ -824,14 +854,15 @@ def collect_version_checks(root_dir: Path) -> List[VersionExtractor]:
             seen_ids.add(check.id)
 
     # Label nested files by their relative path so identical basenames stay distinct.
+    tracked = Counter(check.file_path for check in checks)
     for check in checks:
         try:
             check.label = str(check.file_path.relative_to(root_dir))
         except ValueError:
             check.label = check.file_path.name
-        # pixi.toml tracks both [workspace] and [package] versions.
-        if check.file_path.name == "pixi.toml":
-            check.label += f" [{check.keys[0]}]"
+        # pixi.toml and recipe.yaml track several versions, e.g. workspace and package.
+        if tracked[check.file_path] > 1:
+            check.label += f" ({check.keys[0]})"  # [...] would be rich markup
 
     return checks
 
