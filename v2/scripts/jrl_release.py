@@ -156,6 +156,10 @@ class VersionNotPresent(Exception):
     pass
 
 
+class VersionDerived(VersionNotPresent):
+    """Raised when a version field refers to another one instead of a value."""
+
+
 class VersionExtractor(ABC):
     def __init__(self, file_path: Path):
         self.file_path = file_path
@@ -259,6 +263,8 @@ class TomlVersionExtractor(VersionExtractor):
 
         # e.g. pixi-build `[package] version = { workspace = true }`,
         # or Cargo `version.workspace = true`
+        if isinstance(value, dict) and value.get("workspace") is True:
+            raise VersionDerived("Inherited from workspace.version")
         if isinstance(value, dict):
             raise VersionNotPresent(
                 f"Key '{'.'.join(self.keys)}' in {self.name} is not a version string"
@@ -323,9 +329,7 @@ class YamlVersionExtractor(VersionExtractor):
 
         # e.g. conda recipe `package.version: ${{ version }}`
         if "${{" in str(value):
-            raise VersionNotPresent(
-                f"Key '{'.'.join(self.keys)}' in {self.name} is templated"
-            )
+            raise VersionDerived(f"Templated: {value}")
 
         return str(value)
 
@@ -1525,6 +1529,9 @@ def handle_check_version(checks: List[VersionExtractor], args) -> bool:
                 result["version"] = version
                 result["status"] = "Found"
                 versions_found.add(version)
+            except VersionDerived as e:
+                result["status"] = "Derived"
+                result["message"] = str(e)
             except VersionNotPresent as e:
                 result["status"] = "Warning"
                 result["message"] = str(e)
@@ -1565,6 +1572,8 @@ def handle_check_version(checks: List[VersionExtractor], args) -> bool:
             status_style = f"[{STYLE_SUCCESS}]Found[/{STYLE_SUCCESS}]"
         elif res["status"] == "Missing":
             status_style = f"[{STYLE_WARNING}]Missing[/{STYLE_WARNING}]"
+        elif res["status"] == "Derived":
+            status_style = f"[{STYLE_MUTED}]Derived[/{STYLE_MUTED}]"
         elif res["status"] == "Warning":
             status_style = f"[{STYLE_WARNING}]Warning[/{STYLE_WARNING}]"
         elif res["status"] == "Error":
