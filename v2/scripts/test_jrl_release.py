@@ -428,7 +428,7 @@ def test_toml_extractor_pixi_build_package_version_inherited(tmp_path):
     )
 
     extractor = release.TomlVersionExtractor(file_path, ["package", "version"])
-    with pytest.raises(release.VersionNotPresent):
+    with pytest.raises(release.VersionDerived, match="workspace"):
         extractor.get_version()
 
 
@@ -504,7 +504,7 @@ def test_yaml_extractor_recipe_templated_package_version(tmp_path):
     file_path.write_text(RECIPE_YAML, encoding="utf-8")
 
     extractor = release.YamlVersionExtractor(file_path, ["package", "version"])
-    with pytest.raises(release.VersionNotPresent, match="templated"):
+    with pytest.raises(release.VersionDerived, match="Templated"):
         extractor.get_version()
 
 
@@ -534,6 +534,33 @@ def test_cli_check_version_recipe_mismatch(tmp_path, mocker):
         release.main()
 
     assert exc_info.value.code == 1
+
+
+def test_cli_check_version_derived_not_a_warning(tmp_path, mocker, capsys):
+    """Templated / inherited versions show as Derived, not as warnings."""
+    (tmp_path / "recipe.yaml").write_text(RECIPE_YAML, encoding="utf-8")
+    (tmp_path / "pixi.toml").write_text(PIXI_BUILD_TOML, encoding="utf-8")
+    # main() swaps the global console for one bound to the captured stderr.
+    mocker.patch.object(release, "console", release.console)
+    mocker.patch(
+        "sys.argv",
+        [
+            "jrl_release.py",
+            "--root",
+            str(tmp_path),
+            "--check-version",
+            "--output-format",
+            "json",
+        ],
+    )
+
+    with pytest.raises(SystemExit) as exc_info:
+        release.main()
+
+    assert exc_info.value.code == 0
+    files = {f["file"]: f for f in json.loads(capsys.readouterr().out)["files"]}
+    assert files["recipe.yaml (package)"]["status"] == "Derived"
+    assert files["recipe.yaml (package)"]["message"] == "Templated: ${{ version }}"
 
 
 def test_collect_version_checks_recipe_labels(tmp_path):
