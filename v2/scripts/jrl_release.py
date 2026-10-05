@@ -157,6 +157,10 @@ class VersionDerived(VersionNotPresent):
     """Raised when a version field refers to another one instead of a value."""
 
 
+class SectionNotPresent(VersionNotPresent):
+    """Raised when the section holding the version field is absent."""
+
+
 class VersionExtractor(ABC):
     def __init__(self, file_path: Path):
         self.file_path = file_path
@@ -254,9 +258,9 @@ class TomlVersionExtractor(VersionExtractor):
             if key in value:
                 value = value[key]
             else:
-                raise VersionNotPresent(
-                    f"Key '{'.'.join(self.keys)}' not found in {self.name}"
-                )
+                # A missing section (e.g. no [package] in pixi.toml) is not an issue.
+                error = VersionNotPresent if key == self.keys[-1] else SectionNotPresent
+                raise error(f"Key '{'.'.join(self.keys)}' not found in {self.name}")
 
         # e.g. pixi-build `[package] version = { workspace = true }`
         if isinstance(value, dict) and value.get("workspace") is True:
@@ -319,9 +323,9 @@ class YamlVersionExtractor(VersionExtractor):
             if key in value:
                 value = value[key]
             else:
-                raise VersionNotPresent(
-                    f"Key '{'.'.join(self.keys)}' not found in {self.name}"
-                )
+                # A missing section (e.g. no [package] in pixi.toml) is not an issue.
+                error = VersionNotPresent if key == self.keys[-1] else SectionNotPresent
+                raise error(f"Key '{'.'.join(self.keys)}' not found in {self.name}")
 
         # e.g. conda recipe `package.version: ${{ version }}`
         if "${{" in str(value):
@@ -1460,6 +1464,8 @@ def handle_check_version(checks: List[VersionExtractor], args) -> bool:
                 result["version"] = version
                 result["status"] = "Found"
                 versions_found.add(version)
+            except SectionNotPresent:
+                continue  # field not used in this file; don't report it
             except VersionDerived as e:
                 result["status"] = "Derived"
                 result["message"] = str(e)

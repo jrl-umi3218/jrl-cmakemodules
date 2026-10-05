@@ -563,6 +563,49 @@ def test_cli_check_version_derived_not_a_warning(tmp_path, mocker, capsys):
     assert files["recipe.yaml (package)"]["message"] == "Templated: ${{ version }}"
 
 
+def test_cli_check_version_missing_section_not_reported(tmp_path, mocker, capsys):
+    """A pixi.toml without [package] / a recipe without context: is not a warning."""
+    (tmp_path / "pixi.toml").write_text(
+        '[workspace]\nname = "x"\nversion = "1.0.0"\n', encoding="utf-8"
+    )
+    (tmp_path / "recipe.yaml").write_text(
+        "package:\n  name: x\n  version: 1.0.0\n", encoding="utf-8"
+    )
+    mocker.patch.object(release, "console", release.console)
+    mocker.patch(
+        "sys.argv",
+        [
+            "jrl_release.py",
+            "--root",
+            str(tmp_path),
+            "--check-version",
+            "--output-format",
+            "json",
+        ],
+    )
+
+    with pytest.raises(SystemExit) as exc_info:
+        release.main()
+
+    assert exc_info.value.code == 0
+    files = {f["file"]: f for f in json.loads(capsys.readouterr().out)["files"]}
+    assert files["pixi.toml (workspace)"]["status"] == "Found"
+    assert files["recipe.yaml (package)"]["status"] == "Found"
+    assert "pixi.toml (package)" not in files
+    assert "recipe.yaml (context)" not in files
+
+
+def test_yaml_extractor_missing_version_in_present_section(tmp_path):
+    """A section without its version key is still reported as not present."""
+    file_path = tmp_path / "recipe.yaml"
+    file_path.write_text("context:\n  name: x\n", encoding="utf-8")
+
+    extractor = release.YamlVersionExtractor(file_path, ["context", "version"])
+    with pytest.raises(release.VersionNotPresent) as exc_info:
+        extractor.get_version()
+    assert not isinstance(exc_info.value, release.SectionNotPresent)
+
+
 def test_collect_version_checks_recipe_labels(tmp_path):
     """Both recipe fields are tracked, labelled by section."""
     (tmp_path / "recipe.yaml").write_text(RECIPE_YAML, encoding="utf-8")
