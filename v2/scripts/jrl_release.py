@@ -1569,7 +1569,7 @@ def perform_version_updates(
                     check.update_version(target_version)
                     dry_run_rows.append((check.label, old_version, target_version))
                     line = Text()
-                    line.append(f"  {check.label:<28}", style="cyan")
+                    line.append(f"  {check.label:<28} ", style="cyan")
                     line.append(old_version, style=STYLE_OLD_VALUE)
                     line.append("  →  ", style="dim")
                     line.append(target_version, style=STYLE_NEW_VALUE)
