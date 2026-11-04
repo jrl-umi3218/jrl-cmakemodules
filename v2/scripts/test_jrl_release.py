@@ -428,7 +428,7 @@ def test_toml_extractor_pixi_build_package_version_inherited(tmp_path):
     )
 
     extractor = release.TomlVersionExtractor(file_path, ["package", "version"])
-    with pytest.raises(release.VersionNotPresent):
+    with pytest.raises(release.VersionDerived, match="workspace"):
         extractor.get_version()
 
 
@@ -467,6 +467,153 @@ def test_cli_check_version_pixi_build_mismatch(tmp_path, mocker):
         release.main()
 
     assert exc_info.value.code == 1
+
+
+RECIPE_YAML = """context:
+  name: test-package
+  version: "1.0.0"
+
+package:
+  name: ${{ name }}
+  version: ${{ version }}
+
+requirements:
+  build:
+    - ${{ compiler('cxx') }}
+    - cmake
+"""
+
+
+def test_yaml_extractor_recipe_context_version(tmp_path):
+    """context.version is updated, keeping the recipe's formatting."""
+    file_path = tmp_path / "recipe.yaml"
+    file_path.write_text(RECIPE_YAML, encoding="utf-8")
+
+    extractor = release.YamlVersionExtractor(file_path, ["context", "version"])
+    assert extractor.get_version() == "1.0.0"
+
+    extractor.update_version("1.2.3")
+    assert file_path.read_text(encoding="utf-8") == RECIPE_YAML.replace(
+        '"1.0.0"', '"1.2.3"'
+    )
+
+
+def test_yaml_extractor_recipe_templated_package_version(tmp_path):
+    """package.version: ${{ version }} is not a version of its own."""
+    file_path = tmp_path / "recipe.yaml"
+    file_path.write_text(RECIPE_YAML, encoding="utf-8")
+
+    extractor = release.YamlVersionExtractor(file_path, ["package", "version"])
+    with pytest.raises(release.VersionDerived, match="Templated"):
+        extractor.get_version()
+
+
+def test_find_recipe_search_order(tmp_path):
+    """recipe.yaml by default, and next to the manifest wins over recipe/."""
+    assert release.find_recipe(tmp_path) == tmp_path / "recipe.yaml"
+
+    (tmp_path / "recipe").mkdir()
+    (tmp_path / "recipe" / "recipe.yml").write_text(RECIPE_YAML, encoding="utf-8")
+    assert release.find_recipe(tmp_path) == tmp_path / "recipe" / "recipe.yml"
+
+    (tmp_path / "recipe.yaml").write_text(RECIPE_YAML, encoding="utf-8")
+    assert release.find_recipe(tmp_path) == tmp_path / "recipe.yaml"
+
+
+def test_cli_check_version_recipe_mismatch(tmp_path, mocker):
+    """--check-version reports a mismatch between recipe.yaml and pixi.toml."""
+    (tmp_path / "recipe.yaml").write_text(
+        RECIPE_YAML.replace('"1.0.0"', '"0.9.0"'), encoding="utf-8"
+    )
+    (tmp_path / "pixi.toml").write_text(PIXI_BUILD_TOML, encoding="utf-8")
+    mocker.patch(
+        "sys.argv", ["jrl_release.py", "--root", str(tmp_path), "--check-version"]
+    )
+
+    with pytest.raises(SystemExit) as exc_info:
+        release.main()
+
+    assert exc_info.value.code == 1
+
+
+def test_cli_check_version_derived_not_a_warning(tmp_path, mocker, capsys):
+    """Templated / inherited versions show as Derived, not as warnings."""
+    (tmp_path / "recipe.yaml").write_text(RECIPE_YAML, encoding="utf-8")
+    (tmp_path / "pixi.toml").write_text(PIXI_BUILD_TOML, encoding="utf-8")
+    # main() swaps the global console for one bound to the captured stderr.
+    mocker.patch.object(release, "console", release.console)
+    mocker.patch(
+        "sys.argv",
+        [
+            "jrl_release.py",
+            "--root",
+            str(tmp_path),
+            "--check-version",
+            "--output-format",
+            "json",
+        ],
+    )
+
+    with pytest.raises(SystemExit) as exc_info:
+        release.main()
+
+    assert exc_info.value.code == 0
+    files = {f["file"]: f for f in json.loads(capsys.readouterr().out)["files"]}
+    assert files["recipe.yaml (package)"]["status"] == "Derived"
+    assert files["recipe.yaml (package)"]["message"] == "Templated: ${{ version }}"
+
+
+def test_cli_check_version_missing_section_not_reported(tmp_path, mocker, capsys):
+    """A pixi.toml without [package] / a recipe without context: is not a warning."""
+    (tmp_path / "pixi.toml").write_text(
+        '[workspace]\nname = "x"\nversion = "1.0.0"\n', encoding="utf-8"
+    )
+    (tmp_path / "recipe.yaml").write_text(
+        "package:\n  name: x\n  version: 1.0.0\n", encoding="utf-8"
+    )
+    mocker.patch.object(release, "console", release.console)
+    mocker.patch(
+        "sys.argv",
+        [
+            "jrl_release.py",
+            "--root",
+            str(tmp_path),
+            "--check-version",
+            "--output-format",
+            "json",
+        ],
+    )
+
+    with pytest.raises(SystemExit) as exc_info:
+        release.main()
+
+    assert exc_info.value.code == 0
+    files = {f["file"]: f for f in json.loads(capsys.readouterr().out)["files"]}
+    assert files["pixi.toml (workspace)"]["status"] == "Found"
+    assert files["recipe.yaml (package)"]["status"] == "Found"
+    assert "pixi.toml (package)" not in files
+    assert "recipe.yaml (context)" not in files
+
+
+def test_yaml_extractor_missing_version_in_present_section(tmp_path):
+    """A section without its version key is still reported as not present."""
+    file_path = tmp_path / "recipe.yaml"
+    file_path.write_text("context:\n  name: x\n", encoding="utf-8")
+
+    extractor = release.YamlVersionExtractor(file_path, ["context", "version"])
+    with pytest.raises(release.VersionNotPresent) as exc_info:
+        extractor.get_version()
+    assert not isinstance(exc_info.value, release.SectionNotPresent)
+
+
+def test_collect_version_checks_recipe_labels(tmp_path):
+    """Both recipe fields are tracked, labelled by section."""
+    (tmp_path / "recipe.yaml").write_text(RECIPE_YAML, encoding="utf-8")
+
+    labels = {check.label for check in release.collect_version_checks(tmp_path)}
+
+    assert "recipe.yaml (context)" in labels
+    assert "recipe.yaml (package)" in labels
 
 
 def test_toml_extractor_missing_key(sample_pyproject_toml):
@@ -1879,7 +2026,10 @@ def test_drop_git_ignored_noop_without_git(tmp_path):
 
 
 def test_collect_version_checks_single_package_unchanged(project_dir):
-    """Single-package repos yield exactly the seven base root checks."""
+    """Single-package repos yield exactly the base root checks."""
+    (project_dir / "recipe").mkdir()
+    (project_dir / "recipe" / "recipe.yml").write_text(RECIPE_YAML, encoding="utf-8")
+
     checks = release.collect_version_checks(project_dir)
     check_paths = {check.file_path for check in checks}
 
@@ -1892,6 +2042,7 @@ def test_collect_version_checks_single_package_unchanged(project_dir):
         project_dir / "CMakeLists.txt",
         project_dir / "debian/changelog",
         project_dir / "conanfile.py",
+        project_dir / "recipe" / "recipe.yml",
     }
 
 
@@ -1928,9 +2079,9 @@ def test_collect_version_checks_pixi_toml_both_sections(meta_package_dir):
     checks = release.collect_version_checks(meta_package_dir)
     labels = {check.label for check in checks}
 
-    assert "pixi.toml [workspace]" in labels
-    assert "pixi.toml [package]" in labels
-    assert f"{Path('pkg_a') / 'pixi.toml'} [package]" in labels
+    assert "pixi.toml (workspace)" in labels
+    assert "pixi.toml (package)" in labels
+    assert f"{Path('pkg_a') / 'pixi.toml'} (package)" in labels
 
 
 def test_create_backups_nested_no_collision(tmp_path):
