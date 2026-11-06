@@ -73,19 +73,22 @@ uv run --no-project jrl_release.py --bump patch --git-commit --git-tag
 | `CHANGELOG.md` | First `## [X.Y.Z]` section (not Unreleased) |
 | `pixi.toml` | `[workspace] version` and `[package] version` (pixi-build) |
 | `pixi.lock` | Regenerated via `pixi list` |
+| `Cargo.toml` | `[package] version` and `[workspace.package] version` |
+| `Cargo.lock` | Regenerated via `cargo update --workspace` |
 | `CITATION.cff` | `version` key |
 | `CMakeLists.txt` | `project(... VERSION X.Y.Z ... HOMEPAGE_URL ...)` |
 | `debian/changelog` | `version = ...` |
 | `conanfile.py` | `version = ...` |
 
-> Requires `pixi` CLI if `pixi.lock` exists in the project root.
+> Requires `pixi` CLI if `pixi.lock` exists in the project root, and `cargo`
+> if `Cargo.lock` does.
 
 ## Meta-packages
 
 ROS meta-packages are handled automatically: every nested directory with a
 `package.xml` is treated like the repository root — the full set of
 supported files (`package.xml`, `pyproject.toml`, `CHANGELOG.md`, `pixi.toml`,
-`CITATION.cff`, `CMakeLists.txt`, `debian/changelog`) is checked there too,
+`Cargo.toml`, `CITATION.cff`, `CMakeLists.txt`, `debian/changelog`) is checked there too,
 skipping any that don't exist in that nested directory.
 Discovery skips hidden directories (`.git`, `.pixi`, `.venv`, …), git submodules,
 and — honoring your `.gitignore` via `git check-ignore` — ignored dirs like
@@ -103,6 +106,7 @@ import json
 import subprocess
 import shutil
 import tempfile
+from collections import Counter
 from pathlib import Path
 from abc import ABC, abstractmethod
 from typing import List, Optional, Tuple, Dict
@@ -236,7 +240,7 @@ class TomlVersionExtractor(VersionExtractor):
 
     @property
     def id(self) -> tuple:
-        # Several keys can be tracked in the same file (e.g. pixi.toml).
+        # Several keys can be tracked in the same file (e.g. pixi.toml, Cargo.toml).
         return (self.file_path, tuple(self.keys))
 
     def get_version(self) -> str:
@@ -252,7 +256,8 @@ class TomlVersionExtractor(VersionExtractor):
                     f"Key '{'.'.join(self.keys)}' not found in {self.name}"
                 )
 
-        # e.g. pixi-build `[package] version = { workspace = true }`
+        # e.g. pixi-build `[package] version = { workspace = true }`,
+        # or Cargo `version.workspace = true`
         if isinstance(value, dict):
             raise VersionNotPresent(
                 f"Key '{'.'.join(self.keys)}' in {self.name} is not a version string"
@@ -799,6 +804,10 @@ def build_root_checks(root_dir: Path) -> List[VersionExtractor]:
         ChangelogVersionExtractor(root_dir / "CHANGELOG.md", r""),
         TomlVersionExtractor(root_dir / "pixi.toml", ["workspace", "version"]),
         TomlVersionExtractor(root_dir / "pixi.toml", ["package", "version"]),
+        TomlVersionExtractor(root_dir / "Cargo.toml", ["package", "version"]),
+        TomlVersionExtractor(
+            root_dir / "Cargo.toml", ["workspace", "package", "version"]
+        ),
         YamlVersionExtractor(root_dir / "CITATION.cff", ["version"]),
         CMakeListsVersionExtractor(root_dir / "CMakeLists.txt"),
         DebianChangelogVersionExtractor(root_dir / "debian/changelog"),
@@ -824,14 +833,16 @@ def collect_version_checks(root_dir: Path) -> List[VersionExtractor]:
             seen_ids.add(check.id)
 
     # Label nested files by their relative path so identical basenames stay distinct.
+    checks_per_file = Counter(check.file_path for check in checks)
     for check in checks:
         try:
             check.label = str(check.file_path.relative_to(root_dir))
         except ValueError:
             check.label = check.file_path.name
-        # pixi.toml tracks both [workspace] and [package] versions.
-        if check.file_path.name == "pixi.toml":
-            check.label += f" [{check.keys[0]}]"
+        # A file tracking several version fields (e.g. pixi.toml, Cargo.toml)
+        # gets its table appended so each field stays distinct.
+        if checks_per_file[check.file_path] > 1:
+            check.label += f" [{'.'.join(check.keys[:-1])}]"
 
     return checks
 
@@ -1262,63 +1273,113 @@ def gh_release(
         return False, e.stderr or ""
 
 
-def update_pixi_lock(root_dir: Path, dry_run: bool = False) -> Optional[str]:
-    """Update pixi.lock file by running 'pixi list'.
+def update_lock_file(
+    root_dir: Path,
+    lock_name: str,
+    command: List[str],
+    install_url: str,
+    dry_run: bool = False,
+    backups: Optional[Dict[Path, Path]] = None,
+) -> Optional[str]:
+    """Regenerate a lock file by running `command` in root_dir.
 
-    Returns the path to pixi.lock if updated, None otherwise.
+    The lock file is added to `backups` before being rewritten, so a later
+    failure restores it. Returns the path to the lock file if it exists (and
+    so is, or in dry run would be, regenerated), None otherwise.
     """
-    pixi_lock_path = root_dir / "pixi.lock"
+    lock_path = root_dir / lock_name
+    tool = command[0]
+    cmd_str = " ".join(command)
 
-    if not pixi_lock_path.exists():
+    if not lock_path.exists():
         return None
 
     if dry_run:
-        return None
+        return str(lock_path)
+
+    if backups is not None:
+        backup_file(backups, lock_path)
 
     console.print(
-        f"[{STYLE_INFO}]Running 'pixi list' to update pixi.lock...[/{STYLE_INFO}]"
+        f"[{STYLE_INFO}]Running '{cmd_str}' to update {lock_name}...[/{STYLE_INFO}]"
     )
     try:
         result = subprocess.run(
-            ["pixi", "list"],
+            command,
             cwd=root_dir,
             timeout=60,
         )
 
         if result.returncode != 0:
             console.print(
-                f"[{STYLE_ERROR}]Error: 'pixi list' returned non-zero exit code: {result.returncode}[/{STYLE_ERROR}]"
+                f"[{STYLE_ERROR}]Error: '{cmd_str}' returned non-zero exit code: {result.returncode}[/{STYLE_ERROR}]"
             )
             console.print(
-                f"[{STYLE_ERROR}]Failed to update pixi.lock. Please ensure 'pixi' is installed.[/{STYLE_ERROR}]"
+                f"[{STYLE_ERROR}]Failed to update {lock_name}. Please ensure '{tool}' is installed.[/{STYLE_ERROR}]"
             )
-            raise RuntimeError(f"'pixi list' failed with exit code {result.returncode}")
+            raise RuntimeError(f"'{cmd_str}' failed with exit code {result.returncode}")
 
     except subprocess.TimeoutExpired:
         console.print(
-            f"[{STYLE_ERROR}]Error: 'pixi list' command timed out[/{STYLE_ERROR}]"
+            f"[{STYLE_ERROR}]Error: '{cmd_str}' command timed out[/{STYLE_ERROR}]"
         )
-        raise RuntimeError("'pixi list' command timed out after 30 seconds")
+        raise RuntimeError(f"'{cmd_str}' command timed out after 60 seconds")
     except FileNotFoundError:
-        console.print(f"[{STYLE_ERROR}]Error: 'pixi' command not found[/{STYLE_ERROR}]")
         console.print(
-            f"[{STYLE_ERROR}]pixi.lock exists but 'pixi' executable is not available.[/{STYLE_ERROR}]"
+            f"[{STYLE_ERROR}]Error: '{tool}' command not found[/{STYLE_ERROR}]"
         )
         console.print(
-            f"[{STYLE_INFO}]Please install pixi: https://pixi.sh[/{STYLE_INFO}]"
+            f"[{STYLE_ERROR}]{lock_name} exists but '{tool}' executable is not available.[/{STYLE_ERROR}]"
         )
-        raise RuntimeError("'pixi' executable not found. Install from https://pixi.sh")
+        console.print(
+            f"[{STYLE_INFO}]Please install {tool}: {install_url}[/{STYLE_INFO}]"
+        )
+        raise RuntimeError(f"'{tool}' executable not found. Install from {install_url}")
     except Exception as e:
         console.print(
-            f"[{STYLE_ERROR}]Error: Failed to run 'pixi list': {e}[/{STYLE_ERROR}]"
+            f"[{STYLE_ERROR}]Error: Failed to run '{cmd_str}': {e}[/{STYLE_ERROR}]"
         )
-        raise RuntimeError(f"Failed to run 'pixi list': {e}") from e
+        raise RuntimeError(f"Failed to run '{cmd_str}': {e}") from e
 
     console.print(
-        f"[{STYLE_SUCCESS}]✓ Updated pixi.lock via 'pixi list'[/{STYLE_SUCCESS}]"
+        f"[{STYLE_SUCCESS}]✓ Updated {lock_name} via '{cmd_str}'[/{STYLE_SUCCESS}]"
     )
 
-    return str(pixi_lock_path)
+    return str(lock_path)
+
+
+def update_pixi_lock(
+    root_dir: Path,
+    dry_run: bool = False,
+    backups: Optional[Dict[Path, Path]] = None,
+) -> Optional[str]:
+    """Update pixi.lock file by running 'pixi list'.
+
+    Returns the path to pixi.lock if it exists, None otherwise.
+    """
+    return update_lock_file(
+        root_dir, "pixi.lock", ["pixi", "list"], "https://pixi.sh", dry_run, backups
+    )
+
+
+def update_cargo_lock(
+    root_dir: Path,
+    dry_run: bool = False,
+    backups: Optional[Dict[Path, Path]] = None,
+) -> Optional[str]:
+    """Update Cargo.lock file by running 'cargo update --workspace'.
+
+    Only the workspace crates' own versions are refreshed, not dependencies.
+    Returns the path to Cargo.lock if it exists, None otherwise.
+    """
+    return update_lock_file(
+        root_dir,
+        "Cargo.lock",
+        ["cargo", "update", "--workspace"],
+        "https://rustup.rs",
+        dry_run,
+        backups,
+    )
 
 
 def create_backups(file_paths: List[Path]) -> Dict[Path, Path]:
@@ -1326,18 +1387,27 @@ def create_backups(file_paths: List[Path]) -> Dict[Path, Path]:
 
     Returns a mapping of original paths to backup paths.
     """
-    backups = {}
-    temp_dir = Path(tempfile.mkdtemp(prefix="release_backup_"))
+    backups: Dict[Path, Path] = {}
+    for file_path in file_paths:
+        backup_file(backups, file_path)
+    return backups
+
+
+def backup_file(backups: Dict[Path, Path], file_path: Path) -> None:
+    """Add a backup copy of file_path to backups (no-op if missing or already there)."""
+    # Deduplicate: a file may carry several tracked version fields.
+    if file_path in backups or not file_path.exists():
+        return
+
+    if backups:
+        temp_dir = next(iter(backups.values())).parent
+    else:
+        temp_dir = Path(tempfile.mkdtemp(prefix="release_backup_"))
 
     # Index-prefix the name so files sharing a basename don't collide.
-    # Deduplicate: a file may carry several tracked version fields.
-    for index, file_path in enumerate(dict.fromkeys(file_paths)):
-        if file_path.exists():
-            backup_path = temp_dir / f"{index:04d}_{file_path.name}"
-            shutil.copy2(file_path, backup_path)
-            backups[file_path] = backup_path
-
-    return backups
+    backup_path = temp_dir / f"{len(backups):04d}_{file_path.name}"
+    shutil.copy2(file_path, backup_path)
+    backups[file_path] = backup_path
 
 
 def restore_backups(backups: Dict[Path, Path]) -> None:
@@ -1589,9 +1659,17 @@ def perform_version_updates(
     return updated_files, updated_file_paths, failed, dry_run_rows
 
 
+def print_lock_rows(lock_paths: List[str]) -> None:
+    for lock_path in lock_paths:
+        line = Text()
+        line.append(f"  {Path(lock_path).name:<28}", style="cyan")
+        line.append("regenerated", style="dim")
+        console.print(line)
+
+
 def show_dry_run_panel(
     dry_run_rows: List[Tuple[str, str, str]],
-    pixi_lock_would_update: bool,
+    lock_paths: List[str],
     git_lines: List[str],
 ) -> None:
     """Display a unified dry-run preview."""
@@ -1609,11 +1687,7 @@ def show_dry_run_panel(
         line.append("  →  ", style="dim")
         line.append(new, style=STYLE_NEW_VALUE)
         console.print(line)
-    if pixi_lock_would_update:
-        line = Text()
-        line.append(f"  {'pixi.lock':<28}", style="cyan")
-        line.append("regenerated via pixi list", style="dim")
-        console.print(line)
+    print_lock_rows(lock_paths)
 
     if git_lines:
         console.print()
@@ -1625,14 +1699,10 @@ def show_dry_run_panel(
 
 
 def show_result_panel(
-    pixi_lock_updated: bool,
+    lock_paths: List[str],
 ) -> None:
     """Display a polished summary of completed version updates."""
-    if pixi_lock_updated:
-        line = Text()
-        line.append(f"  {'pixi.lock':<28}", style="cyan")
-        line.append("regenerated via pixi list", style="dim")
-        console.print(line)
+    print_lock_rows(lock_paths)
     console.print()
     console.print(
         f"[{STYLE_SUCCESS_STRONG}]✓ Version updated successfully[/{STYLE_SUCCESS_STRONG}]"
@@ -1921,13 +1991,17 @@ def main():
             sys.exit(1)
 
         try:
-            pixi_lock_path = update_pixi_lock(root_dir, args.dry_run)
-            if pixi_lock_path:
-                updated_files.append("pixi.lock")
-                updated_file_paths.append(pixi_lock_path)
+            lock_paths: List[str] = []
+            if lock_path := update_pixi_lock(root_dir, args.dry_run, backups):
+                lock_paths.append(lock_path)
+            if lock_path := update_cargo_lock(root_dir, args.dry_run, backups):
+                lock_paths.append(lock_path)
+            for lock_path in lock_paths:
+                updated_files.append(Path(lock_path).name)
+                updated_file_paths.append(lock_path)
         except RuntimeError as e:
             console.print(
-                f"[{STYLE_ERROR}]Pixi lock update failed: {e}[/{STYLE_ERROR}]"
+                f"[{STYLE_ERROR}]Lock file update failed: {e}[/{STYLE_ERROR}]"
             )
             if backups:
                 console.print(
@@ -1982,8 +2056,6 @@ def main():
             archive_name = f"{project_url.split('/')[-1]}-{target_version}.tar.gz"
 
     if args.dry_run:
-        pixi_lock_would_update = (root_dir / "pixi.lock").exists()
-
         git_lines: List[str] = []
         if args.git_commit is not None:
             custom_message = None if args.git_commit is True else args.git_commit
@@ -2039,11 +2111,11 @@ def main():
             )
             git_lines.append(call)
 
-        show_dry_run_panel(dry_run_rows, pixi_lock_would_update, git_lines)
+        show_dry_run_panel(dry_run_rows, lock_paths, git_lines)
         sys.exit(0)
     else:
         if not args.short and args.output_format == "text":
-            show_result_panel(pixi_lock_path is not None)
+            show_result_panel(lock_paths)
 
         # Git operations - only perform if explicitly requested
         if args.git_tag is not None and args.git_commit is None:

@@ -61,12 +61,15 @@ jrl-release --bump patch --git-commit --git-tag
 | `package.xml` | `<version>` tag |
 | `pyproject.toml` | `project.version` |
 | `CHANGELOG.md` | First `## [X.Y.Z]` section (not Unreleased) |
-| `pixi.toml` | `[workspace] version` |
+| `pixi.toml` | `[workspace] version` and `[package] version` (pixi-build) |
 | `pixi.lock` | Regenerated via `pixi list` |
+| `Cargo.toml` | `[package] version` and `[workspace.package] version` |
+| `Cargo.lock` | Regenerated via `cargo update --workspace` |
 | `CITATION.cff` | `version` key |
 | `CMakeLists.txt` | `project(... VERSION X.Y.Z ...)` |
 
-> Requires `pixi` CLI if `pixi.lock` exists in the project root.
+> Requires `pixi` CLI if `pixi.lock` exists in the project root, and `cargo`
+> if `Cargo.lock` does.
 
 ## Testing
 
