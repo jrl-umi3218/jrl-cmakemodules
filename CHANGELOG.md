@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - jrl_release: add support for `[package] version` in pixi.toml (pixi-build)
 - jrl_release: add support for Cargo.toml (`[package]` and `[workspace.package]` versions) and Cargo.lock
+- jrl_boostpy_add_stubs: follow $ENV{PYTHONPATH}
 
 ## [2.3.0] - 2026-08-21
 
