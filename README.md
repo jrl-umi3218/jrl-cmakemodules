@@ -33,6 +33,10 @@ or with pip:
 ```bash
 pip install -e v2/scripts
 ```
+or without installation:
+```bash
+uvx --from jrl-cmakemodules-scripts jrl-release --check-version
+```
 
 ### Usage
 
