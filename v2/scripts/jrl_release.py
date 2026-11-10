@@ -76,6 +76,7 @@ uv run --no-project jrl_release.py --bump patch --git-commit --git-tag
 | `Cargo.toml` | `[package] version` and `[workspace.package] version` |
 | `Cargo.lock` | Regenerated via `cargo update --workspace` |
 | `CITATION.cff` | `version` key |
+| `recipe.yaml` (or `recipe/recipe.yaml`, `.yml`) | `context.version` and `package.version` (conda recipe) |
 | `CMakeLists.txt` | `project(... VERSION X.Y.Z ... HOMEPAGE_URL ...)` |
 | `debian/changelog` | `version = ...` |
 | `conanfile.py` | `version = ...` |
@@ -88,7 +89,7 @@ uv run --no-project jrl_release.py --bump patch --git-commit --git-tag
 ROS meta-packages are handled automatically: every nested directory with a
 `package.xml` is treated like the repository root — the full set of
 supported files (`package.xml`, `pyproject.toml`, `CHANGELOG.md`, `pixi.toml`,
-`Cargo.toml`, `CITATION.cff`, `CMakeLists.txt`, `debian/changelog`) is checked there too,
+`Cargo.toml`, `CITATION.cff`, `recipe.yaml`, `CMakeLists.txt`, `debian/changelog`) is checked there too,
 skipping any that don't exist in that nested directory.
 Discovery skips hidden directories (`.git`, `.pixi`, `.venv`, …), git submodules,
 and — honoring your `.gitignore` via `git check-ignore` — ignored dirs like
@@ -153,6 +154,14 @@ class VersionNotPresent(Exception):
     """Raised when a file exists but has no version field configured."""
 
     pass
+
+
+class VersionDerived(VersionNotPresent):
+    """Raised when a version field refers to another one instead of a value."""
+
+
+class SectionNotPresent(VersionNotPresent):
+    """Raised when the section holding the version field is absent."""
 
 
 class VersionExtractor(ABC):
@@ -252,12 +261,14 @@ class TomlVersionExtractor(VersionExtractor):
             if key in value:
                 value = value[key]
             else:
-                raise VersionNotPresent(
-                    f"Key '{'.'.join(self.keys)}' not found in {self.name}"
-                )
+                # A missing section (e.g. no [package] in pixi.toml) is not an issue.
+                error = VersionNotPresent if key == self.keys[-1] else SectionNotPresent
+                raise error(f"Key '{'.'.join(self.keys)}' not found in {self.name}")
 
         # e.g. pixi-build `[package] version = { workspace = true }`,
         # or Cargo `version.workspace = true`
+        if isinstance(value, dict) and value.get("workspace") is True:
+            raise VersionDerived("Inherited from workspace.version")
         if isinstance(value, dict):
             raise VersionNotPresent(
                 f"Key '{'.'.join(self.keys)}' in {self.name} is not a version string"
@@ -300,6 +311,12 @@ class YamlVersionExtractor(VersionExtractor):
         self.keys = keys
         self.yaml = YAML()
         self.yaml.preserve_quotes = True
+        # Keep sequences indented under their key, as in conda recipes.
+        self.yaml.indent(mapping=2, sequence=4, offset=2)
+
+    @property
+    def id(self) -> tuple:
+        return (self.file_path, tuple(self.keys))
 
     def get_version(self) -> str:
         with open(self.file_path, "r", encoding="utf-8") as f:
@@ -310,9 +327,13 @@ class YamlVersionExtractor(VersionExtractor):
             if key in value:
                 value = value[key]
             else:
-                raise VersionNotPresent(
-                    f"Key '{'.'.join(self.keys)}' not found in {self.name}"
-                )
+                # A missing section (e.g. no [package] in pixi.toml) is not an issue.
+                error = VersionNotPresent if key == self.keys[-1] else SectionNotPresent
+                raise error(f"Key '{'.'.join(self.keys)}' not found in {self.name}")
+
+        # e.g. conda recipe `package.version: ${{ version }}`
+        if "${{" in str(value):
+            raise VersionDerived(f"Templated: {value}")
 
         return str(value)
 
@@ -796,6 +817,20 @@ def discover_package_roots(root_dir: Path) -> List[Path]:
     return sorted({package_xml.parent for package_xml in candidates})
 
 
+def find_recipe(root_dir: Path) -> Path:
+    """Conda recipe at the first location pixi-build searches (default: recipe.yaml)."""
+    candidates = [
+        root_dir / name
+        for name in (
+            "recipe.yaml",
+            "recipe.yml",
+            "recipe/recipe.yaml",
+            "recipe/recipe.yml",
+        )
+    ]
+    return next((path for path in candidates if path.exists()), candidates[0])
+
+
 def build_root_checks(root_dir: Path) -> List[VersionExtractor]:
     """Build the version extractors tracked at the repository root."""
     return [
@@ -809,6 +844,8 @@ def build_root_checks(root_dir: Path) -> List[VersionExtractor]:
             root_dir / "Cargo.toml", ["workspace", "package", "version"]
         ),
         YamlVersionExtractor(root_dir / "CITATION.cff", ["version"]),
+        YamlVersionExtractor(find_recipe(root_dir), ["context", "version"]),
+        YamlVersionExtractor(find_recipe(root_dir), ["package", "version"]),
         CMakeListsVersionExtractor(root_dir / "CMakeLists.txt"),
         DebianChangelogVersionExtractor(root_dir / "debian/changelog"),
         ConanfileVersionExtractor(root_dir / "conanfile.py"),
@@ -839,10 +876,11 @@ def collect_version_checks(root_dir: Path) -> List[VersionExtractor]:
             check.label = str(check.file_path.relative_to(root_dir))
         except ValueError:
             check.label = check.file_path.name
-        # A file tracking several version fields (e.g. pixi.toml, Cargo.toml)
-        # gets its table appended so each field stays distinct.
+        # A file tracking several version fields (e.g. pixi.toml, Cargo.toml,
+        # recipe.yaml) gets its table appended so each field stays distinct.
         if checks_per_file[check.file_path] > 1:
-            check.label += f" [{'.'.join(check.keys[:-1])}]"
+            section = ".".join(check.keys[:-1])
+            check.label += f" ({section})"  # [...] would be rich markup
 
     return checks
 
@@ -1495,6 +1533,11 @@ def handle_check_version(checks: List[VersionExtractor], args) -> bool:
                 result["version"] = version
                 result["status"] = "Found"
                 versions_found.add(version)
+            except SectionNotPresent:
+                continue  # field not used in this file; don't report it
+            except VersionDerived as e:
+                result["status"] = "Derived"
+                result["message"] = str(e)
             except VersionNotPresent as e:
                 result["status"] = "Warning"
                 result["message"] = str(e)
@@ -1535,6 +1578,8 @@ def handle_check_version(checks: List[VersionExtractor], args) -> bool:
             status_style = f"[{STYLE_SUCCESS}]Found[/{STYLE_SUCCESS}]"
         elif res["status"] == "Missing":
             status_style = f"[{STYLE_WARNING}]Missing[/{STYLE_WARNING}]"
+        elif res["status"] == "Derived":
+            status_style = f"[{STYLE_MUTED}]Derived[/{STYLE_MUTED}]"
         elif res["status"] == "Warning":
             status_style = f"[{STYLE_WARNING}]Warning[/{STYLE_WARNING}]"
         elif res["status"] == "Error":
