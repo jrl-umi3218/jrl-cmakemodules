@@ -26,7 +26,7 @@ def generate_metadata(pyproject: Path, site_packages: Path):
     # This print is not a debugging information but is parsed by the CMake script
     # to know where to install generated file.
     print(dist_info)
-    dist_info.mkdir(parents=True)
+    dist_info.mkdir(parents=True, exist_ok=True)
 
     with (dist_info / "METADATA").open("w") as f:
         print(metadata.as_rfc822(), file=f)
