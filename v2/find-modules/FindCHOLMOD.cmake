@@ -18,6 +18,9 @@
 #   SuiteSparse::CCOLAMD
 #
 
+# CHOLMOD require C, which is not always enabled
+enable_language(C)
+
 # Prefer a config-file package if available.
 find_package(CHOLMOD ${CHOLMOD_FIND_VERSION} QUIET NO_MODULE)
 if(CHOLMOD_FOUND AND TARGET SuiteSparse::CHOLMOD)
