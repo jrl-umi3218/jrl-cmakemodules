@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 - jrl_release: add support for `context.version` and `package.version` in conda `recipe.yaml`
+- pypa-metadata: Avoid `pypa-metadata.py` crash when the script is run a second time
 
 ## [2.4.0] - 2026-11-07
 
